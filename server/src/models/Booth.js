@@ -19,19 +19,20 @@ const boothSchema = new mongoose.Schema(
         "People must be between 1 and 5",
       ],
     },
-    duration: { type: Number, required: true }, // in hours maybe
+    duration: { type: Number, enum: [1, 2, 3, 4], required: true }, // in weeks
     boothSize: {
       type: String,
-      enum: ["Small", "Medium", "Large"],
+      enum: ["2x2", "4x4"],
       required: true,
     },
-    location: { type: String, required: true },
+    location: { type: String, required: true }, // location in platform (as coordinates an the platform map)
     isBazarBooth: { type: Boolean, default: false },
     status: {
       type: String,
       enum: ["Pending", "Approved", "Rejected"],
       default: "Pending",
     },
+    bazarId: { type: mongoose.Schema.Types.ObjectId, ref: "Bazar" },
   },
   { timestamps: true }
 );
