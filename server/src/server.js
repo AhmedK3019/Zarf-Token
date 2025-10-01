@@ -2,6 +2,12 @@ import express from "express";
 import mongoose from "mongoose";
 import cors from "cors";
 import dotenv from "dotenv";
+import boothRoutes from "./routes/boothRoutes.js";
+import loyaltyRoutes from "./routes/loyaltyRoutes.js";
+import reservationRoutes from "./routes/reservationRoutes.js";
+import courtRoutes from "./routes/courtRoutes.js";
+import gymSessionRoutes from "./routes/gymSessionRoutes.js";
+import uploadRoutes from "./routes/uploadRoutes.js";
 
 dotenv.config();
 const app = express();
@@ -12,6 +18,13 @@ app.use(
     credentials: true,
   })
 );
+
+app.use("/api/booths", boothRoutes);
+app.use("/api/loyalty", loyaltyRoutes);
+app.use("/api/reservations", reservationRoutes);
+app.use("/api/courts", courtRoutes);
+app.use("/api/gym-sessions", gymSessionRoutes);
+app.use("/api/uploads", uploadRoutes);
 
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 
