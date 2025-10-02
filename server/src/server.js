@@ -8,6 +8,7 @@ import reservationRoutes from "./routes/reservationRoutes.js";
 import courtRoutes from "./routes/courtRoutes.js";
 import gymSessionRoutes from "./routes/gymSessionRoutes.js";
 import uploadRoutes from "./routes/uploadRoutes.js";
+import userRoutes from "./routes/userRoutes.js";
 import cron from "node-cron";
 import path from "path";
 import { updateCourtSlots } from "./utils/slotGenerator.js";
@@ -34,6 +35,7 @@ app.use("/api/reservations", reservationRoutes);
 app.use("/api/courts", courtRoutes);
 app.use("/api/gym-sessions", gymSessionRoutes);
 app.use("/api/uploads", uploadRoutes);
+app.use("/api/user", userRoutes);
 cron.schedule("0 0 * * *", () => {
   // runs every day at midnight
   console.log("Updating court slots...");
@@ -51,6 +53,9 @@ const connectDB = async () => {
   try {
     const conn = await mongoose.connect(process.env.MONGO_URI);
     console.log(`MongoDB Connected: ${conn.connection.host}`);
+    app.listen(PORT, () => {
+      console.log(`API listening on http://localhost:${PORT}`);
+    });
   } catch (error) {
     console.error("MongoDB connection error:", error);
     process.exit(1);
