@@ -37,6 +37,20 @@ export const getBooth = async (req, res) => {
   }
 };
 
+export const getBoothsByBazarId = async (req, res) => {
+  try {
+    const booths = await Booth.find({
+      isbazarbooth: true,
+      bazarId: req.params.bazarId, // or req.params.bazarId if in URL
+    })
+      .populate("vendorId")
+      .populate("bazarId");
+    res.json(booths);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};
+
 export const getAllBazarsBooths = async (req, res) => {
   try {
     const booths = await Booth.find({ isbazarbooth: true })
