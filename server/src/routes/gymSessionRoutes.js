@@ -6,6 +6,7 @@ import {
   updateSession,
   deleteSession,
   registerStudent,
+  getSessionsByMonth,
   unregisterStudent,
 } from "../controllers/gymSessionController.js";
 
@@ -15,6 +16,7 @@ router.post("/", createSession);
 router.get("/", getSessions);
 router.get("/:id", getSessionById);
 router.put("/:id", updateSession);
+router.get("/month/:month", getSessionsByMonth);
 router.delete("/:id", deleteSession);
 
 // Register/unregister student
