@@ -36,41 +36,56 @@ export const updateCourt = async (req, res) => {
 
 // Delete court
 export const deleteCourt = async (req, res) => {
-  await Court.findByIdAndDelete(req.params.id);
-  res.json({ message: "Court deleted" });
+  try {
+    const court = await Court.findById(req.params.id);
+    if (!court) return res.status(404).json({ error: "Court not found" });
+
+    // delete all reservations linked to this court
+    await Reservation.deleteMany({ courtId: court._id });
+
+    // delete the court itself
+    await court.deleteOne();
+
+    res.json({ message: "Court and its reservations deleted successfully" });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
 };
 
 export const reserveCourt = async (req, res) => {
   try {
-    const { reservationId } = req.body;
+    const { courtId, studentId, studentName, studentGucId, dateTime } =
+      req.body;
 
-    const reservation = await Reservation.findById(reservationId);
-    if (!reservation)
-      return res.status(404).json({ error: "Reservation not found" });
-
-    const court = await Court.findById(reservation.courtId);
+    const court = await Court.findById(courtId);
     if (!court) return res.status(404).json({ error: "Court not found" });
 
-    // Find the matching slot in the court's freeSlots
+    // Find slot
     const slot = court.freeSlots.find(
-      (s) => s.dateTime.getTime() === reservation.dateTime.getTime()
+      (s) => s.dateTime.getTime() === new Date(dateTime).getTime()
     );
-
-    if (!slot) {
+    if (!slot)
       return res.status(400).json({ error: "Requested time not available" });
-    }
-
-    if (slot.isReserved) {
+    if (slot.isReserved)
       return res.status(400).json({ error: "Slot already reserved" });
-    }
 
-    // Reserve the slot
+    // Create reservation
+    const reservation = new Reservation({
+      courtId,
+      studentId,
+      studentName,
+      studentGucId,
+      dateTime,
+    });
+    await reservation.save();
+
+    // Reserve slot
     slot.isReserved = true;
     slot.reservationId = reservation._id;
 
     await court.save();
 
-    res.json(court);
+    res.status(201).json({ court, reservation });
   } catch (err) {
     res.status(400).json({ error: err.message });
   }
