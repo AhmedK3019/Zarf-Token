@@ -1,5 +1,5 @@
 import Reservation from "../models/Reservation.js";
-import Court from "../models/Court.js";
+import { Court } from "../models/Court.js";
 
 // Create reservation
 export const createReservation = async (req, res) => {

@@ -9,7 +9,14 @@ import courtRoutes from "./routes/courtRoutes.js";
 import gymSessionRoutes from "./routes/gymSessionRoutes.js";
 import uploadRoutes from "./routes/uploadRoutes.js";
 import cron from "node-cron";
+import path from "path";
 import { updateCourtSlots } from "./utils/slotGenerator.js";
+import { fileURLToPath } from "url";
+import { dirname } from "path";
+import authRoutes from "./routes/authRoutes.js";
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
 
 dotenv.config();
 const app = express();
@@ -35,15 +42,18 @@ cron.schedule("0 0 * * *", () => {
 
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 
-const authRoutes = require("./routes/authRoutes");
 app.use("/api/auth", authRoutes);
 
 app.get("/", (req, res) => res.send("API running 🚀"));
 
 const PORT = process.env.PORT || 5000;
-mongoose
-  .connect(process.env.MONGO_URI)
-  .then(() => {
-    app.listen(PORT, () => console.log(`Server running on ${PORT}`));
-  })
-  .catch((err) => console.log(err));
+const connectDB = async () => {
+  try {
+    const conn = await mongoose.connect(process.env.MONGO_URI);
+    console.log(`MongoDB Connected: ${conn.connection.host}`);
+  } catch (error) {
+    console.error("MongoDB connection error:", error);
+    process.exit(1);
+  }
+};
+connectDB();

@@ -4,7 +4,7 @@ import {
   getForms,
   getForm,
   deleteForm,
-} from "../controllers/loyaltyProgramFormController.js";
+} from "../controllers/loyaltyController.js";
 
 const router = express.Router();
 

@@ -1,4 +1,4 @@
-import Court from "../models/Court.js";
+import { Court } from "../models/Court.js";
 import Reservation from "../models/Reservation.js";
 
 // Create a new court
