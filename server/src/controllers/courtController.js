@@ -40,19 +40,36 @@ export const deleteCourt = async (req, res) => {
   res.json({ message: "Court deleted" });
 };
 
-// Mark a court as reserved + link reservation
 export const reserveCourt = async (req, res) => {
   try {
     const { reservationId } = req.body;
+
     const reservation = await Reservation.findById(reservationId);
     if (!reservation)
       return res.status(404).json({ error: "Reservation not found" });
 
-    const court = await Court.findByIdAndUpdate(
-      reservation.courtId,
-      { isReserved: true, reservationId },
-      { new: true }
+    const court = await Court.findById(reservation.courtId);
+    if (!court) return res.status(404).json({ error: "Court not found" });
+
+    // Find the matching slot in the court's freeSlots
+    const slot = court.freeSlots.find(
+      (s) => s.dateTime.getTime() === reservation.dateTime.getTime()
     );
+
+    if (!slot) {
+      return res.status(400).json({ error: "Requested time not available" });
+    }
+
+    if (slot.isReserved) {
+      return res.status(400).json({ error: "Slot already reserved" });
+    }
+
+    // Reserve the slot
+    slot.isReserved = true;
+    slot.reservationId = reservation._id;
+
+    await court.save();
+
     res.json(court);
   } catch (err) {
     res.status(400).json({ error: err.message });

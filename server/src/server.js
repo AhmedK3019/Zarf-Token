@@ -8,6 +8,8 @@ import reservationRoutes from "./routes/reservationRoutes.js";
 import courtRoutes from "./routes/courtRoutes.js";
 import gymSessionRoutes from "./routes/gymSessionRoutes.js";
 import uploadRoutes from "./routes/uploadRoutes.js";
+import cron from "node-cron";
+import { updateCourtSlots } from "./utils/slotGenerator.js";
 
 dotenv.config();
 const app = express();
@@ -25,6 +27,11 @@ app.use("/api/reservations", reservationRoutes);
 app.use("/api/courts", courtRoutes);
 app.use("/api/gym-sessions", gymSessionRoutes);
 app.use("/api/uploads", uploadRoutes);
+cron.schedule("0 0 * * *", () => {
+  // runs every day at midnight
+  console.log("Updating court slots...");
+  updateCourtSlots();
+});
 
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 
