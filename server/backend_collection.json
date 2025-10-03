@@ -1,0 +1,152 @@
+{
+  "info": {
+    "name": "Backend API",
+    "_postman_id": "12345678-aaaa-bbbb-cccc-1234567890ab",
+    "description": "Postman collection for testing backend API (Courts, Reservations, Vendors, Forms, Users).",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Courts",
+      "item": [
+        {
+          "name": "Get Courts",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/courts"
+          }
+        },
+        {
+          "name": "Create Court",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Court A\",\n  \"location\": \"Campus\",\n  \"freeSlots\": []\n}"
+            },
+            "url": "{{baseUrl}}/courts"
+          }
+        },
+        {
+          "name": "Delete Court",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": "{{baseUrl}}/courts/:id"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Reservations",
+      "item": [
+        {
+          "name": "Get Reservations",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/reservations"
+          }
+        },
+        {
+          "name": "Get Reservations by Student",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": "{{baseUrl}}/reservations/student/:studentId"
+          }
+        },
+        {
+          "name": "Create Reservation",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"courtId\": \"<court_id>\",\n  \"studentId\": \"<student_id>\",\n  \"dateTime\": \"2025-10-03T10:00:00Z\"\n}"
+            },
+            "url": "{{baseUrl}}/reservations"
+          }
+        },
+        {
+          "name": "Cancel Reservation",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": "{{baseUrl}}/reservations/:id"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Vendors",
+      "item": [
+        {
+          "name": "Get Vendors",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/vendors"
+          }
+        },
+        {
+          "name": "Create Vendor",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Vendor A\",\n  \"email\": \"vendor@example.com\"\n}"
+            },
+            "url": "{{baseUrl}}/vendors"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Loyalty Program Forms",
+      "item": [
+        {
+          "name": "Get Forms",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/forms"
+          }
+        },
+        {
+          "name": "Get Form by ID",
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/forms/:id"
+          }
+        },
+        {
+          "name": "Create Form",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"vendorId\": \"<vendor_id>\",\n  \"formData\": { \"field1\": \"value1\" }\n}"
+            },
+            "url": "{{baseUrl}}/forms"
+          }
+        },
+        {
+          "name": "Delete Form",
+          "request": {
+            "method": "DELETE",
+            "url": "{{baseUrl}}/forms/:id"
+          }
+        }
+      ]
+    }
+  ],
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:3000/api"
+    }
+  ]
+}
