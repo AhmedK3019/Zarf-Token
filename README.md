@@ -8,7 +8,7 @@
 
 </div>
 
-A comprehensive web-based platform designed to streamline the planning, management, and participation of campus events. Zarf Token serves as a centralized hub connecting the events office, students, teaching assistants, staff, faculty, and external vendors to create a seamless event experience across the university.
+A comprehensive web-based platform designed to streamline the planning, management, and participation of campus events. Zarf Token serves as a centralized hub connecting the events office, students, teaching assistants, staff, faculty, and external vendors to create a seamless event experience across GUC.
 
 ## Motivation
 
@@ -71,7 +71,26 @@ The project uses a carefully selected color palette to ensure visual consistency
 
 ## Screenshots
 
-*Visual representations of the application will be added as development progresses*
+### Postman:
+### Create Court:
+<div align="center">
+  <img src="docs/screenshots/createCourtB.jpg" alt="Zarf Token Landing Page" width="800"/>
+  <p><em>Postman CREATE Court Test</em></p>
+</div>
+
+### Delete Court:
+<div align="center">
+  <img src="docs/screenshots/deleteCourtB.jpg" alt="Feature Overview" width="800"/>
+  <p><em>Postman DELETE Court Test</em></p>
+</div>
+
+### Get Court:
+<div align="center">
+  <img src="docs/screenshots/getCourtB.jpg" alt="Interface Design" width="800"/>
+  <p><em>Postman GET Court Test</em></p>
+</div>
+
+> **Note:** Additional screenshots showcasing different user roles and functionalities will be added as features are completed during the development sprints.
 
 ## Tech/Framework Used
 
@@ -279,12 +298,12 @@ We welcome contributions from our GUCians!!!! Whether you're fixing bugs, adding
 
 **Development Team (aka Tokeners):**
 
-- Abdelhamid Sameh Abdelhamid (58-1165)
-- Ahmed Hamdy Mostafa (58-7370)
-- Yehia Wael Raafat (58-5798)
-- Ahmed Khalid Mohammed (58-1379)
-- Ahmed Mohamed Elsayed (58-7968)
-- Ali Ussama Youssef (58-2854)
+- Abdelhamid Sameh Abdelhamid
+- Ahmed Hamdy Mostafa
+- Yehia Wael Raafat
+- Ahmed Khalid Mohammed
+- Ahmed Mohamed Elsayed
+- Ali Ussama Youssef
 
 **Acknowledgments:**
 
@@ -320,6 +339,6 @@ The license will be chosen based on project requirements and university guidelin
 
 **Documentation:** TBD
 
-**Contact:** For questions or support, please contact our scrum master [Abdelhamid Sameh Abdelhamid (58-1165)].
+**Contact:** For questions or support, please contact our scrum master [Abdelhamid Sameh Abdelhamid].
 
 **Last Updated:** October 2025
