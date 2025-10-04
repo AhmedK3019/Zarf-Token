@@ -8,7 +8,7 @@
 
 </div>
 
-A comprehensive web-based platform designed to streamline the planning, management, and participation of campus events. Zarf Token serves as a centralized hub connecting the events office, students, teaching assistants, staff, faculty, and external vendors to create a seamless event experience across the university.
+A comprehensive web-based platform designed to streamline the planning, management, and participation of campus events. Zarf Token serves as a centralized hub connecting the events office, students, teaching assistants, staff, faculty, and external vendors to create a seamless event experience across GUC.
 
 ## Motivation
 
@@ -71,7 +71,7 @@ The project uses a carefully selected color palette to ensure visual consistency
 
 ## Screenshots
 
-### Database:
+### Postman:
 ### Create Court:
 <div align="center">
   <img src="docs/screenshots/createCourtB.jpg" alt="Zarf Token Landing Page" width="800"/>
