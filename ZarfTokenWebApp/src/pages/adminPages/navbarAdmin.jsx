@@ -35,13 +35,25 @@ const NavbarAdmin = () => {
             SignUp Requests
           </Link>
           <Link
+            to="/vendor-requests"
+            className="transition-colors hover:text-primary"
+          >
+            Vendor Requests
+          </Link>
+          <Link
+            to="/loyalty-vendors"
+            className="transition-colors hover:text-primary"
+          >
+            Loyalty Vendors
+          </Link>
+          <Link
             to="/all-users"
             className="transition-colors hover:text-primary"
           >
             All Users
           </Link>
           <Link
-            to="/all-admins"
+            to="/add-admin"
             className="transition-colors hover:text-primary"
           >
             All Admins

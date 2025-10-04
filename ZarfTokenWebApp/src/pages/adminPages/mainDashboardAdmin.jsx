@@ -1,15 +1,32 @@
-const MainDashboardAdmin = () => {
+import { Routes, Route } from "react-router-dom";
+import NavbarAdmin from "./navbarAdmin";
+import Notifications from "../Notifications";
+import AllEvents from "../AllEvents";
+import SignUpRequests from "./SignUpRequests";
+import VendorRequests from "./VendorRequests";
+import LoyaltyVendors from "./LoyaltyVendors";
+import AllUsers from "./AllUsers";
+import AddAdmin from "./AddAdminOrEventsOffice";
+import EventsOffice from "./EventsOffice";
+
+const mainDashboardAdmin = () => {
   return (
-    <section className="min-h-screen w-full bg-muted px-6 py-16 text-primary">
-      <div className="mx-auto max-w-5xl space-y-6">
-        <h1 className="text-4xl font-bold">Admin Dashboard</h1>
-        <p className="text-primary/80">
-          Gain platform-wide visibility, approve events, and manage stakeholder access from a single control center.
-        </p>
-      </div>
-    </section>
+    <div>
+      <NavbarAdmin />
+      <main className="max-w-5xl mx-auto mt-6 px-4">
+        <Routes>
+          <Route path="/notifications" element={<Notifications />} />
+          <Route path="/all-events" element={<AllEvents />} />
+          <Route path="/signup-requests" element={<SignUpRequests />} />
+          <Route path="/vendor-requests" element={<VendorRequests />} />
+          <Route path="/loyalty-vendors" element={<LoyaltyVendors />} />
+          <Route path="/all-users" element={<AllUsers />} />
+          <Route path="/add-admin" element={<AddAdmin />} />
+          <Route path="/events-office" element={<EventsOffice />} />
+        </Routes>
+      </main>
+    </div>
   );
 };
 
-export default MainDashboardAdmin;
-
+export default mainDashboardAdmin;

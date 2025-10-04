@@ -1,15 +1,31 @@
-const MainDashboardVendor = () => {
+import { Routes, Route } from "react-router-dom";
+import NavbarVendor from "./navbarVendor";
+import UpcomingBazars from "./UpcomingBazars";
+import ApplyBooth from "./ApplyBooth";
+import MyRequests from "./MyRequests";
+import AcceptedBooths from "./AcceptedBooths";
+import ApplyLoyalty from "./ApplyLoyalty";
+import CancelLoyalty from "./CancelLoyalty";
+
+const mainDashboardVendor = ({ vendor }) => {
   return (
-    <section className="min-h-screen w-full bg-muted px-6 py-16 text-primary">
-      <div className="mx-auto max-w-5xl space-y-6">
-        <h1 className="text-4xl font-bold">Vendor Dashboard</h1>
-        <p className="text-primary/80">
-          Track bookings, deliverables, and event requirements created for UniEvents partners.
-        </p>
-      </div>
-    </section>
+    <div>
+      <NavbarVendor vendor={vendor} />
+      <main className="max-w-5xl mx-auto mt-6 px-4">
+        <Routes>
+          <Route path="/upcoming-bazars" element={<UpcomingBazars />} />
+          <Route path="/apply-booth" element={<ApplyBooth />} />
+          <Route path="/my-requests" element={<MyRequests />} />
+          <Route path="/accepted-booths" element={<AcceptedBooths />} />
+          {vendor?.loyal ? (
+            <Route path="/cancel-loyalty" element={<CancelLoyalty />} />
+          ) : (
+            <Route path="/apply-loyalty" element={<ApplyLoyalty />} />
+          )}
+        </Routes>
+      </main>
+    </div>
   );
 };
 
-export default MainDashboardVendor;
-
+export default mainDashboardVendor;
