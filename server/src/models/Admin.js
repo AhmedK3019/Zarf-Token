@@ -1,21 +1,18 @@
 import mongoose from "mongoose";
 import bcrypt from "bcryptjs";
 
-const userSchema = new mongoose.Schema({
+const adminSchema = new mongoose.Schema({
   firstname: { type: String, required: true },
   lastname: { type: String, required: true },
-  gucid: { type: String, unique: true, required: true },
   email: { type: String, required: true },
   role: {
     type: String,
-    enum: ["Student", "TA", "Professor", "Staff", "Not Specified"],
   },
   password: { type: String, required: true },
   createdAt: { type: Date, default: Date.now },
 });
 
-// Hash password before saving
-userSchema.pre("save", async function (next) {
+adminSchema.pre("save", async function (next) {
   if (!this.isModified("password")) return next();
 
   try {
@@ -27,9 +24,8 @@ userSchema.pre("save", async function (next) {
   }
 });
 
-// Method to validate password
-userSchema.methods.validatePassword = async function (password) {
+adminSchema.methods.validatePassword = async function (password) {
   return bcrypt.compare(password, this.password);
 };
 
-export default mongoose.model("User", userSchema);
+export default mongoose.model("Admin", adminSchema);

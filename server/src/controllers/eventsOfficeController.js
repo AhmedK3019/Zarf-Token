@@ -1,11 +1,10 @@
-import User from "../models/User.js";
+import EventsOffice from "../models/EventsOffice.js";
 import Joi from "joi";
 
 // vlidation schemas
-const userSchema = Joi.object({
+const eventsOfficeSchema = Joi.object({
   firstname: Joi.string().min(3).max(13).required(),
   lastname: Joi.string().min(3).max(13).required(),
-  gucid: Joi.string().required(),
   email: Joi.string()
     .email()
     .required()
@@ -16,21 +15,17 @@ const userSchema = Joi.object({
       "string.pattern.base":
         "Email must be a valid GUC email (ending with .guc.edu.eg)",
     }),
-  role: Joi.string()
-    .allow("")
-    .valid("Staff", "TA", "Professor", "Student", "Not Specified")
-    .default("Not Specified"),
+  role: Joi.string().default("Event office"),
   password: Joi.string().min(6).required(),
 });
 
-// createUser
-const signup = async (req, res, next) => {
+// createEventOffice
+const createEventOffice = async (req, res, next) => {
   try {
-    const { value, error } = userSchema.validate(req.body);
+    const { value, error } = eventsOfficeSchema.validate(req.body);
     if (error) return res.status(400).json({ message: error.message });
-    if (value.email.includes("student")) value.role = "Student";
-    const doc = await User.create(value);
-    return res.json({ user: doc });
+    const doc = await EventsOffice.create(value);
+    return res.json({ eventoffice: doc });
   } catch (err) {
     if (err.code === 11000) {
       return res.status(409).json({ message: "Please insert a unique id" });
@@ -40,4 +35,4 @@ const signup = async (req, res, next) => {
 };
 // login
 
-export default { signup };
+export default { createEventOffice };
