@@ -279,12 +279,12 @@ We welcome contributions from our GUCians!!!! Whether you're fixing bugs, adding
 
 **Development Team (aka Tokeners):**
 
-- Abdelhamid Sameh Abdelhamid (58-1165)
-- Ahmed Hamdy Mostafa (58-7370)
-- Yehia Wael Raafat (58-5798)
-- Ahmed Khalid Mohammed (58-1379)
-- Ahmed Mohamed Elsayed (58-7968)
-- Ali Ussama Youssef (58-2854)
+- Abdelhamid Sameh Abdelhamid
+- Ahmed Hamdy Mostafa
+- Yehia Wael Raafat
+- Ahmed Khalid Mohammed
+- Ahmed Mohamed Elsayed
+- Ali Ussama Youssef
 
 **Acknowledgments:**
 
@@ -320,6 +320,6 @@ The license will be chosen based on project requirements and university guidelin
 
 **Documentation:** TBD
 
-**Contact:** For questions or support, please contact our scrum master [Abdelhamid Sameh Abdelhamid (58-1165)].
+**Contact:** For questions or support, please contact our scrum master [Abdelhamid Sameh Abdelhamid].
 
 **Last Updated:** October 2025
