@@ -16,6 +16,7 @@ const eventsOfficeSchema = Joi.object({
         "Email must be a valid GUC email (ending with .guc.edu.eg)",
     }),
   role: Joi.string().default("Event office"),
+  notifications: Joi.array().default([]),
   password: Joi.string().min(6).required(),
 });
 
@@ -34,5 +35,21 @@ const createEventOffice = async (req, res, next) => {
   }
 };
 // login
+const eventOfficeLogin = async (req, res, next) => {
+  try {
+    const { email, password } = req.body;
+    const eventOffice = await EventsOffice.findOne({ email });
+    if (!eventOffice) {
+      return res.status(400).json({ message: "Invalid email" });
+    }
+    const flag = await eventOffice.validatePassword(password);
+    if (!flag) {
+      return res.status(400).json({ message: "Invalid password" });
+    }
+    return res.json({ message: "Login successful", eventOffice });
+  } catch (error) {
+    next(error);
+  }
+};
 
-export default { createEventOffice };
+export default { createEventOffice, eventOfficeLogin };

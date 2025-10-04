@@ -4,4 +4,6 @@ const router = express.Router();
 
 router.post("/createEventOffice", eventsController.createEventOffice);
 
+router.post("/loginEventOffice", eventsController.eventOfficeLogin);
+
 export default router;

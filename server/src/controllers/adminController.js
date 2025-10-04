@@ -1,6 +1,5 @@
 import Admin from "../models/Admin.js";
 import Joi from "joi";
-
 // vlidation schemas
 const adminSchema = Joi.object({
   firstname: Joi.string().min(3).max(13).required(),
@@ -16,6 +15,7 @@ const adminSchema = Joi.object({
         "Email must be a valid GUC email (ending with .guc.edu.eg)",
     }),
   role: Joi.string().default("Admin"),
+  notifications: Joi.array().default([]),
   password: Joi.string().min(6).required(),
 });
 
@@ -32,4 +32,19 @@ const createAdmin = async (req, res, next) => {
 };
 // login
 
-export default { createAdmin };
+const loginAdmin = async (req, res, next) => {
+  try {
+    const { email, password } = req.body;
+    const admin = await Admin.findOne({ email });
+    if (!admin) {
+      return res.status(400).json({ message: "Invalid email" });
+    }
+    const flag = await admin.validatePassword(password);
+    if (!flag) {
+      return res.status(400).json({ message: "Invalid password" });
+    }
+    return res.json({ message: "Login successful", admin });
+  } catch (error) {}
+};
+
+export default { createAdmin, loginAdmin };

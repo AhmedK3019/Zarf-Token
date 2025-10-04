@@ -21,6 +21,7 @@ const userSchema = Joi.object({
     .allow("")
     .valid("Staff", "TA", "Professor", "Student", "Not Specified")
     .default("Not Specified"),
+  notifications: Joi.array().default([]),
   password: Joi.string().min(6).required(),
 });
 
@@ -48,5 +49,20 @@ const signup = async (req, res, next) => {
   }
 };
 // login
-
-export default { signup };
+const loginUser = async (req, res, next) => {
+  try {
+    const { email, password } = req.body;
+    const user = await User.findOne({ email });
+    if (!user) {
+      return res.status(400).json({ message: "Invalid email" });
+    }
+    const flag = await user.validatePassword(password);
+    if (!flag) {
+      return res.status(400).json({ message: "Invalid password" });
+    }
+    return res.json({ message: "Login successful", user });
+  } catch (error) {
+    next(error);
+  }
+};
+export default { signup, loginUser };

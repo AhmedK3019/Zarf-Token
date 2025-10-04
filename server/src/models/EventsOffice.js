@@ -9,6 +9,19 @@ const eventsOfficeSchema = new mongoose.Schema({
     type: String,
   },
   password: { type: String, required: true },
+  notifications: {
+    type: [
+      {
+        id: {
+          type: mongoose.Schema.Types.ObjectId,
+          default: () => new mongoose.Types.ObjectId(),
+        },
+        message: { type: String, required: true },
+        isRead: { type: Boolean, default: false },
+      },
+    ],
+    default: [],
+  },
   createdAt: { type: Date, default: Date.now },
 });
 
@@ -27,7 +40,7 @@ eventsOfficeSchema.pre("save", async function (next) {
 
 // Method to validate password
 eventsOfficeSchema.methods.validatePassword = async function (password) {
-  return bcrypt.compare(password, this.password);
+  return await bcrypt.compare(password, this.password);
 };
 
 export default mongoose.model("EventsOffice", eventsOfficeSchema);

@@ -11,6 +11,19 @@ const userSchema = new mongoose.Schema({
     enum: ["Student", "TA", "Professor", "Staff", "Not Specified"],
   },
   password: { type: String, required: true },
+  notifications: {
+    type: [
+      {
+        id: {
+          type: mongoose.Schema.Types.ObjectId,
+          default: () => new mongoose.Types.ObjectId(),
+        },
+        message: { type: String, required: true },
+        isRead: { type: Boolean, default: false },
+      },
+    ],
+    default: [],
+  },
   createdAt: { type: Date, default: Date.now },
 });
 
@@ -29,7 +42,7 @@ userSchema.pre("save", async function (next) {
 
 // Method to validate password
 userSchema.methods.validatePassword = async function (password) {
-  return bcrypt.compare(password, this.password);
+  return await bcrypt.compare(password, this.password);
 };
 
 export default mongoose.model("User", userSchema);

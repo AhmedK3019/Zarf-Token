@@ -9,6 +9,19 @@ const adminSchema = new mongoose.Schema({
     type: String,
   },
   password: { type: String, required: true },
+  notifications: {
+    type: [
+      {
+        id: {
+          type: mongoose.Schema.Types.ObjectId,
+          default: () => new mongoose.Types.ObjectId(),
+        },
+        message: { type: String, required: true },
+        isRead: { type: Boolean, default: false },
+      },
+    ],
+    default: [],
+  },
   createdAt: { type: Date, default: Date.now },
 });
 

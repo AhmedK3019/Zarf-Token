@@ -17,6 +17,7 @@ import { updateCourtSlots } from "./utils/slotGenerator.js";
 import { fileURLToPath } from "url";
 import { dirname } from "path";
 import authRoutes from "./routes/authRoutes.js";
+import vendorRoutes from "./routes/vendorRoutes.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -40,6 +41,7 @@ app.use("/api/uploads", uploadRoutes);
 app.use("/api/user", userRoutes);
 app.use("/api/admin", adminRoutes);
 app.use("/api/eventsOffice", eventsOfficeRoutes);
+app.use("/api/vendor", vendorRoutes);
 cron.schedule("0 0 * * *", () => {
   // runs every day at midnight
   console.log("Updating court slots...");
