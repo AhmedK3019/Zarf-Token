@@ -9,6 +9,7 @@ const adminSchema = new mongoose.Schema({
     type: String,
   },
   password: { type: String, required: true },
+  status: { type: String, enum: ["Active", "Blocked"], default: "Active" },
   notifications: {
     type: [
       {

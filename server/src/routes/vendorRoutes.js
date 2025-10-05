@@ -14,4 +14,7 @@ router.post(
 
 router.post("/loginvendor", vendorController.loginVendor);
 
+router.get("/getvendors", vendorController.getAllVendors);
+
+router.delete("/deletevendor/:id", vendorController.deleteVendor);
 export default router;

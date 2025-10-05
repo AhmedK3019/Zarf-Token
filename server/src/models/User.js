@@ -11,6 +11,7 @@ const userSchema = new mongoose.Schema({
     enum: ["Student", "TA", "Professor", "Staff", "Not Specified"],
   },
   password: { type: String, required: true },
+  status: { type: String, enum: ["Active", "Blocked"], default: "Active" },
   notifications: {
     type: [
       {

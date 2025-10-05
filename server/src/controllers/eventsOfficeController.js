@@ -1,3 +1,4 @@
+import { get } from "mongoose";
 import EventsOffice from "../models/EventsOffice.js";
 import Joi from "joi";
 
@@ -16,6 +17,7 @@ const eventsOfficeSchema = Joi.object({
         "Email must be a valid GUC email (ending with .guc.edu.eg)",
     }),
   role: Joi.string().default("Event office"),
+  status: Joi.string().valid("Active", "Blocked").default("Active"),
   notifications: Joi.array().default([]),
   password: Joi.string().min(6).required(),
 });
@@ -52,4 +54,27 @@ const eventOfficeLogin = async (req, res, next) => {
   }
 };
 
-export default { createEventOffice, eventOfficeLogin };
+const getEventsOffice = async (req, res, next) => {
+  try {
+    const eventsOffice = await EventsOffice.find();
+    res.json({ eventsOffice });
+  } catch (error) {
+    next(error);
+  }
+};
+
+const deleteEventOffice = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+    await EventsOffice.findByIdAndDelete(id);
+    res.json({ message: "Event office deleted successfully" });
+  } catch (error) {
+    next(error);
+  }
+};
+export default {
+  createEventOffice,
+  eventOfficeLogin,
+  getEventsOffice,
+  deleteEventOffice,
+};

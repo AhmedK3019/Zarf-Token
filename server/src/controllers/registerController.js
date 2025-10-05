@@ -1,12 +1,12 @@
 import RegisterRequest from "../models/RegisterRequest.js";
 
 // createRegisterRequest
-const createRegisterRequest = async (req, res, next) => {
+const createRegisterRequest = async (body) => {
   try {
-    const doc = await RegisterRequest.create(req.body);
-    return res.json({ registerRequest: doc });
+    const doc = await RegisterRequest.create(body);
+    return doc;
   } catch (err) {
-    next(err);
+    throw err;
   }
 };
 

@@ -8,6 +8,7 @@ const vendorSchema = Joi.object({
   password: Joi.string().min(6).required(),
   taxcard: Joi.string().required(),
   logo: Joi.string().required(),
+  status: Joi.string().valid("Active", "Blocked").default("Active"),
 });
 
 const signupvendor = async (req, res, next) => {
@@ -58,4 +59,22 @@ const loginVendor = async (req, res, next) => {
   }
 };
 
-export default { signupvendor, loginVendor };
+const getAllVendors = async (req, res, next) => {
+  try {
+    const vendors = await Vendor.find();
+    return res.json(vendors);
+  } catch (error) {
+    next(error);
+  }
+};
+
+const deleteVendor = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+    await Vendor.findByIdAndDelete(id);
+    return res.json({ message: "Vendor deleted successfully" });
+  } catch (error) {
+    next(error);
+  }
+};
+export default { signupvendor, loginVendor, getAllVendors, deleteVendor };

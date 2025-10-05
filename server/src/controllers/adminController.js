@@ -15,6 +15,7 @@ const adminSchema = Joi.object({
         "Email must be a valid GUC email (ending with .guc.edu.eg)",
     }),
   role: Joi.string().default("Admin"),
+  status: Joi.string().valid("Active", "Blocked").default("Active"),
   notifications: Joi.array().default([]),
   password: Joi.string().min(6).required(),
 });
@@ -44,7 +45,28 @@ const loginAdmin = async (req, res, next) => {
       return res.status(400).json({ message: "Invalid password" });
     }
     return res.json({ message: "Login successful", admin });
-  } catch (error) {}
+  } catch (error) {
+    next(error);
+  }
 };
 
-export default { createAdmin, loginAdmin };
+const getAdmins = async (req, res, next) => {
+  try {
+    const admins = await Admin.find();
+    res.json({ admins });
+  } catch (error) {
+    next(error);
+  }
+};
+
+const deleteAdmin = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+    await Admin.findByIdAndDelete(id);
+    res.json({ message: "Admin deleted successfully" });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export default { createAdmin, loginAdmin, getAdmins, deleteAdmin };

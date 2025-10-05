@@ -6,4 +6,8 @@ router.post("/createEventOffice", eventsController.createEventOffice);
 
 router.post("/loginEventOffice", eventsController.eventOfficeLogin);
 
+router.get("/getEventsOffices", eventsController.getEventsOffice);
+
+router.delete("/deleteEventsOffice/:id", eventsController.deleteEventOffice);
+
 export default router;

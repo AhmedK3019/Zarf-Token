@@ -6,4 +6,8 @@ router.post("/signup", userController.signup);
 
 router.post("/login", userController.loginUser);
 
+router.get("/getUsers", userController.getUsers);
+
+router.delete("/deleteUser/:id", userController.deleteUser);
+
 export default router;

@@ -1,5 +1,5 @@
 import User from "../models/User.js";
-import RegisterRequest from "../models/RegisterRequest.js";
+import RegisterRequest from "../controllers/registerController.js";
 import Joi from "joi";
 
 // vlidation schemas
@@ -21,6 +21,7 @@ const userSchema = Joi.object({
     .allow("")
     .valid("Staff", "TA", "Professor", "Student", "Not Specified")
     .default("Not Specified"),
+  status: Joi.string().valid("Active", "Blocked").default("Blocked"),
   notifications: Joi.array().default([]),
   password: Joi.string().min(6).required(),
 });
@@ -30,16 +31,22 @@ const signup = async (req, res, next) => {
   try {
     const { value, error } = userSchema.validate(req.body);
     if (error) return res.status(400).json({ message: error.message });
-    if (value.email.includes("student")) value.role = "Student";
+    if (value.email.includes("student")) {
+      value.role = "Student";
+      value.status = "Active";
+    }
+    const doc = await User.create(value);
     if (value.role == "Not Specified")
-      await RegisterRequest.create({
+      await RegisterRequest.createRegisterRequest({
+        userid: doc._id,
         firstname: value.firstname,
         lastname: value.lastname,
         gucid: value.gucid,
         email: value.email,
         role: value.role,
+        status: value.status,
       });
-    const doc = await User.create(value);
+
     return res.json({ user: doc });
   } catch (err) {
     if (err.code === 11000) {
@@ -65,4 +72,28 @@ const loginUser = async (req, res, next) => {
     next(error);
   }
 };
-export default { signup, loginUser };
+
+const getUsers = async (req, res, next) => {
+  try {
+    const users = await User.find();
+    return res.json({ users });
+  } catch (error) {
+    next(error);
+  }
+};
+
+const deleteUser = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+    await User.findByIdAndDelete(id);
+    return res.json({ message: "User deleted successfully" });
+  } catch (error) {
+    next(error);
+  }
+};
+
+const updateUser = async (req, res, next) => {
+  try {
+  } catch (error) {}
+};
+export default { signup, loginUser, getUsers, deleteUser };
