@@ -9,7 +9,7 @@ import GenerateQR from "./GenerateQR";
 import LoyaltyVendors from "../adminPages/LoyaltyVendors";
 import VendorRequests from "../adminPages/VendorRequests";
 import VendorPoll from "./VendorPoll";
-import GymSchedule from "../pages/GymSchedule";
+import GymSchedule from "../userPages/GymSchedule";
 
 const mainDashboardEventsOffice = () => {
   return (

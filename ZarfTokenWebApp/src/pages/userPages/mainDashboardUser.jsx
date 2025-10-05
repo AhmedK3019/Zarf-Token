@@ -2,7 +2,7 @@ import { Routes, Route } from "react-router-dom";
 import NavbarUser from "./navbarUser";
 import { useUserContext } from "../context/UserContext";
 import Notifications from "../Notifications";
-import AllEvents from "../pages/AllEvents";
+import AllEvents from "../AllEvents";
 import Wallet from "../Wallet";
 import FavouriteEvents from "./FavouriteEvents";
 import RegisteredEvents from "./RegisteredEvents";
