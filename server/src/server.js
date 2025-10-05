@@ -19,6 +19,7 @@ import { dirname } from "path";
 import authRoutes from "./routes/authRoutes.js";
 import vendorRoutes from "./routes/vendorRoutes.js";
 import allUsersRoutes from "./routes/allUsersRoutes.js";
+import registerRequestRoutes from "./routes/registerRequestRoutes.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -44,6 +45,7 @@ app.use("/api/admin", adminRoutes);
 app.use("/api/eventsOffice", eventsOfficeRoutes);
 app.use("/api/vendor", vendorRoutes);
 app.use("/api/allUsers", allUsersRoutes);
+app.use("/api/registerRequests", registerRequestRoutes);
 cron.schedule("0 0 * * *", () => {
   // runs every day at midnight
   console.log("Updating court slots...");

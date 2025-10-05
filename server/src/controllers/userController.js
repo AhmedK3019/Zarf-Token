@@ -1,5 +1,5 @@
 import User from "../models/User.js";
-import RegisterRequest from "../controllers/registerController.js";
+import RegisterRequest from "./registerRequestController.js";
 import Joi from "joi";
 
 // vlidation schemas
@@ -29,22 +29,23 @@ const userSchema = Joi.object({
 // createUser
 const signup = async (req, res, next) => {
   try {
+    let doc;
     const { value, error } = userSchema.validate(req.body);
     if (error) return res.status(400).json({ message: error.message });
     if (value.email.includes("student")) {
       value.role = "Student";
       value.status = "Active";
+      doc = await User.create(value);
     }
-    const doc = await User.create(value);
     if (value.role == "Not Specified")
-      await RegisterRequest.createRegisterRequest({
-        userid: doc._id,
+      doc = await RegisterRequest.createRegisterRequest({
         firstname: value.firstname,
         lastname: value.lastname,
         gucid: value.gucid,
         email: value.email,
         role: value.role,
         status: value.status,
+        password: value.password,
       });
 
     return res.json({ user: doc });
