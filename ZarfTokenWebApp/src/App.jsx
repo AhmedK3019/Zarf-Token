@@ -4,6 +4,7 @@ import MainDashboardEventsOffice from "./pages/eventsOfficePages/mainDashboardEv
 import MainDashboardUser from "./pages/userPages/mainDashboardUser";
 import MainDashboardVendor from "./pages/vendorPages/mainDashboardVendor";
 import MainDashboardAdmin from "./pages/adminPages/mainDashboardAdmin";
+import SignUp from "./pages/signUp";
 import "./App.css";
 
 function App() {
@@ -11,6 +12,7 @@ function App() {
     <Router>
       <Routes>
         <Route path="/" element={<LandingPage />} />
+        <Route path="/signup" element={<SignUp />} />
         <Route path="/dashboard/user" element={<MainDashboardUser />} />
         <Route
           path="/dashboard/eventsOffice"
