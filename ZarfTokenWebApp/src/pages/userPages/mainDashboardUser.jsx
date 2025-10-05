@@ -1,15 +1,15 @@
 import { Routes, Route } from "react-router-dom";
 import NavbarUser from "./navbarUser";
-import { useUserContext } from "../context/UserContext";
+import { useUserContext } from "../../context/UserContext";
 import Notifications from "../Notifications";
-import AllEvents from "../pages/AllEvents";
+import AllEvents from "../AllEvents";
 import Wallet from "../Wallet";
 import FavouriteEvents from "./FavouriteEvents";
 import RegisteredEvents from "./RegisteredEvents";
 import LoyaltyProgram from "./LoyaltyProgram";
 import VendorsPoll from "./VendorsPoll";
 import GymSchedule from "./GymSchedule";
-import Courts from "../studenPages/Courts";
+import Courts from "../studentPages/Courts";
 import CreateWorkshop from "../professorPages/CreateWorkshop";
 import MyWorkshops from "../professorPages/MyWorkshops";
 

@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { useUserContext } from "../context/UserContext"; // example context hook
+import { useUserContext } from "../../context/UserContext"; // example context hook
 
 const NavbarUser = () => {
   const { user } = useUserContext(); // { role, wallet }

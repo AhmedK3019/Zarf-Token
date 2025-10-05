@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import EyeIcon from "./EyeIcon";
 
 const roleRoutes = {
   student: "/dashboard/student",
@@ -25,6 +26,12 @@ const Hero = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [errors, setErrors] = useState({ email: "", password: "", role: "" });
+  const [isPasswordVisible, setIsPasswordVisible] = useState(false);
+
+  // Toggle password visibility for the landing CTA without breaking styling.
+  const togglePasswordVisibility = () => {
+    setIsPasswordVisible((prev) => !prev);
+  };
 
   const handleSubmit = (event) => {
     event.preventDefault();
@@ -100,14 +107,27 @@ const Hero = () => {
                     <label htmlFor="password" className="block text-sm font-medium text-primary">
                       Password
                     </label>
-                    <input
-                      id="password"
-                      type="password"
-                      placeholder="********"
-                      value={password}
-                      onChange={(event) => setPassword(event.target.value)}
-                      className={`w-full rounded-2xl border px-4 py-3 text-sm text-primary shadow-inner transition focus:outline-none focus:ring-2 ${passwordClassName}`}
-                    />
+                    <div className="relative">
+                      <input
+                        id="password"
+                        type={isPasswordVisible ? "text" : "password"}
+                        placeholder="********"
+                        value={password}
+                        onChange={(event) => setPassword(event.target.value)}
+                        className={`w-full rounded-2xl border px-4 py-3 text-sm text-primary shadow-inner transition focus:outline-none focus:ring-2 pr-12 ${passwordClassName}`}
+                      />
+                      <button
+                        type="button"
+                        onClick={togglePasswordVisibility}
+                        className="absolute inset-y-0 right-3 flex items-center text-primary/60 transition hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40 focus-visible:ring-offset-2 focus-visible:ring-offset-white"
+                        aria-pressed={isPasswordVisible}
+                      >
+                        <EyeIcon visible={isPasswordVisible} />
+                        <span className="sr-only">
+                          {isPasswordVisible ? "Hide password" : "Show password"}
+                        </span>
+                      </button>
+                    </div>
                     {errors.password && <p className="text-sm font-medium text-accent">{errors.password}</p>}
                   </div>
                 </div>
@@ -141,4 +161,3 @@ const Hero = () => {
 };
 
 export default Hero;
-
