@@ -14,13 +14,13 @@ export const createCourt = async (req, res) => {
 
 // Get all courts
 export const getCourts = async (req, res) => {
-  const courts = await Court.find().populate("reservationId");
+  const courts = await Court.find();
   res.json(courts);
 };
 
 // Get court by ID
 export const getCourtById = async (req, res) => {
-  const court = await Court.findById(req.params.id).populate("reservationId");
+  const court = await Court.findById(req.params.id);
   if (!court) return res.status(404).json({ error: "Court not found" });
   res.json(court);
 };

@@ -9,12 +9,17 @@ import courtRoutes from "./routes/courtRoutes.js";
 import gymSessionRoutes from "./routes/gymSessionRoutes.js";
 import uploadRoutes from "./routes/uploadRoutes.js";
 import userRoutes from "./routes/userRoutes.js";
+import eventsOfficeRoutes from "./routes/eventsOfficeRoutes.js";
+import adminRoutes from "./routes/adminRoutes.js";
 import cron from "node-cron";
 import path from "path";
 import { updateCourtSlots } from "./utils/slotGenerator.js";
 import { fileURLToPath } from "url";
 import { dirname } from "path";
 import authRoutes from "./routes/authRoutes.js";
+import vendorRoutes from "./routes/vendorRoutes.js";
+import allUsersRoutes from "./routes/allUsersRoutes.js";
+import registerRequestRoutes from "./routes/registerRequestRoutes.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -36,6 +41,11 @@ app.use("/api/courts", courtRoutes);
 app.use("/api/gym-sessions", gymSessionRoutes);
 app.use("/api/uploads", uploadRoutes);
 app.use("/api/user", userRoutes);
+app.use("/api/admin", adminRoutes);
+app.use("/api/eventsOffice", eventsOfficeRoutes);
+app.use("/api/vendor", vendorRoutes);
+app.use("/api/allUsers", allUsersRoutes);
+app.use("/api/registerRequests", registerRequestRoutes);
 cron.schedule("0 0 * * *", () => {
   // runs every day at midnight
   console.log("Updating court slots...");

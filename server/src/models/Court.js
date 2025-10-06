@@ -13,11 +13,13 @@ function generateDailySlots(date) {
     slotDate.setSeconds(0);
     slotDate.setMilliseconds(0);
 
-    slots.push({
-      dateTime: slotDate,
-      isReserved: false,
-      reservationId: null,
-    });
+    if (slotDate > new Date()) {
+      slots.push({
+        dateTime: slotDate,
+        isReserved: false,
+        reservationId: null,
+      });
+    }
   }
 
   return slots;
