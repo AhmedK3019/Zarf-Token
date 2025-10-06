@@ -17,16 +17,17 @@ const mainDashboardEventsOffice = () => {
       <NavbarEventsOffice />
       <main className="max-w-5xl mx-auto mt-6 px-4">
         <Routes>
-          <Route path="/notifications" element={<Notifications />} />
-          <Route path="/all-events" element={<AllEvents />} />
-          <Route path="/create-event" element={<CreateEvent />} />
-          <Route path="/workshop-requests" element={<WorkshopRequests />} />
-          <Route path="/archived-events" element={<ArchivedEvents />} />
-          <Route path="/generate-qr" element={<GenerateQR />} />
-          <Route path="/loyalty-vendors" element={<LoyaltyVendors />} />
-          <Route path="/vendor-requests" element={<VendorRequests />} />
-          <Route path="/vendor-poll" element={<VendorPoll />} />
-          <Route path="/gym-schedule" element={<GymSchedule />} />
+          <Route index element={<WorkshopRequests />} />
+          <Route path="notifications" element={<Notifications />} />
+          <Route path="all-events" element={<AllEvents />} />
+          <Route path="create-event" element={<CreateEvent />} />
+          <Route path="workshop-requests" element={<WorkshopRequests />} />
+          <Route path="archived-events" element={<ArchivedEvents />} />
+          <Route path="generate-qr" element={<GenerateQR />} />
+          <Route path="loyalty-vendors" element={<LoyaltyVendors />} />
+          <Route path="vendor-requests" element={<VendorRequests />} />
+          <Route path="vendor-poll" element={<VendorPoll />} />
+          <Route path="gym-schedule" element={<GymSchedule />} />
         </Routes>
       </main>
     </div>

@@ -21,7 +21,7 @@ function App() {
         <Route path="/signup" element={<SignUp />} />
         <Route path="/dashboard/user" element={<MainDashboardUser />} />
         <Route
-          path="/dashboard/eventsOffice"
+          path="/dashboard/eventsOffice/*"
           element={<MainDashboardEventsOffice />}
         />
         <Route path="/dashboard/vendor" element={<MainDashboardVendor />} />
