@@ -1,3 +1,5 @@
+import { useEffect } from "react";
+
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import LandingPage from "./pages/landingPage";
 import MainDashboardEventsOffice from "./pages/eventsOfficePages/mainDashboardEventsOffice";
@@ -8,6 +10,10 @@ import SignUp from "./pages/signUp";
 import "./App.css";
 
 function App() {
+  useEffect(() => {
+    document.title = "ZarfToken";
+  }, []);
+
   return (
     <Router>
       <Routes>

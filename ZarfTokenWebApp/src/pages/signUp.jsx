@@ -178,11 +178,11 @@ export default function SignUp() {
     }`;
 
   const baseToggleButtonClasses =
-    "flex-1 rounded-full border border-transparent px-4 py-2 text-sm font-semibold transition-all duration-200 focus-visible:outline-none";
+    "flex-1 rounded-full border border-transparent px-4 py-2 text-sm font-semibold transition-all duration-300 ease-out focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-secondary/60 focus-visible:ring-offset-2 focus-visible:ring-offset-transparent";
   const activeToggleClasses =
-    "text-primary bg-transparent -translate-y-1 shadow-[0_14px_32px_rgba(115,108,237,0.35)] ring-2 ring-secondary/50 ring-offset-2 ring-offset-white hover:-translate-y-2 hover:shadow-[0_22px_45px_rgba(115,108,237,0.45)]";
+    "text-primary bg-transparent -translate-y-1 shadow-[0_0_0_2px_rgba(115,108,237,0.4),0_18px_40px_rgba(115,108,237,0.32)] ring-2 ring-secondary/70 ring-offset-[3px] ring-offset-transparent hover:-translate-y-2 hover:shadow-[0_0_0_3px_rgba(115,108,237,0.45),0_26px_52px_rgba(115,108,237,0.45)]";
   const inactiveToggleClasses =
-    "bg-transparent text-primary shadow-none hover:-translate-y-1 hover:shadow-[0_14px_28px_rgba(115,108,237,0.18)]";
+    "bg-transparent text-primary/90 shadow-none hover:-translate-y-1 hover:shadow-[0_12px_24px_rgba(115,108,237,0.18)]";
 
   return (
     <div className="relative min-h-screen w-full overflow-hidden bg-muted text-primary">
