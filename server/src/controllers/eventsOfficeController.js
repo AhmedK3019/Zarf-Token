@@ -56,7 +56,10 @@ const eventOfficeLogin = async (req, res, next) => {
 
 const getEventsOffice = async (req, res, next) => {
   try {
-    const eventsOffice = await EventsOffice.find();
+    const eventsOffice = await EventsOffice.find(
+      {},
+      { password: 0, __v: 0, notifications: 0 }
+    );
     res.json({ eventsOffice });
   } catch (error) {
     next(error);
@@ -72,9 +75,26 @@ const deleteEventOffice = async (req, res, next) => {
     next(error);
   }
 };
+
+const getEventOffice = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+    const eventOffice = await EventsOffice.findById(
+      { _id: id },
+      { password: 0, __v: 0, notifications: 0 }
+    );
+    if (!eventOffice) {
+      return res.status(404).json({ message: "Event office not found" });
+    }
+    return res.json({ eventOffice });
+  } catch (error) {
+    next(error);
+  }
+};
 export default {
   createEventOffice,
   eventOfficeLogin,
   getEventsOffice,
   deleteEventOffice,
+  getEventOffice,
 };

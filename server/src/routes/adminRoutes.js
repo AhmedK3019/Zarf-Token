@@ -8,5 +8,7 @@ router.post("/loginAdmin", adminController.loginAdmin);
 
 router.get("/getAdmins", adminController.getAdmins);
 
+router.get("/getAdmin/:id", adminController.getAdmin);
+
 router.delete("/deleteAdmin/:id", adminController.deleteAdmin);
 export default router;

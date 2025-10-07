@@ -35,7 +35,7 @@ const getAllBazaars = async (req, res, next) => {
 const getBazaar = async (req, res, next) => {
   try {
     const { id } = req.params;
-    const doc = await Bazaar.findById(id);
+    const doc = await Bazaar.findById({ _id: id });
     return res.json({ bazaar: doc });
   } catch (err) {
     next(err);
@@ -45,9 +45,11 @@ const getBazaar = async (req, res, next) => {
 const updateBazaar = async (req, res, next) => {
   try {
     const { id } = req.params;
+    const { value, error } = bazaarSchema.validate(req.body);
+    if (error) return res.json({ message: error.message });
     const doc = await Bazaar.findByIdAndUpdate(
       id,
-      { $set: req.body },
+      { $set: value },
       { new: true }
     );
     return res.json({ bazaar: doc });
@@ -60,7 +62,7 @@ const deleteBazaar = async (req, res, next) => {
   try {
     const { id } = req.params;
     await Bazaar.findByIdAndDelete(id);
-    return res.json({ message: "bazaar is delete " });
+    return res.json({ message: "bazaar is deleted successfully" });
   } catch (err) {
     next(err);
   }

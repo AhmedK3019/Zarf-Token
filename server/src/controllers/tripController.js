@@ -2,7 +2,7 @@ import Trip from "../models/Trip.js";
 import Joi from "joi";
 
 const TripSchema = Joi.object({
-  bazaarname: Joi.string().required(),
+  tripname: Joi.string().required(),
   startdate: Joi.date().required(),
   starttime: Joi.string().required(),
   enddate: Joi.date().required(),
@@ -18,8 +18,8 @@ const createTrip = async (req, res, next) => {
   try {
     const { value, error } = TripSchema.validate(req.body);
     if (error) return res.json({ message: error.message });
-    const doc = await Bazaar.create(value);
-    return res.json({ bazaar: doc });
+    const doc = await Trip.create(value);
+    return res.json({ trip: doc });
   } catch (err) {
     next(err);
   }
@@ -37,7 +37,7 @@ const getAllTrips = async (_req, res, next) => {
 const getTrip = async (req, res, next) => {
   try {
     const { id } = req.params;
-    const doc = await Trip.findById(id);
+    const doc = await Trip.findById({ _id: id });
     return res.json({ trip: doc });
   } catch (err) {
     next(err);
@@ -47,9 +47,11 @@ const getTrip = async (req, res, next) => {
 const updateTrip = async (req, res, next) => {
   try {
     const { id } = req.params;
+    const { value, error } = TripSchema.validate(req.body);
+    if (error) return res.json({ message: error.message });
     const doc = await Trip.findByIdAndUpdate(
       id,
-      { $set: req.body },
+      { $set: value },
       { new: true }
     );
     return res.json({ trip: doc });

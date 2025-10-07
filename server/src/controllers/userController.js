@@ -76,8 +76,27 @@ const loginUser = async (req, res, next) => {
 
 const getUsers = async (req, res, next) => {
   try {
-    const users = await User.find();
+    const users = await User.find(
+      {},
+      { password: 0, __v: 0, notifications: 0 }
+    );
     return res.json({ users });
+  } catch (error) {
+    next(error);
+  }
+};
+
+const getUser = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+    const user = await User.findById(
+      { _id: id },
+      { password: 0, __v: 0, notifications: 0 }
+    );
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+    return res.json({ user });
   } catch (error) {
     next(error);
   }
@@ -93,8 +112,4 @@ const deleteUser = async (req, res, next) => {
   }
 };
 
-const updateUser = async (req, res, next) => {
-  try {
-  } catch (error) {}
-};
-export default { signup, loginUser, getUsers, deleteUser };
+export default { signup, loginUser, getUsers, deleteUser, getUser };
