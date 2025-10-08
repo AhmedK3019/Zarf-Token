@@ -22,6 +22,7 @@ import allUsersRoutes from "./routes/allUsersRoutes.js";
 import registerRequestRoutes from "./routes/registerRequestRoutes.js";
 import tripRoutes from "./routes/tripRoutes.js";
 import bazaarRoutes from "./routes/bazaarRoutes.js";
+import vendorRequestRoutes from "./routes/vendorRequestRoutes.js";
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
@@ -45,6 +46,7 @@ app.use("/api/user", userRoutes);
 app.use("/api/admin", adminRoutes);
 app.use("/api/eventsOffice", eventsOfficeRoutes);
 app.use("/api/vendor", vendorRoutes);
+app.use("/api/vendorRequests", vendorRequestRoutes);
 app.use("/api/allUsers", allUsersRoutes);
 app.use("/api/registerRequests", registerRequestRoutes);
 app.use("/api/trips", tripRoutes);

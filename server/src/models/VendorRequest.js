@@ -5,7 +5,7 @@ const peopleSchema = new mongoose.Schema({
   email: { type: String, required: true },
 });
 
-const boothSchema = new mongoose.Schema(
+const vendorRequestSchema = new mongoose.Schema(
   {
     vendorId: {
       type: mongoose.Schema.Types.ObjectId,
@@ -37,4 +37,4 @@ const boothSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-export default mongoose.model("Booth", boothSchema);
+export default mongoose.model("VendorRequest", vendorRequestSchema);
