@@ -2,6 +2,7 @@ import { useEffect } from "react";
 
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import LandingPage from "./pages/landingPage";
+import EventsPage from "./pages/AllEvents";
 import MainDashboardEventsOffice from "./pages/eventsOfficePages/mainDashboardEventsOffice";
 import MainDashboardUser from "./pages/userPages/mainDashboardUser";
 import MainDashboardVendor from "./pages/vendorPages/mainDashboardVendor";
@@ -18,6 +19,8 @@ function App() {
     <Router>
       <Routes>
         <Route path="/" element={<LandingPage />} />
+        <Route path="/events" element={<EventsPage />} />
+        <Route path="/events/:category" element={<EventsPage />} />
         <Route path="/signup" element={<SignUp />} />
         <Route path="/dashboard/user" element={<MainDashboardUser />} />
         <Route
@@ -32,3 +35,4 @@ function App() {
 }
 
 export default App;
+
