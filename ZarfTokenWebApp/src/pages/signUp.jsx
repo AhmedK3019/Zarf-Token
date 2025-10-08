@@ -135,38 +135,80 @@ export default function SignUp() {
     return nextErrors;
   };
 
-  const handleSubmit = (event) => {
-    event.preventDefault();
-    const validationErrors = validateForm();
+const handleSubmit = async (event) => {
+  event.preventDefault();
 
-    if (Object.keys(validationErrors).length) {
-      setErrors(validationErrors);
-      setSuccessMessage("");
-      return;
+  const validationErrors = validateForm();
+  if (Object.keys(validationErrors).length) {
+    setErrors(validationErrors);
+    setSuccessMessage("");
+    return;
+  }
+
+  try {
+    let res;
+
+    if (activeRole === "gucian") {
+      // ---- Gucian Signup ----
+      const body = {
+        firstname: formData.gucian.firstName,
+        lastname: formData.gucian.lastName,
+        gucid: formData.gucian.gucId,
+        email: formData.gucian.email,
+        password: formData.gucian.password,
+      };
+
+      res = await fetch("http://localhost:5000/api/user/signup", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(body),
+      });
+    } else {
+      // ---- Vendor Signup ----
+      const form = new FormData();
+      form.append("companyname", formData.vendor.name);
+      form.append("email", formData.vendor.email);
+      form.append("password", formData.vendor.password);
+      form.append("taxcard", formData.vendor.tax);
+      form.append("logo", formData.vendor.logo);
+
+      res = await fetch("http://localhost:5000/api/vendors/signup", {
+        method: "POST",
+        body: form, // no Content-Type header; browser sets multipart boundary
+      });
     }
 
-    setErrors({});
-    setSuccessMessage(
-      activeRole === "gucian"
-        ? "Thanks for signing up! Our team will verify your GUC credentials and get you onboarded shortly."
-        : "Vendor application received! We'll review your details and reach out to finalize your storefront."
-    );
+    const data = await res.json();
 
-    setPasswordVisibility((prev) => ({
-      ...prev,
-      [activeRole]: false,
-    }));
-
-    const resetState = createInitialFormState();
-    setFormData((prev) => ({
-      ...prev,
-      [activeRole]: resetState[activeRole],
-    }));
-
-    if (activeRole === "vendor" && logoInputRef.current) {
-      logoInputRef.current.value = "";
+    if (!res.ok) {
+      throw new Error(data.message || "Signup failed");
     }
-  };
+
+    if (data.user.role === "Student") {
+      setSuccessMessage("Student signed up successfully!");
+    } else if (
+      data.user.role === "Not Specified"
+    ) {
+      setSuccessMessage("Your sign-up request is currently being reviewed.");
+    } else if (data.user.role === "Vendor") {
+      setSuccessMessage("Vendor account created successfully!");
+    } else {
+      setSuccessMessage("Signed up successfully!");
+    }
+
+
+    console.log("Signup successful:", data);
+
+    // Reset fields
+    setFormData(createInitialFormState());
+    if (logoInputRef.current) logoInputRef.current.value = "";
+  } catch (err) {
+    console.error(err);
+    setErrors({ general: err.message });
+    setSuccessMessage("");
+  }
+};
+
 
   const selectedLogoName = formData.vendor.logo?.name ?? "";
 
@@ -229,6 +271,11 @@ export default function SignUp() {
                   {successMessage && (
                     <div className="rounded-3xl border border-primary/20 bg-secondary/10 px-4 py-3 text-sm font-medium text-primary shadow-sm">
                       {successMessage}
+                    </div>
+                  )}
+                    {errors.general && (
+                    <div className="rounded-3xl border border-accent/30 bg-accent/10 px-4 py-3 text-sm font-medium text-accent shadow-sm">
+                      {errors.general}
                     </div>
                   )}
 
