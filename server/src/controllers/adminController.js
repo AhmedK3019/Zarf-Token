@@ -52,7 +52,10 @@ const loginAdmin = async (req, res, next) => {
 
 const getAdmins = async (req, res, next) => {
   try {
-    const admins = await Admin.find();
+    const admins = await Admin.find(
+      {},
+      { password: 0, __v: 0, notifications: 0 }
+    );
     res.json({ admins });
   } catch (error) {
     next(error);
@@ -69,4 +72,20 @@ const deleteAdmin = async (req, res, next) => {
   }
 };
 
-export default { createAdmin, loginAdmin, getAdmins, deleteAdmin };
+const getAdmin = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+    const admin = await Admin.findById(
+      { _id: id },
+      { password: 0, __v: 0, notifications: 0 }
+    );
+    if (!admin) {
+      return res.status(404).json({ message: "Admin not found" });
+    }
+    return res.json({ admin });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export default { createAdmin, loginAdmin, getAdmins, deleteAdmin, getAdmin };
