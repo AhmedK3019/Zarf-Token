@@ -19,8 +19,8 @@ const createInitialFormState = () => ({
   },
 });
 
-
-const getRoleFromParams = (params) => (params.get("vendor") === "true" ? "vendor" : "gucian");
+const getRoleFromParams = (params) =>
+  params.get("vendor") === "true" ? "vendor" : "gucian";
 const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 export default function SignUp() {
@@ -28,8 +28,13 @@ export default function SignUp() {
   const [formData, setFormData] = useState(() => createInitialFormState());
   const [errors, setErrors] = useState({});
   const [successMessage, setSuccessMessage] = useState("");
-  const [activeRole, setActiveRole] = useState(() => getRoleFromParams(searchParams));
-  const [passwordVisibility, setPasswordVisibility] = useState({ gucian: false, vendor: false });
+  const [activeRole, setActiveRole] = useState(() =>
+    getRoleFromParams(searchParams)
+  );
+  const [passwordVisibility, setPasswordVisibility] = useState({
+    gucian: false,
+    vendor: false,
+  });
   const logoInputRef = useRef(null);
 
   useEffect(() => {
@@ -135,80 +140,76 @@ export default function SignUp() {
     return nextErrors;
   };
 
-const handleSubmit = async (event) => {
-  event.preventDefault();
+  const handleSubmit = async (event) => {
+    event.preventDefault();
 
-  const validationErrors = validateForm();
-  if (Object.keys(validationErrors).length) {
-    setErrors(validationErrors);
-    setSuccessMessage("");
-    return;
-  }
-
-  try {
-    let res;
-
-    if (activeRole === "gucian") {
-      // ---- Gucian Signup ----
-      const body = {
-        firstname: formData.gucian.firstName,
-        lastname: formData.gucian.lastName,
-        gucid: formData.gucian.gucId,
-        email: formData.gucian.email,
-        password: formData.gucian.password,
-      };
-
-      res = await fetch("http://localhost:5000/api/user/signup", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(body),
-      });
-    } else {
-      // ---- Vendor Signup ----
-      const form = new FormData();
-      form.append("companyname", formData.vendor.name);
-      form.append("email", formData.vendor.email);
-      form.append("password", formData.vendor.password);
-      form.append("taxcard", formData.vendor.tax);
-      form.append("logo", formData.vendor.logo);
-
-      res = await fetch("http://localhost:5000/api/vendors/signup", {
-        method: "POST",
-        body: form, // no Content-Type header; browser sets multipart boundary
-      });
+    const validationErrors = validateForm();
+    if (Object.keys(validationErrors).length) {
+      setErrors(validationErrors);
+      setSuccessMessage("");
+      return;
     }
 
-    const data = await res.json();
+    try {
+      let res;
 
-    if (!res.ok) {
-      throw new Error(data.message || "Signup failed");
+      if (activeRole === "gucian") {
+        // ---- Gucian Signup ----
+        const body = {
+          firstname: formData.gucian.firstName,
+          lastname: formData.gucian.lastName,
+          gucid: formData.gucian.gucId,
+          email: formData.gucian.email,
+          password: formData.gucian.password,
+        };
+
+        res = await fetch("http://localhost:3000/api/user/signup", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(body),
+        });
+      } else {
+        // ---- Vendor Signup ----
+        const form = new FormData();
+        form.append("companyname", formData.vendor.name);
+        form.append("email", formData.vendor.email);
+        form.append("password", formData.vendor.password);
+        form.append("taxcard", formData.vendor.tax);
+        form.append("logo", formData.vendor.logo);
+
+        res = await fetch("http://localhost:3000/api/vendors/signup", {
+          method: "POST",
+          body: form, // no Content-Type header; browser sets multipart boundary
+        });
+      }
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        throw new Error(data.message || "Signup failed");
+      }
+
+      if (data.user.role === "Student") {
+        setSuccessMessage("Student signed up successfully!");
+      } else if (data.user.role === "Not Specified") {
+        setSuccessMessage("Your sign-up request is currently being reviewed.");
+      } else if (data.user.role === "Vendor") {
+        setSuccessMessage("Vendor account created successfully!");
+      } else {
+        setSuccessMessage("Signed up successfully!");
+      }
+
+      console.log("Signup successful:", data);
+
+      // Reset fields
+      setFormData(createInitialFormState());
+      if (logoInputRef.current) logoInputRef.current.value = "";
+    } catch (err) {
+      console.error(err);
+      setErrors({ general: err.message });
+      setSuccessMessage("");
     }
-
-    if (data.user.role === "Student") {
-      setSuccessMessage("Student signed up successfully!");
-    } else if (
-      data.user.role === "Not Specified"
-    ) {
-      setSuccessMessage("Your sign-up request is currently being reviewed.");
-    } else if (data.user.role === "Vendor") {
-      setSuccessMessage("Vendor account created successfully!");
-    } else {
-      setSuccessMessage("Signed up successfully!");
-    }
-
-
-    console.log("Signup successful:", data);
-
-    // Reset fields
-    setFormData(createInitialFormState());
-    if (logoInputRef.current) logoInputRef.current.value = "";
-  } catch (err) {
-    console.error(err);
-    setErrors({ general: err.message });
-    setSuccessMessage("");
-  }
-};
-
+  };
 
   const selectedLogoName = formData.vendor.logo?.name ?? "";
 
@@ -234,12 +235,13 @@ const handleSubmit = async (event) => {
       <main className="relative z-10 flex min-h-screen items-center justify-center px-6 py-16">
         <div className="grid w-full max-w-6xl gap-12 lg:grid-cols-[1.05fr_1fr]">
           <div className="space-y-6 self-center">
-
-            <h2 className="text-4xl font-bold text-primary sm:text-5xl lg:text-6xl">Become a Tokener</h2>
+            <h2 className="text-4xl font-bold text-primary sm:text-5xl lg:text-6xl">
+              Become a Tokener
+            </h2>
             <p className="text-base text-primary/80 sm:text-lg">
-              Whether you're a GUCian ready to discover events or a vendor launching your booth, it only takes a few
-              steps. 
-              Pick the experience that fits you and we'll tailor the onboarding.
+              Whether you're a GUCian ready to discover events or a vendor
+              launching your booth, it only takes a few steps. Pick the
+              experience that fits you and we'll tailor the onboarding.
             </p>
           </div>
 
@@ -251,7 +253,9 @@ const handleSubmit = async (event) => {
                     type="button"
                     onClick={() => handleRoleChange("gucian")}
                     className={`${baseToggleButtonClasses} ${
-                      activeRole === "gucian" ? activeToggleClasses : inactiveToggleClasses
+                      activeRole === "gucian"
+                        ? activeToggleClasses
+                        : inactiveToggleClasses
                     }`}
                   >
                     GUCian
@@ -260,20 +264,26 @@ const handleSubmit = async (event) => {
                     type="button"
                     onClick={() => handleRoleChange("vendor")}
                     className={`${baseToggleButtonClasses} ${
-                      activeRole === "vendor" ? activeToggleClasses : inactiveToggleClasses
+                      activeRole === "vendor"
+                        ? activeToggleClasses
+                        : inactiveToggleClasses
                     }`}
                   >
                     Vendor
                   </button>
                 </div>
 
-                <form className="mt-6 space-y-6" onSubmit={handleSubmit} noValidate>
+                <form
+                  className="mt-6 space-y-6"
+                  onSubmit={handleSubmit}
+                  noValidate
+                >
                   {successMessage && (
                     <div className="rounded-3xl border border-primary/20 bg-secondary/10 px-4 py-3 text-sm font-medium text-primary shadow-sm">
                       {successMessage}
                     </div>
                   )}
-                    {errors.general && (
+                  {errors.general && (
                     <div className="rounded-3xl border border-accent/30 bg-accent/10 px-4 py-3 text-sm font-medium text-accent shadow-sm">
                       {errors.general}
                     </div>
@@ -283,7 +293,10 @@ const handleSubmit = async (event) => {
                     <div className="space-y-5">
                       <div className="grid gap-4 sm:grid-cols-2">
                         <div className="space-y-2">
-                          <label htmlFor="firstName" className="block text-sm font-medium text-primary">
+                          <label
+                            htmlFor="firstName"
+                            className="block text-sm font-medium text-primary"
+                          >
                             First name
                           </label>
                           <input
@@ -291,14 +304,23 @@ const handleSubmit = async (event) => {
                             type="text"
                             placeholder="Sara"
                             value={formData.gucian.firstName}
-                            onChange={(event) => updateField("firstName", event.target.value)}
+                            onChange={(event) =>
+                              updateField("firstName", event.target.value)
+                            }
                             className={getInputClassName("firstName")}
                           />
-                          {errors.firstName && <p className="text-sm font-medium text-accent">{errors.firstName}</p>}
+                          {errors.firstName && (
+                            <p className="text-sm font-medium text-accent">
+                              {errors.firstName}
+                            </p>
+                          )}
                         </div>
 
                         <div className="space-y-2">
-                          <label htmlFor="lastName" className="block text-sm font-medium text-primary">
+                          <label
+                            htmlFor="lastName"
+                            className="block text-sm font-medium text-primary"
+                          >
                             Last name
                           </label>
                           <input
@@ -306,15 +328,24 @@ const handleSubmit = async (event) => {
                             type="text"
                             placeholder="Omar"
                             value={formData.gucian.lastName}
-                            onChange={(event) => updateField("lastName", event.target.value)}
+                            onChange={(event) =>
+                              updateField("lastName", event.target.value)
+                            }
                             className={getInputClassName("lastName")}
                           />
-                          {errors.lastName && <p className="text-sm font-medium text-accent">{errors.lastName}</p>}
+                          {errors.lastName && (
+                            <p className="text-sm font-medium text-accent">
+                              {errors.lastName}
+                            </p>
+                          )}
                         </div>
                       </div>
 
                       <div className="space-y-2">
-                        <label htmlFor="gucId" className="block text-sm font-medium text-primary">
+                        <label
+                          htmlFor="gucId"
+                          className="block text-sm font-medium text-primary"
+                        >
                           GUC ID
                         </label>
                         <input
@@ -322,14 +353,23 @@ const handleSubmit = async (event) => {
                           type="text"
                           placeholder="e.g. 34-12345"
                           value={formData.gucian.gucId}
-                          onChange={(event) => updateField("gucId", event.target.value)}
+                          onChange={(event) =>
+                            updateField("gucId", event.target.value)
+                          }
                           className={getInputClassName("gucId")}
                         />
-                        {errors.gucId && <p className="text-sm font-medium text-accent">{errors.gucId}</p>}
+                        {errors.gucId && (
+                          <p className="text-sm font-medium text-accent">
+                            {errors.gucId}
+                          </p>
+                        )}
                       </div>
 
                       <div className="space-y-2">
-                        <label htmlFor="gucEmail" className="block text-sm font-medium text-primary">
+                        <label
+                          htmlFor="gucEmail"
+                          className="block text-sm font-medium text-primary"
+                        >
                           GUC email
                         </label>
                         <input
@@ -337,23 +377,36 @@ const handleSubmit = async (event) => {
                           type="email"
                           placeholder="you@guc.edu.eg"
                           value={formData.gucian.email}
-                          onChange={(event) => updateField("email", event.target.value)}
+                          onChange={(event) =>
+                            updateField("email", event.target.value)
+                          }
                           className={getInputClassName("email")}
                         />
-                        {errors.email && <p className="text-sm font-medium text-accent">{errors.email}</p>}
+                        {errors.email && (
+                          <p className="text-sm font-medium text-accent">
+                            {errors.email}
+                          </p>
+                        )}
                       </div>
 
                       <div className="space-y-2">
-                        <label htmlFor="gucPassword" className="block text-sm font-medium text-primary">
+                        <label
+                          htmlFor="gucPassword"
+                          className="block text-sm font-medium text-primary"
+                        >
                           Password
                         </label>
                         <div className="relative">
                           <input
                             id="gucPassword"
-                            type={passwordVisibility.gucian ? "text" : "password"}
+                            type={
+                              passwordVisibility.gucian ? "text" : "password"
+                            }
                             placeholder="Create a password"
                             value={formData.gucian.password}
-                            onChange={(event) => updateField("password", event.target.value)}
+                            onChange={(event) =>
+                              updateField("password", event.target.value)
+                            }
                             className={`${getInputClassName("password")} pr-12`}
                           />
                           <button
@@ -364,17 +417,26 @@ const handleSubmit = async (event) => {
                           >
                             <EyeIcon visible={passwordVisibility.gucian} />
                             <span className="sr-only">
-                              {passwordVisibility.gucian ? "Hide password" : "Show password"}
+                              {passwordVisibility.gucian
+                                ? "Hide password"
+                                : "Show password"}
                             </span>
                           </button>
                         </div>
-                        {errors.password && <p className="text-sm font-medium text-accent">{errors.password}</p>}
+                        {errors.password && (
+                          <p className="text-sm font-medium text-accent">
+                            {errors.password}
+                          </p>
+                        )}
                       </div>
                     </div>
                   ) : (
                     <div className="space-y-5">
                       <div className="space-y-2">
-                        <label htmlFor="vendorName" className="block text-sm font-medium text-primary">
+                        <label
+                          htmlFor="vendorName"
+                          className="block text-sm font-medium text-primary"
+                        >
                           Vendor name
                         </label>
                         <input
@@ -382,14 +444,23 @@ const handleSubmit = async (event) => {
                           type="text"
                           placeholder="Zarf Coffee Cart"
                           value={formData.vendor.name}
-                          onChange={(event) => updateField("name", event.target.value)}
+                          onChange={(event) =>
+                            updateField("name", event.target.value)
+                          }
                           className={getInputClassName("name")}
                         />
-                        {errors.name && <p className="text-sm font-medium text-accent">{errors.name}</p>}
+                        {errors.name && (
+                          <p className="text-sm font-medium text-accent">
+                            {errors.name}
+                          </p>
+                        )}
                       </div>
 
                       <div className="space-y-2">
-                        <label htmlFor="vendorEmail" className="block text-sm font-medium text-primary">
+                        <label
+                          htmlFor="vendorEmail"
+                          className="block text-sm font-medium text-primary"
+                        >
                           Email
                         </label>
                         <input
@@ -397,14 +468,23 @@ const handleSubmit = async (event) => {
                           type="email"
                           placeholder="contact@brand.com"
                           value={formData.vendor.email}
-                          onChange={(event) => updateField("email", event.target.value)}
+                          onChange={(event) =>
+                            updateField("email", event.target.value)
+                          }
                           className={getInputClassName("email")}
                         />
-                        {errors.email && <p className="text-sm font-medium text-accent">{errors.email}</p>}
+                        {errors.email && (
+                          <p className="text-sm font-medium text-accent">
+                            {errors.email}
+                          </p>
+                        )}
                       </div>
 
                       <div className="space-y-2">
-                        <label htmlFor="vendorTax" className="block text-sm font-medium text-primary">
+                        <label
+                          htmlFor="vendorTax"
+                          className="block text-sm font-medium text-primary"
+                        >
                           Tax registration number
                         </label>
                         <input
@@ -412,23 +492,36 @@ const handleSubmit = async (event) => {
                           type="text"
                           placeholder="e.g. 203-445-678"
                           value={formData.vendor.tax}
-                          onChange={(event) => updateField("tax", event.target.value)}
+                          onChange={(event) =>
+                            updateField("tax", event.target.value)
+                          }
                           className={getInputClassName("tax")}
                         />
-                        {errors.tax && <p className="text-sm font-medium text-accent">{errors.tax}</p>}
+                        {errors.tax && (
+                          <p className="text-sm font-medium text-accent">
+                            {errors.tax}
+                          </p>
+                        )}
                       </div>
 
                       <div className="space-y-2">
-                        <label htmlFor="vendorPassword" className="block text-sm font-medium text-primary">
+                        <label
+                          htmlFor="vendorPassword"
+                          className="block text-sm font-medium text-primary"
+                        >
                           Password
                         </label>
                         <div className="relative">
                           <input
                             id="vendorPassword"
-                            type={passwordVisibility.vendor ? "text" : "password"}
+                            type={
+                              passwordVisibility.vendor ? "text" : "password"
+                            }
                             placeholder="Create a password"
                             value={formData.vendor.password}
-                            onChange={(event) => updateField("password", event.target.value)}
+                            onChange={(event) =>
+                              updateField("password", event.target.value)
+                            }
                             className={`${getInputClassName("password")} pr-12`}
                           />
                           <button
@@ -439,15 +532,23 @@ const handleSubmit = async (event) => {
                           >
                             <EyeIcon visible={passwordVisibility.vendor} />
                             <span className="sr-only">
-                              {passwordVisibility.vendor ? "Hide password" : "Show password"}
+                              {passwordVisibility.vendor
+                                ? "Hide password"
+                                : "Show password"}
                             </span>
                           </button>
                         </div>
-                        {errors.password && <p className="text-sm font-medium text-accent">{errors.password}</p>}
+                        {errors.password && (
+                          <p className="text-sm font-medium text-accent">
+                            {errors.password}
+                          </p>
+                        )}
                       </div>
 
                       <div className="space-y-2">
-                        <span className="block text-sm font-medium text-primary">Logo</span>
+                        <span className="block text-sm font-medium text-primary">
+                          Logo
+                        </span>
                         <label
                           htmlFor="vendorLogo"
                           className={`flex w-full cursor-pointer items-center justify-between rounded-2xl border px-4 py-3 text-sm text-primary transition ${
@@ -474,7 +575,11 @@ const handleSubmit = async (event) => {
                             }}
                           />
                         </label>
-                        {errors.logo && <p className="text-sm font-medium text-accent">{errors.logo}</p>}
+                        {errors.logo && (
+                          <p className="text-sm font-medium text-accent">
+                            {errors.logo}
+                          </p>
+                        )}
                       </div>
                     </div>
                   )}
@@ -483,11 +588,14 @@ const handleSubmit = async (event) => {
                     type="submit"
                     className="w-full rounded-full border border-primary/40 bg-white px-6 py-4 text-lg font-semibold text-primary tracking-wide shadow-[0_12px_24px_rgba(115,108,237,0.25)] transition-transform hover:-translate-y-0.5 hover:bg-secondary/20 hover:shadow-[0_16px_30px_rgba(115,108,237,0.3)]"
                   >
-                    {activeRole === "gucian" ? "Create my GUCian account" : "Apply as a vendor"}
+                    {activeRole === "gucian"
+                      ? "Create my GUCian account"
+                      : "Apply as a vendor"}
                   </button>
 
                   <p className="text-center text-xs text-primary/70">
-                    By continuing you agree to our terms and acknowledge our privacy policy.
+                    By continuing you agree to our terms and acknowledge our
+                    privacy policy.
                   </p>
                 </form>
               </div>
@@ -501,9 +609,3 @@ const handleSubmit = async (event) => {
     </div>
   );
 }
-
-
-
-
-
-

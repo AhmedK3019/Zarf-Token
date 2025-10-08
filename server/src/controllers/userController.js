@@ -1,6 +1,12 @@
 import User from "../models/User.js";
 import RegisterRequest from "./registerRequestController.js";
 import Joi from "joi";
+import jwt from "jsonwebtoken";
+import { sendEmail } from "../utils/mailer.js";
+
+const JWT_SECRET = process.env.JWT_SECRET || "your-secret-key";
+const BACKEND_URL = process.env.BACKEND_URL || "http://localhost:3000";
+const FRONTEND_URL = process.env.FRONTEND_URL || "http://localhost:5173";
 
 // vlidation schemas
 const userSchema = Joi.object({
@@ -32,10 +38,53 @@ const signup = async (req, res, next) => {
     let doc;
     const { value, error } = userSchema.validate(req.body);
     if (error) return res.status(400).json({ message: error.message });
+    // normalize identifiers to reduce accidental duplicates
+    if (value.gucid && typeof value.gucid === "string")
+      value.gucid = value.gucid.trim();
+    if (value.email && typeof value.email === "string")
+      value.email = value.email.trim().toLowerCase();
+
+    // prevent obvious duplicate user creation by checking existing User first
+    try {
+      const existing = await User.findOne({
+        $or: [{ gucid: value.gucid }, { email: value.email }],
+      });
+      if (existing) {
+        // indicate which field conflicts when possible
+        const conflict = {};
+        if (existing.gucid === value.gucid) conflict.gucid = value.gucid;
+        if (existing.email === value.email) conflict.email = value.email;
+        return res
+          .status(409)
+          .json({ message: "GUC ID or email already registered", conflict });
+      }
+    } catch (findErr) {
+      // non-fatal: log and continue to let create() surface any issues
+      console.error("Error checking existing user:", findErr);
+    }
     if (value.email.includes("student")) {
       value.role = "Student";
-      value.status = "Active";
+      // initially blocked until email verification
+      value.status = "Blocked";
       doc = await User.create(value);
+
+      // create a verification token and send email with verify link
+      try {
+        const token = jwt.sign({ userId: doc._id }, JWT_SECRET, {
+          expiresIn: "1d",
+        });
+        const verifyUrl = `${BACKEND_URL}/api/auth/verify-email?token=${token}`;
+        const subject = "Verify your GUC account";
+        const text = `Hello ${doc.firstname},\n\nPlease verify your account by clicking the link below:\n\n${verifyUrl}\n\nThis link will redirect you to the login page after verification.`;
+        await sendEmail(doc.email, subject, text);
+      } catch (emailErr) {
+        // if email fails, remove created user to avoid unverified leftovers
+        await User.findByIdAndDelete(doc._id);
+        console.error("Error sending verification email:", emailErr);
+        return res
+          .status(500)
+          .json({ message: "Failed to send verification email" });
+      }
     }
     if (value.role == "Not Specified")
       doc = await RegisterRequest.createRegisterRequest({
@@ -50,8 +99,17 @@ const signup = async (req, res, next) => {
 
     return res.json({ user: doc });
   } catch (err) {
-    if (err.code === 11000) {
-      return res.status(409).json({ message: "Please insert a unique id" });
+    // Duplicate key from MongoDB (unique index) — provide details
+    if (err && err.code === 11000) {
+      // err.keyValue usually holds the offending field/value
+      console.error(
+        "Duplicate key error creating user:",
+        err.keyValue || err.message
+      );
+      return res.status(409).json({
+        message: "Duplicate key error",
+        details: err.keyValue || err.message,
+      });
     }
     next(err);
   }

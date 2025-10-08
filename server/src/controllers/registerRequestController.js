@@ -45,11 +45,32 @@ const updateRegisterRequest = async (req, res, next) => {
       role: request.role,
     });
     if (error) return res.status(400).json({ message: error.message });
+    // normalize
+    const gucid =
+      request.gucid && typeof request.gucid === "string"
+        ? request.gucid.trim()
+        : request.gucid;
+    const email =
+      request.email && typeof request.email === "string"
+        ? request.email.trim().toLowerCase()
+        : request.email;
+
+    // check existing user to avoid duplicate key error
+    const existing = await User.findOne({ $or: [{ gucid }, { email }] });
+    if (existing) {
+      const conflict = {};
+      if (existing.gucid === gucid) conflict.gucid = gucid;
+      if (existing.email === email) conflict.email = email;
+      return res
+        .status(409)
+        .json({ message: "GUC ID or email already registered", conflict });
+    }
+
     const user = await User.create({
       firstname: request.firstname,
       lastname: request.lastname,
-      gucid: request.gucid,
-      email: request.email,
+      gucid,
+      email,
       role: value.role,
       status: request.status,
       password: request.password,
