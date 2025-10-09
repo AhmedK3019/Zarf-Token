@@ -7,7 +7,7 @@ import VendorRequests from "./VendorRequests";
 import LoyaltyVendors from "./LoyaltyVendors";
 import AllUsers from "./AllUsers";
 import AddAdmin from "./AddAdminOrEventsOffice";
-import EventsOffice from "./EventsOffice";
+import AllAdmins from "./AllAdminsAndOfficers";
 
 const mainDashboardAdmin = () => {
   return (
@@ -23,7 +23,7 @@ const mainDashboardAdmin = () => {
           <Route path="/loyalty-vendors" element={<LoyaltyVendors />} />
           <Route path="/all-users" element={<AllUsers />} />
           <Route path="/add-admin" element={<AddAdmin />} />
-          <Route path="/events-office" element={<EventsOffice />} />
+          <Route path="/all-admins" element={<AllAdmins />} />
         </Routes>
       </main>
     </div>

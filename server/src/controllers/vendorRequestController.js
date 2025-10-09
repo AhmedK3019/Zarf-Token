@@ -1,4 +1,9 @@
 import VendorRequest from "../models/VendorRequest.js";
+import Booth from "../models/Booth.js";
+import {
+  sendBoothApprovalEmail,
+  sendBoothRejectionEmail,
+} from "../utils/mailer.js";
 
 // create request for a bazar: POST /api/vendorRequests/bazar/:bazarId
 const createBazarRequest = async (req, res, next) => {
@@ -113,8 +118,49 @@ const updateRequest = async (req, res, next) => {
   }
 };
 
+const acceptRequest = async (req, res, next) => {
+  try {
+    const request = await VendorRequest.findById(req.params.id);
+    if (!request)
+      return res.status(404).json({ message: "VendorRequest not found" });
+    const booth = await Booth.create({
+      vendorId: request.vendorId,
+      isBazarBooth: request.isBazarBooth,
+      bazarId: request.bazarId,
+      boothSize: request.boothSize,
+      people: request.people,
+      location: request.location,
+      duration: request.duration,
+    });
+    await request.remove();
+    try {
+      await mailer.sendBoothApprovalEmail(request.vendorId, booth);
+    } catch (emailErr) {
+      console.error(
+        "Failed to send booth approval email:",
+        emailErr && emailErr.message ? emailErr.message : emailErr
+      );
+    }
+    res.json(booth);
+  } catch (err) {
+    next(err);
+  }
+};
+
 const deleteRequest = async (req, res, next) => {
   try {
+    const doc = await VendorRequest.findById(req.params.id);
+    if (!doc)
+      return res.status(404).json({ message: "VendorRequest not found" });
+    // send a rejection email to vendor
+    try {
+      await mailer.sendBoothRejectionEmail(request.vendorId, doc);
+    } catch (emailErr) {
+      console.error(
+        "Failed to send booth rejection email:",
+        emailErr && emailErr.message ? emailErr.message : emailErr
+      );
+    }
     await VendorRequest.findByIdAndDelete(req.params.id);
     res.json({ message: "VendorRequest deleted" });
   } catch (err) {
@@ -129,5 +175,6 @@ export default {
   getMyRequests,
   getRequest,
   updateRequest,
+  acceptRequest,
   deleteRequest,
 };

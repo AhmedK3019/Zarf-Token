@@ -1,84 +1,123 @@
-import { Link } from "react-router-dom";
+import { NavLink } from "react-router-dom";
 import logo from "../../assets/logo.png";
 
 const NavbarEventsOffice = () => {
   return (
     <div className="flex w-full justify-center pt-9 pb-4">
-      <header className="flex w-[86%] max-w-5xl items-center justify-between rounded-full bg-white/95 px-5 py-2.5 shadow-[0_14px_32px_rgba(115,108,237,0.2)] backdrop-blur md:px-7">
+      <header className="flex w-[86%] max-w-5xl min-w-[820px] items-center justify-center gap-8 rounded-full bg-white/95 px-5 py-2.5 shadow-[0_14px_32px_rgba(115,108,237,0.2)] backdrop-blur md:px-7">
         <img
           src={logo}
           alt="Logo"
           className="h-8 w-8 rounded-full bg-primary/10 p-1"
         />
         <nav className="hidden md:flex items-center gap-5 text-sm font-medium text-primary/80">
-          <Link
+          <NavLink
             to="/dashboard/eventsOffice/notifications"
-            className="rounded-full bg-primary/10 px-4 py-2 text-primary shadow-inner"
+            className={({ isActive }) =>
+              isActive
+                ? "rounded-full bg-black/5 px-4 py-2 text-primary shadow-inner transform scale-100"
+                : "transition-colors hover:text-primary transform hover:scale-105"
+            }
           >
             Notifications
-          </Link>
-          <Link
+          </NavLink>
+          <NavLink
             to="/dashboard/eventsOffice/all-events"
-            className="transition-colors hover:text-primary"
+            className={({ isActive }) =>
+              isActive
+                ? "rounded-full bg-black/5 px-4 py-2 text-primary shadow-inner transform scale-100"
+                : "transition-colors hover:text-primary transform hover:scale-105"
+            }
           >
             All Events
-          </Link>
-          <Link
+          </NavLink>
+          <NavLink
             to="/dashboard/eventsOffice/create-event"
-            className="transition-colors hover:text-primary"
+            className={({ isActive }) =>
+              isActive
+                ? "rounded-full bg-black/5 px-4 py-2 text-primary shadow-inner transform scale-100"
+                : "transition-colors hover:text-primary transform hover:scale-105"
+            }
           >
             Create Event
-          </Link>
-          <Link
+          </NavLink>
+          <NavLink
             to="/dashboard/eventsOffice/workshop-requests"
-            className="transition-colors hover:text-primary"
+            className={({ isActive }) =>
+              isActive
+                ? "rounded-full bg-black/5 px-4 py-2 text-primary shadow-inner transform scale-100"
+                : "transition-colors hover:text-primary transform hover:scale-105"
+            }
           >
             Workshop Requests
-          </Link>
-          <Link
+          </NavLink>
+          <NavLink
             to="/dashboard/eventsOffice/archived-events"
-            className="transition-colors hover:text-primary"
+            className={({ isActive }) =>
+              isActive
+                ? "rounded-full bg-black/5 px-4 py-2 text-primary shadow-inner transform scale-100"
+                : "transition-colors hover:text-primary transform hover:scale-105"
+            }
           >
             Archived Events
-          </Link>
-          <Link
+          </NavLink>
+          <NavLink
             to="/dashboard/eventsOffice/generate-qr"
-            className="transition-colors hover:text-primary"
+            className={({ isActive }) =>
+              isActive
+                ? "rounded-full bg-black/5 px-4 py-2 text-primary shadow-inner transform scale-100"
+                : "transition-colors hover:text-primary transform hover:scale-105"
+            }
           >
             Generate QR
-          </Link>
-          <Link
+          </NavLink>
+          <NavLink
             to="/dashboard/eventsOffice/loyalty-vendors"
-            className="transition-colors hover:text-primary"
+            className={({ isActive }) =>
+              isActive
+                ? "rounded-full bg-black/5 px-4 py-2 text-primary shadow-inner transform scale-100"
+                : "transition-colors hover:text-primary transform hover:scale-105"
+            }
           >
             Loyalty Vendors
-          </Link>
-          <Link
+          </NavLink>
+          <NavLink
             to="/dashboard/eventsOffice/vendor-requests"
-            className="transition-colors hover:text-primary"
+            className={({ isActive }) =>
+              isActive
+                ? "rounded-full bg-black/5 px-4 py-2 text-primary shadow-inner transform scale-100"
+                : "transition-colors hover:text-primary transform hover:scale-105"
+            }
           >
             Vendor Requests
-          </Link>
-          <Link
+          </NavLink>
+          <NavLink
             to="/dashboard/eventsOffice/vendor-poll"
-            className="transition-colors hover:text-primary"
+            className={({ isActive }) =>
+              isActive
+                ? "rounded-full bg-black/5 px-4 py-2 text-primary shadow-inner transform scale-100"
+                : "transition-colors hover:text-primary transform hover:scale-105"
+            }
           >
             Vendor Poll
-          </Link>
-          <Link
+          </NavLink>
+          <NavLink
             to="/dashboard/eventsOffice/gym-schedule"
-            className="transition-colors hover:text-primary"
+            className={({ isActive }) =>
+              isActive
+                ? "rounded-full bg-black/5 px-4 py-2 text-primary shadow-inner transform scale-100"
+                : "transition-colors hover:text-primary transform hover:scale-105"
+            }
           >
             Gym Schedule
-          </Link>
+          </NavLink>
         </nav>
-
-        <div className="flex items-center gap-2 text-sm font-medium">
-          <button className="rounded-full border border-primary px-4 py-2 text-primary transition-colors hover:bg-primary hover:text-white">
-            Logout
-          </button>
-        </div>
       </header>
+      <div className="flex px-4 items-center gap-2 text-sm font-medium">
+        <button className="rounded-full border border-primary bg-white px-4 py-2 text-primary transition-colors hover:bg-black/10">
+          Logout
+        </button>
+      </div>
     </div>
   );
 };
