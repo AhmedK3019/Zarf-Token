@@ -1,4 +1,4 @@
-import { Link } from "react-router-dom";
+import { NavLink } from "react-router-dom";
 import { useUserContext } from "../../context/UserContext"; // example context hook
 import logo from "../../assets/logo.png";
 
@@ -68,31 +68,123 @@ const NavbarUser = () => {
         />
 
         <nav className="hidden md:flex items-center gap-5 text-sm font-medium text-primary/80">
-          {commonLinks}
+          {/* map commonLinks into NavLinks for active styling */}
+          <NavLink
+            to="/dashboard/user/notifications"
+            className={({ isActive }) =>
+              isActive
+                ? "rounded-full bg-black/5 px-4 py-2 text-primary shadow-inner transform scale-100"
+                : "transition-colors hover:text-primary transform hover:scale-105"
+            }
+          >
+            Notifications
+          </NavLink>
+          <NavLink
+            to="/dashboard/user/all-events"
+            className={({ isActive }) =>
+              isActive
+                ? "rounded-full bg-black/5 px-4 py-2 text-primary shadow-inner transform scale-100"
+                : "transition-colors hover:text-primary transform hover:scale-105"
+            }
+          >
+            All Events
+          </NavLink>
+          <NavLink
+            to="/dashboard/user/wallet"
+            className={({ isActive }) =>
+              isActive
+                ? "rounded-full bg-black/5 px-4 py-2 text-primary shadow-inner transform scale-100"
+                : "transition-colors hover:text-primary transform hover:scale-105"
+            }
+          >
+            Wallet (${user.wallet || 0})
+          </NavLink>
+          <NavLink
+            to="/dashboard/user/favourite-events"
+            className={({ isActive }) =>
+              isActive
+                ? "rounded-full bg-black/5 px-4 py-2 text-primary shadow-inner transform scale-100"
+                : "transition-colors hover:text-primary transform hover:scale-105"
+            }
+          >
+            Favourite Events
+          </NavLink>
+          <NavLink
+            to="/dashboard/user/registered-events"
+            className={({ isActive }) =>
+              isActive
+                ? "rounded-full bg-black/5 px-4 py-2 text-primary shadow-inner transform scale-100"
+                : "transition-colors hover:text-primary transform hover:scale-105"
+            }
+          >
+            Registered Events
+          </NavLink>
+          <NavLink
+            to="/dashboard/user/loyalty-program"
+            className={({ isActive }) =>
+              isActive
+                ? "rounded-full bg-black/5 px-4 py-2 text-primary shadow-inner transform scale-100"
+                : "transition-colors hover:text-primary transform hover:scale-105"
+            }
+          >
+            Loyalty Program
+          </NavLink>
+          <NavLink
+            to="/dashboard/user/vendors-poll"
+            className={({ isActive }) =>
+              isActive
+                ? "rounded-full bg-black/5 px-4 py-2 text-primary shadow-inner transform scale-100"
+                : "transition-colors hover:text-primary transform hover:scale-105"
+            }
+          >
+            Vendors Poll
+          </NavLink>
+          <NavLink
+            to="/dashboard/user/gym-schedule"
+            className={({ isActive }) =>
+              isActive
+                ? "rounded-full bg-black/5 px-4 py-2 text-primary shadow-inner transform scale-100"
+                : "transition-colors hover:text-primary transform hover:scale-105"
+            }
+          >
+            Gym Schedule
+          </NavLink>
 
           {user.role === "Student" && (
-            <Link
+            <NavLink
               to="/dashboard/user/courts"
-              className="transition-colors hover:text-primary"
+              className={({ isActive }) =>
+                isActive
+                  ? "rounded-full bg-black/5 px-4 py-2 text-primary shadow-inner transform scale-100"
+                  : "transition-colors hover:text-primary transform hover:scale-105"
+              }
             >
               Courts
-            </Link>
+            </NavLink>
           )}
 
           {user.role === "Professor" && (
             <>
-              <Link
+              <NavLink
                 to="/dashboard/user/create-workshop"
-                className="transition-colors hover:text-primary"
+                className={({ isActive }) =>
+                  isActive
+                    ? "rounded-full bg-black/5 px-4 py-2 text-primary shadow-inner transform scale-100"
+                    : "transition-colors hover:text-primary transform hover:scale-105"
+                }
               >
                 Create Workshop
-              </Link>
-              <Link
+              </NavLink>
+              <NavLink
                 to="/dashboard/user/my-workshops"
-                className="transition-colors hover:text-primary"
+                className={({ isActive }) =>
+                  isActive
+                    ? "rounded-full bg-black/5 px-4 py-2 text-primary shadow-inner transform scale-100"
+                    : "transition-colors hover:text-primary transform hover:scale-105"
+                }
               >
                 My Workshops
-              </Link>
+              </NavLink>
             </>
           )}
         </nav>
