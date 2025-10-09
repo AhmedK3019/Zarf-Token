@@ -22,17 +22,16 @@ function App() {
         <Route path="/events" element={<EventsPage />} />
         <Route path="/events/:category" element={<EventsPage />} />
         <Route path="/signup" element={<SignUp />} />
-        <Route path="/dashboard/user" element={<MainDashboardUser />} />
+        <Route path="/dashboard/user/*" element={<MainDashboardUser />} />
         <Route
           path="/dashboard/eventsOffice/*"
           element={<MainDashboardEventsOffice />}
         />
-        <Route path="/dashboard/vendor" element={<MainDashboardVendor />} />
-        <Route path="/dashboard/admin" element={<MainDashboardAdmin />} />
+        <Route path="/dashboard/vendor/*" element={<MainDashboardVendor />} />
+        <Route path="/dashboard/admin/*" element={<MainDashboardAdmin />} />
       </Routes>
     </Router>
   );
 }
 
 export default App;
-

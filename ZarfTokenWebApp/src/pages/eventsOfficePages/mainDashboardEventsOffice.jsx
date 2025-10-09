@@ -17,7 +17,7 @@ const mainDashboardEventsOffice = () => {
       <NavbarEventsOffice />
       <main className="max-w-5xl mx-auto mt-6 px-4">
         <Routes>
-          <Route index element={<WorkshopRequests />} />
+          <Route index element={<Notifications />} />
           <Route path="notifications" element={<Notifications />} />
           <Route path="all-events" element={<AllEvents />} />
           <Route path="create-event" element={<CreateEvent />} />
