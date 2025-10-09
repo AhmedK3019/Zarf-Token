@@ -23,9 +23,9 @@ router.get("/verify-email", async (req, res) => {
     await user.save();
 
     // Redirect to frontend login (could append a query param indicating success)
-    return res.redirect(`${FRONTEND_URL}/login?verified=1`);
+    return res.redirect(`${FRONTEND_URL}/?verified=1`);
   } catch (err) {
-    return res.redirect(`${FRONTEND_URL}/login?verified=0`);
+    return res.redirect(`${FRONTEND_URL}/?verified=0`);
   }
 });
 
