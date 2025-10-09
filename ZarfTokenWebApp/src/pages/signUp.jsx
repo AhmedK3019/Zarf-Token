@@ -284,7 +284,7 @@ export default function SignUp() {
                     </div>
                   )}
                   {errors.general && (
-                    <div className="rounded-3xl border border-accent/30 bg-accent/10 px-4 py-3 text-sm font-medium text-accent shadow-sm">
+                    <div className="rounded-lg border border-red-400 bg-red-50 px-4 py-3 text-sm font-medium text-red-700 shadow-sm">
                       {errors.general}
                     </div>
                   )}
