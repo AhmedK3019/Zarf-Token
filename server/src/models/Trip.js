@@ -11,6 +11,10 @@ const tripSchema = new mongoose.Schema({
   registerdeadline: { type: Date, required: true },
   price: { type: Number, required: true },
   capacity: { type: Number, required: true },
+  attendees: {
+    type: [{ type: mongoose.Schema.ObjectId, ref: "User" }],
+    default: [],
+  },
 });
 
 const Trip = mongoose.model("Trip", tripSchema);

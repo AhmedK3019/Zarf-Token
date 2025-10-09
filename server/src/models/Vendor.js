@@ -7,6 +7,7 @@ const vendorSchema = new moongoose.Schema({
   taxcard: { type: String, required: true },
   logo: { type: String, required: true },
   status: { type: String, enum: ["Active", "Blocked"], default: "Active" },
+  role: { type: String, default: "Vendor" },
 });
 
 vendorSchema.pre("save", async function (next) {

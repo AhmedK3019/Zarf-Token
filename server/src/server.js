@@ -25,6 +25,7 @@ import bazaarRoutes from "./routes/bazaarRoutes.js";
 import vendorRequestRoutes from "./routes/vendorRequestRoutes.js";
 import conferenceRoutes from "./routes/conferenceRoutes.js";
 import workshopRoutes from "./routes/workshopRoutes.js";
+import allEventsRoutes from "./routes/allEventsRoutes.js";
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
@@ -55,6 +56,7 @@ app.use("/api/trips", tripRoutes);
 app.use("/api/bazaars", bazaarRoutes);
 app.use("/api/conferences", conferenceRoutes);
 app.use("/api/workshops", workshopRoutes);
+app.use("/api/allEvents", allEventsRoutes);
 cron.schedule("0 0 * * *", () => {
   // runs every day at midnight
   console.log("Updating court slots...");

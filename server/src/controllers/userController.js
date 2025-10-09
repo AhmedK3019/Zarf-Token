@@ -149,8 +149,13 @@ const getUser = async (req, res, next) => {
     const { id } = req.params;
     const user = await User.findById(
       { _id: id },
-      { password: 0, __v: 0, notifications: 0 }
+      {
+        password: 0,
+        __v: 0,
+        notifications: 0,
+      }
     );
+    console.log(JSON.stringify(user));
     if (!user) {
       return res.status(404).json({ message: "User not found" });
     }
@@ -170,4 +175,21 @@ const deleteUser = async (req, res, next) => {
   }
 };
 
-export default { signup, loginUser, getUsers, deleteUser, getUser };
+// const getProfessors = async (_req, res, next) => {
+//   try {
+//     const profs = await User.find(
+//       { role: "Professor" },
+//       { firstname: 1, lastname: 1 }
+//     );
+//     return res.status(200).json(profs);
+//   } catch (error) {
+//     next(error);
+//   }
+// };
+export default {
+  signup,
+  loginUser,
+  getUsers,
+  deleteUser,
+  getUser,
+};

@@ -10,8 +10,15 @@ const workshopSchema = new mongoose.Schema({
   shortdescription: { type: String, required: true },
   fullagenda: { type: String, required: true },
   facultyresponsibilty: { type: String, required: true },
-  professorsparticipating: { type: [String], required: true },
+  professorsparticipating: {
+    type: [{ type: mongoose.Schema.ObjectId, ref: "User" }],
+    default: [],
+  },
   fundingsource: { type: String, enum: ["External", "GUC"], required: true },
+  attendees: {
+    type: [{ type: mongoose.Schema.ObjectId, ref: "User" }],
+    default: [],
+  },
   extrarequiredfunding: { type: Number, required: true },
 });
 
