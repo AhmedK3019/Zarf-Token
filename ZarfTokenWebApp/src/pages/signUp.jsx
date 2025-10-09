@@ -177,7 +177,7 @@ export default function SignUp() {
         form.append("taxcard", formData.vendor.tax);
         form.append("logo", formData.vendor.logo);
 
-        res = await fetch("http://localhost:3000/api/vendors/signup", {
+        res = await fetch("http://localhost:3000/api/vendor/signupvendor", {
           method: "POST",
           body: form, // no Content-Type header; browser sets multipart boundary
         });
