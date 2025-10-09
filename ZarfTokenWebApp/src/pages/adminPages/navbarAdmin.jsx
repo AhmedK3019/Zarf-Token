@@ -79,7 +79,7 @@ const NavbarAdmin = () => {
                 : "transition-colors hover:text-primary transform hover:scale-105"
             }
           >
-            All Admins
+            Add Admin | Officer
           </NavLink>
           <NavLink
             to="/dashboard/admin/all-admins"
