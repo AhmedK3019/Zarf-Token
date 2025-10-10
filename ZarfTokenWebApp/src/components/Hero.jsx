@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import EyeIcon from "./EyeIcon";
 import api from "../services/api";
+import { AdminContext } from "../context/AdminContext";
 
 const roleRoutes = {
   admin: "/dashboard/admin",
@@ -10,31 +11,23 @@ const roleRoutes = {
   user: "/dashboard/user",
 };
 
-const resolveRoleRoute = (email) => {
-  const user = api.post("/allUsers/login", { email });
-  // logic to determine role based on user.role
+const resolveRoleRoute = async (email, password) => {
+  console.log(email, password);
   if (!email) return null;
-  const normalized = email.toLowerCase();
-  const gucDomains = ["@guc.edu.eg", "@student.guc.edu.eg"];
-  const isGucEmail = gucDomains.some((domain) => normalized.endsWith(domain));
-
-  if (isGucEmail && normalized.includes("admin")) return roleRoutes.admin;
-  if (
-    normalized.includes("events") &&
-    (normalized.includes("office") || normalized.includes("officer")) &&
-    isGucEmail
-  ) {
-    return roleRoutes.eventsOffice;
+  const { data } = await api.post("/allUsers/login", { email, password });
+  // logic to determine role based on user.role
+  console.log(data.user.role);
+  console.log(data.user);
+  switch (String(data.user.role)) {
+    case "Admin":
+      return roleRoutes.admin;
+    case "Vendor":
+      return roleRoutes.company;
+    case "Event office":
+      return roleRoutes.eventsOffice;
+    default:
+      return roleRoutes.user;
   }
-  if (
-    normalized.includes("company") ||
-    normalized.includes("vendor") ||
-    normalized.endsWith("@vendors.com")
-  ) {
-    return roleRoutes.company;
-  }
-  if (isGucEmail) return roleRoutes.user;
-  return null;
 };
 
 const Hero = () => {
@@ -49,7 +42,7 @@ const Hero = () => {
     setIsPasswordVisible((prev) => !prev);
   };
 
-  const handleSubmit = (event) => {
+  const handleSubmit = async (event) => {
     event.preventDefault();
 
     const nextErrors = { email: "", password: "", role: "" };
@@ -60,7 +53,8 @@ const Hero = () => {
       nextErrors.password = "Please enter your password.";
     }
 
-    const targetRoute = resolveRoleRoute(email);
+    const targetRoute = await resolveRoleRoute(email, password);
+    console.log(targetRoute);
     if (email.trim() && !targetRoute) {
       nextErrors.role =
         "We couldn't determine your dashboard. Please use your campus email.";
