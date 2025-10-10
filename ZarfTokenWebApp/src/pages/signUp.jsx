@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import EyeIcon from "../components/EyeIcon";
+import api from "../services/api";
 
 const createInitialFormState = () => ({
   gucian: {
@@ -28,11 +29,7 @@ const allowedTaxFileTypes = [
   "image/jpg",
   "application/pdf",
 ];
-const allowedLogoFileTypes = [
-  "image/svg+xml",
-  "image/png",
-  "image/webp",
-];
+const allowedLogoFileTypes = ["image/svg+xml", "image/png", "image/webp"];
 
 export default function SignUp() {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -181,10 +178,8 @@ export default function SignUp() {
           password: formData.gucian.password,
         };
 
-        res = await fetch("http://localhost:3000/api/user/signup", {
-          method: "POST",
+        res = await api.post("/user/signup", body, {
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(body),
         });
       } else {
         // ---- Company Signup ----
@@ -195,34 +190,33 @@ export default function SignUp() {
         form.append("taxcard", formData.vendor.tax);
         form.append("logo", formData.vendor.logo);
 
-        res = await fetch("http://localhost:3000/api/vendor/signupvendor", {
-          method: "POST",
-          body: form, // no Content-Type header; browser sets multipart boundary
-        });
+        res = await api.post("/vendor/signupvendor", form);
       }
 
-      const data = await res.json();
+      // axios returns the parsed response in res.data
+      const data = res?.data;
 
-      if (!res.ok) {
-        throw new Error(data.message || "Signup failed");
+      // treat any non-2xx status as error
+      if (res?.status >= 400) {
+        throw new Error(data?.message || "Signup failed");
       }
 
-      if (data.user.role === "Student") {
+      if (data?.user?.role === "Student") {
         setSuccessMessage("Student signed up successfully!");
-      } else if (data.user.role === "Not Specified") {
+      } else if (data?.user?.role === "Not Specified") {
         setSuccessMessage("Your sign-up request is currently being reviewed.");
-      } else if (data.user.role === "Vendor") {
+      } else if (data?.user?.role === "Vendor") {
         setSuccessMessage("Company account created successfully!");
-    } else {
-      setSuccessMessage("Signed up successfully!");
-    }
+      } else {
+        setSuccessMessage("Signed up successfully!");
+      }
 
-    console.log("Signup successful:", data);
+      console.log("Signup successful:", data);
 
-    // Reset fields
-    setFormData(createInitialFormState());
-    if (logoInputRef.current) logoInputRef.current.value = "";
-    if (taxInputRef.current) taxInputRef.current.value = "";
+      // Reset fields
+      setFormData(createInitialFormState());
+      if (logoInputRef.current) logoInputRef.current.value = "";
+      if (taxInputRef.current) taxInputRef.current.value = "";
     } catch (err) {
       console.error(err);
       setErrors({ general: err.message });
@@ -554,7 +548,8 @@ export default function SignUp() {
                           }`}
                         >
                           <span className="truncate pr-3">
-                            {selectedTaxName || "Upload your file (PDF, PNG, or JPG)"}
+                            {selectedTaxName ||
+                              "Upload your file (PDF, PNG, or JPG)"}
                           </span>
                           <span className="rounded-full bg-primary/10 px-3 py-1 text-xs font-semibold text-primary">
                             Browse
@@ -591,7 +586,8 @@ export default function SignUp() {
                           }`}
                         >
                           <span className="truncate pr-3">
-                            {selectedLogoName || "Upload your file (SVG, PNG, or WebP)"}
+                            {selectedLogoName ||
+                              "Upload your file (SVG, PNG, or WebP)"}
                           </span>
                           <span className="rounded-full bg-primary/10 px-3 py-1 text-xs font-semibold text-primary">
                             Browse
