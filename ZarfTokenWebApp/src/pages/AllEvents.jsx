@@ -8,11 +8,13 @@ const AllEvents = () => {
   const { category } = useParams();
   const [selectedCategory, setSelectedCategory] = useState(category || "all");
   const [events, setEvents] = useState([]);
+  const [filteredEvents, setFilteredEvents] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [selectedBazaar, setSelectedBazaar] = useState(null);
   const [bazaarBooths, setBazaarBooths] = useState([]);
   const [showBoothsModal, setShowBoothsModal] = useState(false);
+  const [searchTerm, setSearchTerm] = useState("");
 
   const eventCategories = [
     { id: "all", name: "All Events" },
@@ -177,8 +179,11 @@ const AllEvents = () => {
         // Combine all events
         const allEvents = Object.values(mockEvents).flat();
         setEvents(allEvents);
+        setFilteredEvents(allEvents);
       } else {
-        setEvents(mockEvents[category] || []);
+        const categoryEvents = mockEvents[category] || [];
+        setEvents(categoryEvents);
+        setFilteredEvents(categoryEvents);
       }
     } catch (err) {
       setError("Failed to fetch events. Please try again.");
@@ -202,6 +207,7 @@ const AllEvents = () => {
       // setEvents(data);
 
       setEvents(mockEvents.booths);
+      setFilteredEvents(mockEvents.booths);
     } catch (err) {
       setError("Failed to fetch booths. Please try again.");
     } finally {
@@ -227,12 +233,70 @@ const AllEvents = () => {
     }
   };
 
+  // Search function
+  const handleSearch = (searchValue) => {
+    setSearchTerm(searchValue);
+    
+    if (!searchValue.trim()) {
+      setFilteredEvents(events);
+      return;
+    }
+
+    const lowercasedSearch = searchValue.toLowerCase().trim();
+    
+    const filtered = events.filter(event => {
+      // Search in event name
+      if (event.name?.toLowerCase().includes(lowercasedSearch)) {
+        return true;
+      }
+      
+      // Search in faculty responsible
+      if (event.facultyresponsible?.toLowerCase().includes(lowercasedSearch)) {
+        return true;
+      }
+      
+      // Search in professors participating array
+      if (event.professorsparticipating?.some(prof => 
+        prof.toLowerCase().includes(lowercasedSearch)
+      )) {
+        return true;
+      }
+      
+      // Search in vendor name for booths
+      if (event.vendor?.toLowerCase().includes(lowercasedSearch)) {
+        return true;
+      }
+      
+      // Search in location
+      if (event.location?.toLowerCase().includes(lowercasedSearch)) {
+        return true;
+      }
+      
+      // Search in short description
+      if (event.shortdescription?.toLowerCase().includes(lowercasedSearch)) {
+        return true;
+      }
+      
+      return false;
+    });
+    
+    setFilteredEvents(filtered);
+  };
+
+  // Clear search
+  const clearSearch = () => {
+    setSearchTerm("");
+    setFilteredEvents(events);
+  };
+
   useEffect(() => {
     if (selectedCategory === "booths") {
       fetchPlatformBooths();
     } else {
       fetchEvents(selectedCategory);
     }
+    // Clear search when category changes
+    setSearchTerm("");
   }, [selectedCategory]);
 
   const handleCategoryClick = (categoryId) => {
@@ -338,7 +402,7 @@ const AllEvents = () => {
             </div>
 
             {/* Category Filter */}
-            <div className="flex flex-wrap justify-center gap-4 mb-12">
+            <div className="flex flex-wrap justify-center gap-4 mb-8">
               {eventCategories.map((cat) => (
                 <button
                   key={cat.id}
@@ -354,6 +418,42 @@ const AllEvents = () => {
               ))}
             </div>
 
+            {/* Search Bar */}
+            <div className="mb-12">
+              <div className="relative max-w-2xl mx-auto">
+                <div className="relative">
+                  <input
+                    type="text"
+                    placeholder="Search by event name, professor name, vendor, or location..."
+                    value={searchTerm}
+                    onChange={(e) => handleSearch(e.target.value)}
+                    className="w-full px-6 py-4 pr-12 rounded-full border border-[#736CED] bg-white/70 text-[#312A68] placeholder-[#312A68]/60 focus:outline-none focus:ring-2 focus:ring-[#736CED] focus:border-transparent shadow-sm"
+                  />
+                  <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
+                    {searchTerm ? (
+                      <button
+                        onClick={clearSearch}
+                        className="text-[#736CED] hover:text-[#5A4BBA] transition-colors"
+                      >
+                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                      </button>
+                    ) : (
+                      <svg className="w-5 h-5 text-[#736CED]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                      </svg>
+                    )}
+                  </div>
+                </div>
+                {searchTerm && (
+                  <p className="text-sm text-[#312A68]/70 mt-2 text-center">
+                    Found {filteredEvents.length} result{filteredEvents.length !== 1 ? 's' : ''} for "{searchTerm}"
+                  </p>
+                )}
+              </div>
+            </div>
+
             {/* Events Grid */}
             {loading ? (
               <div className="text-center py-12">
@@ -363,16 +463,30 @@ const AllEvents = () => {
                 </p>
               </div>
             ) : error ? (
-              <div className="text-center py-12 text-red-500">{error}</div>
-            ) : events.length === 0 ? (
+              <div className="text-center py-12 text-red-500">
+                {error}
+              </div>
+            ) : filteredEvents.length === 0 ? (
               <div className="text-center py-12">
-                <p className="text-[#312A68] text-lg">
-                  No {selectedCategory} found.
-                </p>
+                {searchTerm ? (
+                  <div>
+                    <p className="text-[#312A68] text-lg mb-4">
+                      No {selectedCategory} found matching "{searchTerm}"
+                    </p>
+                    <button
+                      onClick={clearSearch}
+                      className="text-[#736CED] hover:text-[#5A4BBA] underline"
+                    >
+                      Clear search
+                    </button>
+                  </div>
+                ) : (
+                  <p className="text-[#312A68] text-lg">No {selectedCategory} found.</p>
+                )}
               </div>
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-12">
-                {events.map((event) => (
+                {filteredEvents.map((event) => (
                   <div
                     key={`${event.type}-${event.id}`}
                     className="bg-white rounded-2xl p-6 shadow-[0_10px_25px_rgba(165,148,249,0.2)] border border-white/50 hover:shadow-[0_15px_35px_rgba(165,148,249,0.3)] transition-all hover:-translate-y-1"
@@ -440,24 +554,28 @@ const AllEvents = () => {
 
                     {/* Additional Info based on event type */}
                     <div className="mt-4 pt-4 border-t border-gray-200">
-                      {event.type === "workshops" &&
-                        event.facultyresponsible && (
-                          <p className="text-xs text-[#312A68]/70">
-                            Faculty: {event.facultyresponsible}
-                          </p>
-                        )}
+                      {event.type === 'workshops' && event.facultyresponsible && (
+                        <p className="text-xs text-[#312A68]/70">
+                          Faculty: {event.facultyresponsible}
+                        </p>
+                      )}
 
-                      {event.type === "conferences" &&
-                        event.conferencewebsitelink && (
-                          <a
-                            href={event.conferencewebsitelink}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="text-xs text-[#736CED] hover:underline"
-                          >
-                            Conference Website →
-                          </a>
-                        )}
+                      {event.type === 'workshops' && event.professorsparticipating && event.professorsparticipating.length > 0 && (
+                        <p className="text-xs text-[#312A68]/70 mt-1">
+                          Professors: {event.professorsparticipating.join(', ')}
+                        </p>
+                      )}
+                      
+                      {event.type === 'conferences' && event.conferencewebsitelink && (
+                        <a
+                          href={event.conferencewebsitelink}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-xs text-[#736CED] hover:underline"
+                        >
+                          Conference Website →
+                        </a>
+                      )}
 
                       {event.type === "booths" && event.contact && (
                         <p className="text-xs text-[#312A68]/70">
