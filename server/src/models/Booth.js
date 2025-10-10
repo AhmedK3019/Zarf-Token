@@ -7,6 +7,7 @@ const peopleSchema = new mongoose.Schema({
 
 const boothSchema = new mongoose.Schema(
   {
+    boothname: { type: String, required: true },
     vendorId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Vendor",

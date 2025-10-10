@@ -525,7 +525,11 @@ const AllEvents = () => {
 
                     {/* Event Name */}
                     <h3 className="text-xl font-bold text-[#4C3BCF] mb-3">
-                      {event.name}
+                      {event.bazaarname ||
+                        event.workshopname ||
+                        event.tripname ||
+                        event.conferencename ||
+                        event.boothname}
                     </h3>
 
                     {/* Event Details */}

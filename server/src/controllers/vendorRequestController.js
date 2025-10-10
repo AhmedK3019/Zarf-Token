@@ -121,9 +121,11 @@ const updateRequest = async (req, res, next) => {
 const acceptRequest = async (req, res, next) => {
   try {
     const request = await VendorRequest.findById(req.params.id);
+    const vendor = await Vendor.findById(request.vendorId);
     if (!request)
       return res.status(404).json({ message: "VendorRequest not found" });
     const booth = await Booth.create({
+      boothname: vendor ? vendor.companyName : "Vendor Booth",
       vendorId: request.vendorId,
       isBazarBooth: request.isBazarBooth,
       bazarId: request.bazarId,
