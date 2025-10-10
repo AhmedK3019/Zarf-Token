@@ -14,9 +14,9 @@ const router = express.Router();
 
 router.post("/", createBooth);
 router.get("/", getBooths);
-router.get("/:bazarId", getBoothsByBazarId);
-router.get("/bazars", getAllBazarsBooths);
+router.get("/bazaars", getAllBazarsBooths);
 router.get("/platform", getAllPlatformBooths);
+router.get("/:bazaarId", getBoothsByBazarId);
 router.get("/:id", getBooth);
 router.put("/:id", updateBooth);
 router.delete("/:id", deleteBooth);

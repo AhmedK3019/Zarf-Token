@@ -7,6 +7,7 @@ const peopleSchema = new mongoose.Schema({
 
 const boothSchema = new mongoose.Schema(
   {
+    boothname: { type: String, required: true },
     vendorId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Vendor",
@@ -33,6 +34,7 @@ const boothSchema = new mongoose.Schema(
       default: "Pending",
     },
     bazarId: { type: mongoose.Schema.Types.ObjectId, ref: "Bazar" },
+    type: { type: String, default: "booth" },
   },
   { timestamps: true }
 );

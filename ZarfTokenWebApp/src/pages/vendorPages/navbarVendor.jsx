@@ -12,14 +12,14 @@ const NavbarVendor = ({ vendor }) => {
         />
         <nav className="hidden md:flex items-center gap-5 text-sm font-medium text-primary/80 whitespace-nowrap">
           <NavLink
-            to="/dashboard/vendor/upcoming-bazars"
+            to="/dashboard/vendor/upcoming-bazaars"
             className={({ isActive }) =>
               isActive
                 ? "rounded-full bg-black/5 px-4 py-2 text-primary shadow-inner transform scale-100"
                 : "transition-colors hover:text-primary transform hover:scale-105"
             }
           >
-            Upcoming Bazars
+            Upcoming Bazaars
           </NavLink>
           <NavLink
             to="/dashboard/vendor/apply-booth"

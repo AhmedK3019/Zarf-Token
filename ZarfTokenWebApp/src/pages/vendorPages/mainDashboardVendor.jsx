@@ -1,6 +1,6 @@
 import { Routes, Route } from "react-router-dom";
 import NavbarVendor from "./navbarVendor";
-import UpcomingBazars from "./UpcomingBazars";
+import UpcomingBazaars from "./UpcomingBazaars";
 import ApplyBooth from "./ApplyBooth";
 import MyRequests from "./MyRequests";
 import AcceptedBooths from "./AcceptedBooths";
@@ -13,8 +13,8 @@ const mainDashboardVendor = ({ vendor }) => {
       <NavbarVendor vendor={vendor} />
       <main className="max-w-5xl mx-auto mt-6 px-4">
         <Routes>
-          <Route index element={<UpcomingBazars />} />
-          <Route path="/upcoming-bazars" element={<UpcomingBazars />} />
+          <Route index element={<UpcomingBazaars />} />
+          <Route path="/upcoming-bazaars" element={<UpcomingBazaars />} />
           <Route path="/apply-booth" element={<ApplyBooth />} />
           <Route path="/my-requests" element={<MyRequests />} />
           <Route path="/accepted-booths" element={<AcceptedBooths />} />

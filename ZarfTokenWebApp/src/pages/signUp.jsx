@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import EyeIcon from "../components/EyeIcon";
+import api from "../services/api";
 
 const createInitialFormState = () => ({
   gucian: {
@@ -14,7 +15,7 @@ const createInitialFormState = () => ({
     name: "",
     email: "",
     password: "",
-    tax: "",
+    tax: null,
     logo: null,
   },
 });
@@ -22,6 +23,13 @@ const createInitialFormState = () => ({
 const getRoleFromParams = (params) =>
   params.get("vendor") === "true" ? "vendor" : "gucian";
 const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+const allowedTaxFileTypes = [
+  "image/png",
+  "image/jpeg",
+  "image/jpg",
+  "application/pdf",
+];
+const allowedLogoFileTypes = ["image/svg+xml", "image/png", "image/webp"];
 
 export default function SignUp() {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -36,6 +44,7 @@ export default function SignUp() {
     vendor: false,
   });
   const logoInputRef = useRef(null);
+  const taxInputRef = useRef(null);
 
   useEffect(() => {
     const roleFromQuery = getRoleFromParams(searchParams);
@@ -117,7 +126,7 @@ export default function SignUp() {
       }
     } else {
       if (!activeData.name.trim()) {
-        nextErrors.name = "Vendor name is required.";
+        nextErrors.name = "Company name is required.";
       }
       if (!activeData.email.trim()) {
         nextErrors.email = "Email is required.";
@@ -129,11 +138,17 @@ export default function SignUp() {
       } else if (activeData.password.trim().length < 6) {
         nextErrors.password = "Password should be at least 6 characters.";
       }
-      if (!activeData.tax.trim()) {
-        nextErrors.tax = "Include your tax registration number.";
+      if (!activeData.tax) {
+        nextErrors.tax = "Upload your tax registration document.";
+      } else {
+        if (!allowedTaxFileTypes.includes(activeData.tax.type)) {
+          nextErrors.tax = "Supported formats: PNG, JPG, or PDF.";
+        }
       }
       if (!activeData.logo) {
-        nextErrors.logo = "Please upload your logo.";
+        nextErrors.logo = "Please upload your logo file.";
+      } else if (!allowedLogoFileTypes.includes(activeData.logo.type)) {
+        nextErrors.logo = "Supported formats: SVG, PNG, or WebP.";
       }
     }
 
@@ -163,13 +178,11 @@ export default function SignUp() {
           password: formData.gucian.password,
         };
 
-        res = await fetch("http://localhost:3000/api/user/signup", {
-          method: "POST",
+        res = await api.post("/user/signup", body, {
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(body),
         });
       } else {
-        // ---- Vendor Signup ----
+        // ---- Company Signup ----
         const form = new FormData();
         form.append("companyname", formData.vendor.name);
         form.append("email", formData.vendor.email);
@@ -177,24 +190,23 @@ export default function SignUp() {
         form.append("taxcard", formData.vendor.tax);
         form.append("logo", formData.vendor.logo);
 
-        res = await fetch("http://localhost:3000/api/vendor/signupvendor", {
-          method: "POST",
-          body: form, // no Content-Type header; browser sets multipart boundary
-        });
+        res = await api.post("/vendor/signupvendor", form);
       }
 
-      const data = await res.json();
+      // axios returns the parsed response in res.data
+      const data = res?.data;
 
-      if (!res.ok) {
-        throw new Error(data.message || "Signup failed");
+      // treat any non-2xx status as error
+      if (res?.status >= 400) {
+        throw new Error(data?.message || "Signup failed");
       }
 
-      if (data.user.role === "Student") {
+      if (data?.user?.role === "Student") {
         setSuccessMessage("Student signed up successfully!");
-      } else if (data.user.role === "Not Specified") {
+      } else if (data?.user?.role === "Not Specified") {
         setSuccessMessage("Your sign-up request is currently being reviewed.");
-      } else if (data.user.role === "Vendor") {
-        setSuccessMessage("Vendor account created successfully!");
+      } else if (data?.user?.role === "Vendor") {
+        setSuccessMessage("Company account created successfully!");
       } else {
         setSuccessMessage("Signed up successfully!");
       }
@@ -204,6 +216,7 @@ export default function SignUp() {
       // Reset fields
       setFormData(createInitialFormState());
       if (logoInputRef.current) logoInputRef.current.value = "";
+      if (taxInputRef.current) taxInputRef.current.value = "";
     } catch (err) {
       console.error(err);
       setErrors({ general: err.message });
@@ -211,6 +224,7 @@ export default function SignUp() {
     }
   };
 
+  const selectedTaxName = formData.vendor.tax?.name ?? "";
   const selectedLogoName = formData.vendor.logo?.name ?? "";
 
   const getInputClassName = (field) =>
@@ -239,7 +253,7 @@ export default function SignUp() {
               Become a Tokener
             </h2>
             <p className="text-base text-primary/80 sm:text-lg">
-              Whether you're a GUCian ready to discover events or a vendor
+              Whether you're a GUCian ready to discover events or a company
               launching your booth, it only takes a few steps. Pick the
               experience that fits you and we'll tailor the onboarding.
             </p>
@@ -269,7 +283,7 @@ export default function SignUp() {
                         : inactiveToggleClasses
                     }`}
                   >
-                    Vendor
+                    Company
                   </button>
                 </div>
 
@@ -437,12 +451,12 @@ export default function SignUp() {
                           htmlFor="vendorName"
                           className="block text-sm font-medium text-primary"
                         >
-                          Vendor name
+                          Company name
                         </label>
                         <input
                           id="vendorName"
                           type="text"
-                          placeholder="Zarf Coffee Cart"
+                          placeholder="El Sewedy Electric Co S.A.E."
                           value={formData.vendor.name}
                           onChange={(event) =>
                             updateField("name", event.target.value)
@@ -476,30 +490,6 @@ export default function SignUp() {
                         {errors.email && (
                           <p className="text-sm font-medium text-accent">
                             {errors.email}
-                          </p>
-                        )}
-                      </div>
-
-                      <div className="space-y-2">
-                        <label
-                          htmlFor="vendorTax"
-                          className="block text-sm font-medium text-primary"
-                        >
-                          Tax registration number
-                        </label>
-                        <input
-                          id="vendorTax"
-                          type="text"
-                          placeholder="e.g. 203-445-678"
-                          value={formData.vendor.tax}
-                          onChange={(event) =>
-                            updateField("tax", event.target.value)
-                          }
-                          className={getInputClassName("tax")}
-                        />
-                        {errors.tax && (
-                          <p className="text-sm font-medium text-accent">
-                            {errors.tax}
                           </p>
                         )}
                       </div>
@@ -547,6 +537,44 @@ export default function SignUp() {
 
                       <div className="space-y-2">
                         <span className="block text-sm font-medium text-primary">
+                          Tax registration document
+                        </span>
+                        <label
+                          htmlFor="vendorTax"
+                          className={`flex w-full cursor-pointer items-center justify-between rounded-2xl border px-4 py-3 text-sm text-primary transition ${
+                            errors.tax
+                              ? "border-accent bg-accent/5"
+                              : "border-dashed border-primary/30 bg-primary/5 hover:border-primary/60"
+                          }`}
+                        >
+                          <span className="truncate pr-3">
+                            {selectedTaxName ||
+                              "Upload your file (PDF, PNG, or JPG)"}
+                          </span>
+                          <span className="rounded-full bg-primary/10 px-3 py-1 text-xs font-semibold text-primary">
+                            Browse
+                          </span>
+                          <input
+                            id="vendorTax"
+                            ref={taxInputRef}
+                            type="file"
+                            accept=".png,.jpg,.jpeg,.pdf"
+                            className="sr-only"
+                            onChange={(event) => {
+                              const file = event.target.files?.[0] ?? null;
+                              updateField("tax", file);
+                            }}
+                          />
+                        </label>
+                        {errors.tax && (
+                          <p className="text-sm font-medium text-accent">
+                            {errors.tax}
+                          </p>
+                        )}
+                      </div>
+
+                      <div className="space-y-2">
+                        <span className="block text-sm font-medium text-primary">
                           Logo
                         </span>
                         <label
@@ -558,7 +586,8 @@ export default function SignUp() {
                           }`}
                         >
                           <span className="truncate pr-3">
-                            {selectedLogoName || "Upload an image (PNG, JPG)"}
+                            {selectedLogoName ||
+                              "Upload your file (SVG, PNG, or WebP)"}
                           </span>
                           <span className="rounded-full bg-primary/10 px-3 py-1 text-xs font-semibold text-primary">
                             Browse
@@ -567,7 +596,7 @@ export default function SignUp() {
                             id="vendorLogo"
                             ref={logoInputRef}
                             type="file"
-                            accept="image/*"
+                            accept=".svg,.png,.webp"
                             className="sr-only"
                             onChange={(event) => {
                               const file = event.target.files?.[0] ?? null;
@@ -590,7 +619,7 @@ export default function SignUp() {
                   >
                     {activeRole === "gucian"
                       ? "Create my GUCian account"
-                      : "Apply as a vendor"}
+                      : "Apply as a company"}
                   </button>
 
                   <p className="text-center text-xs text-primary/70">

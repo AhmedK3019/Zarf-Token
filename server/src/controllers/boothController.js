@@ -1,4 +1,5 @@
 import Booth from "../models/Booth.js";
+import mongoose from "mongoose";
 
 export const createBooth = async (req, res) => {
   try {
@@ -16,7 +17,7 @@ export const getBooths = async (req, res) => {
     // Now conditionally populate bazarId only for bazar booths
     booths = await Booth.populate(booths, {
       path: "bazarId",
-      match: { isBazarBooth: true }, // no condition inside populate
+      match: { isBazarBooth: true },
     });
     res.json(booths);
   } catch (err) {
@@ -26,11 +27,11 @@ export const getBooths = async (req, res) => {
 
 export const getBooth = async (req, res) => {
   try {
-    const booth = await Booth.findById(req.params.id).populate("vendorId");
+    let booth = await Booth.findById(req.params.id).populate("vendorId");
+    if (!booth) return res.status(404).json({ error: "Booth not found" });
     if (booth.isBazarBooth) {
       booth = await Booth.populate(booth, "bazarId");
     }
-    if (!booth) return res.status(404).json({ error: "Booth not found" });
     res.json(booth);
   } catch (err) {
     res.status(500).json({ error: err.message });
@@ -39,9 +40,25 @@ export const getBooth = async (req, res) => {
 
 export const getBoothsByBazarId = async (req, res) => {
   try {
+    const { bazaarId } = req.params;
+
+    // Defensive: if someone calls /platform here, return empty list or 400
+    if (!bazaarId)
+      return res.status(400).json({ error: "bazaarId is required" });
+
+    // If bazaarId is the string 'platform' or other sentinel, avoid casting to ObjectId
+    if (bazaarId === "platform") {
+      return res.status(400).json({ error: "Invalid bazaarId" });
+    }
+
+    // ensure valid ObjectId
+    if (!mongoose.Types.ObjectId.isValid(bazaarId)) {
+      return res.status(400).json({ error: "Invalid bazaarId format" });
+    }
+
     const booths = await Booth.find({
-      isbazarbooth: true,
-      bazarId: req.params.bazarId, // or req.params.bazarId if in URL
+      isBazarBooth: true,
+      bazarId: bazaarId,
     })
       .populate("vendorId")
       .populate("bazarId");
@@ -53,7 +70,7 @@ export const getBoothsByBazarId = async (req, res) => {
 
 export const getAllBazarsBooths = async (req, res) => {
   try {
-    const booths = await Booth.find({ isbazarbooth: true })
+    const booths = await Booth.find({ isBazarBooth: true })
       .populate("vendorId")
       .populate("bazarId");
     res.json(booths);
@@ -64,7 +81,7 @@ export const getAllBazarsBooths = async (req, res) => {
 
 export const getAllPlatformBooths = async (req, res) => {
   try {
-    const booths = await Booth.find({ isbazarbooth: false }).populate(
+    const booths = await Booth.find({ isBazarBooth: false }).populate(
       "vendorId"
     );
     res.json(booths);

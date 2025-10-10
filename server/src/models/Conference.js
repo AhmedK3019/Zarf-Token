@@ -14,6 +14,7 @@ const conferenceSchema = new mongoose.Schema({
   sourceoffunding: { type: String, enum: ["External", "GUC"], required: true },
   extrarequiredresources: { type: String },
   createdAt: { type: Date, default: Date.now },
+  type: { type: String, default: "conference" },
 });
 
 const Conference = mongoose.model("Conference", conferenceSchema);

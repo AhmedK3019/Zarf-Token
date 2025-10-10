@@ -8,7 +8,7 @@
 
 </div>
 
-A comprehensive web-based platform designed to streamline the planning, management, and participation of campus events. Zarf Token serves as a centralized hub connecting the events office, students, teaching assistants, staff, faculty, and external vendors to create a seamless event experience across GUC.
+A web-based platform designed to streamline the planning, management, and participation of campus events. Zarf Token serves as a centralized hub connecting the events office, students, teaching assistants, staff, faculty, and external vendors to create a seamless event experience across GUC.
 
 ## Motivation
 
@@ -17,15 +17,13 @@ University events nurtures engagement and professional development, but managing
 Zarf Token solves these challenges by providing a unified platform that simplifies event management, enables seamless registration, facilitates proposals, streamlines participation, and ensures transparent workflows for all stakeholders.
 
 - Simplifies event creation and management for the events office
-- Enables seamless registration and tracking for students, TAs, and staff
-- Facilitates academic event proposals from faculty members
-- Streamlines vendor and external company participation in campus activities
-- Implements proper approval workflows to maintain quality and compliance
-- Creates transparency in event planning and participant validation
+- Enables seamless registration and tracking for all university members
+- Facilitates academic event proposals and vendor participation
+- Implements approval workflows ensuring quality and transparency
 
 ## Build Status
 
-**Current Sprint:** Sprint 1 of 3 (Week 1-3)
+**Current Sprint:** Sprint 1 of 3
 
 **Project Progress:** In Active Development
 
@@ -36,7 +34,7 @@ Zarf Token solves these challenges by providing a unified platform that simplifi
 - Sprint 2
 - Sprint 3
 
-**Status:** The project is currently in its initial development phase. Tokeners are working on establishing the foundational architecture and implementing core system requirements for Sprint 1.
+**Status:** The project is currently in its initial development phase. We are working on establishing the foundational architecture and implementing core system requirements for Sprint 1.
 
 **Known Issues:** TBD
 
@@ -99,16 +97,19 @@ The project uses a carefully selected color palette to ensure visual consistency
 - **MongoDB:-** NoSQL database for flexible data management (Version: TBD)
 - **Express.js:-** Backend web application framework (Version: TBD)
 - **React.js:-** Frontend library for building user interfaces (Version: TBD)
-- **Node.js:-** JavaScript runtime environment (Version: TBD)
+- **Node.js:-** JavaScript runtime environment (Version: 22.16.0)
 
 **Additional Technologies & Libraries:**
 
 **Backend:**
+- TBD
 
 **Frontend:**
+- **react-router-dom** - Routing library for React applications
+- **qrcode** - QR code generation library
+- **lucide-react** - Icon library for React components
 
 **Development Tools:**
-
 - Testing framework (TBD)
 
 ## Features
@@ -157,18 +158,78 @@ We distinguished Zarf Token through comprehensive role-based functionality and a
 
 **Step-by-Step Installation Guide:**
 
-*Detailed installation instructions will be provided here, including:*
+1. **Clone the repository**
+   ```bash
+   git clone [repository-url]
+   cd zarf-token
+   ```
 
-1. Cloning the repository
-2. Installing dependencies for both frontend and backend
-3. Setting up MongoDB database
-4. Configuring environment variables
-5. Running initial database migrations/seeds
-6. Starting development servers
+2. **Install Backend Dependencies**
+   ```bash
+   cd server
+   npm install
+   ```
 
-**Installation Steps:** TBD
+3. **Install Frontend Dependencies**
+   ```bash
+   cd ../ZarfTokenWebApp
+   npm install
+   npm install react-router-dom
+   npm install qrcode
+   npm install lucide-react
+   ```
 
-**Troubleshooting Resources:** Links to common installation issues and solutions will be provided.
+4. **Set up MongoDB database** (Instructions TBD)
+
+5. **Configure environment variables** (Instructions TBD)
+
+6. **Start the Development Servers**
+   
+   Backend:
+   ```bash
+   cd server
+   npm start
+   ```
+   
+   Frontend:
+   ```bash
+   cd ZarfTokenWebApp
+   npm start
+   ```
+
+**Troubleshooting Common Issues:**
+
+If you encounter errors while trying to run the project, follow these steps in order:
+
+1. **First, install dependencies in the frontend (ZarfTokenWebApp):**
+   ```bash
+   cd ZarfTokenWebApp
+   npm install
+   ```
+
+2. **Then, install dependencies in the backend (server):**
+   ```bash
+   cd ../server
+   npm install
+   ```
+
+3. **If you still get errors, try installing react-router-dom explicitly:**
+   ```bash
+   cd ../ZarfTokenWebApp
+   npm install react-router-dom
+   ```
+
+4. **If errors persist, try running the development server anyway** - sometimes the page will render despite warning messages.
+
+5. **Additional troubleshooting steps (if needed):**
+   ```bash
+   # Clear npm cache
+   npm cache clean --force
+   
+   # Delete node_modules and reinstall (in both frontend and backend directories)
+   rm -rf node_modules package-lock.json
+   npm install
+   ```
 
 ## API Reference
 

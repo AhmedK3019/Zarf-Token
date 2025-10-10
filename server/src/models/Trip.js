@@ -15,6 +15,7 @@ const tripSchema = new mongoose.Schema({
     type: [{ type: mongoose.Schema.ObjectId, ref: "User" }],
     default: [],
   },
+  type: { type: String, default: "trip" },
 });
 
 const Trip = mongoose.model("Trip", tripSchema);
