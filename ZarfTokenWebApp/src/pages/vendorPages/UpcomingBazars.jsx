@@ -133,123 +133,140 @@ export default function UpcomingBazars() {
   };
 
   return (
-    <div className="min-h-screen w-full bg-muted px-6 py-10">
-      <div className="mx-auto w-full max-w-7xl">
-        <header className="text-center space-y-3 mb-12 animate-fade-in">
-          <h1 className="text-5xl sm:text-6xl font-black leading-tight text-primary">
-            Bazaar Opportunities
-          </h1>
-          <div className="h-1 w-32 mx-auto rounded-full bg-gradient-to-r from-primary to-secondary animate-pulse"></div>
-          <p className="text-base text-gray-600 max-w-2xl mx-auto leading-relaxed pt-2">
-            Explore upcoming bazaars and find the perfect opportunity for your business.
-          </p>
-        </header>
-        
-        <section className="grid gap-6 lg:grid-cols-2">
-          {loading ? (
-            <>
-              <SkeletonCard />
-              <SkeletonCard />
-            </>
-          ) : error ? (
-            <div className="col-span-full text-center bg-accent/10 border border-accent/20 text-accent p-6 rounded-2xl">
-              {error}
+    <div className="min-h-screen w-full overflow-hidden bg-[#D5CFE1] text-[#1F1B3B]">
+      <div className="relative flex min-h-screen w-full flex-col items-center">
+        <main className="relative z-10 flex w-full flex-1 flex-col items-center px-6 py-8">
+          <div className="w-full max-w-6xl">
+            {/* Header */}
+            <div className="mb-12 text-center">
+              <h1 className="text-4xl font-bold text-[#736CED] sm:text-5xl mb-4">
+                Bazaar Opportunities
+              </h1>
+              <p className="text-lg text-[#312A68] max-w-2xl mx-auto">
+                Explore upcoming bazaars and find the perfect opportunity for your business.
+              </p>
             </div>
-          ) : bazaars.length > 0 ? (
-            bazaars.map((bazaar) => (
-              <article
-                key={bazaar._id}
-                className="relative overflow-hidden rounded-2xl bg-[#FDFBFF] border border-white/40 shadow-lg transition-all duration-300 hover:scale-[1.02] hover:shadow-2xl animate-fade-in border-l-4 border-primary"
-                style={{ animationDelay: `${Math.random() * 200}ms` }}
-              >
-                <div className="relative bg-gradient-to-r from-primary via-primary/90 to-secondary px-6 py-5 text-white">
-                  <div className="relative flex items-start justify-between gap-4">
-                    <div className="flex-1">
-                      <p className="text-xs uppercase tracking-wider text-black/70 font-semibold flex items-center gap-1.5"><MapPin size={14} /> Location</p>
-                      <h3 className="text-lg text-black font-bold mt-1">{bazaar.location}</h3>
-                    </div>
-                    <span className="inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-bold uppercase tracking-wide bg-white/20 text-black border border-white/30 shadow-sm">
-                        <Clock size={12} /> Apply by {formatDate(bazaar.registerdeadline)}
-                    </span>
-                  </div>
-                </div>
-                <div className="px-6 py-6 space-y-4">
-                    <h4 className="text-xl font-bold text-primary flex-1 leading-tight">{bazaar.bazaarname}</h4>
-                    <p className="text-sm leading-relaxed text-gray-700 line-clamp-2">{bazaar.shortdescription}</p>
-                    <div className="grid grid-cols-2 gap-4 text-sm text-gray-600 pt-2">
-                        <div className="flex items-center gap-2">
-                            <Calendar size={14} className="text-primary"/> <strong>Starts:</strong> {formatDateTime(bazaar.startdate, bazaar.starttime)}
-                        </div>
-                        <div className="flex items-center gap-2">
-                            <Calendar size={14} className="text-primary"/> <strong>Ends:</strong> {formatDateTime(bazaar.enddate, bazaar.endtime)}
-                        </div>
-                    </div>
-                    <div className="flex justify-end gap-4 pt-4 border-t border-gray-200/80">
-                         <button
-                            type="button"
-                            onClick={() => handleOpenModal(bazaar)}
-                            className="inline-flex items-center justify-center gap-2 rounded-full px-5 py-2.5 text-base font-semibold transition-all duration-200 bg-white text-primary border-2 border-primary/40 shadow-sm hover:-translate-y-0.5 hover:bg-primary/10"
-                        >
-                            Apply for Booth
-                        </button>
-                    </div>
-                </div>
-              </article>
-            ))
-          ) : (
-             <div className="col-span-full rounded-3xl border-2 border-dashed border-primary/30 bg-[#FDFBFF] px-8 py-16 text-center">
-              <div className="flex flex-col items-center gap-3">
-                <FileText className="w-16 h-16 text-primary/30" />
-                <p className="text-lg font-semibold text-primary/70">No Upcoming Bazaars Found</p>
-                <p className="text-sm text-gray-500">Please check back later for new opportunities.</p>
+            
+            {/* Bazaars Grid */}
+            {loading ? (
+              <div className="text-center py-12">
+                <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-[#736CED]"></div>
+                <p className="mt-4 text-[#312A68]">Loading bazaars...</p>
               </div>
-            </div>
-          )}
-        </section>
+            ) : error ? (
+              <div className="text-center py-12 text-red-500">{error}</div>
+            ) : bazaars.length === 0 ? (
+              <div className="text-center py-12">
+                <FileText className="w-16 h-16 text-[#736CED]/30 mx-auto mb-4" />
+                <p className="text-[#312A68] text-lg">No upcoming bazaars found.</p>
+                <p className="text-sm text-[#312A68]/70 mt-2">Please check back later for new opportunities.</p>
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-12">
+                {bazaars.map((bazaar) => (
+                  <div
+                    key={bazaar._id}
+                    className="bg-white rounded-2xl p-6 shadow-[0_10px_25px_rgba(165,148,249,0.2)] border border-white/50 hover:shadow-[0_15px_35px_rgba(165,148,249,0.3)] transition-all hover:-translate-y-1"
+                  >
+                    {/* Bazaar Type Badge */}
+                    <div className="inline-flex items-center gap-2 rounded-full bg-[#EEE9FF] px-3 py-1 text-xs font-medium text-[#5A4BBA] mb-4">
+                      <span className="h-2 w-2 rounded-full bg-[#6DD3CE]" />
+                      <span>Bazaar</span>
+                    </div>
+
+                    {/* Bazaar Name */}
+                    <h3 className="text-xl font-bold text-[#4C3BCF] mb-3">
+                      {bazaar.bazaarname}
+                    </h3>
+
+                    {/* Bazaar Details */}
+                    <div className="space-y-2 text-sm text-[#312A68]">
+                      <p className="flex items-center gap-2">
+                        <MapPin size={14} className="text-[#736CED]" />
+                        {bazaar.location}
+                      </p>
+
+                      <p className="flex items-center gap-2">
+                        <Calendar size={14} className="text-[#736CED]" />
+                        {formatDateTime(bazaar.startdate, bazaar.starttime)}
+                      </p>
+
+                      <p className="flex items-center gap-2">
+                        <Calendar size={14} className="text-[#736CED]" />
+                        Ends: {formatDateTime(bazaar.enddate, bazaar.endtime)}
+                      </p>
+
+                      <p className="flex items-center gap-2 text-[#E53E3E]">
+                        <Clock size={14} />
+                        Apply by: {formatDate(bazaar.registerdeadline)}
+                      </p>
+                    </div>
+
+                    {/* Short Description */}
+                    <p className="mt-4 text-[#312A68] text-sm leading-relaxed">
+                      {bazaar.shortdescription}
+                    </p>
+
+                    {/* Apply Button */}
+                    <div className="mt-6">
+                      <button
+                        type="button"
+                        onClick={() => handleOpenModal(bazaar)}
+                        className="w-full px-4 py-2 bg-[#736CED] text-white rounded-lg font-semibold hover:bg-[#5A4BBA] transition-all hover:shadow-[0_8px_20px_rgba(115,108,237,0.3)]"
+                      >
+                        Apply for Booth
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        </main>
       </div>
 
       {/* Application Modal */}
       {isModalOpen && selectedBazaar && (
-        <div className="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-50 p-4 animate-fade-in">
-          <div className="bg-white rounded-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+        <div className="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto shadow-[0_25px_50px_rgba(115,108,237,0.3)]">
             <form onSubmit={handleSubmitApplication} className="p-8">
               <div className="flex justify-between items-start mb-6">
                 <div>
-                  <h2 className="text-2xl font-bold text-primary">
+                  <h2 className="text-2xl font-bold text-[#4C3BCF]">
                     Apply to {selectedBazaar.bazaarname}
                   </h2>
-                  <p className="text-sm text-primary/70 mt-1">Fill in your booth details below.</p>
+                  <p className="text-sm text-[#312A68] mt-1">Fill in your booth details below.</p>
                 </div>
-                <button type="button" onClick={handleCloseModal} className="text-gray-400 hover:text-gray-600 text-2xl"><X size={24} /></button>
+                <button type="button" onClick={handleCloseModal} className="text-gray-400 hover:text-[#736CED] text-2xl transition-colors"><X size={24} /></button>
               </div>
 
               <div className="mb-6">
-                <label htmlFor="boothSize" className="block text-sm font-medium text-primary mb-2">
+                <label htmlFor="boothSize" className="block text-sm font-medium text-[#4C3BCF] mb-2">
                   Booth Size
                 </label>
-                <select id="boothSize" name="boothSize" value={applicationData.boothSize} onChange={handleFormChange} className="w-full rounded-md border-gray-300 shadow-sm focus:border-primary focus:ring-primary">
+                <select id="boothSize" name="boothSize" value={applicationData.boothSize} onChange={handleFormChange} className="w-full rounded-lg border-2 border-gray-200 shadow-sm focus:border-[#736CED] focus:ring-[#736CED] text-[#312A68]">
                   <option value="2x2">2x2</option>
                   <option value="4x4">4x4</option>
                 </select>
               </div>
               
               <div className="mb-6">
-                 <label className="block text-sm font-medium text-primary mb-2">
+                 <label className="block text-sm font-medium text-[#4C3BCF] mb-2">
                   Attendees (Max 5)
                 </label>
                 <div className="space-y-4">
                   {applicationData.attendees.map((attendee, index) => (
                     <div key={index} className="flex items-center gap-4">
-                      <input type="text" placeholder={`Attendee ${index + 1} Name`} value={attendee.name} onChange={(e) => handleAttendeeChange(index, "name", e.target.value)} className="flex-1 rounded-md border-gray-300 shadow-sm focus:border-primary focus:ring-primary" required />
-                      <input type="email" placeholder={`Attendee ${index + 1} Email`} value={attendee.email} onChange={(e) => handleAttendeeChange(index, "email", e.target.value)} className="flex-1 rounded-md border-gray-300 shadow-sm focus:border-primary focus:ring-primary" required />
+                      <input type="text" placeholder={`Attendee ${index + 1} Name`} value={attendee.name} onChange={(e) => handleAttendeeChange(index, "name", e.target.value)} className="flex-1 rounded-lg border-2 border-gray-200 shadow-sm focus:border-[#736CED] focus:ring-[#736CED] text-[#312A68]" required />
+                      <input type="email" placeholder={`Attendee ${index + 1} Email`} value={attendee.email} onChange={(e) => handleAttendeeChange(index, "email", e.target.value)} className="flex-1 rounded-lg border-2 border-gray-200 shadow-sm focus:border-[#736CED] focus:ring-[#736CED] text-[#312A68]" required />
                       {applicationData.attendees.length > 1 && (
-                         <button type="button" onClick={() => removeAttendee(index)} className="text-red-500 hover:text-red-700 font-bold p-1 rounded-full"><X size={18}/></button>
+                         <button type="button" onClick={() => removeAttendee(index)} className="text-red-500 hover:text-red-700 font-bold p-1 rounded-full transition-colors"><X size={18}/></button>
                       )}
                     </div>
                   ))}
                 </div>
                 {applicationData.attendees.length < 5 && (
-                  <button type="button" onClick={addAttendee} className="mt-4 text-sm font-semibold text-primary hover:text-secondary">
+                  <button type="button" onClick={addAttendee} className="mt-4 text-sm font-semibold text-[#736CED] hover:text-[#5A4BBA] transition-colors">
                     + Add Attendee
                   </button>
                 )}
@@ -259,13 +276,13 @@ export default function UpcomingBazars() {
                 <button
                   type="button"
                   onClick={handleCloseModal}
-                  className="bg-gray-200 text-gray-800 font-bold py-2 px-6 rounded-full hover:bg-gray-300"
+                  className="bg-gray-200 text-[#312A68] font-semibold py-3 px-6 rounded-lg hover:bg-gray-300 transition-colors"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  className="bg-gray-200 text-gray-800 font-bold py-2 px-6 rounded-full hover:bg-gray-300"
+                  className="bg-[#736CED] text-white font-semibold py-3 px-6 rounded-lg hover:bg-[#5A4BBA] transition-all hover:shadow-[0_8px_20px_rgba(115,108,237,0.3)]"
                 >
                   Submit Application
                 </button>
