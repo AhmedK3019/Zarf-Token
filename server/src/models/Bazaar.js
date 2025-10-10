@@ -9,6 +9,7 @@ const bazaarSchema = new mongoose.Schema({
   location: { type: String, required: true },
   shortdescription: { type: String, required: true },
   registerdeadline: { type: Date, required: true },
+  type: { type: String, default: "bazaar" },
 });
 
 const Bazaar = mongoose.model("Bazaar", bazaarSchema);

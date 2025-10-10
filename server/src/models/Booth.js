@@ -33,6 +33,7 @@ const boothSchema = new mongoose.Schema(
       default: "Pending",
     },
     bazarId: { type: mongoose.Schema.Types.ObjectId, ref: "Bazar" },
+    type: { type: String, default: "booth" },
   },
   { timestamps: true }
 );
