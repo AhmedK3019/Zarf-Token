@@ -46,7 +46,7 @@ const loginAdmin = async (req, res, next) => {
     if (!flag) {
       return res.status(400).json({ message: "Invalid password" });
     }
-    const token = await createToken(body);
+    const token = createToken(body);
     const admin = {
       id: body._id.String(),
       name: body.firstname,
@@ -97,7 +97,7 @@ const getAdmin = async (req, res, next) => {
   }
 };
 
-const createToken = async (body) => {
+const createToken = (body) => {
   try {
     let payload = {
       id: body._id.String(),
