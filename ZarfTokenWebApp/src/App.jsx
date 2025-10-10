@@ -8,6 +8,8 @@ import MainDashboardUser from "./pages/userPages/mainDashboardUser";
 import MainDashboardVendor from "./pages/vendorPages/mainDashboardVendor";
 import MainDashboardAdmin from "./pages/adminPages/mainDashboardAdmin";
 import SignUp from "./pages/signUp";
+import CreateTrip from "./pages/tripPages/createTrip";
+import { AdminProvider } from "./context/AdminContext";
 import "./App.css";
 
 function App() {
@@ -28,7 +30,16 @@ function App() {
           element={<MainDashboardEventsOffice />}
         />
         <Route path="/dashboard/vendor/*" element={<MainDashboardVendor />} />
-        <Route path="/dashboard/admin/*" element={<MainDashboardAdmin />} />
+        <Route
+          path="/dashboard/admin/*"
+          element={
+            <AdminProvider>
+              <MainDashboardAdmin />
+            </AdminProvider>
+          }
+        />
+
+        <Route path="/createTrip" element={<CreateTrip />} />
       </Routes>
     </Router>
   );

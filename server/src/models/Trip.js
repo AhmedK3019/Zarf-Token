@@ -8,7 +8,7 @@ const tripSchema = new mongoose.Schema({
   endtime: { type: String, required: true },
   location: { type: String, required: true },
   shortdescription: { type: String, required: true },
-  registerdeadline: { type: Date, required: true },
+  registerationdeadline: { type: Date, required: true },
   price: { type: Number, required: true },
   capacity: { type: Number, required: true },
   attendees: {

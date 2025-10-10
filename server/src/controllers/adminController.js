@@ -1,5 +1,7 @@
 import Admin from "../models/Admin.js";
 import Joi from "joi";
+import jwt from "jsonwebtoken";
+
 // vlidation schemas
 const adminSchema = Joi.object({
   firstname: Joi.string().min(3).max(13).required(),
@@ -36,15 +38,22 @@ const createAdmin = async (req, res, next) => {
 const loginAdmin = async (req, res, next) => {
   try {
     const { email, password } = req.body;
-    const admin = await Admin.findOne({ email });
-    if (!admin) {
+    const body = await Admin.findOne({ email });
+    if (!body) {
       return res.status(400).json({ message: "Invalid email" });
     }
-    const flag = await admin.validatePassword(password);
+    const flag = await body.validatePassword(password);
     if (!flag) {
       return res.status(400).json({ message: "Invalid password" });
     }
-    return res.json({ message: "Login successful", admin });
+    const token = await createToken(body);
+    const admin = {
+      id: body._id.String(),
+      name: body.firstname,
+      email: body.email,
+      role: body.role,
+    };
+    return res.json({ message: "Login successful", admin, token });
   } catch (error) {
     next(error);
   }
@@ -85,6 +94,22 @@ const getAdmin = async (req, res, next) => {
     return res.json({ admin });
   } catch (error) {
     next(error);
+  }
+};
+
+const createToken = async (body) => {
+  try {
+    let payload = {
+      id: body._id.String(),
+      name: body.firstname,
+      role: body.role,
+    };
+    const token = jwt.verify(payload, process.env.JWT_SECRET, {
+      expiresIn: "7d",
+    });
+    return token;
+  } catch (error) {
+    throw new Error(error);
   }
 };
 

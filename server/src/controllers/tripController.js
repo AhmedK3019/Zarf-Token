@@ -9,7 +9,7 @@ const TripSchema = Joi.object({
   endtime: Joi.string().required(),
   location: Joi.string().required(),
   shortdescription: Joi.string().required(),
-  registerdeadline: Joi.date().required(),
+  registerationdeadline: Joi.date().required(),
   price: Joi.number().required(),
   capacity: Joi.number().required(),
   attendees: Joi.array().default([]),
@@ -17,6 +17,7 @@ const TripSchema = Joi.object({
 
 const createTrip = async (req, res, next) => {
   try {
+    console.log(req.body);
     const { value, error } = TripSchema.validate(req.body);
     if (error) return res.json({ message: error.message });
     const doc = await Trip.create(value);

@@ -1,27 +1,33 @@
-import { createContext, useState, useCallback, useMemo } from "react";
+import { createContext, useState, useCallback } from "react";
+import api from "../services/api";
 const AdminContext = createContext(null);
 
 const AdminProvider = ({ children }) => {
   const [admin, setAdmin] = useState(null);
 
-  const loginAdmin = useCallback((adminData) => {
-    setAdmin(adminData);
+  const createAdmin = useCallback(async (adminData) => {
+    const res = await api.post("/admin/createAdmin", adminData);
+    localStorage.setItem("token", res.data.token);
+    setAdmin(res.data.admin);
+  }, []);
+  const loginAdmin = useCallback(async (adminData) => {
+    const res = await api.post("/admin/login", adminData);
+    localStorage.setItem("token", res.data.token);
+    setAdmin(res.data.admin);
   }, []);
 
   const logoutAdmin = useCallback(() => {
+    localStorage.removeItem("token");
     setAdmin(null);
+    window.location.href = "/login";
   }, []);
-  const value = useMemo(
-    () => ({
-      admin,
-      loginAdmin,
-      logoutAdmin,
-    }),
-    [admin, loginAdmin, logoutAdmin]
-  );
 
   return (
-    <AdminContext.Provider value={value}>{children}</AdminContext.Provider>
+    <AdminContext.Provider
+      value={{ createAdmin, loginAdmin, logoutAdmin, admin }}
+    >
+      {children}
+    </AdminContext.Provider>
   );
 };
 
