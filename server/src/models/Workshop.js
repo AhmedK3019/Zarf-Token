@@ -20,6 +20,7 @@ const workshopSchema = new mongoose.Schema({
     default: [],
   },
   extrarequiredfunding: { type: Number, required: true },
+  type: { type: String, default: "workshop" },
 });
 
 const Workshop = mongoose.model("Workshop", workshopSchema);
