@@ -22,6 +22,10 @@ import allUsersRoutes from "./routes/allUsersRoutes.js";
 import registerRequestRoutes from "./routes/registerRequestRoutes.js";
 import tripRoutes from "./routes/tripRoutes.js";
 import bazaarRoutes from "./routes/bazaarRoutes.js";
+import vendorRequestRoutes from "./routes/vendorRequestRoutes.js";
+import conferenceRoutes from "./routes/conferenceRoutes.js";
+import workshopRoutes from "./routes/workshopRoutes.js";
+import allEventsRoutes from "./routes/allEventsRoutes.js";
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
@@ -45,10 +49,14 @@ app.use("/api/user", userRoutes);
 app.use("/api/admin", adminRoutes);
 app.use("/api/eventsOffice", eventsOfficeRoutes);
 app.use("/api/vendor", vendorRoutes);
+app.use("/api/vendorRequests", vendorRequestRoutes);
 app.use("/api/allUsers", allUsersRoutes);
 app.use("/api/registerRequests", registerRequestRoutes);
 app.use("/api/trips", tripRoutes);
 app.use("/api/bazaars", bazaarRoutes);
+app.use("/api/conferences", conferenceRoutes);
+app.use("/api/workshops", workshopRoutes);
+app.use("/api/allEvents", allEventsRoutes);
 cron.schedule("0 0 * * *", () => {
   // runs every day at midnight
   console.log("Updating court slots...");
@@ -61,14 +69,65 @@ app.use("/api/auth", authRoutes);
 
 app.get("/", (req, res) => res.send("API running 🚀"));
 
-const PORT = process.env.PORT || 5000;
+const PORT = process.env.PORT || 3000;
 const connectDB = async () => {
   try {
     const conn = await mongoose.connect(process.env.MONGO_URI);
     console.log(`MongoDB Connected: ${conn.connection.host}`);
+    // short migration: remove legacy unique index on `username` if it exists
+    try {
+      const userCollection = mongoose.connection.collection("users");
+      const indexes = await userCollection.indexes();
+      const usernameIndex = indexes.find((ix) => {
+        // index key may be { username: 1 } and name may be 'username_1'
+        return (
+          (ix.name && ix.name === "username_1") || (ix.key && ix.key.username)
+        );
+      });
+      if (usernameIndex) {
+        console.log(
+          "Found legacy username index on users collection. Attempting to drop it to avoid duplicate-key errors."
+        );
+        try {
+          await userCollection.dropIndex(usernameIndex.name || "username_1");
+          console.log("Dropped legacy username index.");
+        } catch (dropErr) {
+          console.error(
+            "Failed to drop legacy username index:",
+            dropErr.message || dropErr
+          );
+        }
+      }
+    } catch (ixErr) {
+      console.error(
+        "Error checking/dropping legacy username index:",
+        ixErr.message || ixErr
+      );
+    }
     app.listen(PORT, () => {
       console.log(`API listening on http://localhost:${PORT}`);
     });
+
+    // import mailer after dotenv has loaded to ensure credentials are available
+    try {
+      const mailer = await import("./utils/mailer.js");
+      const transporter = mailer.transporter;
+      transporter.verify((error, success) => {
+        if (error) {
+          console.error(
+            "Mail transporter verification failed:",
+            error && error.message ? error.message : error
+          );
+        } else {
+          console.log("Mail transporter is ready to send messages");
+        }
+      });
+    } catch (mailErr) {
+      console.error(
+        "Error during transporter.verify():",
+        mailErr && mailErr.message ? mailErr.message : mailErr
+      );
+    }
   } catch (error) {
     console.error("MongoDB connection error:", error);
     process.exit(1);

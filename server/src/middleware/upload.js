@@ -28,13 +28,23 @@ const storage = multer.diskStorage({
   },
 });
 
-// File filter (optional: only pdf/images)
+// File filter (optional: only pdf/images/svg/webp)
 const fileFilter = (req, file, cb) => {
-  const allowedTypes = ["image/jpeg", "image/png", "application/pdf"];
+  // include svg and webp to match frontend allowed types
+  const allowedTypes = [
+    "image/jpeg",
+    "image/png",
+    "image/jpg",
+    "image/svg+xml",
+    "image/webp",
+    "application/pdf",
+  ];
   if (allowedTypes.includes(file.mimetype)) {
     cb(null, true);
   } else {
-    cb(new Error("Invalid file type. Only JPG, PNG, PDF allowed."));
+    cb(
+      new Error("Invalid file type. Only JPG, PNG, SVG, WebP or PDF allowed.")
+    );
   }
 };
 

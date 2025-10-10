@@ -1,6 +1,8 @@
 import { useState, useEffect } from "react";
-import { useParams, Link } from "react-router-dom";
+import { useParams, Link, useLocation } from "react-router-dom";
 import Navbar from "../components/Navbar";
+import api from "../services/api";
+import { useUserContext } from "../context/UserContext";
 
 const AllEvents = () => {
   const { category } = useParams();
@@ -37,7 +39,7 @@ const AllEvents = () => {
         facultyresponsible: "Dr. Smith",
         professorsparticipating: ["Dr. Smith", "Prof. Johnson"],
         registrationdeadline: "2024-03-10T23:59:00",
-        type: "workshops"
+        type: "workshops",
       },
       {
         id: 2,
@@ -50,8 +52,8 @@ const AllEvents = () => {
         facultyresponsible: "Dr. Brown",
         professorsparticipating: ["Dr. Brown", "Prof. Davis"],
         registrationdeadline: "2024-03-15T23:59:00",
-        type: "workshops"
-      }
+        type: "workshops",
+      },
     ],
     bazaars: [
       {
@@ -66,8 +68,8 @@ const AllEvents = () => {
         booths: [
           { id: 1, name: "Artisan Crafts", vendor: "Local Artisans Group" },
           { id: 2, name: "Food Corner", vendor: "Campus Catering" },
-          { id: 3, name: "Handmade Jewelry", vendor: "Creative Designs" }
-        ]
+          { id: 3, name: "Handmade Jewelry", vendor: "Creative Designs" },
+        ],
       },
       {
         id: 2,
@@ -80,9 +82,9 @@ const AllEvents = () => {
         type: "bazaars",
         booths: [
           { id: 4, name: "Pottery Display", vendor: "Clay Masters" },
-          { id: 5, name: "Textile Arts", vendor: "Weaver's Guild" }
-        ]
-      }
+          { id: 5, name: "Textile Arts", vendor: "Weaver's Guild" },
+        ],
+      },
     ],
     trips: [
       {
@@ -94,7 +96,7 @@ const AllEvents = () => {
         enddateandtime: "2024-03-30T19:00:00",
         shortdescription: "Day trip to explore scenic mountain trails",
         registrationdeadline: "2024-03-25T23:59:00",
-        type: "trips"
+        type: "trips",
       },
       {
         id: 2,
@@ -105,8 +107,8 @@ const AllEvents = () => {
         enddateandtime: "2024-04-12T15:00:00",
         shortdescription: "Guided tour of the city's premier art museum",
         registrationdeadline: "2024-04-07T23:59:00",
-        type: "trips"
-      }
+        type: "trips",
+      },
     ],
     conferences: [
       {
@@ -117,7 +119,7 @@ const AllEvents = () => {
         shortdescription: "Exploring the future of technology and innovation",
         fullagenda: "Keynotes, panels, workshops, and networking sessions",
         conferencewebsitelink: "https://example.com/tech-summit",
-        type: "conferences"
+        type: "conferences",
       },
       {
         id: 2,
@@ -127,8 +129,8 @@ const AllEvents = () => {
         shortdescription: "Discussing sustainable practices for the future",
         fullagenda: "Expert talks, case studies, and solution workshops",
         conferencewebsitelink: "https://example.com/sustainability-conf",
-        type: "conferences"
-      }
+        type: "conferences",
+      },
     ],
     booths: [
       {
@@ -139,7 +141,7 @@ const AllEvents = () => {
         vendor: "University Career Center",
         hours: "Mon-Fri 9AM-5PM",
         contact: "career@university.edu",
-        type: "booths"
+        type: "booths",
       },
       {
         id: 2,
@@ -149,7 +151,7 @@ const AllEvents = () => {
         vendor: "University Library",
         hours: "Mon-Thu 10AM-8PM, Fri 10AM-5PM",
         contact: "researchhelp@university.edu",
-        type: "booths"
+        type: "booths",
       },
       {
         id: 3,
@@ -159,20 +161,20 @@ const AllEvents = () => {
         vendor: "University IT Department",
         hours: "24/7",
         contact: "itsupport@university.edu",
-        type: "booths"
-      }
-    ]
+        type: "booths",
+      },
+    ],
   };
 
   // Simulate API call for events
   const fetchEvents = async (category) => {
     setLoading(true);
     setError(null);
-    
+
     try {
       // Simulate API delay
-      await new Promise(resolve => setTimeout(resolve, 500));
-      
+      await new Promise((resolve) => setTimeout(resolve, 500));
+
       if (category === "all") {
         // Combine all events
         const allEvents = Object.values(mockEvents).flat();
@@ -194,16 +196,16 @@ const AllEvents = () => {
   const fetchPlatformBooths = async () => {
     setLoading(true);
     setError(null);
-    
+
     try {
       // Simulate API delay
-      await new Promise(resolve => setTimeout(resolve, 500));
-      
+      await new Promise((resolve) => setTimeout(resolve, 500));
+
       // This would be your actual API call
       // const response = await fetch('/api/booths/platform');
       // const data = await response.json();
       // setEvents(data);
-      
+
       setEvents(mockEvents.booths);
       setFilteredEvents(mockEvents.booths);
     } catch (err) {
@@ -217,14 +219,14 @@ const AllEvents = () => {
   const fetchBazaarBooths = async (bazaarId) => {
     try {
       // Simulate API delay
-      await new Promise(resolve => setTimeout(resolve, 300));
-      
+      await new Promise((resolve) => setTimeout(resolve, 300));
+
       // This would be your actual API call
       // const response = await fetch(`/api/bazaars/${bazaarId}/booths`);
       // const data = await response.json();
       // setBazaarBooths(data);
-      
-      const bazaar = mockEvents.bazaars.find(b => b.id === bazaarId);
+
+      const bazaar = mockEvents.bazaars.find((b) => b.id === bazaarId);
       setBazaarBooths(bazaar?.booths || []);
     } catch (err) {
       setError("Failed to fetch bazaar booths. Please try again.");
@@ -314,20 +316,78 @@ const AllEvents = () => {
   };
 
   const formatDate = (dateString) => {
-    return new Date(dateString).toLocaleDateString('en-US', {
-      weekday: 'long',
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit'
+    return new Date(dateString).toLocaleDateString("en-US", {
+      weekday: "long",
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
     });
+  };
+
+  // detect if current user has privilege to delete events
+  const { user } = useUserContext();
+  const location = useLocation();
+  const userIsPrivileged = (() => {
+    const role = user?.role || "";
+    const fromRole =
+      role.toLowerCase().includes("admin") ||
+      role.toLowerCase().includes("event");
+    const fromPath =
+      location.pathname.toLowerCase().includes("admin") ||
+      location.pathname.toLowerCase().includes("eventsoffice") ||
+      location.pathname.toLowerCase().includes("events-office") ||
+      location.pathname.toLowerCase().includes("events-office");
+    return fromRole || fromPath;
+  })();
+
+  const handleDeleteEvent = async (event) => {
+    const ok = window.confirm(
+      `Delete ${
+        event.name || event.bazaarname || "item"
+      }? This action cannot be undone.`
+    );
+    if (!ok) return;
+
+    // Determine endpoint by type
+    try {
+      if (event.type === "bazaars") {
+        // real backend endpoint
+        await api.delete(`/bazaars/deleteBazaar/${event.id}`);
+      } else if (event.type === "booths") {
+        await api.delete(`/booths/${event.id}`);
+      } else if (event.type === "conferences") {
+        await api.delete(`/conferences/deleteConference/${event.id}`);
+      } else {
+        // Not deletable by this rule
+        throw new Error("Not deletable");
+      }
+      // if API succeeded, remove from local state
+      setEvents((prev) =>
+        prev.filter((e) => !(e.id === event.id && e.type === event.type))
+      );
+
+      // close modal if deleting selected bazaar
+      if (showBoothsModal && selectedBazaar && selectedBazaar.id === event.id) {
+        closeBoothsModal();
+      }
+    } catch (err) {
+      // If backend not available or call failed, fallback to local removal for mock data
+      console.error("Delete API error:", err?.response || err?.message || err);
+      // If the app uses mock data (no backend), just remove locally
+      setEvents((prev) =>
+        prev.filter((e) => !(e.id === event.id && e.type === event.type))
+      );
+      if (showBoothsModal && selectedBazaar && selectedBazaar.id === event.id) {
+        closeBoothsModal();
+      }
+    }
   };
 
   return (
     <div className="min-h-screen w-full overflow-hidden bg-[#D5CFE1] text-[#1F1B3B]">
       <div className="relative flex min-h-screen w-full flex-col items-center">
-        
         <main className="relative z-10 flex w-full flex-1 flex-col items-center px-6 py-8">
           <div className="w-full max-w-6xl">
             {/* Header */}
@@ -336,7 +396,8 @@ const AllEvents = () => {
                 Campus Events & Booths
               </h1>
               <p className="text-lg text-[#312A68] max-w-2xl mx-auto">
-                Discover amazing events and platform booths across campus. Filter by category to find exactly what you're looking for.
+                Discover amazing events and platform booths across campus.
+                Filter by category to find exactly what you're looking for.
               </p>
             </div>
 
@@ -397,7 +458,9 @@ const AllEvents = () => {
             {loading ? (
               <div className="text-center py-12">
                 <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-[#736CED]"></div>
-                <p className="mt-4 text-[#312A68]">Loading {selectedCategory}...</p>
+                <p className="mt-4 text-[#312A68]">
+                  Loading {selectedCategory}...
+                </p>
               </div>
             ) : error ? (
               <div className="text-center py-12 text-red-500">
@@ -447,7 +510,7 @@ const AllEvents = () => {
                           {event.location}
                         </p>
                       )}
-                      
+
                       {event.price && (
                         <p className="flex items-center gap-2">
                           <span>💰</span>
@@ -514,14 +577,14 @@ const AllEvents = () => {
                         </a>
                       )}
 
-                      {event.type === 'booths' && event.contact && (
+                      {event.type === "booths" && event.contact && (
                         <p className="text-xs text-[#312A68]/70">
                           Contact: {event.contact}
                         </p>
                       )}
 
                       {/* View Booths Button for Bazaars */}
-                      {event.type === 'bazaars' && (
+                      {event.type === "bazaars" && (
                         <button
                           onClick={() => handleViewBooths(event)}
                           className="mt-2 text-xs bg-[#736CED] text-white px-3 py-1 rounded-full hover:bg-[#5A4BBA] transition-colors"
@@ -529,6 +592,20 @@ const AllEvents = () => {
                           View Booths ({event.booths?.length || 0})
                         </button>
                       )}
+                      {/* Delete button for privileged users for bazaars/booths/conferences */}
+                      {userIsPrivileged &&
+                        (event.type === "bazaars" ||
+                          event.type === "booths" ||
+                          event.type === "conferences") && (
+                          <div className="mt-3">
+                            <button
+                              onClick={() => handleDeleteEvent(event)}
+                              className="text-xs bg-rose-50 text-rose-700 px-3 py-1 rounded-full hover:bg-rose-100 transition-colors"
+                            >
+                              Delete
+                            </button>
+                          </div>
+                        )}
                     </div>
                   </div>
                 ))}
@@ -540,7 +617,7 @@ const AllEvents = () => {
         <footer className="relative z-10 w-full px-6 py-6 text-center text-sm text-[#312A68]/80">
           {new Date().getFullYear()} Zarf Token. All rights reserved.
         </footer>
-        
+
         <div className="pointer-events-none absolute bottom-[-12%] left-1/2 h-64 w-[130%] -translate-x-1/2 rounded-[50%] bg-gradient-to-r from-[#736CED] via-[#A594F9] to-[#6DD3CE] opacity-70 -z-10" />
       </div>
 
@@ -560,7 +637,7 @@ const AllEvents = () => {
                   ×
                 </button>
               </div>
-              
+
               <p className="text-[#312A68] mb-6">
                 {selectedBazaar.shortdescription}
               </p>

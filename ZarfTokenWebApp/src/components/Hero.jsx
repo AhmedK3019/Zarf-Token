@@ -1,23 +1,39 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import EyeIcon from "./EyeIcon";
+import api from "../services/api";
 
 const roleRoutes = {
-  student: "/dashboard/student",
-  faculty: "/dashboard/faculty",
-  staff: "/dashboard/staff",
-  vendor: "/dashboard/vendor",
   admin: "/dashboard/admin",
+  company: "/dashboard/vendor",
+  eventsOffice: "/dashboard/eventsOffice",
+  user: "/dashboard/user",
 };
 
 const resolveRoleRoute = (email) => {
+  const user = api.post("/allUsers/login", { email });
+  // logic to determine role based on user.role
   if (!email) return null;
   const normalized = email.toLowerCase();
-  if (normalized.includes("admin")) return roleRoutes.admin;
-  if (normalized.includes("faculty") || normalized.endsWith("@faculty.edu")) return roleRoutes.faculty;
-  if (normalized.includes("staff") || normalized.endsWith("@staff.edu")) return roleRoutes.staff;
-  if (normalized.includes("vendor") || normalized.endsWith("@vendors.com")) return roleRoutes.vendor;
-  if (normalized.includes("student") || normalized.endsWith("@students.edu")) return roleRoutes.student;
+  const gucDomains = ["@guc.edu.eg", "@student.guc.edu.eg"];
+  const isGucEmail = gucDomains.some((domain) => normalized.endsWith(domain));
+
+  if (isGucEmail && normalized.includes("admin")) return roleRoutes.admin;
+  if (
+    normalized.includes("events") &&
+    (normalized.includes("office") || normalized.includes("officer")) &&
+    isGucEmail
+  ) {
+    return roleRoutes.eventsOffice;
+  }
+  if (
+    normalized.includes("company") ||
+    normalized.includes("vendor") ||
+    normalized.endsWith("@vendors.com")
+  ) {
+    return roleRoutes.company;
+  }
+  if (isGucEmail) return roleRoutes.user;
   return null;
 };
 
@@ -46,7 +62,8 @@ const Hero = () => {
 
     const targetRoute = resolveRoleRoute(email);
     if (email.trim() && !targetRoute) {
-      nextErrors.role = "We couldn't determine your dashboard. Please use your campus email.";
+      nextErrors.role =
+        "We couldn't determine your dashboard. Please use your campus email.";
     }
 
     setErrors(nextErrors);
@@ -79,8 +96,9 @@ const Hero = () => {
             GUC x Zarf Token
           </h1>
           <p className="text-base text-primary/80 sm:text-lg">
-            From planning to participation, Zarf Token keeps your community synced. Instant registrations, real-time
-            insights, and automated engagement at your fingertips.
+            From planning to participation, Zarf Token keeps your community
+            synced. Instant registrations, real-time insights, and automated
+            engagement at your fingertips.
           </p>
         </div>
 
@@ -90,7 +108,10 @@ const Hero = () => {
               <form className="space-y-6" onSubmit={handleSubmit}>
                 <div className="space-y-4">
                   <div className="space-y-2">
-                    <label htmlFor="email" className="block text-sm font-medium text-primary">
+                    <label
+                      htmlFor="email"
+                      className="block text-sm font-medium text-primary"
+                    >
                       Email
                     </label>
                     <input
@@ -101,10 +122,17 @@ const Hero = () => {
                       onChange={(event) => setEmail(event.target.value)}
                       className={`w-full rounded-2xl border px-4 py-3 text-sm text-primary shadow-inner transition focus:outline-none focus:ring-2 ${emailClassName}`}
                     />
-                    {errors.email && <p className="text-sm font-medium text-accent">{errors.email}</p>}
+                    {errors.email && (
+                      <p className="text-sm font-medium text-accent">
+                        {errors.email}
+                      </p>
+                    )}
                   </div>
                   <div className="space-y-2">
-                    <label htmlFor="password" className="block text-sm font-medium text-primary">
+                    <label
+                      htmlFor="password"
+                      className="block text-sm font-medium text-primary"
+                    >
                       Password
                     </label>
                     <div className="relative">
@@ -124,15 +152,25 @@ const Hero = () => {
                       >
                         <EyeIcon visible={isPasswordVisible} />
                         <span className="sr-only">
-                          {isPasswordVisible ? "Hide password" : "Show password"}
+                          {isPasswordVisible
+                            ? "Hide password"
+                            : "Show password"}
                         </span>
                       </button>
                     </div>
-                    {errors.password && <p className="text-sm font-medium text-accent">{errors.password}</p>}
+                    {errors.password && (
+                      <p className="text-sm font-medium text-accent">
+                        {errors.password}
+                      </p>
+                    )}
                   </div>
                 </div>
 
-                {errors.role && <p className="text-sm font-medium text-accent">{errors.role}</p>}
+                {errors.role && (
+                  <p className="text-sm font-medium text-accent">
+                    {errors.role}
+                  </p>
+                )}
 
                 <button
                   type="submit"
@@ -141,16 +179,15 @@ const Hero = () => {
                   Sign in
                 </button>
 
-                <p className="text-center text-sm text-primary">Not a member?</p>
-                <div className="flex items-center justify-center gap-4 text-sm font-semibold text-primary">
-                  <Link to="/signup" className="text-secondary hover:text-primary">
-                    Sign up as a GUCian
+                <p className="text-center text-sm text-primary">
+                  Not a member?{" "}
+                  <Link
+                    to="/signup"
+                    className="font-semibold text-secondary hover:text-primary"
+                  >
+                    Sign up
                   </Link>
-                  <span className="text-primary font-extrabold">|</span>
-                  <Link to="/signup?vendor=true" className="text-secondary hover:text-primary">
-                    Sign up as a Vendor
-                  </Link>
-                </div>
+                </p>
               </form>
             </div>
           </div>

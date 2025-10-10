@@ -7,7 +7,7 @@ import VendorRequests from "./VendorRequests";
 import LoyaltyVendors from "./LoyaltyVendors";
 import AllUsers from "./AllUsers";
 import AddAdmin from "./AddAdminOrEventsOffice";
-import EventsOffice from "./EventsOffice";
+import AllAdmins from "./AllAdminsAndOfficers";
 
 const mainDashboardAdmin = () => {
   return (
@@ -15,6 +15,7 @@ const mainDashboardAdmin = () => {
       <NavbarAdmin />
       <main className="max-w-5xl mx-auto mt-6 px-4">
         <Routes>
+          <Route index element={<Notifications />} />
           <Route path="/notifications" element={<Notifications />} />
           <Route path="/all-events" element={<AllEvents />} />
           <Route path="/signup-requests" element={<SignUpRequests />} />
@@ -22,7 +23,7 @@ const mainDashboardAdmin = () => {
           <Route path="/loyalty-vendors" element={<LoyaltyVendors />} />
           <Route path="/all-users" element={<AllUsers />} />
           <Route path="/add-admin" element={<AddAdmin />} />
-          <Route path="/events-office" element={<EventsOffice />} />
+          <Route path="/all-admins" element={<AllAdmins />} />
         </Routes>
       </main>
     </div>
