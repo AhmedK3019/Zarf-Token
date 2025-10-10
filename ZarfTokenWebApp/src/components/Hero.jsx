@@ -3,21 +3,33 @@ import { Link, useNavigate } from "react-router-dom";
 import EyeIcon from "./EyeIcon";
 
 const roleRoutes = {
-  student: "/dashboard/student",
-  faculty: "/dashboard/faculty",
-  staff: "/dashboard/staff",
-  vendor: "/dashboard/vendor",
   admin: "/dashboard/admin",
+  vendor: "/dashboard/vendor",
+  eventsOffice: "/dashboard/eventsOffice",
+  user: "/dashboard/user",
 };
 
 const resolveRoleRoute = (email) => {
   if (!email) return null;
   const normalized = email.toLowerCase();
-  if (normalized.includes("admin")) return roleRoutes.admin;
-  if (normalized.includes("faculty") || normalized.endsWith("@faculty.edu")) return roleRoutes.faculty;
-  if (normalized.includes("staff") || normalized.endsWith("@staff.edu")) return roleRoutes.staff;
-  if (normalized.includes("vendor") || normalized.endsWith("@vendors.com")) return roleRoutes.vendor;
-  if (normalized.includes("student") || normalized.endsWith("@students.edu")) return roleRoutes.student;
+  const gucDomains = ["@guc.edu.eg", "@guc.student.edu.eg"];
+  const isGucEmail = gucDomains.some((domain) => normalized.endsWith(domain));
+
+  if (!isGucEmail && normalized.includes("admin")) return roleRoutes.admin;
+  if (
+    !isGucEmail &&
+    normalized.includes("events") &&
+    (normalized.includes("office") || normalized.includes("officer"))
+  ) {
+    return roleRoutes.eventsOffice;
+  }
+  if (
+    !isGucEmail &&
+    (normalized.includes("vendor") || normalized.endsWith("@vendors.com"))
+  ) {
+    return roleRoutes.vendor;
+  }
+  if (isGucEmail) return roleRoutes.user;
   return null;
 };
 
