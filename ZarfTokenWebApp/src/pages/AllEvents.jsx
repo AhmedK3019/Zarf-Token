@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { useParams, Link, useLocation } from "react-router-dom";
 import Navbar from "../components/Navbar";
 import api from "../services/api";
-import { useUserContext } from "../context/UserContext";
+// import { useUserContext } from "../context/UserContext";
 
 const AllEvents = () => {
   const { category } = useParams();
@@ -39,7 +39,8 @@ const AllEvents = () => {
         facultyresponsible: "Dr. Smith",
         professorsparticipating: ["Dr. Smith", "Prof. Johnson"],
         registrationdeadline: "2024-03-10T23:59:00",
-        type: "workshops",
+        type: "workshop",
+        attendees: [{ id: 1, name: "Alice Johnson" }],
       },
       {
         id: 2,
@@ -52,7 +53,8 @@ const AllEvents = () => {
         facultyresponsible: "Dr. Brown",
         professorsparticipating: ["Dr. Brown", "Prof. Davis"],
         registrationdeadline: "2024-03-15T23:59:00",
-        type: "workshops",
+        type: "workshop",
+        attendees: [],
       },
     ],
     bazaars: [
@@ -64,7 +66,7 @@ const AllEvents = () => {
         enddateandtime: "2024-03-25T17:00:00",
         shortdescription: "Annual spring festival with food and crafts",
         registrationdeadline: "2024-03-20T23:59:00",
-        type: "bazaars",
+        type: "bazaar",
         booths: [
           { id: 1, name: "Artisan Crafts", vendor: "Local Artisans Group" },
           { id: 2, name: "Food Corner", vendor: "Campus Catering" },
@@ -79,7 +81,7 @@ const AllEvents = () => {
         enddateandtime: "2024-04-05T16:00:00",
         shortdescription: "Local artisans showcasing their work",
         registrationdeadline: "2024-03-30T23:59:00",
-        type: "bazaars",
+        type: "bazaar",
         booths: [
           { id: 4, name: "Pottery Display", vendor: "Clay Masters" },
           { id: 5, name: "Textile Arts", vendor: "Weaver's Guild" },
@@ -97,6 +99,7 @@ const AllEvents = () => {
         shortdescription: "Day trip to explore scenic mountain trails",
         registrationdeadline: "2024-03-25T23:59:00",
         type: "trips",
+        attendees: [{ id: 1, name: "Alice Johnson" }],
       },
       {
         id: 2,
@@ -108,6 +111,7 @@ const AllEvents = () => {
         shortdescription: "Guided tour of the city's premier art museum",
         registrationdeadline: "2024-04-07T23:59:00",
         type: "trips",
+        attendees: [{ id: 1, name: "Alice Johnson" }],
       },
     ],
     conferences: [
@@ -236,50 +240,52 @@ const AllEvents = () => {
   // Search function
   const handleSearch = (searchValue) => {
     setSearchTerm(searchValue);
-    
+
     if (!searchValue.trim()) {
       setFilteredEvents(events);
       return;
     }
 
     const lowercasedSearch = searchValue.toLowerCase().trim();
-    
-    const filtered = events.filter(event => {
+
+    const filtered = events.filter((event) => {
       // Search in event name
       if (event.name?.toLowerCase().includes(lowercasedSearch)) {
         return true;
       }
-      
+
       // Search in faculty responsible
       if (event.facultyresponsible?.toLowerCase().includes(lowercasedSearch)) {
         return true;
       }
-      
+
       // Search in professors participating array
-      if (event.professorsparticipating?.some(prof => 
-        prof.toLowerCase().includes(lowercasedSearch)
-      )) {
+      if (
+        event.professorsparticipating?.some((prof) =>
+          prof.toLowerCase().includes(lowercasedSearch)
+        )
+      ) {
         return true;
       }
-      
+
       // Search in vendor name for booths
       if (event.vendor?.toLowerCase().includes(lowercasedSearch)) {
         return true;
       }
-      
+
       // Search in location
       if (event.location?.toLowerCase().includes(lowercasedSearch)) {
         return true;
       }
-      
+
       // Search in short description
       if (event.shortdescription?.toLowerCase().includes(lowercasedSearch)) {
         return true;
       }
-      
+
       return false;
     });
-    
+
     setFilteredEvents(filtered);
   };
 
@@ -327,20 +333,21 @@ const AllEvents = () => {
   };
 
   // detect if current user has privilege to delete events
-  const { user } = useUserContext();
+  // const { user } = useUserContext();
   const location = useLocation();
-  const userIsPrivileged = (() => {
-    const role = user?.role || "";
-    const fromRole =
-      role.toLowerCase().includes("admin") ||
-      role.toLowerCase().includes("event");
-    const fromPath =
-      location.pathname.toLowerCase().includes("admin") ||
-      location.pathname.toLowerCase().includes("eventsoffice") ||
-      location.pathname.toLowerCase().includes("events-office") ||
-      location.pathname.toLowerCase().includes("events-office");
-    return fromRole || fromPath;
-  })();
+  // const userIsPrivileged = (() => {
+  //   const role = user?.role || "";
+  //   const fromRole =
+  //     role.toLowerCase().includes("admin") ||
+  //     role.toLowerCase().includes("event");
+  //   const fromPath =
+  //     location.pathname.toLowerCase().includes("admin") ||
+  //     location.pathname.toLowerCase().includes("eventsoffice") ||
+  //     location.pathname.toLowerCase().includes("events-office") ||
+  //     location.pathname.toLowerCase().includes("events-office");
+  //   return fromRole || fromPath;
+  // })();
+  const userIsPrivileged = true; // For testing, assume true
 
   const handleDeleteEvent = async (event) => {
     const ok = window.confirm(
@@ -435,20 +442,41 @@ const AllEvents = () => {
                         onClick={clearSearch}
                         className="text-[#736CED] hover:text-[#5A4BBA] transition-colors"
                       >
-                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                        <svg
+                          className="w-5 h-5"
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M6 18L18 6M6 6l12 12"
+                          />
                         </svg>
                       </button>
                     ) : (
-                      <svg className="w-5 h-5 text-[#736CED]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                      <svg
+                        className="w-5 h-5 text-[#736CED]"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+                        />
                       </svg>
                     )}
                   </div>
                 </div>
                 {searchTerm && (
                   <p className="text-sm text-[#312A68]/70 mt-2 text-center">
-                    Found {filteredEvents.length} result{filteredEvents.length !== 1 ? 's' : ''} for "{searchTerm}"
+                    Found {filteredEvents.length} result
+                    {filteredEvents.length !== 1 ? "s" : ""} for "{searchTerm}"
                   </p>
                 )}
               </div>
@@ -463,9 +491,7 @@ const AllEvents = () => {
                 </p>
               </div>
             ) : error ? (
-              <div className="text-center py-12 text-red-500">
-                {error}
-              </div>
+              <div className="text-center py-12 text-red-500">{error}</div>
             ) : filteredEvents.length === 0 ? (
               <div className="text-center py-12">
                 {searchTerm ? (
@@ -481,7 +507,9 @@ const AllEvents = () => {
                     </button>
                   </div>
                 ) : (
-                  <p className="text-[#312A68] text-lg">No {selectedCategory} found.</p>
+                  <p className="text-[#312A68] text-lg">
+                    No {selectedCategory} found.
+                  </p>
                 )}
               </div>
             ) : (
@@ -554,28 +582,33 @@ const AllEvents = () => {
 
                     {/* Additional Info based on event type */}
                     <div className="mt-4 pt-4 border-t border-gray-200">
-                      {event.type === 'workshops' && event.facultyresponsible && (
-                        <p className="text-xs text-[#312A68]/70">
-                          Faculty: {event.facultyresponsible}
-                        </p>
-                      )}
+                      {event.type === "workshops" &&
+                        event.facultyresponsible && (
+                          <p className="text-xs text-[#312A68]/70">
+                            Faculty: {event.facultyresponsible}
+                          </p>
+                        )}
 
-                      {event.type === 'workshops' && event.professorsparticipating && event.professorsparticipating.length > 0 && (
-                        <p className="text-xs text-[#312A68]/70 mt-1">
-                          Professors: {event.professorsparticipating.join(', ')}
-                        </p>
-                      )}
-                      
-                      {event.type === 'conferences' && event.conferencewebsitelink && (
-                        <a
-                          href={event.conferencewebsitelink}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="text-xs text-[#736CED] hover:underline"
-                        >
-                          Conference Website →
-                        </a>
-                      )}
+                      {event.type === "workshops" &&
+                        event.professorsparticipating &&
+                        event.professorsparticipating.length > 0 && (
+                          <p className="text-xs text-[#312A68]/70 mt-1">
+                            Professors:{" "}
+                            {event.professorsparticipating.join(", ")}
+                          </p>
+                        )}
+
+                      {event.type === "conferences" &&
+                        event.conferencewebsitelink && (
+                          <a
+                            href={event.conferencewebsitelink}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-xs text-[#736CED] hover:underline"
+                          >
+                            Conference Website →
+                          </a>
+                        )}
 
                       {event.type === "booths" && event.contact && (
                         <p className="text-xs text-[#312A68]/70">
@@ -594,9 +627,13 @@ const AllEvents = () => {
                       )}
                       {/* Delete button for privileged users for bazaars/booths/conferences */}
                       {userIsPrivileged &&
-                        (event.type === "bazaars" ||
-                          event.type === "booths" ||
-                          event.type === "conferences") && (
+                        (event.type === "bazaar" ||
+                          event.type === "booth" ||
+                          event.type === "conference" ||
+                          (event.type === "workshop" &&
+                            event.attendees.length === 0) ||
+                          (event.type === "trip" &&
+                            event.attendees.length === 0)) && (
                           <div className="mt-3">
                             <button
                               onClick={() => handleDeleteEvent(event)}
