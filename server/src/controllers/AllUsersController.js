@@ -28,4 +28,30 @@ const getAllAdminsAndOfficers = async (_req, res, next) => {
   }
 };
 
-export default { getAllUsers, getAllAdminsAndOfficers };
+const loginUser = async (req, res, next) => {
+  try {
+    const { email, password } = req.body;
+    const user = await User.findOne({ email });
+    if (!user) {
+      user = await Admin.findOne({ email });
+    }
+    if (!user) {
+      user = await EventsOffice.findOne({ email });
+    }
+    if (!user) {
+      user = await Vendor.findOne({ email });
+    }
+    if (!user) {
+      return res.status(400).json({ message: "Invalid email" });
+    }
+    const flag = await user.validatePassword(password);
+    if (!flag) {
+      return res.status(400).json({ message: "Invalid password" });
+    }
+    return res.json({ message: "Login successful", user });
+  } catch (error) {
+    next(error);
+  }
+};
+
+export default { getAllUsers, getAllAdminsAndOfficers, loginUser };

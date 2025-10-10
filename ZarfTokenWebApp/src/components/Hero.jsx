@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import EyeIcon from "./EyeIcon";
+import api from "../services/api";
 
 const roleRoutes = {
   admin: "/dashboard/admin",
@@ -10,6 +11,8 @@ const roleRoutes = {
 };
 
 const resolveRoleRoute = (email) => {
+  const user = api.post("/allUsers/login", { email });
+  // logic to determine role based on user.role
   if (!email) return null;
   const normalized = email.toLowerCase();
   const gucDomains = ["@guc.edu.eg", "@student.guc.edu.eg"];
