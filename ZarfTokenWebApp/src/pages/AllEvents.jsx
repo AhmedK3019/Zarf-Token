@@ -176,18 +176,17 @@ const AllEvents = () => {
     setError(null);
 
     try {
-      // Simulate API delay
-      await new Promise((resolve) => setTimeout(resolve, 500));
-
       if (category === "all") {
         // Combine all events
-        const allEvents = Object.values(mockEvents).flat();
+        const allEvents = await api.get("/allEvents/getAllEvents");
         setEvents(allEvents);
-        setFilteredEvents(allEvents);
+        setFilteredEvents(allEvents.data);
       } else {
-        const categoryEvents = mockEvents[category] || [];
+        const categoryEvents = await api.get(
+          `/allEvents/getEventsByType/${category}`
+        );
         setEvents(categoryEvents);
-        setFilteredEvents(categoryEvents);
+        setFilteredEvents(categoryEvents.data);
       }
     } catch (err) {
       setError("Failed to fetch events. Please try again.");
@@ -203,15 +202,10 @@ const AllEvents = () => {
 
     try {
       // Simulate API delay
-      await new Promise((resolve) => setTimeout(resolve, 500));
+      const categoryEvents = await api.get(`/booths/platform`);
 
-      // This would be your actual API call
-      // const response = await fetch('/api/booths/platform');
-      // const data = await response.json();
-      // setEvents(data);
-
-      setEvents(mockEvents.booths);
-      setFilteredEvents(mockEvents.booths);
+      setEvents(categoryEvents);
+      setFilteredEvents(categoryEvents.data);
     } catch (err) {
       setError("Failed to fetch booths. Please try again.");
     } finally {
@@ -222,16 +216,8 @@ const AllEvents = () => {
   // Simulate API call for bazaar booths
   const fetchBazaarBooths = async (bazaarId) => {
     try {
-      // Simulate API delay
-      await new Promise((resolve) => setTimeout(resolve, 300));
-
-      // This would be your actual API call
-      // const response = await fetch(`/api/bazaars/${bazaarId}/booths`);
-      // const data = await response.json();
-      // setBazaarBooths(data);
-
-      const bazaar = mockEvents.bazaars.find((b) => b.id === bazaarId);
-      setBazaarBooths(bazaar?.booths || []);
+      const categoryEvents = await api.get(`/booths/${bazaarId}`);
+      setBazaarBooths(categoryEvents.data);
     } catch (err) {
       setError("Failed to fetch bazaar booths. Please try again.");
     }
@@ -311,7 +297,7 @@ const AllEvents = () => {
 
   const handleViewBooths = (bazaar) => {
     setSelectedBazaar(bazaar);
-    fetchBazaarBooths(bazaar.id);
+    fetchBazaarBooths(bazaar._id);
     setShowBoothsModal(true);
   };
 
@@ -359,24 +345,32 @@ const AllEvents = () => {
 
     // Determine endpoint by type
     try {
-      if (event.type === "bazaars") {
+      if (event.type === "bazaar") {
         // real backend endpoint
-        await api.delete(`/bazaars/deleteBazaar/${event.id}`);
-      } else if (event.type === "booths") {
-        await api.delete(`/booths/${event.id}`);
-      } else if (event.type === "conferences") {
-        await api.delete(`/conferences/deleteConference/${event.id}`);
+        await api.delete(`/bazaars/deleteBazaar/${event._id}`);
+      } else if (event.type === "booth") {
+        await api.delete(`/booths/${event._id}`);
+      } else if (event.type === "conference") {
+        await api.delete(`/conferences/deleteConference/${event._id}`);
+      } else if (event.type === "workshop") {
+        await api.delete(`/workshops/deleteWorkshop/${event._id}`);
+      } else if (event.type === "trip") {
+        await api.delete(`/trips/deleteTrip/${event._id}`);
       } else {
         // Not deletable by this rule
         throw new Error("Not deletable");
       }
       // if API succeeded, remove from local state
       setEvents((prev) =>
-        prev.filter((e) => !(e.id === event.id && e.type === event.type))
+        prev.data.filter((e) => !(e._id === event._id && e.type === event.type))
       );
 
       // close modal if deleting selected bazaar
-      if (showBoothsModal && selectedBazaar && selectedBazaar.id === event.id) {
+      if (
+        showBoothsModal &&
+        selectedBazaar &&
+        selectedBazaar._id === event._id
+      ) {
         closeBoothsModal();
       }
     } catch (err) {
@@ -384,9 +378,13 @@ const AllEvents = () => {
       console.error("Delete API error:", err?.response || err?.message || err);
       // If the app uses mock data (no backend), just remove locally
       setEvents((prev) =>
-        prev.filter((e) => !(e.id === event.id && e.type === event.type))
+        prev.data.filter((e) => !(e._id === event._id && e.type === event.type))
       );
-      if (showBoothsModal && selectedBazaar && selectedBazaar.id === event.id) {
+      if (
+        showBoothsModal &&
+        selectedBazaar &&
+        selectedBazaar._id === event._id
+      ) {
         closeBoothsModal();
       }
     }
@@ -516,7 +514,7 @@ const AllEvents = () => {
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-12">
                 {filteredEvents.map((event) => (
                   <div
-                    key={`${event.type}-${event.id}`}
+                    key={`${event.type}-${event._id}`}
                     className="bg-white rounded-2xl p-6 shadow-[0_10px_25px_rgba(165,148,249,0.2)] border border-white/50 hover:shadow-[0_15px_35px_rgba(165,148,249,0.3)] transition-all hover:-translate-y-1"
                   >
                     {/* Event Type Badge */}
@@ -687,7 +685,7 @@ const AllEvents = () => {
                 <div className="grid gap-4">
                   {bazaarBooths.map((booth) => (
                     <div
-                      key={booth.id}
+                      key={booth._id}
                       className="border border-gray-200 rounded-xl p-4 hover:shadow-md transition-shadow"
                     >
                       <h3 className="font-semibold text-[#4C3BCF] text-lg">

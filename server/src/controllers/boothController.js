@@ -41,7 +41,7 @@ export const getBoothsByBazarId = async (req, res) => {
   try {
     const booths = await Booth.find({
       isbazarbooth: true,
-      bazarId: req.params.bazarId, // or req.params.bazarId if in URL
+      bazarId: req.params.bazaarId, // or req.params.bazarId if in URL
     })
       .populate("vendorId")
       .populate("bazarId");
