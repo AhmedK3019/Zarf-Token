@@ -14,7 +14,7 @@ const createInitialFormState = () => ({
     name: "",
     email: "",
     password: "",
-    tax: "",
+    tax: null,
     logo: null,
   },
 });
@@ -22,6 +22,17 @@ const createInitialFormState = () => ({
 const getRoleFromParams = (params) =>
   params.get("vendor") === "true" ? "vendor" : "gucian";
 const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+const allowedTaxFileTypes = [
+  "image/png",
+  "image/jpeg",
+  "image/jpg",
+  "application/pdf",
+];
+const allowedLogoFileTypes = [
+  "image/svg+xml",
+  "image/png",
+  "image/webp",
+];
 
 export default function SignUp() {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -36,6 +47,7 @@ export default function SignUp() {
     vendor: false,
   });
   const logoInputRef = useRef(null);
+  const taxInputRef = useRef(null);
 
   useEffect(() => {
     const roleFromQuery = getRoleFromParams(searchParams);
@@ -129,11 +141,17 @@ export default function SignUp() {
       } else if (activeData.password.trim().length < 6) {
         nextErrors.password = "Password should be at least 6 characters.";
       }
-      if (!activeData.tax.trim()) {
-        nextErrors.tax = "Include your tax registration number.";
+      if (!activeData.tax) {
+        nextErrors.tax = "Upload your tax registration document.";
+      } else {
+        if (!allowedTaxFileTypes.includes(activeData.tax.type)) {
+          nextErrors.tax = "Supported formats: PNG, JPG, or PDF.";
+        }
       }
       if (!activeData.logo) {
-        nextErrors.logo = "Please upload your logo.";
+        nextErrors.logo = "Please upload your logo file.";
+      } else if (!allowedLogoFileTypes.includes(activeData.logo.type)) {
+        nextErrors.logo = "Supported formats: SVG, PNG, or WebP.";
       }
     }
 
@@ -194,16 +212,17 @@ export default function SignUp() {
       } else if (data.user.role === "Not Specified") {
         setSuccessMessage("Your sign-up request is currently being reviewed.");
       } else if (data.user.role === "Vendor") {
-        setSuccessMessage("Vendor account created successfully!");
-      } else {
-        setSuccessMessage("Signed up successfully!");
-      }
+      setSuccessMessage("Vendor account created successfully!");
+    } else {
+      setSuccessMessage("Signed up successfully!");
+    }
 
-      console.log("Signup successful:", data);
+    console.log("Signup successful:", data);
 
-      // Reset fields
-      setFormData(createInitialFormState());
-      if (logoInputRef.current) logoInputRef.current.value = "";
+    // Reset fields
+    setFormData(createInitialFormState());
+    if (logoInputRef.current) logoInputRef.current.value = "";
+    if (taxInputRef.current) taxInputRef.current.value = "";
     } catch (err) {
       console.error(err);
       setErrors({ general: err.message });
@@ -211,6 +230,7 @@ export default function SignUp() {
     }
   };
 
+  const selectedTaxName = formData.vendor.tax?.name ?? "";
   const selectedLogoName = formData.vendor.logo?.name ?? "";
 
   const getInputClassName = (field) =>
@@ -482,30 +502,6 @@ export default function SignUp() {
 
                       <div className="space-y-2">
                         <label
-                          htmlFor="vendorTax"
-                          className="block text-sm font-medium text-primary"
-                        >
-                          Tax registration number
-                        </label>
-                        <input
-                          id="vendorTax"
-                          type="text"
-                          placeholder="e.g. 203-445-678"
-                          value={formData.vendor.tax}
-                          onChange={(event) =>
-                            updateField("tax", event.target.value)
-                          }
-                          className={getInputClassName("tax")}
-                        />
-                        {errors.tax && (
-                          <p className="text-sm font-medium text-accent">
-                            {errors.tax}
-                          </p>
-                        )}
-                      </div>
-
-                      <div className="space-y-2">
-                        <label
                           htmlFor="vendorPassword"
                           className="block text-sm font-medium text-primary"
                         >
@@ -547,6 +543,43 @@ export default function SignUp() {
 
                       <div className="space-y-2">
                         <span className="block text-sm font-medium text-primary">
+                          Tax registration document
+                        </span>
+                        <label
+                          htmlFor="vendorTax"
+                          className={`flex w-full cursor-pointer items-center justify-between rounded-2xl border px-4 py-3 text-sm text-primary transition ${
+                            errors.tax
+                              ? "border-accent bg-accent/5"
+                              : "border-dashed border-primary/30 bg-primary/5 hover:border-primary/60"
+                          }`}
+                        >
+                          <span className="truncate pr-3">
+                            {selectedTaxName || "Upload your file (PDF, PNG, or JPG)"}
+                          </span>
+                          <span className="rounded-full bg-primary/10 px-3 py-1 text-xs font-semibold text-primary">
+                            Browse
+                          </span>
+                          <input
+                            id="vendorTax"
+                            ref={taxInputRef}
+                            type="file"
+                            accept=".png,.jpg,.jpeg,.pdf"
+                            className="sr-only"
+                            onChange={(event) => {
+                              const file = event.target.files?.[0] ?? null;
+                              updateField("tax", file);
+                            }}
+                          />
+                        </label>
+                        {errors.tax && (
+                          <p className="text-sm font-medium text-accent">
+                            {errors.tax}
+                          </p>
+                        )}
+                      </div>
+
+                      <div className="space-y-2">
+                        <span className="block text-sm font-medium text-primary">
                           Logo
                         </span>
                         <label
@@ -558,7 +591,7 @@ export default function SignUp() {
                           }`}
                         >
                           <span className="truncate pr-3">
-                            {selectedLogoName || "Upload an image (PNG, JPG)"}
+                            {selectedLogoName || "Upload your file (SVG, PNG, or WebP)"}
                           </span>
                           <span className="rounded-full bg-primary/10 px-3 py-1 text-xs font-semibold text-primary">
                             Browse
@@ -567,7 +600,7 @@ export default function SignUp() {
                             id="vendorLogo"
                             ref={logoInputRef}
                             type="file"
-                            accept="image/*"
+                            accept=".svg,.png,.webp"
                             className="sr-only"
                             onChange={(event) => {
                               const file = event.target.files?.[0] ?? null;
