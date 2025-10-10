@@ -12,7 +12,7 @@ const roleRoutes = {
 const resolveRoleRoute = (email) => {
   if (!email) return null;
   const normalized = email.toLowerCase();
-  const gucDomains = ["@guc.edu.eg", "@guc.student.edu.eg"];
+  const gucDomains = ["@guc.edu.eg", "@student.guc.edu.eg"];
   const isGucEmail = gucDomains.some((domain) => normalized.endsWith(domain));
 
   if (isGucEmail && normalized.includes("admin")) return roleRoutes.admin;
@@ -59,7 +59,8 @@ const Hero = () => {
 
     const targetRoute = resolveRoleRoute(email);
     if (email.trim() && !targetRoute) {
-      nextErrors.role = "We couldn't determine your dashboard. Please use your campus email.";
+      nextErrors.role =
+        "We couldn't determine your dashboard. Please use your campus email.";
     }
 
     setErrors(nextErrors);
@@ -92,8 +93,9 @@ const Hero = () => {
             GUC x Zarf Token
           </h1>
           <p className="text-base text-primary/80 sm:text-lg">
-            From planning to participation, Zarf Token keeps your community synced. Instant registrations, real-time
-            insights, and automated engagement at your fingertips.
+            From planning to participation, Zarf Token keeps your community
+            synced. Instant registrations, real-time insights, and automated
+            engagement at your fingertips.
           </p>
         </div>
 
@@ -103,7 +105,10 @@ const Hero = () => {
               <form className="space-y-6" onSubmit={handleSubmit}>
                 <div className="space-y-4">
                   <div className="space-y-2">
-                    <label htmlFor="email" className="block text-sm font-medium text-primary">
+                    <label
+                      htmlFor="email"
+                      className="block text-sm font-medium text-primary"
+                    >
                       Email
                     </label>
                     <input
@@ -114,10 +119,17 @@ const Hero = () => {
                       onChange={(event) => setEmail(event.target.value)}
                       className={`w-full rounded-2xl border px-4 py-3 text-sm text-primary shadow-inner transition focus:outline-none focus:ring-2 ${emailClassName}`}
                     />
-                    {errors.email && <p className="text-sm font-medium text-accent">{errors.email}</p>}
+                    {errors.email && (
+                      <p className="text-sm font-medium text-accent">
+                        {errors.email}
+                      </p>
+                    )}
                   </div>
                   <div className="space-y-2">
-                    <label htmlFor="password" className="block text-sm font-medium text-primary">
+                    <label
+                      htmlFor="password"
+                      className="block text-sm font-medium text-primary"
+                    >
                       Password
                     </label>
                     <div className="relative">
@@ -137,15 +149,25 @@ const Hero = () => {
                       >
                         <EyeIcon visible={isPasswordVisible} />
                         <span className="sr-only">
-                          {isPasswordVisible ? "Hide password" : "Show password"}
+                          {isPasswordVisible
+                            ? "Hide password"
+                            : "Show password"}
                         </span>
                       </button>
                     </div>
-                    {errors.password && <p className="text-sm font-medium text-accent">{errors.password}</p>}
+                    {errors.password && (
+                      <p className="text-sm font-medium text-accent">
+                        {errors.password}
+                      </p>
+                    )}
                   </div>
                 </div>
 
-                {errors.role && <p className="text-sm font-medium text-accent">{errors.role}</p>}
+                {errors.role && (
+                  <p className="text-sm font-medium text-accent">
+                    {errors.role}
+                  </p>
+                )}
 
                 <button
                   type="submit"
@@ -156,7 +178,10 @@ const Hero = () => {
 
                 <p className="text-center text-sm text-primary">
                   Not a member?{" "}
-                  <Link to="/signup" className="font-semibold text-secondary hover:text-primary">
+                  <Link
+                    to="/signup"
+                    className="font-semibold text-secondary hover:text-primary"
+                  >
                     Sign up
                   </Link>
                 </p>
