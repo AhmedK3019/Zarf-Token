@@ -141,16 +141,12 @@ const Hero = () => {
                   Sign in
                 </button>
 
-                <p className="text-center text-sm text-primary">Not a member?</p>
-                <div className="flex items-center justify-center gap-4 text-sm font-semibold text-primary">
-                  <Link to="/signup" className="text-secondary hover:text-primary">
-                    Sign up as a GUCian
+                <p className="text-center text-sm text-primary">
+                  Not a member?{" "}
+                  <Link to="/signup" className="font-semibold text-secondary hover:text-primary">
+                    Sign up
                   </Link>
-                  <span className="text-primary font-extrabold">|</span>
-                  <Link to="/signup?vendor=true" className="text-secondary hover:text-primary">
-                    Sign up as a Vendor
-                  </Link>
-                </div>
+                </p>
               </form>
             </div>
           </div>
