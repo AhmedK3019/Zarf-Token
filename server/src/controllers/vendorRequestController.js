@@ -1,6 +1,9 @@
 import VendorRequest from "../models/VendorRequest.js";
 import Booth from "../models/Booth.js";
-import mailer from "../utils/mailer.js";
+import {
+  sendBoothApprovalEmail,
+  sendBoothRejectionEmail,
+} from "../utils/mailer.js";
 
 // create request for a bazar: POST /api/vendorRequests/bazar/:bazarId
 const createBazarRequest = async (req, res, next) => {

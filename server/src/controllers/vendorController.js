@@ -14,6 +14,7 @@ const vendorSchema = Joi.object({
   taxcard: Joi.string().required(),
   logo: Joi.string().required(),
   status: Joi.string().valid("Active", "Blocked").default("Active"),
+  role: Joi.string().default("Vendor"),
 });
 
 const signupvendor = async (req, res, next) => {
@@ -72,7 +73,7 @@ const loginVendor = async (req, res, next) => {
   }
 };
 
-const getAllVendors = async (req, res, next) => {
+const getAllVendors = async (_req, res, next) => {
   try {
     const vendors = await Vendor.find(
       {},

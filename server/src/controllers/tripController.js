@@ -12,6 +12,7 @@ const TripSchema = Joi.object({
   registerdeadline: Joi.date().required(),
   price: Joi.number().required(),
   capacity: Joi.number().required(),
+  attendees: Joi.array().default([]),
 });
 
 const createTrip = async (req, res, next) => {

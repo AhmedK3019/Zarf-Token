@@ -1,6 +1,6 @@
 import mongoose from "mongoose";
 
-const conderenceSchema = new mongoose.Schema({
+const conferenceSchema = new mongoose.Schema({
   conferencename: { type: String, required: true },
   startdate: { type: Date, required: true },
   starttime: { type: String, required: true },
@@ -16,5 +16,5 @@ const conderenceSchema = new mongoose.Schema({
   createdAt: { type: Date, default: Date.now },
 });
 
-const Conference = mongoose.model("Conference", conderenceSchema);
+const Conference = mongoose.model("Conference", conferenceSchema);
 export default Conference;
