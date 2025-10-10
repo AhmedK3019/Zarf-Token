@@ -4,7 +4,7 @@ import EyeIcon from "./EyeIcon";
 
 const roleRoutes = {
   admin: "/dashboard/admin",
-  vendor: "/dashboard/vendor",
+  company: "/dashboard/vendor",
   eventsOffice: "/dashboard/eventsOffice",
   user: "/dashboard/user",
 };
@@ -15,19 +15,20 @@ const resolveRoleRoute = (email) => {
   const gucDomains = ["@guc.edu.eg", "@guc.student.edu.eg"];
   const isGucEmail = gucDomains.some((domain) => normalized.endsWith(domain));
 
-  if (!isGucEmail && normalized.includes("admin")) return roleRoutes.admin;
+  if (isGucEmail && normalized.includes("admin")) return roleRoutes.admin;
   if (
-    !isGucEmail &&
     normalized.includes("events") &&
-    (normalized.includes("office") || normalized.includes("officer"))
+    (normalized.includes("office") || normalized.includes("officer")) &&
+    isGucEmail
   ) {
     return roleRoutes.eventsOffice;
   }
   if (
-    !isGucEmail &&
-    (normalized.includes("vendor") || normalized.endsWith("@vendors.com"))
+    normalized.includes("company") ||
+    normalized.includes("vendor") ||
+    normalized.endsWith("@vendors.com")
   ) {
-    return roleRoutes.vendor;
+    return roleRoutes.company;
   }
   if (isGucEmail) return roleRoutes.user;
   return null;

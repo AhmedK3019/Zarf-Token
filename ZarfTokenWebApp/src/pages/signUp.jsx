@@ -129,7 +129,7 @@ export default function SignUp() {
       }
     } else {
       if (!activeData.name.trim()) {
-        nextErrors.name = "Vendor name is required.";
+        nextErrors.name = "Company name is required.";
       }
       if (!activeData.email.trim()) {
         nextErrors.email = "Email is required.";
@@ -187,7 +187,7 @@ export default function SignUp() {
           body: JSON.stringify(body),
         });
       } else {
-        // ---- Vendor Signup ----
+        // ---- Company Signup ----
         const form = new FormData();
         form.append("companyname", formData.vendor.name);
         form.append("email", formData.vendor.email);
@@ -212,7 +212,7 @@ export default function SignUp() {
       } else if (data.user.role === "Not Specified") {
         setSuccessMessage("Your sign-up request is currently being reviewed.");
       } else if (data.user.role === "Vendor") {
-      setSuccessMessage("Vendor account created successfully!");
+        setSuccessMessage("Company account created successfully!");
     } else {
       setSuccessMessage("Signed up successfully!");
     }
@@ -259,7 +259,7 @@ export default function SignUp() {
               Become a Tokener
             </h2>
             <p className="text-base text-primary/80 sm:text-lg">
-              Whether you're a GUCian ready to discover events or a vendor
+              Whether you're a GUCian ready to discover events or a company
               launching your booth, it only takes a few steps. Pick the
               experience that fits you and we'll tailor the onboarding.
             </p>
@@ -289,7 +289,7 @@ export default function SignUp() {
                         : inactiveToggleClasses
                     }`}
                   >
-                    Vendor
+                    Company
                   </button>
                 </div>
 
@@ -457,12 +457,12 @@ export default function SignUp() {
                           htmlFor="vendorName"
                           className="block text-sm font-medium text-primary"
                         >
-                          Vendor name
+                          Company name
                         </label>
                         <input
                           id="vendorName"
                           type="text"
-                          placeholder="Zarf Coffee Cart"
+                          placeholder="El Sewedy Electric Co S.A.E."
                           value={formData.vendor.name}
                           onChange={(event) =>
                             updateField("name", event.target.value)
@@ -623,7 +623,7 @@ export default function SignUp() {
                   >
                     {activeRole === "gucian"
                       ? "Create my GUCian account"
-                      : "Apply as a vendor"}
+                      : "Apply as a company"}
                   </button>
 
                   <p className="text-center text-xs text-primary/70">
