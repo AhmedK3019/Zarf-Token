@@ -583,7 +583,7 @@ export default function SignUp() {
                         <input
                           id="vendorEmail"
                           type="email"
-                          placeholder="contact@brand.com"
+                          placeholder="company@example.com"
                           value={formData.vendor.email}
                           onChange={(event) =>
                             updateField("email", event.target.value)
@@ -593,50 +593,6 @@ export default function SignUp() {
                         {errors.email && (
                           <p className="text-sm font-medium text-accent">
                             {errors.email}
-                          </p>
-                        )}
-                      </div>
-
-                      <div className="space-y-2">
-                        <label
-                          htmlFor="vendorPassword"
-                          className="block text-sm font-medium text-primary"
-                        >
-                          Password
-                        </label>
-                        <div className="relative">
-                          <input
-                            id="vendorPassword"
-                            type={
-                              passwordVisibility.vendor ? "text" : "password"
-                            }
-                            placeholder="Create a password"
-                            value={formData.vendor.password}
-                            onChange={(event) =>
-                              updateField("password", event.target.value)
-                            }
-                            className={`${getInputClassName("password")} pr-12`}
-                          />
-                          <button
-                            type="button"
-                            onClick={() => togglePasswordVisibility("vendor")}
-                            className="absolute inset-y-0 right-3 flex items-center text-primary/60 transition hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40 focus-visible:ring-offset-2 focus-visible:ring-offset-white"
-                            aria-pressed={passwordVisibility.vendor}
-                          >
-                            <EyeIcon visible={passwordVisibility.vendor} />
-                            <span className="sr-only">
-                              {passwordVisibility.vendor
-                                ? "Hide password"
-                                : "Show password"}
-                            </span>
-                          </button>
-                        </div>
-                        <PasswordStrengthMeter
-                          password={formData.vendor.password}
-                        />
-                        {errors.password && (
-                          <p className="text-sm font-medium text-accent">
-                            {errors.password}
                           </p>
                         )}
                       </div>
@@ -713,6 +669,50 @@ export default function SignUp() {
                         {errors.logo && (
                           <p className="text-sm font-medium text-accent">
                             {errors.logo}
+                          </p>
+                        )}
+                      </div>
+
+                      <div className="space-y-2">
+                        <label
+                          htmlFor="vendorPassword"
+                          className="block text-sm font-medium text-primary"
+                        >
+                          Password
+                        </label>
+                        <div className="relative">
+                          <input
+                            id="vendorPassword"
+                            type={
+                              passwordVisibility.vendor ? "text" : "password"
+                            }
+                            placeholder="Create a password"
+                            value={formData.vendor.password}
+                            onChange={(event) =>
+                              updateField("password", event.target.value)
+                            }
+                            className={`${getInputClassName("password")} pr-12`}
+                          />
+                          <button
+                            type="button"
+                            onClick={() => togglePasswordVisibility("vendor")}
+                            className="absolute inset-y-0 right-3 flex items-center text-primary/60 transition hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40 focus-visible:ring-offset-2 focus-visible:ring-offset-white"
+                            aria-pressed={passwordVisibility.vendor}
+                          >
+                            <EyeIcon visible={passwordVisibility.vendor} />
+                            <span className="sr-only">
+                              {passwordVisibility.vendor
+                                ? "Hide password"
+                                : "Show password"}
+                            </span>
+                          </button>
+                        </div>
+                        <PasswordStrengthMeter
+                          password={formData.vendor.password}
+                        />
+                        {errors.password && (
+                          <p className="text-sm font-medium text-accent">
+                            {errors.password}
                           </p>
                         )}
                       </div>
