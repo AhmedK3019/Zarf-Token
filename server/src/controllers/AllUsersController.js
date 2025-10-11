@@ -16,6 +16,65 @@ const getAllUsers = async (_req, res, next) => {
   }
 };
 
+const getUserById = async (req, res, next) => {
+  try {
+    const userId = req.params.id;
+    let user = await User.findById(userId);
+    if (!user) {
+      user = await Admin.findById(userId);
+    }
+    if (!user) {
+      user = await EventsOffice.findById(userId);
+    }
+    if (!user) {
+      user = await Vendor.findById(userId);
+    }
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+    res.json(user);
+  } catch (error) {
+    next(error);
+  }
+};
+
+const deleteUserById = async (req, res, next) => {
+  try {
+    const userId = req.params.id;
+    let user = await User.findByIdAndDelete(userId);
+    if (!user) {
+      user = await Admin.findByIdAndDelete(userId);
+    }
+    if (!user) {
+      user = await EventsOffice.findByIdAndDelete(userId);
+    }
+    if (!user) {
+      user = await Vendor.findByIdAndDelete(userId);
+    }
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+    res.json({ message: "User deleted successfully" });
+  } catch (error) {
+    next(error);
+  }
+};
+
+const setNotificationRead = async (req, res, next) => {
+  try {
+    const userId = req.user?._id || req.user?.id;
+    if (!userId)
+      return res.status(401).json({ message: "Authentication required" });
+    const user = await User.findById(userId);
+    if (!user) return res.status(404).json({ message: "User not found" });
+    user.notifications = user.notifications.map((n) => ({ ...n, read: true }));
+    await user.save();
+    res.json({ message: "Notifications marked as read" });
+  } catch (error) {
+    next(error);
+  }
+};
+
 const getAllAdminsAndOfficers = async (_req, res, next) => {
   try {
     const result = [];
@@ -66,4 +125,11 @@ const createToken = (body) => {
   };
   return jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: "7d" });
 };
-export default { getAllUsers, getAllAdminsAndOfficers, loginUser };
+export default {
+  getAllUsers,
+  getUserById,
+  deleteUserById,
+  setNotificationRead,
+  getAllAdminsAndOfficers,
+  loginUser,
+};
