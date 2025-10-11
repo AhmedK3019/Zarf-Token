@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import EyeIcon from "./EyeIcon";
 import api from "../services/api";
@@ -41,12 +41,37 @@ const resolveRoleRoute = async (email, password) => {
 };
 
 const Hero = () => {
-  const { login } = useAuthUser();
+  const { login, user } = useAuthUser();
   const navigate = useNavigate();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [errors, setErrors] = useState({ email: "", password: "", role: "" });
   const [isPasswordVisible, setIsPasswordVisible] = useState(false);
+
+  useEffect(() => {
+    // If user already logged in, redirect immediately
+    if (user && user.role) {
+      switch (String(user.role)) {
+        case "Admin":
+          navigate("/dashboard/admin");
+          break;
+        case "Vendor":
+          navigate("/dashboard/vendor");
+          break;
+        case "Event office":
+          navigate("/dashboard/eventsOffice");
+          break;
+        case "Student":
+        case "Professor":
+        case "TA":
+        case "staff":
+          navigate("/dashboard/user");
+          break;
+        default:
+          break;
+      }
+    }
+  }, [user, navigate]);
 
   // Toggle password visibility for the landing CTA without breaking styling.
   const togglePasswordVisibility = () => {
