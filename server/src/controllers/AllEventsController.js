@@ -3,7 +3,6 @@ import Bazaar from "../models/Bazaar.js";
 import Conference from "../models/Conference.js";
 import Trip from "../models/Trip.js";
 import Booth from "../models/Booth.js";
-import { get } from "mongoose";
 
 const getAllEvents = async (_req, res, next) => {
   try {

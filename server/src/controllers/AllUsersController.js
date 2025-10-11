@@ -3,7 +3,6 @@ import Admin from "../models/Admin.js";
 import EventsOffice from "../models/EventsOffice.js";
 import Vendor from "../models/Vendor.js";
 import jwt from "jsonwebtoken";
-import { get } from "mongoose";
 const getAllUsers = async (_req, res, next) => {
   try {
     const users = await User.find();
@@ -54,18 +53,16 @@ const loginUser = async (req, res, next) => {
     const userObj =
       typeof user.toObject === "function" ? user.toObject() : { ...user };
     if (userObj.password) delete userObj.password;
+    console.log(JSON.stringify(userObj), token);
     return res.json({ message: "Login successful", user: userObj, token });
   } catch (error) {
     next(error);
   }
 };
 const createToken = (body) => {
-  if (!process.env.JWT_SECRET) {
-    throw new Error("JWT_SECRET is not defined in environment variables");
-  }
   const payload = {
-    id: body._id ? String(body._id) : body.id,
-    name: body.firstname || body.name,
+    id: String(body._id),
+    name: body.firstname,
     role: body.role,
   };
   return jwt.sign(payload, process.env.JWT_SECRET, { expiresIn: "7d" });
