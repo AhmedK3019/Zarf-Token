@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
-import { useSearchParams } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import EyeIcon from "../components/EyeIcon";
 import api from "../services/api";
 
@@ -31,14 +31,105 @@ const allowedTaxFileTypes = [
 ];
 const allowedLogoFileTypes = ["image/svg+xml", "image/png", "image/webp"];
 
+// Map the four strength tiers to their Tailwind-driven styles.
+const passwordStrengthStyles = {
+  weak: {
+    ariaLabel: "Weak password",
+    barClass: "bg-[#ef4444]",
+    width: "10%",
+    score: 1,
+  },
+  medium: {
+    ariaLabel: "Medium password",
+    barClass: "bg-[#f97316]",
+    width: "50%",
+    score: 2,
+  },
+  fair: {
+    ariaLabel: "Fair password",
+    barClass: "bg-[#facc15]",
+    width: "75%",
+    score: 3,
+  },
+  strong: {
+    ariaLabel: "Strong password",
+    barClass: "bg-[#22c55e]",
+    width: "100%",
+    score: 4,
+  },
+};
+
+// Evaluate strength against the requested heuristics.
+const evaluatePasswordStrength = (password) => {
+  if (!password) {
+    return null;
+  }
+
+  const length = password.length;
+  const hasUppercase = /[A-Z]/.test(password);
+  const hasNumber = /\d/.test(password);
+  const hasSpecial = /[^A-Za-z0-9]/.test(password);
+
+  if (hasUppercase && hasNumber && hasSpecial) {
+    // Treat fully mixed passwords as strong once they reach 8 chars to match the desired UX.
+    if (length >= 10) {
+      return passwordStrengthStyles.strong;
+    }
+
+    if (length >= 8) {
+      return passwordStrengthStyles.strong;
+    }
+
+    return passwordStrengthStyles.fair;
+  }
+
+  if (
+    (length >= 8 && (hasUppercase || hasNumber)) ||
+    (hasUppercase && hasNumber)
+  ) {
+    return passwordStrengthStyles.medium;
+  }
+
+  return passwordStrengthStyles.weak;
+};
+
+function PasswordStrengthMeter({ password }) {
+  const strength = evaluatePasswordStrength(password);
+
+  if (!strength) {
+    return null;
+  }
+
+  return (
+    <div className="pt-1" aria-live="polite">
+      <div
+        className="h-2 w-full overflow-hidden rounded-full bg-primary/10"
+        role="progressbar"
+        aria-valuenow={strength.score}
+        aria-valuemin={0}
+        aria-valuemax={4}
+        aria-valuetext={strength.ariaLabel}
+      >
+        <div
+          className={`h-full rounded-full transition-all duration-300 ease-out ${strength.barClass}`}
+          style={{ width: strength.width }}
+        />
+      </div>
+      <span className="sr-only">{strength.ariaLabel}</span>
+    </div>
+  );
+}
+
 export default function SignUp() {
   const [searchParams, setSearchParams] = useSearchParams();
+  const navigate = useNavigate();
   const [formData, setFormData] = useState(() => createInitialFormState());
   const [errors, setErrors] = useState({});
   const [successMessage, setSuccessMessage] = useState("");
-  const [activeRole, setActiveRole] = useState(() =>
-    getRoleFromParams(searchParams)
-  );
+  const [activeRole, setActiveRole] = useState(() => {
+    const r = getRoleFromParams(searchParams);
+    return r === "vendor" ? "vendor" : "gucian";
+  });
   const [passwordVisibility, setPasswordVisibility] = useState({
     gucian: false,
     vendor: false,
@@ -48,7 +139,8 @@ export default function SignUp() {
 
   useEffect(() => {
     const roleFromQuery = getRoleFromParams(searchParams);
-    setActiveRole(roleFromQuery);
+    // Always ensure a safe default in case parsing fails elsewhere
+    setActiveRole(roleFromQuery ?? "gucian");
     setErrors({});
     setSuccessMessage("");
     setPasswordVisibility({ gucian: false, vendor: false });
@@ -71,6 +163,11 @@ export default function SignUp() {
     setSuccessMessage("");
     setPasswordVisibility({ gucian: false, vendor: false });
     setQueryRole(role);
+  };
+
+  // Provide a quick exit route back to the landing page.
+  const handleGoBack = () => {
+    navigate("/", { replace: true });
   };
 
   const updateField = (field, value) => {
@@ -156,6 +253,7 @@ export default function SignUp() {
   };
 
   const handleSubmit = async (event) => {
+    setErrors({});
     event.preventDefault();
 
     const validationErrors = validateForm();
@@ -166,9 +264,13 @@ export default function SignUp() {
     }
 
     try {
+      // Use a safe effectiveRole so a missing/undefined activeRole
+      // doesn't cause us to hit the wrong backend endpoint.
+      const effectiveRole = activeRole === "vendor" ? "vendor" : "gucian";
+
       let res;
 
-      if (activeRole === "gucian") {
+      if (effectiveRole === "gucian") {
         // ---- Gucian Signup ----
         const body = {
           firstname: formData.gucian.firstName,
@@ -245,6 +347,13 @@ export default function SignUp() {
       <div className="pointer-events-none absolute bottom-[-18%] left-1/2 h-[360px] w-[110%] -translate-x-1/2 rounded-[50%] bg-gradient-to-r from-secondary via-primary to-info opacity-40 blur-3xl" />
 
       <main className="relative z-10 flex min-h-screen items-center justify-center px-6 py-16">
+        <button
+          type="button"
+          onClick={handleGoBack}
+          className="absolute left-6 top-6 inline-flex items-center justify-center rounded-full border border-primary/40 bg-white px-4 py-2 text-sm font-semibold text-primary tracking-wide shadow-[0_8px_18px_rgba(115,108,237,0.2)] transition-transform hover:-translate-y-0.5 hover:bg-secondary/20 hover:shadow-[0_12px_24px_rgba(115,108,237,0.25)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40 focus-visible:ring-offset-2 focus-visible:ring-offset-white sm:left-10 sm:top-10"
+        >
+          Back
+        </button>
         <div className="grid w-full max-w-6xl gap-12 lg:grid-cols-[1.05fr_1fr]">
           <div className="space-y-6 self-center">
             <h2 className="text-4xl font-bold text-primary sm:text-5xl lg:text-6xl">
@@ -435,6 +544,9 @@ export default function SignUp() {
                             </span>
                           </button>
                         </div>
+                        <PasswordStrengthMeter
+                          password={formData.gucian.password}
+                        />
                         {errors.password && (
                           <p className="text-sm font-medium text-accent">
                             {errors.password}
@@ -478,7 +590,7 @@ export default function SignUp() {
                         <input
                           id="vendorEmail"
                           type="email"
-                          placeholder="contact@brand.com"
+                          placeholder="company@example.com"
                           value={formData.vendor.email}
                           onChange={(event) =>
                             updateField("email", event.target.value)
@@ -488,47 +600,6 @@ export default function SignUp() {
                         {errors.email && (
                           <p className="text-sm font-medium text-accent">
                             {errors.email}
-                          </p>
-                        )}
-                      </div>
-
-                      <div className="space-y-2">
-                        <label
-                          htmlFor="vendorPassword"
-                          className="block text-sm font-medium text-primary"
-                        >
-                          Password
-                        </label>
-                        <div className="relative">
-                          <input
-                            id="vendorPassword"
-                            type={
-                              passwordVisibility.vendor ? "text" : "password"
-                            }
-                            placeholder="Create a password"
-                            value={formData.vendor.password}
-                            onChange={(event) =>
-                              updateField("password", event.target.value)
-                            }
-                            className={`${getInputClassName("password")} pr-12`}
-                          />
-                          <button
-                            type="button"
-                            onClick={() => togglePasswordVisibility("vendor")}
-                            className="absolute inset-y-0 right-3 flex items-center text-primary/60 transition hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40 focus-visible:ring-offset-2 focus-visible:ring-offset-white"
-                            aria-pressed={passwordVisibility.vendor}
-                          >
-                            <EyeIcon visible={passwordVisibility.vendor} />
-                            <span className="sr-only">
-                              {passwordVisibility.vendor
-                                ? "Hide password"
-                                : "Show password"}
-                            </span>
-                          </button>
-                        </div>
-                        {errors.password && (
-                          <p className="text-sm font-medium text-accent">
-                            {errors.password}
                           </p>
                         )}
                       </div>
@@ -605,6 +676,50 @@ export default function SignUp() {
                         {errors.logo && (
                           <p className="text-sm font-medium text-accent">
                             {errors.logo}
+                          </p>
+                        )}
+                      </div>
+
+                      <div className="space-y-2">
+                        <label
+                          htmlFor="vendorPassword"
+                          className="block text-sm font-medium text-primary"
+                        >
+                          Password
+                        </label>
+                        <div className="relative">
+                          <input
+                            id="vendorPassword"
+                            type={
+                              passwordVisibility.vendor ? "text" : "password"
+                            }
+                            placeholder="Create a password"
+                            value={formData.vendor.password}
+                            onChange={(event) =>
+                              updateField("password", event.target.value)
+                            }
+                            className={`${getInputClassName("password")} pr-12`}
+                          />
+                          <button
+                            type="button"
+                            onClick={() => togglePasswordVisibility("vendor")}
+                            className="absolute inset-y-0 right-3 flex items-center text-primary/60 transition hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40 focus-visible:ring-offset-2 focus-visible:ring-offset-white"
+                            aria-pressed={passwordVisibility.vendor}
+                          >
+                            <EyeIcon visible={passwordVisibility.vendor} />
+                            <span className="sr-only">
+                              {passwordVisibility.vendor
+                                ? "Hide password"
+                                : "Show password"}
+                            </span>
+                          </button>
+                        </div>
+                        <PasswordStrengthMeter
+                          password={formData.vendor.password}
+                        />
+                        {errors.password && (
+                          <p className="text-sm font-medium text-accent">
+                            {errors.password}
                           </p>
                         )}
                       </div>
