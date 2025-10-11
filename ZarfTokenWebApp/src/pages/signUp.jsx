@@ -126,9 +126,10 @@ export default function SignUp() {
   const [formData, setFormData] = useState(() => createInitialFormState());
   const [errors, setErrors] = useState({});
   const [successMessage, setSuccessMessage] = useState("");
-  const [activeRole, setActiveRole] = useState(() =>
-    getRoleFromParams(searchParams)
-  );
+  const [activeRole, setActiveRole] = useState(() => {
+    const r = getRoleFromParams(searchParams);
+    return r === "vendor" ? "vendor" : "gucian";
+  });
   const [passwordVisibility, setPasswordVisibility] = useState({
     gucian: false,
     vendor: false,
@@ -138,7 +139,8 @@ export default function SignUp() {
 
   useEffect(() => {
     const roleFromQuery = getRoleFromParams(searchParams);
-    setActiveRole(roleFromQuery);
+    // Always ensure a safe default in case parsing fails elsewhere
+    setActiveRole(roleFromQuery ?? "gucian");
     setErrors({});
     setSuccessMessage("");
     setPasswordVisibility({ gucian: false, vendor: false });
@@ -251,6 +253,7 @@ export default function SignUp() {
   };
 
   const handleSubmit = async (event) => {
+    setErrors({});
     event.preventDefault();
 
     const validationErrors = validateForm();
@@ -261,9 +264,13 @@ export default function SignUp() {
     }
 
     try {
+      // Use a safe effectiveRole so a missing/undefined activeRole
+      // doesn't cause us to hit the wrong backend endpoint.
+      const effectiveRole = activeRole === "vendor" ? "vendor" : "gucian";
+
       let res;
 
-      if (activeRole === "gucian") {
+      if (effectiveRole === "gucian") {
         // ---- Gucian Signup ----
         const body = {
           firstname: formData.gucian.firstName,
