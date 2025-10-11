@@ -31,6 +31,95 @@ const allowedTaxFileTypes = [
 ];
 const allowedLogoFileTypes = ["image/svg+xml", "image/png", "image/webp"];
 
+// Map the four strength tiers to their Tailwind-driven styles.
+const passwordStrengthStyles = {
+  weak: {
+    ariaLabel: "Weak password",
+    barClass: "bg-[#ef4444]",
+    width: "10%",
+    score: 1,
+  },
+  medium: {
+    ariaLabel: "Medium password",
+    barClass: "bg-[#f97316]",
+    width: "50%",
+    score: 2,
+  },
+  fair: {
+    ariaLabel: "Fair password",
+    barClass: "bg-[#facc15]",
+    width: "75%",
+    score: 3,
+  },
+  strong: {
+    ariaLabel: "Strong password",
+    barClass: "bg-[#22c55e]",
+    width: "100%",
+    score: 4,
+  },
+};
+
+// Evaluate strength against the requested heuristics.
+const evaluatePasswordStrength = (password) => {
+  if (!password) {
+    return null;
+  }
+
+  const length = password.length;
+  const hasUppercase = /[A-Z]/.test(password);
+  const hasNumber = /\d/.test(password);
+  const hasSpecial = /[^A-Za-z0-9]/.test(password);
+
+  if (hasUppercase && hasNumber && hasSpecial) {
+    // Treat fully mixed passwords as strong once they reach 8 chars to match the desired UX.
+    if (length >= 10) {
+      return passwordStrengthStyles.strong;
+    }
+
+    if (length >= 8) {
+      return passwordStrengthStyles.strong;
+    }
+
+    return passwordStrengthStyles.fair;
+  }
+
+  if (
+    (length >= 8 && (hasUppercase || hasNumber)) ||
+    (hasUppercase && hasNumber)
+  ) {
+    return passwordStrengthStyles.medium;
+  }
+
+  return passwordStrengthStyles.weak;
+};
+
+function PasswordStrengthMeter({ password }) {
+  const strength = evaluatePasswordStrength(password);
+
+  if (!strength) {
+    return null;
+  }
+
+  return (
+    <div className="pt-1" aria-live="polite">
+      <div
+        className="h-2 w-full overflow-hidden rounded-full bg-primary/10"
+        role="progressbar"
+        aria-valuenow={strength.score}
+        aria-valuemin={0}
+        aria-valuemax={4}
+        aria-valuetext={strength.ariaLabel}
+      >
+        <div
+          className={`h-full rounded-full transition-all duration-300 ease-out ${strength.barClass}`}
+          style={{ width: strength.width }}
+        />
+      </div>
+      <span className="sr-only">{strength.ariaLabel}</span>
+    </div>
+  );
+}
+
 export default function SignUp() {
   const [searchParams, setSearchParams] = useSearchParams();
   const navigate = useNavigate();
@@ -448,6 +537,9 @@ export default function SignUp() {
                             </span>
                           </button>
                         </div>
+                        <PasswordStrengthMeter
+                          password={formData.gucian.password}
+                        />
                         {errors.password && (
                           <p className="text-sm font-medium text-accent">
                             {errors.password}
@@ -539,6 +631,9 @@ export default function SignUp() {
                             </span>
                           </button>
                         </div>
+                        <PasswordStrengthMeter
+                          password={formData.vendor.password}
+                        />
                         {errors.password && (
                           <p className="text-sm font-medium text-accent">
                             {errors.password}
