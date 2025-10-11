@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { useParams, Link, useLocation } from "react-router-dom";
 import Navbar from "../components/Navbar";
 import api from "../services/api";
-// import { useUserContext } from "../context/UserContext";
+import { useAuthUser } from "../hooks/auth";
 
 const AllEvents = () => {
   const { category } = useParams();
@@ -24,151 +24,6 @@ const AllEvents = () => {
     { id: "conferences", name: "Conferences" },
     { id: "booths", name: "Platform Booths" },
   ];
-
-  // Mock API data - replace with your actual API calls
-  const mockEvents = {
-    workshops: [
-      {
-        id: 1,
-        name: "Web Development Workshop",
-        location: "Tech Building Room 101",
-        startdateandtime: "2024-03-15T10:00:00",
-        enddateandtime: "2024-03-15T16:00:00",
-        shortdescription: "Learn modern web development techniques",
-        fullagenda: "HTML, CSS, JavaScript, React, and more...",
-        facultyresponsible: "Dr. Smith",
-        professorsparticipating: ["Dr. Smith", "Prof. Johnson"],
-        registrationdeadline: "2024-03-10T23:59:00",
-        type: "workshop",
-        attendees: [{ id: 1, name: "Alice Johnson" }],
-      },
-      {
-        id: 2,
-        name: "AI & Machine Learning",
-        location: "Science Center Lab 3",
-        startdateandtime: "2024-03-20T14:00:00",
-        enddateandtime: "2024-03-20T18:00:00",
-        shortdescription: "Introduction to AI and ML concepts",
-        fullagenda: "Neural networks, deep learning, practical applications",
-        facultyresponsible: "Dr. Brown",
-        professorsparticipating: ["Dr. Brown", "Prof. Davis"],
-        registrationdeadline: "2024-03-15T23:59:00",
-        type: "workshop",
-        attendees: [],
-      },
-    ],
-    bazaars: [
-      {
-        id: 1,
-        name: "Spring Bazaar",
-        location: "Student Union Courtyard",
-        startdateandtime: "2024-03-25T09:00:00",
-        enddateandtime: "2024-03-25T17:00:00",
-        shortdescription: "Annual spring festival with food and crafts",
-        registrationdeadline: "2024-03-20T23:59:00",
-        type: "bazaar",
-        booths: [
-          { id: 1, name: "Artisan Crafts", vendor: "Local Artisans Group" },
-          { id: 2, name: "Food Corner", vendor: "Campus Catering" },
-          { id: 3, name: "Handmade Jewelry", vendor: "Creative Designs" },
-        ],
-      },
-      {
-        id: 2,
-        name: "Artisan Market",
-        location: "Main Quad",
-        startdateandtime: "2024-04-05T10:00:00",
-        enddateandtime: "2024-04-05T16:00:00",
-        shortdescription: "Local artisans showcasing their work",
-        registrationdeadline: "2024-03-30T23:59:00",
-        type: "bazaar",
-        booths: [
-          { id: 4, name: "Pottery Display", vendor: "Clay Masters" },
-          { id: 5, name: "Textile Arts", vendor: "Weaver's Guild" },
-        ],
-      },
-    ],
-    trips: [
-      {
-        id: 1,
-        name: "Mountain Hiking Trip",
-        price: "$25",
-        location: "Blue Ridge Mountains",
-        startdateandtime: "2024-03-30T07:00:00",
-        enddateandtime: "2024-03-30T19:00:00",
-        shortdescription: "Day trip to explore scenic mountain trails",
-        registrationdeadline: "2024-03-25T23:59:00",
-        type: "trips",
-        attendees: [{ id: 1, name: "Alice Johnson" }],
-      },
-      {
-        id: 2,
-        name: "Museum Tour",
-        price: "$15",
-        location: "City Art Museum",
-        startdateandtime: "2024-04-12T09:00:00",
-        enddateandtime: "2024-04-12T15:00:00",
-        shortdescription: "Guided tour of the city's premier art museum",
-        registrationdeadline: "2024-04-07T23:59:00",
-        type: "trips",
-        attendees: [{ id: 1, name: "Alice Johnson" }],
-      },
-    ],
-    conferences: [
-      {
-        id: 1,
-        name: "Tech Innovation Summit 2024",
-        startdateandtime: "2024-04-18T09:00:00",
-        enddateandtime: "2024-04-19T17:00:00",
-        shortdescription: "Exploring the future of technology and innovation",
-        fullagenda: "Keynotes, panels, workshops, and networking sessions",
-        conferencewebsitelink: "https://example.com/tech-summit",
-        type: "conferences",
-      },
-      {
-        id: 2,
-        name: "Sustainability Conference",
-        startdateandtime: "2024-05-05T10:00:00",
-        enddateandtime: "2024-05-05T16:00:00",
-        shortdescription: "Discussing sustainable practices for the future",
-        fullagenda: "Expert talks, case studies, and solution workshops",
-        conferencewebsitelink: "https://example.com/sustainability-conf",
-        type: "conferences",
-      },
-    ],
-    booths: [
-      {
-        id: 1,
-        name: "Career Services Booth",
-        location: "Student Services Building",
-        shortdescription: "Get career advice and resume reviews",
-        vendor: "University Career Center",
-        hours: "Mon-Fri 9AM-5PM",
-        contact: "career@university.edu",
-        type: "booths",
-      },
-      {
-        id: 2,
-        name: "Library Research Help",
-        location: "Main Library, 1st Floor",
-        shortdescription: "Research assistance and citation help",
-        vendor: "University Library",
-        hours: "Mon-Thu 10AM-8PM, Fri 10AM-5PM",
-        contact: "researchhelp@university.edu",
-        type: "booths",
-      },
-      {
-        id: 3,
-        name: "IT Support Desk",
-        location: "Tech Hub Building",
-        shortdescription: "Technical support and software assistance",
-        vendor: "University IT Department",
-        hours: "24/7",
-        contact: "itsupport@university.edu",
-        type: "booths",
-      },
-    ],
-  };
 
   // Simulate API call for events
   const fetchEvents = async (category) => {
@@ -319,21 +174,30 @@ const AllEvents = () => {
   };
 
   // detect if current user has privilege to delete events
-  // const { user } = useUserContext();
+  const { user } = useAuthUser();
   const location = useLocation();
-  // const userIsPrivileged = (() => {
-  //   const role = user?.role || "";
-  //   const fromRole =
-  //     role.toLowerCase().includes("admin") ||
-  //     role.toLowerCase().includes("event");
-  //   const fromPath =
-  //     location.pathname.toLowerCase().includes("admin") ||
-  //     location.pathname.toLowerCase().includes("eventsoffice") ||
-  //     location.pathname.toLowerCase().includes("events-office") ||
-  //     location.pathname.toLowerCase().includes("events-office");
-  //   return fromRole || fromPath;
-  // })();
-  const userIsPrivileged = true; // For testing, assume true
+  const userIsPrivileged = (() => {
+    const role = user?.role || "";
+    const fromRole =
+      role.toLowerCase().includes("admin") ||
+      role.toLowerCase().includes("event");
+    const fromPath =
+      location.pathname.toLowerCase().includes("admin") ||
+      location.pathname.toLowerCase().includes("eventsoffice") ||
+      location.pathname.toLowerCase().includes("events-office") ||
+      location.pathname.toLowerCase().includes("events-office");
+    return fromRole || fromPath;
+  })();
+
+  const userIsEligible = (() => {
+    const role = user?.role || "";
+    return (
+      role.toLowerCase().includes("student") ||
+      role.toLowerCase().includes("professor") ||
+      role.toLowerCase().includes("staff") ||
+      role.toLowerCase().includes("ta")
+    );
+  })();
 
   const handleDeleteEvent = async (event) => {
     const ok = window.confirm(
@@ -388,6 +252,14 @@ const AllEvents = () => {
         closeBoothsModal();
       }
     }
+  };
+
+  const handleRegisterEvent = (event) => {
+    alert(
+      `You have registered for ${
+        event.name || event.bazaarname || "the event"
+      }!`
+    );
   };
 
   return (
@@ -495,7 +367,8 @@ const AllEvents = () => {
                 {searchTerm ? (
                   <div>
                     <p className="text-[#312A68] text-lg mb-4">
-                      No {selectedCategory} found matching "{searchTerm}"
+                      No {selectedCategory == "all" ? events : selectedCategory}{" "}
+                      found matching "{searchTerm}"
                     </p>
                     <button
                       onClick={clearSearch}
@@ -642,6 +515,24 @@ const AllEvents = () => {
                               className="text-xs bg-rose-50 text-rose-700 px-3 py-1 rounded-full hover:bg-rose-100 transition-colors"
                             >
                               Delete
+                            </button>
+                          </div>
+                        )}
+                      {userIsEligible &&
+                        (event.type === "trip" || event.type === "workshop") &&
+                        ((event.registrationdeadline &&
+                          event.registrationdeadline > new Date()) ||
+                          new Date(event.startdate) > new Date()) &&
+                        !event.attendees.includes(user._id) &&
+                        ((event.capacity &&
+                          event.attendees.length < event.capacity) ||
+                          true) && (
+                          <div className="mt-3">
+                            <button
+                              onClick={() => handleRegisterEvent(event)}
+                              className="text-xs bg-rose-50 text-rose-700 px-3 py-1 rounded-full hover:bg-rose-100 transition-colors"
+                            >
+                              Register
                             </button>
                           </div>
                         )}
