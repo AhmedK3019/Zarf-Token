@@ -6,6 +6,7 @@ import MyRequests from "./MyRequests";
 import AcceptedBooths from "./AcceptedBooths";
 import ApplyLoyalty from "./ApplyLoyalty";
 import CancelLoyalty from "./CancelLoyalty";
+import NotFound from "../NotFoundPage";
 
 const mainDashboardVendor = ({ vendor }) => {
   return (
@@ -23,6 +24,7 @@ const mainDashboardVendor = ({ vendor }) => {
           ) : (
             <Route path="/apply-loyalty" element={<ApplyLoyalty />} />
           )}
+          <Route path="*" element={<NotFound />}></Route>
         </Routes>
       </main>
     </div>

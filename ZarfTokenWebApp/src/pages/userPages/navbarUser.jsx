@@ -1,4 +1,4 @@
-import { NavLink } from "react-router-dom";
+import { NavLink, useNavigate } from "react-router-dom";
 import { useAuthUser } from "../../hooks/auth"; // example context hook
 import logo from "../../assets/logo.png";
 
@@ -190,12 +190,29 @@ const NavbarUser = () => {
         </nav>
       </header>
       <div className="flex px-4 items-center gap-2 text-sm font-medium">
-        <button className="rounded-full border border-primary bg-white px-4 py-2 text-primary transition-colors hover:bg-black/10">
-          Logout
-        </button>
+        <LogoutButton />
       </div>
     </div>
   );
 };
 
 export default NavbarUser;
+
+function LogoutButton() {
+  const navigate = useNavigate();
+  const { logout } = useAuthUser();
+
+  const handleLogout = () => {
+    logout();
+    navigate("/", { replace: true });
+  };
+
+  return (
+    <button
+      onClick={handleLogout}
+      className="rounded-full border border-primary bg-white px-4 py-2 text-primary transition-colors hover:bg-black/10"
+    >
+      Logout
+    </button>
+  );
+}

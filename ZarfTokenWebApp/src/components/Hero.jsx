@@ -14,12 +14,12 @@ const roleRoutes = {
 const resolveRoleRoute = async (email, password) => {
   try {
     if (!email) return null;
-    const { data, message } = await api.post("/allUsers/login", {
+    const { data } = await api.post("/allUsers/login", {
       email,
       password,
     });
     // logic to determine role based on user.role
-    if (message !== "Login successful") return null;
+    if (data.message !== "Login successful") return null;
     switch (String(data.user.role)) {
       case "Admin":
         return roleRoutes.admin;

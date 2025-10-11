@@ -7,6 +7,7 @@ import MainDashboardEventsOffice from "./pages/eventsOfficePages/mainDashboardEv
 import MainDashboardUser from "./pages/userPages/mainDashboardUser";
 import MainDashboardVendor from "./pages/vendorPages/mainDashboardVendor";
 import MainDashboardAdmin from "./pages/adminPages/mainDashboardAdmin";
+import ProtectedRoute from "./components/ProtectedRoute";
 import SignUp from "./pages/signUp";
 import CreateTrip from "./pages/tripPages/createTrip";
 import "./App.css";
@@ -24,13 +25,38 @@ function App() {
         <Route path="/events" element={<EventsPage />} />
         <Route path="/events/:category" element={<EventsPage />} />
         <Route path="/signup" element={<SignUp />} />
-        <Route path="/dashboard/user/*" element={<MainDashboardUser />} />
+        <Route
+          path="/dashboard/user/*"
+          element={
+            <ProtectedRoute>
+              <MainDashboardUser />
+            </ProtectedRoute>
+          }
+        />
         <Route
           path="/dashboard/eventsOffice/*"
-          element={<MainDashboardEventsOffice />}
+          element={
+            <ProtectedRoute allowedRoles={["EventsOffice", "Admin"]}>
+              <MainDashboardEventsOffice />
+            </ProtectedRoute>
+          }
         />
-        <Route path="/dashboard/vendor/*" element={<MainDashboardVendor />} />
-        <Route path="/dashboard/admin/*" element={<MainDashboardAdmin />} />
+        <Route
+          path="/dashboard/vendor/*"
+          element={
+            <ProtectedRoute allowedRoles={["Vendor"]}>
+              <MainDashboardVendor />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/dashboard/admin/*"
+          element={
+            <ProtectedRoute allowedRoles={["Admin"]}>
+              <MainDashboardAdmin />
+            </ProtectedRoute>
+          }
+        />
 
         <Route path="/createTrip" element={<CreateTrip />} />
       </Routes>

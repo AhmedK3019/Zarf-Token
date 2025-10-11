@@ -1,7 +1,12 @@
-import { NavLink } from "react-router-dom";
+import { NavLink, useNavigate } from "react-router-dom";
+import { useAuthUser } from "../../hooks/auth";
 import logo from "../../assets/logo.png";
 
 const NavbarVendor = ({ vendor }) => {
+  const { user } = useAuthUser();
+  // if not authenticated or not a vendor, don't render nav
+  if (!user || user.role !== "Vendor") return null;
+
   return (
     <div className="flex w-full justify-center pt-9 pb-4">
       <header className="flex w-[86%] max-w-3xl min-w-[820px] items-center justify-center gap-8 rounded-full bg-white/95 px-5 py-2.5 shadow-[0_14px_32px_rgba(115,108,237,0.2)] backdrop-blur md:px-7">
@@ -77,12 +82,29 @@ const NavbarVendor = ({ vendor }) => {
         </nav>
       </header>
       <div className="flex px-4 items-center gap-2 text-sm font-medium">
-        <button className="rounded-full border border-primary bg-white px-4 py-2 text-primary transition-colors hover:bg-black/10">
-          Logout
-        </button>
+        <LogoutButton />
       </div>
     </div>
   );
 };
 
 export default NavbarVendor;
+
+function LogoutButton() {
+  const navigate = useNavigate();
+  const { logout } = useAuthUser();
+
+  const handleLogout = () => {
+    logout();
+    navigate("/", { replace: true });
+  };
+
+  return (
+    <button
+      onClick={handleLogout}
+      className="rounded-full border border-primary bg-white px-4 py-2 text-primary transition-colors hover:bg-black/10"
+    >
+      Logout
+    </button>
+  );
+}

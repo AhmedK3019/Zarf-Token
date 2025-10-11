@@ -12,6 +12,7 @@ import GymSchedule from "./GymSchedule";
 import Courts from "../studentPages/Courts";
 import CreateWorkshop from "../professorPages/CreateWorkshop";
 import MyWorkshops from "../professorPages/MyWorkshops";
+import NotFound from "../NotFoundPage";
 
 const mainDashboardUser = () => {
   const { user } = useAuthUser();
@@ -41,6 +42,7 @@ const mainDashboardUser = () => {
               <Route path="/my-workshops" element={<MyWorkshops />} />
             </>
           )}
+          <Route path="*" element={<NotFound />}></Route>
         </Routes>
       </main>
     </div>

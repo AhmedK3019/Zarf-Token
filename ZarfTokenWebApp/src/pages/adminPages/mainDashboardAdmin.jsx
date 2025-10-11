@@ -8,6 +8,7 @@ import LoyaltyVendors from "./LoyaltyVendors";
 import AllUsers from "./AllUsers";
 import AddAdmin from "./AddAdminOrEventsOffice";
 import AllAdmins from "./AllAdminsAndOfficers";
+import NotFound from "../NotFoundPage";
 
 const mainDashboardAdmin = () => {
   return (
@@ -24,6 +25,7 @@ const mainDashboardAdmin = () => {
           <Route path="/all-users" element={<AllUsers />} />
           <Route path="/add-admin" element={<AddAdmin />} />
           <Route path="/all-admins" element={<AllAdmins />} />
+          <Route path="*" element={<NotFound />}></Route>
         </Routes>
       </main>
     </div>
