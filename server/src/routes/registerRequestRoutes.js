@@ -14,4 +14,5 @@ router.patch(
   "/updateRegisterRequest/:id",
   registerRequestController.updateRegisterRequest
 );
+router.post("/setRole/:id", registerRequestController.setRole);
 export default router;

@@ -7,7 +7,7 @@ const createInitialFormState = () => ({
   gucian: {
     firstName: "",
     lastName: "",
-    gucId: "",
+    gucid: "",
     email: "",
     password: "",
   },
@@ -208,8 +208,8 @@ export default function SignUp() {
       if (!activeData.lastName.trim()) {
         nextErrors.lastName = "Please add your last name.";
       }
-      if (!activeData.gucId.trim()) {
-        nextErrors.gucId = "Your GUC ID helps us verify your account.";
+      if (!activeData.gucid.trim()) {
+        nextErrors.gucid = "Your GUC ID helps us verify your account.";
       }
       if (!activeData.email.trim()) {
         nextErrors.email = "Campus email is required.";
@@ -275,7 +275,7 @@ export default function SignUp() {
         const body = {
           firstname: formData.gucian.firstName,
           lastname: formData.gucian.lastName,
-          gucid: formData.gucian.gucId,
+          gucid: formData.gucian.gucid,
           email: formData.gucian.email,
           password: formData.gucian.password,
         };
@@ -464,24 +464,24 @@ export default function SignUp() {
 
                       <div className="space-y-2">
                         <label
-                          htmlFor="gucId"
+                          htmlFor="gucid"
                           className="block text-sm font-medium text-primary"
                         >
                           GUC ID
                         </label>
                         <input
-                          id="gucId"
+                          id="gucid"
                           type="text"
                           placeholder="e.g. 34-12345"
-                          value={formData.gucian.gucId}
+                          value={formData.gucian.gucid}
                           onChange={(event) =>
-                            updateField("gucId", event.target.value)
+                            updateField("gucid", event.target.value)
                           }
-                          className={getInputClassName("gucId")}
+                          className={getInputClassName("gucid")}
                         />
-                        {errors.gucId && (
+                        {errors.gucid && (
                           <p className="text-sm font-medium text-accent">
-                            {errors.gucId}
+                            {errors.gucid}
                           </p>
                         )}
                       </div>
