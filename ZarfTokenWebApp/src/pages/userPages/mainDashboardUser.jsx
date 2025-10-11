@@ -1,6 +1,6 @@
 import { Routes, Route } from "react-router-dom";
 import NavbarUser from "./navbarUser";
-import { useUserContext } from "../../context/UserContext";
+import { useAuthUser } from "../../hooks/auth";
 import Notifications from "../Notifications";
 import AllEvents from "../AllEvents";
 import Wallet from "../Wallet";
@@ -14,7 +14,7 @@ import CreateWorkshop from "../professorPages/CreateWorkshop";
 import MyWorkshops from "../professorPages/MyWorkshops";
 
 const mainDashboardUser = () => {
-  const { user } = useUserContext();
+  const { user } = useAuthUser();
 
   return (
     <div>

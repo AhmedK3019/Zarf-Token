@@ -10,12 +10,13 @@ import MainDashboardAdmin from "./pages/adminPages/mainDashboardAdmin";
 import SignUp from "./pages/signUp";
 import CreateTrip from "./pages/tripPages/createTrip";
 import "./App.css";
+import { useAuthUser } from "./hooks/auth";
 
 function App() {
   useEffect(() => {
     document.title = "ZarfToken";
   }, []);
-
+  const { user, logout } = useAuthUser();
   return (
     <Router>
       <Routes>

@@ -1,29 +1,39 @@
 import React, { useEffect, useState } from "react";
 import api from "../../services/api";
-import { useUserContext } from "../../context/UserContext";
+import { useAuthUser } from "../../hooks/auth";
 
 export default function MyWorkshops() {
-  const { user } = useUserContext();
+  const { user } = useAuthUser();
   const [workshops, setWorkshops] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [editing, setEditing] = useState(null); 
+  const [editing, setEditing] = useState(null);
   const [form, setForm] = useState({});
   const [error, setError] = useState("");
 
- 
   useEffect(() => {
     const fetch = async () => {
       try {
         const res = await api.get("/workshop/getAllWorkshops");
         const items = res.data.workshops || res.data || [];
 
-        const myName = user ? (user.firstName ? `${user.firstName} ${user.lastName || ""}` : user.name || user.email) : "";
+        const myName = user
+          ? user.firstName
+            ? `${user.firstName} ${user.lastName || ""}`
+            : user.name || user.email
+          : "";
         const myId = user?._id || user?.id;
 
-        const filtered = items.filter(w => {
-          if (w.facultyresponsibilty && myName && String(w.facultyresponsibilty).includes(myName)) return true;
+        const filtered = items.filter((w) => {
+          if (
+            w.facultyresponsibilty &&
+            myName &&
+            String(w.facultyresponsibilty).includes(myName)
+          )
+            return true;
           if (w.professorsparticipating && myId) {
-            return w.professorsparticipating.some(pid => String(pid) === String(myId));
+            return w.professorsparticipating.some(
+              (pid) => String(pid) === String(myId)
+            );
           }
           return false;
         });
@@ -38,10 +48,9 @@ export default function MyWorkshops() {
     fetch();
   }, [user]);
 
-  
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setForm(prev => ({ ...prev, [name]: value }));
+    setForm((prev) => ({ ...prev, [name]: value }));
   };
 
   const startEdit = (workshop) => {
@@ -58,10 +67,10 @@ export default function MyWorkshops() {
     try {
       await api.put(`/workshop/updateWorkshop/${editing}`, {
         ...form,
-        extrarequiredfunding: Number(form.extrarequiredfunding)
+        extrarequiredfunding: Number(form.extrarequiredfunding),
       });
-      setWorkshops(prev =>
-        prev.map(w => (w._id === editing ? { ...w, ...form } : w))
+      setWorkshops((prev) =>
+        prev.map((w) => (w._id === editing ? { ...w, ...form } : w))
       );
       cancelEdit();
     } catch (err) {
@@ -73,7 +82,7 @@ export default function MyWorkshops() {
     if (!confirm("Delete this workshop?")) return;
     try {
       await api.delete(`/workshop/deleteWorkshop/${id}`);
-      setWorkshops(prev => prev.filter(w => w._id !== id));
+      setWorkshops((prev) => prev.filter((w) => w._id !== id));
     } catch (err) {
       alert("Failed to delete");
     }
@@ -87,14 +96,18 @@ export default function MyWorkshops() {
       <h2 className="text-2xl font-semibold mb-4">My Workshops</h2>
 
       {workshops.length === 0 ? (
-        <div className="text-gray-600">You have not created any workshops yet.</div>
+        <div className="text-gray-600">
+          You have not created any workshops yet.
+        </div>
       ) : (
         <div className="grid grid-cols-1 gap-4">
-          {workshops.map(w =>
+          {workshops.map((w) =>
             editing === w._id ? (
               // edit mode
               <div key={w._id} className="rounded-xl border p-4 bg-white/5">
-                <h3 className="text-lg font-semibold mb-2">Edit {w.workshopname}</h3>
+                <h3 className="text-lg font-semibold mb-2">
+                  Edit {w.workshopname}
+                </h3>
                 <div className="space-y-2">
                   <input
                     name="workshopname"
@@ -110,27 +123,41 @@ export default function MyWorkshops() {
                     rows={3}
                   />
                   <div className="flex gap-2">
-                    <button onClick={saveEdit} className="bg-primary text-white px-3 py-1 rounded">
+                    <button
+                      onClick={saveEdit}
+                      className="bg-primary text-white px-3 py-1 rounded"
+                    >
                       Save
                     </button>
-                    <button onClick={cancelEdit} className="border px-3 py-1 rounded">
+                    <button
+                      onClick={cancelEdit}
+                      className="border px-3 py-1 rounded"
+                    >
                       Cancel
                     </button>
                   </div>
                 </div>
               </div>
             ) : (
-              
-              <div key={w._id} className="rounded-xl border p-4 bg-white/5 flex justify-between items-start">
+              <div
+                key={w._id}
+                className="rounded-xl border p-4 bg-white/5 flex justify-between items-start"
+              >
                 <div>
                   <h3 className="text-lg font-semibold">{w.workshopname}</h3>
                   <p className="text-sm text-gray-400">{w.shortdescription}</p>
                 </div>
                 <div className="flex gap-2">
-                  <button onClick={() => startEdit(w)} className="border px-3 py-1 rounded">
+                  <button
+                    onClick={() => startEdit(w)}
+                    className="border px-3 py-1 rounded"
+                  >
                     Edit
                   </button>
-                  <button onClick={() => handleDelete(w._id)} className="border px-3 py-1 rounded">
+                  <button
+                    onClick={() => handleDelete(w._id)}
+                    className="border px-3 py-1 rounded"
+                  >
                     Delete
                   </button>
                 </div>

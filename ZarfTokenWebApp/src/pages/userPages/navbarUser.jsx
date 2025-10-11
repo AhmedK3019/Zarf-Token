@@ -1,9 +1,9 @@
 import { NavLink } from "react-router-dom";
-import { useUserContext } from "../../context/UserContext"; // example context hook
+import { useAuthUser } from "../../hooks/auth"; // example context hook
 import logo from "../../assets/logo.png";
 
 const NavbarUser = () => {
-  const { user } = useUserContext(); // { role, wallet }
+  const { user } = useAuthUser(); // { role, wallet }
 
   const commonLinks = (
     <>

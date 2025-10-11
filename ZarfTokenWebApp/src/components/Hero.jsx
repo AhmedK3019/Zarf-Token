@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import EyeIcon from "./EyeIcon";
 import api from "../services/api";
-import { AdminContext } from "../context/AdminContext";
+import { useAuthUser } from "../hooks/auth";
 
 const roleRoutes = {
   admin: "/dashboard/admin",
@@ -31,6 +31,7 @@ const resolveRoleRoute = async (email, password) => {
 };
 
 const Hero = () => {
+  const { login } = useAuthUser();
   const navigate = useNavigate();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -64,6 +65,7 @@ const Hero = () => {
 
     const hasErrors = Object.values(nextErrors).some(Boolean);
     if (!hasErrors && targetRoute) {
+      await login(email, password);
       navigate(targetRoute);
     }
   };

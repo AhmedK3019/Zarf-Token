@@ -1,1 +1,1 @@
-export { useAuth } from "../context/AdminContext";
+export { useAuthUser } from "../context/UserContext";
