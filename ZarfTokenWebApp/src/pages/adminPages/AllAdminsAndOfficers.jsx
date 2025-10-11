@@ -1,10 +1,12 @@
 import React, { useEffect, useState } from "react";
 import api from "../../services/api";
+import { useAuthUser } from "../../hooks/auth";
 
 export default function AllAdminsAndOfficers() {
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  const { user } = useAuthUser();
 
   const fetchUsers = async () => {
     setLoading(true);
@@ -12,7 +14,14 @@ export default function AllAdminsAndOfficers() {
     try {
       const res = await api.get("/allUsers/allAdminsAndOfficers");
       // API returns an array
-      setUsers(res.data || res.data?.result || res.data?.users || res.data);
+      // remove current user from list
+      const filtered = (
+        res.data ||
+        res.data?.result ||
+        res.data?.users ||
+        res.data
+      ).filter((u) => (u._id || u.id) !== user._id);
+      setUsers(filtered);
     } catch (err) {
       console.error(err);
       setError("Failed to load users. Please try again.");
