@@ -12,21 +12,31 @@ const roleRoutes = {
 };
 
 const resolveRoleRoute = async (email, password) => {
-  console.log(email, password);
-  if (!email) return null;
-  const { data } = await api.post("/allUsers/login", { email, password });
-  // logic to determine role based on user.role
-  console.log(data.user.role);
-  console.log(data.user);
-  switch (String(data.user.role)) {
-    case "Admin":
-      return roleRoutes.admin;
-    case "Vendor":
-      return roleRoutes.company;
-    case "Event office":
-      return roleRoutes.eventsOffice;
-    default:
-      return roleRoutes.user;
+  try {
+    if (!email) return null;
+    const { data, message } = await api.post("/allUsers/login", {
+      email,
+      password,
+    });
+    // logic to determine role based on user.role
+    if (message !== "Login successful") return null;
+    switch (String(data.user.role)) {
+      case "Admin":
+        return roleRoutes.admin;
+      case "Vendor":
+        return roleRoutes.company;
+      case "Event office":
+        return roleRoutes.eventsOffice;
+      case "Student":
+      case "Professor":
+      case "TA":
+      case "staff":
+        return roleRoutes.user;
+      default:
+        return null;
+    }
+  } catch (error) {
+    return null;
   }
 };
 
@@ -55,10 +65,8 @@ const Hero = () => {
     }
 
     const targetRoute = await resolveRoleRoute(email, password);
-    console.log(targetRoute);
     if (email.trim() && !targetRoute) {
-      nextErrors.role =
-        "We couldn't determine your dashboard. Please use your campus email.";
+      nextErrors.role = "Invalid credentials or unauthorized role.";
     }
 
     setErrors(nextErrors);

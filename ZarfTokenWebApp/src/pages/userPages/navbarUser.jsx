@@ -7,54 +7,54 @@ const NavbarUser = () => {
 
   const commonLinks = (
     <>
-      <Link
+      <NavLink
         to="/dashboard/user/notifications"
         className="rounded-full bg-primary/10 px-4 py-2 text-primary shadow-inner"
       >
         Notifications
-      </Link>
-      <Link
+      </NavLink>
+      <NavLink
         to="/dashboard/user/all-events"
         className="transition-colors hover:text-primary"
       >
         All Events
-      </Link>
-      <Link
+      </NavLink>
+      <NavLink
         to="/dashboard/user/wallet"
         className="transition-colors hover:text-primary"
       >
         Wallet (${user.wallet || 0})
-      </Link>
-      <Link
+      </NavLink>
+      <NavLink
         to="/dashboard/user/favourite-events"
         className="transition-colors hover:text-primary"
       >
         Favourite Events
-      </Link>
-      <Link
+      </NavLink>
+      <NavLink
         to="/dashboard/user/registered-events"
         className="transition-colors hover:text-primary"
       >
         Registered Events
-      </Link>
-      <Link
+      </NavLink>
+      <NavLink
         to="/dashboard/user/loyalty-program"
         className="transition-colors hover:text-primary"
       >
         Loyalty Program
-      </Link>
-      <Link
+      </NavLink>
+      <NavLink
         to="/dashboard/user/vendors-poll"
         className="transition-colors hover:text-primary"
       >
         Vendors Poll
-      </Link>
-      <Link
+      </NavLink>
+      <NavLink
         to="/dashboard/user/gym-schedule"
         className="transition-colors hover:text-primary"
       >
         Gym Schedule
-      </Link>
+      </NavLink>
     </>
   );
 
