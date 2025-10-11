@@ -80,6 +80,63 @@ const updateWorkshop = async (req, res, next) => {
 };
 
 // (TODO : Update workshop status )
+
+const updateWorkshopStatus = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+    const { status } = req.body;
+    const updatedStatus = await WorkShop.findByIdAndUpdate(
+      id,
+      { status },
+      { new: true }
+    );
+    if (!updatedStatus)
+      return res.status(404).json({ message: "Workshop is not found" });
+    return res.status(200).json({
+      message: "Status is updated successfully",
+      workshop: updatedStatus,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+const requestEdits = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+    const { comments } = req.body;
+    const updatedComment = await WorkShop.findByIdAndUpdate(
+      id,
+      { comments },
+      { new: true }
+    );
+    if (!updatedComment)
+      return res.status(404).json({ message: "Workshop is not found" });
+    return res.status(200).json({
+      message: "Edits are requested successfully",
+      workshop: updatedComment,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+const getMyWorkshops = async (req, res, next) => {
+  try {
+    const token = req.headers.authorization.split(" ")[1];
+    if (!token) return res.status(401).json({ message: "Token is not found" });
+    const myId = unPackToken(token);
+    if (!myId) return res.status(401).json({ message: "Invalid token" });
+    const myWorkshops = await WorkShop.find({ createdBy: myId });
+    if (!myWorkshops)
+      return res
+        .status(404)
+        .json({ message: "You did not create any workshops yet" });
+    return res.status(200).json({ myworkshops: myWorkshops });
+  } catch (error) {
+    next(error);
+  }
+};
 const deleteWorkshop = async (req, res, next) => {
   try {
     const { id } = req.params;
@@ -92,11 +149,53 @@ const deleteWorkshop = async (req, res, next) => {
     next(error);
   }
 };
+const registerForWorkshop = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+    const token = req.headers.authorization?.split(" ")[1];
+    if (!token) return res.status(401).json({ message: "No token provided" });
+    let userId = unPackToken(token);
+    if (!userId) return res.status(401).json({ message: "Invalid Token" });
+    const check = await WorkShop.findById(id, { capacity: 1, attendees: 1 });
+    if (!check)
+      return res.status(404).json({ message: "Workshop is not found" });
+    if (check.attendees.includes(userId)) {
+      return res
+        .status(400)
+        .json({ message: "You already registered for this workshop" });
+    }
+    if (check.attendees.length + 1 > check.capacity) {
+      return res.status(400).json({ message: "Workshop is full" });
+    }
+    const afterUpdate = await WorkShop.findByIdAndUpdate(
+      id,
+      { $addToSet: { attendees: userId } },
+      { new: true }
+    );
+    return res
+      .status(200)
+      .json({ message: "done updating", workshop: afterUpdate });
+  } catch (error) {
+    next(error);
+  }
+};
 
+const unPackToken = (token) => {
+  try {
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    return decoded.id;
+  } catch (error) {
+    return null;
+  }
+};
 export default {
   createWorkshop,
   getAllWorkshops,
   getWorkshop,
   updateWorkshop,
   deleteWorkshop,
+  registerForWorkshop,
+  updateWorkshopStatus,
+  getMyWorkshops,
+  requestEdits,
 };

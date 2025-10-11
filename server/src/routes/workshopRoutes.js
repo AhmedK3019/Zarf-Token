@@ -12,4 +12,15 @@ router.put("/updateWorkshop/:id", worshopsController.updateWorkshop);
 
 router.delete("/deleteWorkshop/:id", worshopsController.deleteWorkshop);
 
+router.patch(
+  "/registerForaWorkshop/:id",
+  worshopsController.registerForWorkshop
+);
+router.patch(
+  "/updateWorkshopStatus/:id",
+  worshopsController.updateWorkshopStatus
+);
+router.get("/getMyWorkshops", worshopsController.getMyWorkshops);
+
+router.patch("/requestEdits/:id", worshopsController.requestEdits);
 export default router;
