@@ -124,6 +124,8 @@ const acceptRequest = async (req, res, next) => {
     const vendor = await Vendor.findById(request.vendorId);
     if (!request)
       return res.status(404).json({ message: "VendorRequest not found" });
+    request.status = "Approved";
+    await request.save();
     const booth = await Booth.create({
       boothname: vendor ? vendor.companyName : "Vendor Booth",
       vendorId: request.vendorId,
@@ -134,7 +136,6 @@ const acceptRequest = async (req, res, next) => {
       location: request.location,
       duration: request.duration,
     });
-    await request.remove();
     try {
       await mailer.sendBoothApprovalEmail(request.vendorId, booth);
     } catch (emailErr) {
@@ -155,6 +156,7 @@ const deleteRequest = async (req, res, next) => {
     if (!doc)
       return res.status(404).json({ message: "VendorRequest not found" });
     // send a rejection email to vendor
+    doc.status = "Rejected";
     try {
       await mailer.sendBoothRejectionEmail(request.vendorId, doc);
     } catch (emailErr) {
@@ -163,8 +165,7 @@ const deleteRequest = async (req, res, next) => {
         emailErr && emailErr.message ? emailErr.message : emailErr
       );
     }
-    await VendorRequest.findByIdAndDelete(req.params.id);
-    res.json({ message: "VendorRequest deleted" });
+    res.json({ message: "VendorRequest rejected" });
   } catch (err) {
     next(err);
   }

@@ -21,6 +21,14 @@ const workshopSchema = new mongoose.Schema({
   },
   extrarequiredfunding: { type: Number, required: true },
   type: { type: String, default: "workshop" },
+  comments: { type: String, default: "" },
+  status: {
+    type: String,
+    enum: ["Pending", "Approved", "Rejected", "Cancelled", "Completed"],
+    default: "Pending",
+  },
+  createdBy: { type: mongoose.Schema.ObjectId, ref: "User", required: true },
+  createdAt: { type: Date, default: Date.now },
 });
 
 const Workshop = mongoose.model("Workshop", workshopSchema);

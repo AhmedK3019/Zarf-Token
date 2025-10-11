@@ -4,8 +4,7 @@ import logo from "../../assets/logo.png";
 
 const NavbarEventsOffice = () => {
   const { user } = useAuthUser();
-  if (!user || (user.role !== "EventsOffice" && user.role !== "Admin"))
-    return null;
+  if (!user || user.role !== "Event office") return null;
 
   return (
     <div className="flex w-full justify-center pt-9 pb-4">
