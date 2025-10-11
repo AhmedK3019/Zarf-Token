@@ -48,4 +48,20 @@ const getEventsByType = async (req, res, next) => {
   }
 };
 
-export default { getAllEvents, getEventsByType };
+const getEventsRegisteredByUser = async (req, res, next) => {
+  try {
+    const { userId } = req.params;
+    const workshops = await Workshop.find({ attendees: userId });
+    const Bazzars = await Bazaar.find({ attendees: userId });
+    const Conferences = await Conference.find({ attendees: userId });
+    const Trips = await Trip.find({ attendees: userId });
+    const Booths = await Booth.find({ attendees: userId });
+    return res
+      .status(200)
+      .json([...workshops, ...Bazzars, ...Conferences, ...Trips, ...Booths]);
+  } catch (error) {
+    next(error);
+  }
+};
+
+export default { getAllEvents, getEventsByType, getEventsRegisteredByUser };
