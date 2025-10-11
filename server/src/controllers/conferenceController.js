@@ -22,7 +22,6 @@ const createConference = async (req, res, next) => {
     if (error) {
       return res.status(400).json({ message: error.details[0].message });
     }
-    console.log(value);
     const doc = await Conference.create(value);
     return res.status(201).json({ conference: doc });
   } catch (error) {
@@ -33,7 +32,6 @@ const createConference = async (req, res, next) => {
 const getAllConferences = async (_req, res, next) => {
   try {
     const conferences = await Conference.find();
-    console.log(conferences);
     return res.status(200).json({ conferences });
   } catch (error) {
     next(error);

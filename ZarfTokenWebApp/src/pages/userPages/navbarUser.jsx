@@ -5,6 +5,8 @@ import logo from "../../assets/logo.png";
 const NavbarUser = () => {
   const { user } = useAuthUser(); // { role, wallet }
 
+  if (!user) return null; // or a loading state
+
   const commonLinks = (
     <>
       <NavLink

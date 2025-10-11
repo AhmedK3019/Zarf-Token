@@ -11,7 +11,6 @@ const getAllEvents = async (_req, res, next) => {
     const Conferences = await Conference.find();
     const Trips = await Trip.find();
     const Booths = await Booth.find();
-    console.log(workshops);
     return res
       .status(200)
       .json([...workshops, ...Bazzars, ...Conferences, ...Trips, ...Booths]);

@@ -32,11 +32,11 @@ const mainDashboardUser = () => {
           <Route path="/vendors-poll" element={<VendorsPoll />} />
           <Route path="/gym-schedule" element={<GymSchedule />} />
 
-          {user.role === "Student" && (
+          {user && user.role === "Student" && (
             <Route path="/courts" element={<Courts />} />
           )}
 
-          {user.role === "Professor" && (
+          {user && user.role === "Professor" && (
             <>
               <Route path="/create-workshop" element={<CreateWorkshop />} />
               <Route path="/my-workshops" element={<MyWorkshops />} />

@@ -155,7 +155,6 @@ const getUser = async (req, res, next) => {
         notifications: 0,
       }
     );
-    console.log(JSON.stringify(user));
     if (!user) {
       return res.status(404).json({ message: "User not found" });
     }

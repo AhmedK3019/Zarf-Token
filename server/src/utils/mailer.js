@@ -19,7 +19,6 @@ export const sendEmail = async (to, subject, textOrHtml, isHtml = false) => {
       subject,
       [isHtml ? "html" : "text"]: textOrHtml,
     });
-    console.log("Email sent:", info.messageId);
     return info;
   } catch (err) {
     console.error("sendEmail failed:", err && err.message ? err.message : err);

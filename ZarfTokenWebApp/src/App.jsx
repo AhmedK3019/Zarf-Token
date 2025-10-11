@@ -28,7 +28,9 @@ function App() {
         <Route
           path="/dashboard/user/*"
           element={
-            <ProtectedRoute>
+            <ProtectedRoute
+              allowedRoles={["Student", "Professor", "Staff", "TA"]}
+            >
               <MainDashboardUser />
             </ProtectedRoute>
           }

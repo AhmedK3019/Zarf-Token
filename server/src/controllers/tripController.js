@@ -17,7 +17,6 @@ const TripSchema = Joi.object({
 
 const createTrip = async (req, res, next) => {
   try {
-    console.log(req.body);
     const { value, error } = TripSchema.validate(req.body);
     if (error) return res.json({ message: error.message });
     const doc = await Trip.create(value);

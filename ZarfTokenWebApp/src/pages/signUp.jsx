@@ -211,8 +211,6 @@ export default function SignUp() {
         setSuccessMessage("Signed up successfully!");
       }
 
-      console.log("Signup successful:", data);
-
       // Reset fields
       setFormData(createInitialFormState());
       if (logoInputRef.current) logoInputRef.current.value = "";
