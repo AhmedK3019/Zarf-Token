@@ -15,6 +15,11 @@ const workshopSchema = Joi.object({
     "array.length":
       '"proffessorsparticipating" must contain at least one professor',
   }),
+  status: Joi.string()
+    .valid("Pending", "Approved", "Rejected")
+    .default("Pending"),
+  capacity: Joi.number().integer().min(1).required(),
+  price: Joi.number().min(0).required(),
   fundingsource: Joi.string().valid("External", "GUC").required(),
   extrarequiredfunding: Joi.number().default(0),
   attendees: Joi.array().default([]),
@@ -74,6 +79,7 @@ const updateWorkshop = async (req, res, next) => {
   }
 };
 
+// (TODO : Update workshop status )
 const deleteWorkshop = async (req, res, next) => {
   try {
     const { id } = req.params;

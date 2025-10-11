@@ -38,7 +38,7 @@ function App() {
         <Route
           path="/dashboard/eventsOffice/*"
           element={
-            <ProtectedRoute allowedRoles={["EventsOffice", "Admin"]}>
+            <ProtectedRoute allowedRoles={["Event office", "Admin"]}>
               <MainDashboardEventsOffice />
             </ProtectedRoute>
           }
