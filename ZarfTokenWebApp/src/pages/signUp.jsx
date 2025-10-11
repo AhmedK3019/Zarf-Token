@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
-import { useSearchParams } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import EyeIcon from "../components/EyeIcon";
 import api from "../services/api";
 
@@ -33,6 +33,7 @@ const allowedLogoFileTypes = ["image/svg+xml", "image/png", "image/webp"];
 
 export default function SignUp() {
   const [searchParams, setSearchParams] = useSearchParams();
+  const navigate = useNavigate();
   const [formData, setFormData] = useState(() => createInitialFormState());
   const [errors, setErrors] = useState({});
   const [successMessage, setSuccessMessage] = useState("");
@@ -71,6 +72,11 @@ export default function SignUp() {
     setSuccessMessage("");
     setPasswordVisibility({ gucian: false, vendor: false });
     setQueryRole(role);
+  };
+
+  // Provide a quick exit route back to the landing page.
+  const handleGoBack = () => {
+    navigate("/", { replace: true });
   };
 
   const updateField = (field, value) => {
@@ -245,6 +251,13 @@ export default function SignUp() {
       <div className="pointer-events-none absolute bottom-[-18%] left-1/2 h-[360px] w-[110%] -translate-x-1/2 rounded-[50%] bg-gradient-to-r from-secondary via-primary to-info opacity-40 blur-3xl" />
 
       <main className="relative z-10 flex min-h-screen items-center justify-center px-6 py-16">
+        <button
+          type="button"
+          onClick={handleGoBack}
+          className="absolute left-6 top-6 inline-flex items-center justify-center rounded-full border border-primary/40 bg-white px-4 py-2 text-sm font-semibold text-primary tracking-wide shadow-[0_8px_18px_rgba(115,108,237,0.2)] transition-transform hover:-translate-y-0.5 hover:bg-secondary/20 hover:shadow-[0_12px_24px_rgba(115,108,237,0.25)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40 focus-visible:ring-offset-2 focus-visible:ring-offset-white sm:left-10 sm:top-10"
+        >
+          Back
+        </button>
         <div className="grid w-full max-w-6xl gap-12 lg:grid-cols-[1.05fr_1fr]">
           <div className="space-y-6 self-center">
             <h2 className="text-4xl font-bold text-primary sm:text-5xl lg:text-6xl">
