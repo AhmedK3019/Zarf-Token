@@ -8,7 +8,7 @@ const bazaarSchema = new mongoose.Schema({
   endtime: { type: String, required: true },
   location: { type: String, required: true },
   shortdescription: { type: String, required: true },
-  registerdeadline: { type: Date, required: true },
+  registrationdeadline: { type: Date, required: true },
   type: { type: String, default: "bazaar" },
 });
 

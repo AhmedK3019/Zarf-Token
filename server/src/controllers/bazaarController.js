@@ -9,7 +9,7 @@ const bazaarSchema = Joi.object({
   endtime: Joi.string().required(),
   location: Joi.string().required(),
   shortdescription: Joi.string().required(),
-  registerdeadline: Joi.date().required(),
+  registrationdeadline: Joi.date().required(),
 });
 
 const createBazaar = async (req, res, next) => {
