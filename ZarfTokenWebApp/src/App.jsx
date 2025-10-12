@@ -9,7 +9,6 @@ import MainDashboardVendor from "./pages/vendorPages/mainDashboardVendor";
 import MainDashboardAdmin from "./pages/adminPages/mainDashboardAdmin";
 import ProtectedRoute from "./components/ProtectedRoute";
 import SignUp from "./pages/signUp";
-import CreateTrip from "./pages/tripPages/createTrip";
 import "./App.css";
 import { useAuthUser } from "./hooks/auth";
 
@@ -59,8 +58,6 @@ function App() {
             </ProtectedRoute>
           }
         />
-
-        <Route path="/createTrip" element={<CreateTrip />} />
       </Routes>
     </Router>
   );

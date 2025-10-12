@@ -16,7 +16,7 @@ function CreateBazaar() {
   });
 
   const validateForm = () => {
-    const errorValues = {};
+    let errorValues = {};
     if (bazaarData.bazaarname.trim() === "") {
       errorValues.bazaarname = "Please enter the bazaar name";
     }
@@ -66,6 +66,41 @@ function CreateBazaar() {
         shortdescription: bazaarData.shortdescription,
         registrationdeadline: bazaarData.registrationdeadline,
       };
+      if (new Date(bazaarData.startdate) - new Date(bazaarData.enddate) <= 0) {
+        setError({
+          general: "Start date should be less than the end date",
+        });
+        setSuccessMessage("");
+        return;
+      }
+      if (
+        (new Date(bazaarData.enddate) - new Date(bazaarData.startdate)) /
+          (1000 * 60 * 60 * 24) +
+          1 <
+          7 ||
+        (new Date(bazaarData.enddate) - new Date(bazaarData.startdate)) /
+          (1000 * 60 * 60 * 24) +
+          1 >
+          28
+      ) {
+        setError({
+          general: "Duration should be between 1 and 4 weeks inclusive",
+        });
+        setSuccessMessage("");
+        return;
+      }
+      if (
+        new Date(bazaarData.startdate) -
+          new Date(bazaarData.registrationdeadline) <=
+        0
+      ) {
+        setError({
+          general: "Registration deadline should be less than the start date",
+        });
+        setSuccessMessage("");
+        return;
+      }
+
       await api.post("/bazaars/createBazaar", body);
       setSuccessMessage("Bazaar created successfully!");
       setError({});
@@ -76,7 +111,7 @@ function CreateBazaar() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-purple-100 to-purple-200 py-10 px-4">
+    <div className="min-h-screen flex items-center justify-center bg-transparent py-10 px-4">
       <div className="bg-white rounded-3xl shadow-xl w-full max-w-2xl p-8">
         <h2 className="text-2xl font-semibold text-center text-gray-800 mb-6">
           Create a New Bazaar
@@ -111,7 +146,7 @@ function CreateBazaar() {
                 setBazaarData({ ...bazaarData, bazaarname: e.target.value });
                 setSuccessMessage("");
               }}
-              className="w-full border border-gray-300 rounded-xl px-4 py-2 focus:ring-2 focus:ring-purple-400 focus:outline-none"
+              className="w-full border border-purple-oklch(29.3% 0.136 325.661) rounded-xl px-4 py-2 focus:ring-2 focus:ring-purple-oklch(29.3% 0.136 325.661) focus:outline-none"
             />
             {errorvalues.bazaarname && (
               <p className="text-red-500 text-sm mt-1">
@@ -136,7 +171,7 @@ function CreateBazaar() {
                   setBazaarData({ ...bazaarData, startdate: e.target.value });
                   setSuccessMessage("");
                 }}
-                className="w-full border border-gray-300 rounded-xl px-4 py-2 focus:ring-2 focus:ring-purple-400 focus:outline-none"
+                className="w-full border border-purple-oklch(29.3% 0.136 325.661) rounded-xl px-4 py-2 focus:ring-2 focus:ring-purple-oklch(29.3% 0.136 325.661) focus:outline-none"
               />
               {errorvalues.startdate && (
                 <p className="text-red-500 text-sm mt-1">
@@ -160,7 +195,7 @@ function CreateBazaar() {
                   setBazaarData({ ...bazaarData, starttime: e.target.value });
                   setSuccessMessage("");
                 }}
-                className="w-full border border-gray-300 rounded-xl px-4 py-2 focus:ring-2 focus:ring-purple-400 focus:outline-none"
+                className="w-full border border-purple-oklch(29.3% 0.136 325.661) rounded-xl px-4 py-2 focus:ring-2 focus:ring-purple-oklch(29.3% 0.136 325.661) focus:outline-none"
               />
               {errorvalues.starttime && (
                 <p className="text-red-500 text-sm mt-1">
@@ -186,7 +221,7 @@ function CreateBazaar() {
                   setBazaarData({ ...bazaarData, enddate: e.target.value });
                   setSuccessMessage("");
                 }}
-                className="w-full border border-gray-300 rounded-xl px-4 py-2 focus:ring-2 focus:ring-purple-400 focus:outline-none"
+                className="w-full border border-purple-oklch(29.3% 0.136 325.661) rounded-xl px-4 py-2 focus:ring-2 focus:ring-purple-oklch(29.3% 0.136 325.661) focus:outline-none"
               />
               {errorvalues.enddate && (
                 <p className="text-red-500 text-sm mt-1">
@@ -210,7 +245,7 @@ function CreateBazaar() {
                   setBazaarData({ ...bazaarData, endtime: e.target.value });
                   setSuccessMessage("");
                 }}
-                className="w-full border border-gray-300 rounded-xl px-4 py-2 focus:ring-2 focus:ring-purple-400 focus:outline-none"
+                className="w-full border border-purple-oklch(29.3% 0.136 325.661) rounded-xl px-4 py-2 focus:ring-2 focus:ring-purple-oklch(29.3% 0.136 325.661) focus:outline-none"
               />
               {errorvalues.endtime && (
                 <p className="text-red-500 text-sm mt-1">
@@ -236,7 +271,7 @@ function CreateBazaar() {
                 setBazaarData({ ...bazaarData, location: e.target.value });
                 setSuccessMessage("");
               }}
-              className="w-full border border-gray-300 rounded-xl px-4 py-2 focus:ring-2 focus:ring-purple-400 focus:outline-none"
+              className="w-full border border-purple-oklch(29.3% 0.136 325.661) rounded-xl px-4 py-2 focus:ring-2 focus:ring-purple-oklch(29.3% 0.136 325.661) focus:outline-none"
             />
             {errorvalues.location && (
               <p className="text-red-500 text-sm mt-1">
@@ -264,7 +299,7 @@ function CreateBazaar() {
                 });
                 setSuccessMessage("");
               }}
-              className="w-full border border-gray-300 rounded-xl px-4 py-2 focus:ring-2 focus:ring-purple-400 focus:outline-none"
+              className="w-full border border-purple-oklch(29.3% 0.136 325.661) rounded-xl px-4 py-2 focus:ring-2 focus:ring-purple-oklch(29.3% 0.136 325.661) focus:outline-none"
             />
             {errorvalues.shortdescription && (
               <p className="text-red-500 text-sm mt-1">
@@ -291,7 +326,7 @@ function CreateBazaar() {
                 });
                 setSuccessMessage("");
               }}
-              className="w-full border border-gray-300 rounded-xl px-4 py-2 focus:ring-2 focus:ring-purple-400 focus:outline-none"
+              className="w-full border border-purple-oklch(29.3% 0.136 325.661) rounded-xl px-4 py-2 focus:ring-2 focus:ring-purple-oklch(29.3% 0.136 325.661) focus:outline-none"
             />
             {errorvalues.registrationdeadline && (
               <p className="text-red-500 text-sm mt-1">
