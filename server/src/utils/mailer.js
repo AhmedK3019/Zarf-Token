@@ -11,7 +11,13 @@ export const transporter = nodemailer.createTransport({
   },
 });
 
-export const sendEmail = async (to, subject, textOrHtml, isHtml = false) => {
+export const sendEmail = async (
+  to,
+  subject,
+  textOrHtml,
+  isHtml = false,
+  attachments = []
+) => {
   try {
     const info = await transporter.sendMail({
       from: `"GUC Events" <${process.env.EMAIL_USER}>`,
@@ -19,6 +25,7 @@ export const sendEmail = async (to, subject, textOrHtml, isHtml = false) => {
       cc: process.env.EMAIL_USER,
       subject,
       [isHtml ? "html" : "text"]: textOrHtml,
+      attachments,
     });
     return info;
   } catch (err) {
@@ -62,17 +69,21 @@ export const sendBoothApprovalEmail = async (vendor, booth) => {
     <p>Please find below the QR codes for each of your booth representatives:</p>
   `;
 
+  const attachments = [];
   for (let i = 0; i < booth.people.length; i++) {
     const person = booth.people[i];
     const qrData = `Name: ${person.name}\nEmail: ${person.email}\nBooth ID: ${booth._id}`;
-    const qrCode = await QRCode.toDataURL(qrData);
+    // generate PNG buffer for QR code
+    const qrBuffer = await QRCode.toBuffer(qrData, { type: "png" });
+    const cid = `qr-${booth._id}-${i}@guc`;
+    attachments.push({ filename: `qr-${i + 1}.png`, content: qrBuffer, cid });
 
     html += `
       <div style="margin-bottom: 16px;">
         <strong>Representative ${i + 1}:</strong><br/>
         Name: ${person.name}<br/>
         Email: ${person.email}<br/>
-        <img src="${qrCode}" alt="QR Code for ${
+        <img src="cid:${cid}" alt="QR Code for ${
       person.name
     }" style="margin-top: 6px; width: 120px; height: 120px;"/>
       </div>
@@ -83,7 +94,7 @@ export const sendBoothApprovalEmail = async (vendor, booth) => {
     <p>We look forward to your participation in the event. If you have any questions, please feel free to contact us.</p>
     <p>Best regards,<br/>GUC Events Team</p>
   `;
-  return await sendEmail(vendor.email, subject, html, true);
+  return await sendEmail(vendor.email, subject, html, true, attachments);
 };
 
 export const sendBoothRejectionEmail = async (vendor, booth) => {
