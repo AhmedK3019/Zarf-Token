@@ -174,21 +174,22 @@ const deleteUser = async (req, res, next) => {
   }
 };
 
-// const getProfessors = async (_req, res, next) => {
-//   try {
-//     const profs = await User.find(
-//       { role: "Professor" },
-//       { firstname: 1, lastname: 1 }
-//     );
-//     return res.status(200).json(profs);
-//   } catch (error) {
-//     next(error);
-//   }
-// };
+const getProfessors = async (_req, res, next) => {
+  try {
+    const profs = await User.find(
+      { role: "Professor" },
+      { firstname: 1, lastname: 1 }
+    );
+    return res.status(200).json(profs);
+  } catch (error) {
+    next(error);
+  }
+};
 export default {
   signup,
   loginUser,
   getUsers,
   deleteUser,
+  getProfessors,
   getUser,
 };
