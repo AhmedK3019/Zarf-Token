@@ -1,4 +1,5 @@
 ﻿import React, { useEffect, useMemo, useState } from "react";
+import api from "../../services/api";
 import { CheckCircle, XCircle, Flag, Clock, FileText, Users, Calendar, X, RefreshCw } from "lucide-react";
 
 const COLORS = {
@@ -88,6 +89,60 @@ function formatSubmittedAt(dateISO) {
 
 function classNames(...values) {
   return values.filter(Boolean).join(" ");
+}
+
+function normalizeWorkshop(doc) {
+  if (!doc) return null;
+
+  const startDateValue = doc.startdate ? new Date(doc.startdate) : null;
+  const endDateValue = doc.enddate ? new Date(doc.enddate) : null;
+
+  let durationHours = 1;
+  if (doc.startdate && doc.starttime && doc.enddate && doc.endtime) {
+    const start = new Date(`${doc.startdate}T${doc.starttime}`);
+    const end = new Date(`${doc.enddate}T${doc.endtime}`);
+    if (!Number.isNaN(start.getTime()) && !Number.isNaN(end.getTime()) && end > start) {
+      durationHours = Math.max(1, Math.round((end.getTime() - start.getTime()) / (1000 * 60 * 60)));
+    }
+  } else if (startDateValue && endDateValue && endDateValue > startDateValue) {
+    durationHours = Math.max(1, Math.round((endDateValue - startDateValue) / (1000 * 60 * 60)));
+  }
+
+  const agendaText = doc.fullagenda || "";
+  const objectives =
+    Array.isArray(doc.objectives) && doc.objectives.length
+      ? doc.objectives
+      : agendaText
+          .split(/\r?\n+/)
+          .map((line) => line.trim())
+          .filter(Boolean)
+          .slice(0, 5);
+
+  return {
+    id: doc._id,
+    _id: doc._id,
+    professorName: doc.facultyresponsibilty || "Events Office",
+    department: doc.location || "Location TBA",
+    title: doc.workshopname || "Untitled Workshop",
+    description: doc.shortdescription || "No short description provided.",
+    category:
+      doc.type && doc.type !== "workshop"
+        ? doc.type.charAt(0).toUpperCase() + doc.type.slice(1)
+        : "Workshop",
+    status: doc.status || "Pending",
+    dateISO: startDateValue ? startDateValue.toISOString() : doc.createdAt,
+    durationHours,
+    submittedAt: doc.createdAt || doc.startdate || new Date().toISOString(),
+    overview: agendaText || doc.shortdescription || "No overview provided.",
+    objectives: objectives.length ? objectives : ["No detailed objectives provided."],
+    audience: doc.audience || "General audience",
+    attachments: [],
+    lastActionComment:
+      Array.isArray(doc.comments) && doc.comments.length
+        ? doc.comments[doc.comments.length - 1]?.message
+        : "",
+    raw: doc,
+  };
 }
 
 // Status Badge Component
@@ -210,12 +265,33 @@ function WorkshopCard({ workshop, onView }) {
 }
 
 // Workshop Modal Component
-function WorkshopModal({ workshop, onClose, onStatusUpdate, comment, setComment, commentError }) {
+function WorkshopModal({
+  workshop,
+  onClose,
+  onStatusUpdate,
+  comment,
+  setComment,
+  commentError,
+  onRequestEditsSuccess,
+}) {
   const [animateIn, setAnimateIn] = useState(false);
+  const [showRequestForm, setShowRequestForm] = useState(false);
+  const [requestMessage, setRequestMessage] = useState("");
+  const [requestError, setRequestError] = useState("");
+  const [isSubmittingRequest, setIsSubmittingRequest] = useState(false);
+
+  const workshopId = workshop._id || workshop.id;
 
   useEffect(() => {
     setAnimateIn(true);
   }, []);
+
+  useEffect(() => {
+    setShowRequestForm(false);
+    setRequestMessage("");
+    setRequestError("");
+    setIsSubmittingRequest(false);
+  }, [workshopId]);
 
   const handleBackdropClick = (e) => {
     if (e.target === e.currentTarget) onClose();
@@ -230,7 +306,53 @@ function WorkshopModal({ workshop, onClose, onStatusUpdate, comment, setComment,
     return () => document.removeEventListener("keydown", handleKeyDown);
   }, []);
 
+  const handleToggleRequestForm = () => {
+    setShowRequestForm((prev) => !prev);
+    setRequestError("");
+  };
+
+  const handleCancelRequest = () => {
+    setShowRequestForm(false);
+    setRequestMessage("");
+    setRequestError("");
+  };
+
+  const handleSubmitRequest = async () => {
+    if (!workshopId) {
+      setRequestError("Unable to determine workshop identifier. Please contact support.");
+      return;
+    }
+
+    if (!requestMessage.trim()) {
+      setRequestError("Please enter the requested edits before submitting.");
+      return;
+    }
+
+    try {
+      setIsSubmittingRequest(true);
+      setRequestError("");
+
+      await api.post(`/workshops/${workshopId}/request-edits`, {
+        message: requestMessage.trim(),
+      });
+
+      setRequestMessage("");
+      setShowRequestForm(false);
+      if (onRequestEditsSuccess) {
+        onRequestEditsSuccess("Edit request sent.");
+      }
+    } catch (error) {
+      console.error("Failed to submit edit request:", error);
+      const message =
+        error?.response?.data?.message || "Failed to send edit request. Please try again.";
+      setRequestError(message);
+    } finally {
+      setIsSubmittingRequest(false);
+    }
+  };
+
   const statusColor = statusConfig[workshop.status]?.color || COLORS.primary;
+  const requestButtonText = showRequestForm ? "Close Request Edits" : "Request Edits";
 
   return (
     <div 
@@ -367,7 +489,10 @@ function WorkshopModal({ workshop, onClose, onStatusUpdate, comment, setComment,
                       key={config.status}
                       type="button"
                       onClick={() => onStatusUpdate(config.status)}
-                      className={classNames(BUTTON_BASE, BUTTON_VARIANTS[config.variant] ?? BUTTON_VARIANTS.primary)}
+                      className={classNames(
+                        BUTTON_BASE,
+                        BUTTON_VARIANTS[config.variant] ?? BUTTON_VARIANTS.primary
+                      )}
                     >
                       <Icon className="w-4 h-4" />
                       {config.label}
@@ -375,6 +500,68 @@ function WorkshopModal({ workshop, onClose, onStatusUpdate, comment, setComment,
                   );
                 })}
               </div>
+
+              <button
+                type="button"
+                onClick={handleToggleRequestForm}
+                className={classNames(
+                  BUTTON_BASE,
+                  BUTTON_VARIANTS.info,
+                  "w-full sm:w-auto"
+                )}
+              >
+                <Flag className="w-4 h-4" />
+                {requestButtonText}
+              </button>
+
+              {showRequestForm && (
+                <div className="rounded-2xl border border-[#54C6EB]/30 bg-gradient-to-br from-white via-white to-[#54C6EB]/10 px-6 py-5 shadow-[0_4px_12px_rgba(84,198,235,0.15)] space-y-4">
+                  <label className="block">
+                    <span className="text-sm font-semibold text-[#2a8db0]">
+                      Share the edits you'd like the professor to make
+                    </span>
+                    <textarea
+                      value={requestMessage}
+                      onChange={(e) => setRequestMessage(e.target.value)}
+                      rows={4}
+                      placeholder="Highlight what needs to change before approval..."
+                      className="mt-2 w-full rounded-2xl border border-[#54C6EB]/40 bg-white/90 px-4 py-3 text-sm text-gray-700 shadow-inner focus:outline-none focus:ring-2 focus:ring-[#54C6EB]/40"
+                    />
+                  </label>
+                  {requestError && (
+                    <p className="text-xs font-semibold text-rose-600 flex items-center gap-1">
+                      <XCircle className="w-3.5 h-3.5" />
+                      {requestError}
+                    </p>
+                  )}
+                  <div className="flex flex-wrap items-center gap-3">
+                    <button
+                      type="button"
+                      onClick={handleSubmitRequest}
+                      disabled={isSubmittingRequest}
+                      className={classNames(
+                        BUTTON_BASE,
+                        BUTTON_VARIANTS.primary,
+                        "w-full sm:w-auto disabled:opacity-60 disabled:cursor-not-allowed"
+                      )}
+                    >
+                      {isSubmittingRequest ? "Sending..." : "Submit Request"}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={handleCancelRequest}
+                      disabled={isSubmittingRequest}
+                      className={classNames(
+                        BUTTON_BASE,
+                        BUTTON_VARIANTS.secondary,
+                        "w-full sm:w-auto disabled:opacity-60 disabled:cursor-not-allowed"
+                      )}
+                    >
+                      Cancel
+                    </button>
+                  </div>
+                </div>
+              )}
 
               <label className="block">
                 <span className="text-sm font-semibold text-gray-700">Comment {requiresComment.has(workshop.status) ? "(required)" : "(optional)"}</span>
@@ -458,79 +645,20 @@ export default function WorkshopRequests() {
     const fetchWorkshops = async () => {
       try {
         setIsLoading(true);
-        // Replace with your actual API endpoint
-        // const res = await fetch("/api/workshops");
-        // const data = await res.json();
-        // setWorkshops(data);
-        
-        // Simulating API call with mock data
-        await new Promise(resolve => setTimeout(resolve, 800));
-        const mockData = [
-          {
-            id: "ws-1",
-            professorName: "Dr. Milad Ghantous",
-            department: "Computer Science, Faculty of Media Engineering",
-            title: "Advanced AI Workshop: Neural Networks Simplified",
-            description: "A hands-on session that walks students through building neural networks using visual tools before transitioning to code implementations.",
-            category: "Technical",
-            status: "Pending",
-            dateISO: "2025-10-12T10:00:00.000Z",
-            durationHours: 2,
-            submittedAt: "2025-09-28T15:30:00.000Z",
-            overview: "This workshop aims to demystify neural networks for students who have a basic understanding of programming but limited exposure to machine learning. Participants will interact with visual simulations before writing their own models in Python.",
-            objectives: [
-              "Explain the intuition behind perceptrons and multilayer networks",
-              "Compare activation functions and understand when to use them",
-              "Experiment with training hyperparameters to reduce loss",
-              "Deploy a lightweight model for image classification"
-            ],
-            audience: "Senior computer science students and AI enthusiasts",
-            attachments: [{ id: "poster", label: "Workshop Poster", url: "#", type: "image/jpeg" }]
-          },
-          {
-            id: "ws-2",
-            professorName: "Prof. Mervat Abuelkheir",
-            department: "Business Administration, Faculty of Management",
-            title: "Career Storytelling for Future Leaders",
-            description: "An interactive seminar guiding students through crafting compelling personal narratives for interviews and networking events.",
-            category: "Career",
-            status: "Flagged",
-            dateISO: "2025-11-05T09:00:00.000Z",
-            durationHours: 1.5,
-            submittedAt: "2025-09-24T11:15:00.000Z",
-            overview: "Students explore the STAR method, storytelling frameworks, and body language exercises to help them stand out during assessment centers and professional mixers.",
-            objectives: [
-              "Identify signature career moments to highlight during interviews",
-              "Practice concise responses using the STAR method",
-              "Build confidence through guided mock networking conversations"
-            ],
-            audience: "Third and fourth year students preparing for internships",
-            attachments: []
-          },
-          {
-            id: "ws-3",
-            professorName: "Dr. Slim",
-            department: "Architecture and Urban Design",
-            title: "Sustainable Campuses: Designing with Purpose",
-            description: "A collaborative workshop exploring sustainable design strategies that can be applied across university campuses in the MENA region.",
-            category: "Soft Skills",
-            status: "Accepted",
-            dateISO: "2025-10-20T13:00:00.000Z",
-            durationHours: 3,
-            submittedAt: "2025-09-20T08:45:00.000Z",
-            overview: "Participants will break down successful case studies, complete a rapid design sprint, and pitch sustainable masterplans tailored to campus contexts.",
-            objectives: [
-              "Differentiate between passive and active sustainability strategies",
-              "Evaluate campus touchpoints that influence footprint",
-              "Produce a concept board communicating sustainable ideas"
-            ],
-            audience: "Architecture students and sustainability advocates",
-            attachments: [{ id: "deck", label: "Concept Deck", url: "#", type: "application/pdf" }]
-          }
-        ];
-        setWorkshops(mockData);
+        const res = await api.get("/workshops/getAllWorkshops");
+        const payload = Array.isArray(res.data)
+          ? res.data
+          : Array.isArray(res.data?.workshops)
+          ? res.data.workshops
+          : [];
+        const normalized = payload
+          .map((item) => normalizeWorkshop(item))
+          .filter(Boolean);
+
+        setWorkshops(normalized);
       } catch (err) {
         console.error("Error fetching workshops:", err);
+        setWorkshops([]);
       } finally {
         setIsLoading(false);
       }
@@ -616,6 +744,10 @@ export default function WorkshopRequests() {
       console.error("Error updating workshop:", err);
       setFeedback({ tone: "Rejected", message: "Failed to update workshop. Please try again." });
     }
+  };
+
+  const handleRequestEditsSuccess = (message = "Edit request sent.") => {
+    setFeedback({ tone: "Flagged", message });
   };
 
   return (
@@ -727,6 +859,7 @@ export default function WorkshopRequests() {
           comment={modalComment}
           setComment={setModalComment}
           commentError={commentError}
+          onRequestEditsSuccess={handleRequestEditsSuccess}
         />
       )}
 
