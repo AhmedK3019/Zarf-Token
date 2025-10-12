@@ -1,33 +1,108 @@
 import { useState, useEffect } from 'react';
 import api from '../../services/api';
 
-const scrollbarStyles = `
-  .custom-scrollbar::-webkit-scrollbar {
-    width: 6px;
-  }
-  .custom-scrollbar::-webkit-scrollbar-track {
-    background: rgba(213, 207, 225, 0.2);
-    border-radius: 3px;
-  }
-  .custom-scrollbar::-webkit-scrollbar-thumb {
-    background: linear-gradient(to bottom, #736CED, #4C3BCF);
-    border-radius: 3px;
-  }
-  .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-    background: linear-gradient(to bottom, #4C3BCF, #312A68);
-  }
-`;
-
-  const styleSheet = document.createElement('style');
-  styleSheet.innerText = scrollbarStyles;
-  document.head.appendChild(styleSheet);
-
 const Courts = () => {
   const [courts, setCourts] = useState([]);
+  const [filteredCourts, setFilteredCourts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [selectedCategory, setSelectedCategory] = useState("all");
+  const [searchTerm, setSearchTerm] = useState("");
+  const [selectedCourt, setSelectedCourt] = useState(null);
+  const [showSlotsModal, setShowSlotsModal] = useState(false);
+
+  const courtCategories = [
+    { id: "all", name: "All Courts" },
+    { id: "basketball", name: "Basketball" },
+    { id: "tennis", name: "Tennis" },
+    { id: "football", name: "Football" },
+    { id: "volleyball", name: "Volleyball" },
+    { id: "badminton", name: "Badminton" },
+  ];
 
   const formatDateTime = (isoString) => {
+    const date = new Date(isoString);
+    const options = {
+      weekday: 'short',
+      month: 'short',
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+    };
+    return date.toLocaleDateString('en-US', options); 
+  };
+
+  const fetchCourts = async () => {
+    setLoading(true);
+    setError(null);
+    
+    try {
+      const response = await api.get('/courts');
+      setCourts(response.data);
+      setFilteredCourts(response.data);
+    } catch (err) {
+      setError('Failed to fetch courts. Please try again later.');
+      console.error(err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchCourts();
+  }, []);
+
+  // Filter courts by category
+  useEffect(() => {
+    let filtered = courts;
+    
+    if (selectedCategory !== "all") {
+      filtered = courts.filter(court => 
+        court.type?.toLowerCase() === selectedCategory.toLowerCase()
+      );
+    }
+    
+    // Apply search filter
+    if (searchTerm.trim()) {
+      const searchLower = searchTerm.toLowerCase();
+      filtered = filtered.filter(court => 
+        court.name?.toLowerCase().includes(searchLower) ||
+        court.type?.toLowerCase().includes(searchLower)
+      );
+    }
+    
+    setFilteredCourts(filtered);
+  }, [courts, selectedCategory, searchTerm]);
+
+  const handleCategoryClick = (categoryId) => {
+    setSelectedCategory(categoryId);
+  };
+
+  const handleSearch = (searchValue) => {
+    setSearchTerm(searchValue);
+  };
+
+  const clearSearch = () => {
+    setSearchTerm("");
+  };
+
+  const getAvailableSlots = (court) => {
+    return court.freeSlots?.filter(slot => 
+      !slot.isReserved && new Date(slot.dateTime) > new Date()
+    ) || [];
+  };
+
+  const handleViewAllSlots = (court) => {
+    setSelectedCourt(court);
+    setShowSlotsModal(true);
+  };
+
+  const closeSlotsModal = () => {
+    setShowSlotsModal(false);
+    setSelectedCourt(null);
+  };
+
+  const formatFullDateTime = (isoString) => {
     const date = new Date(isoString);
     const options = {
       weekday: 'long',
@@ -37,134 +112,313 @@ const Courts = () => {
       hour: '2-digit',
       minute: '2-digit',
     };
-    return date.toLocaleDateString('en-EG', options); 
+    return date.toLocaleDateString('en-US', options);
   };
-
-  useEffect(() => {
-    const fetchCourts = async () => {
-      try {
-        const response = await api.get('/courts');
-        setCourts(response.data);
-      } catch (err) {
-        setError('Failed to fetch courts. Please try again later.');
-        console.error(err);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchCourts();
-  }, []);
-
-  const groupCourtsByType = (courtsList) => {
-    return courtsList.reduce((acc, court) => {
-      const { type } = court;
-      if (!acc[type]) {
-        acc[type] = [];
-      }
-      acc[type].push(court);
-      return acc;
-    }, {});
-  };
-
-  const groupedCourts = groupCourtsByType(courts);
-  const courtTypes = Object.keys(groupedCourts);
-
-  if (loading) {
-    return (
-      <div className="flex justify-center items-center h-screen bg-gradient-to-br from-[#D5CFE1] to-white">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-16 w-16 border-4 border-[#736CED] border-t-transparent mx-auto mb-4"></div>
-          <p className="text-[#4C3BCF] font-semibold">Loading courts...</p>
-        </div>
-      </div>
-    );
-  }
-
-  if (error) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-[#D5CFE1] to-white flex items-center justify-center">
-        <div className="text-center p-8 bg-white rounded-2xl shadow-lg border border-red-200">
-          <p className="text-red-600 text-lg">{error}</p>
-        </div>
-      </div>
-    );
-  }
 
   return (
-      <div className="container mx-auto px-6 py-12">
-        <div className="text-center mb-12">
-          <h1 className="text-5xl font-bold bg-gradient-to-r from-[#4C3BCF] to-[#736CED] bg-clip-text text-transparent mb-6 pb-2">
-            Campus Courts
-          </h1>
-          <p className="text-[#312A68] text-lg mb-6">Discover available court times for your activities</p>
-        </div>
-        
-        {courtTypes.length > 0 ? (
-          <div className="space-y-12">
-            {courtTypes.map((type) => (
-              <div key={type} className="relative">
-                <div className="flex items-center mb-8">
-                  <div className="h-1 bg-gradient-to-r from-[#736CED] to-transparent flex-1"></div>
-                  <h2 className="text-3xl font-bold text-[#4C3BCF] capitalize mx-6 bg-white px-4 py-2 rounded-full shadow-lg border border-[#D5CFE1]">
-                    {type} Courts
-                  </h2>
-                  <div className="h-1 bg-gradient-to-l from-[#736CED] to-transparent flex-1"></div>
+    <div className="min-h-screen w-full overflow-hidden bg-[#D5CFE1] text-[#1F1B3B]">
+      <div className="relative flex min-h-screen w-full flex-col items-center">
+        <main className="relative z-10 flex w-full flex-1 flex-col items-center px-6 py-8">
+          <div className="w-full max-w-6xl">
+            {/* Header */}
+            <div className="mb-12 text-center">
+              <h1 className="text-4xl font-bold text-[#736CED] sm:text-5xl mb-4">
+                Campus Courts
+              </h1>
+              <p className="text-lg text-[#312A68] max-w-2xl mx-auto">
+                Discover available court times for your sports activities.
+                Filter by court type to find exactly what you're looking for.
+              </p>
+            </div>
+
+            {/* Category Filter */}
+            <div className="flex flex-wrap justify-center gap-4 mb-8">
+              {courtCategories.map((cat) => (
+                <button
+                  key={cat.id}
+                  onClick={() => handleCategoryClick(cat.id)}
+                  className={`px-6 py-3 rounded-full font-semibold transition-all ${
+                    selectedCategory === cat.id
+                      ? "bg-[#736CED] text-white shadow-[0_10px_25px_rgba(115,108,237,0.3)]"
+                      : "bg-white/70 text-[#736CED] border border-[#736CED] hover:bg-[#E7E1FF]"
+                  }`}
+                >
+                  {cat.name}
+                </button>
+              ))}
+            </div>
+
+            {/* Search Bar */}
+            <div className="mb-12">
+              <div className="relative max-w-2xl mx-auto">
+                <div className="relative">
+                  <input
+                    type="text"
+                    placeholder="Search by court name or type..."
+                    value={searchTerm}
+                    onChange={(e) => handleSearch(e.target.value)}
+                    className="w-full px-6 py-4 pr-12 rounded-full border border-[#736CED] bg-white/70 text-[#312A68] placeholder-[#312A68]/60 focus:outline-none focus:ring-2 focus:ring-[#736CED] focus:border-transparent shadow-sm"
+                  />
+                  <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
+                    {searchTerm ? (
+                      <button
+                        onClick={clearSearch}
+                        className="text-[#736CED] hover:text-[#5A4BBA] transition-colors"
+                      >
+                        <svg
+                          className="w-5 h-5"
+                          fill="none"
+                          stroke="currentColor"
+                          viewBox="0 0 24 24"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={2}
+                            d="M6 18L18 6M6 6l12 12"
+                          />
+                        </svg>
+                      </button>
+                    ) : (
+                      <svg
+                        className="w-5 h-5 text-[#736CED]"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+                        />
+                      </svg>
+                    )}
+                  </div>
                 </div>
-                
-                <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-8">
-                  {groupedCourts[type].map((court) => (
-                    <div key={court._id} className="group bg-white rounded-2xl shadow-[0_10px_25px_rgba(165,148,249,0.15)] border border-[#D5CFE1]/30 p-8 hover:shadow-[0_20px_40px_rgba(165,148,249,0.25)] hover:-translate-y-2 transition-all duration-300">
-                      <div className="flex items-center mb-6">
-                        <div className="w-3 h-3 bg-gradient-to-r from-[#736CED] to-[#4C3BCF] rounded-full mr-3"></div>
-                        <h3 className="text-2xl font-bold text-[#4C3BCF] group-hover:text-[#312A68] transition-colors">
-                          {court.name}
-                        </h3>
+                {searchTerm && (
+                  <p className="text-sm text-[#312A68]/70 mt-2 text-center">
+                    Found {filteredCourts.length} result
+                    {filteredCourts.length !== 1 ? "s" : ""} for "{searchTerm}"
+                  </p>
+                )}
+              </div>
+            </div>
+
+            {/* Courts Grid */}
+            {loading ? (
+              <div className="text-center py-12">
+                <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-[#736CED]"></div>
+                <p className="mt-4 text-[#312A68]">
+                  Loading courts...
+                </p>
+              </div>
+            ) : error ? (
+              <div className="text-center py-12 text-red-500">{error}</div>
+            ) : filteredCourts.length === 0 ? (
+              <div className="text-center py-12">
+                {searchTerm ? (
+                  <div>
+                    <p className="text-[#312A68] text-lg mb-4">
+                      No courts found matching "{searchTerm}"
+                    </p>
+                    <button
+                      onClick={clearSearch}
+                      className="text-[#736CED] hover:text-[#5A4BBA] underline"
+                    >
+                      Clear search
+                    </button>
+                  </div>
+                ) : (
+                  <div>
+                    <div className="w-24 h-24 bg-[#D5CFE1]/30 rounded-full flex items-center justify-center mx-auto mb-6">
+                      <span className="text-[#736CED] text-4xl">🏟️</span>
+                    </div>
+                    <p className="text-[#312A68] text-lg mb-2">
+                      No {selectedCategory === "all" ? "courts" : selectedCategory + " courts"} found.
+                    </p>
+                    <p className="text-[#312A68]/70">
+                      Check back later for available court bookings.
+                    </p>
+                  </div>
+                )}
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-12">
+                {filteredCourts.map((court) => {
+                  const availableSlots = getAvailableSlots(court);
+                  return (
+                    <div
+                      key={court._id}
+                      className="bg-white rounded-2xl p-6 shadow-[0_10px_25px_rgba(165,148,249,0.2)] border border-white/50 hover:shadow-[0_15px_35px_rgba(165,148,249,0.3)] transition-all hover:-translate-y-1"
+                    >
+                      {/* Court Type Badge */}
+                      <div className="inline-flex items-center gap-2 rounded-full bg-[#EEE9FF] px-3 py-1 text-xs font-medium text-[#5A4BBA] mb-4">
+                        <span className="h-2 w-2 rounded-full bg-[#6DD3CE]" />
+                        <span className="capitalize">{court.type || 'Court'}</span>
                       </div>
-                      
+
+                      {/* Court Name */}
+                      <h3 className="text-xl font-bold text-[#4C3BCF] mb-3">
+                        {court.name}
+                      </h3>
+
+                      {/* Available Slots Count */}
                       <div className="mb-4">
-                        <h4 className="font-semibold text-[#312A68] mb-4 flex items-center">
-                          <span className="w-2 h-2 bg-[#736CED] rounded-full mr-2"></span>
-                          Upcoming Available Slots:
-                        </h4>
+                        <p className="flex items-center gap-2 text-sm text-[#312A68]">
+                          <span>📅</span>
+                          {availableSlots.length} available slot{availableSlots.length !== 1 ? 's' : ''}
+                        </p>
                       </div>
-                      
-                      <div className="max-h-64 overflow-y-auto pr-2 custom-scrollbar">
-                        <ul className="space-y-3">
-                          {court.freeSlots
-                            .filter(slot => !slot.isReserved && new Date(slot.dateTime) > new Date())
-                            .map((slot) => (
-                              <li key={slot._id} className="bg-gradient-to-r from-[#D5CFE1]/20 to-transparent p-4 rounded-xl text-[#312A68] hover:from-[#736CED] hover:to-[#4C3BCF] hover:text-white transition-all duration-300 cursor-pointer border border-[#D5CFE1]/30 hover:border-[#736CED] hover:shadow-md">
-                                <span className="font-medium">{formatDateTime(slot.dateTime)}</span>
-                              </li>
+
+                      {/* Available Slots */}
+                      <div className="space-y-2">
+                        <h4 className="text-sm font-semibold text-[#312A68] mb-3">
+                          Upcoming Available Times:
+                        </h4>
+                        
+                        {availableSlots.length > 0 ? (
+                          <div className="max-h-48 overflow-y-auto space-y-2">
+                            {availableSlots.slice(0, 5).map((slot) => (
+                              <div
+                                key={slot._id}
+                                className="bg-[#F8F6FF] p-3 rounded-lg text-xs text-[#312A68] border border-[#E7E1FF] hover:bg-[#EEE9FF] transition-colors"
+                              >
+                                <span className="font-medium">
+                                  {formatDateTime(slot.dateTime)}
+                                </span>
+                              </div>
                             ))}
-                        </ul>
-                        {court.freeSlots.filter(slot => !slot.isReserved && new Date(slot.dateTime) > new Date()).length === 0 && (
-                          <div className="text-center py-8">
-                            <div className="w-16 h-16 bg-[#D5CFE1]/30 rounded-full flex items-center justify-center mx-auto mb-3">
-                              <span className="text-[#736CED] text-2xl">📅</span>
+                            {availableSlots.length > 5 && (
+                              <p className="text-xs text-[#312A68]/70 text-center pt-2">
+                                +{availableSlots.length - 5} more slots available
+                              </p>
+                            )}
+                          </div>
+                        ) : (
+                          <div className="text-center py-4">
+                            <div className="w-12 h-12 bg-[#D5CFE1]/30 rounded-full flex items-center justify-center mx-auto mb-2">
+                              <span className="text-[#736CED] text-lg">📅</span>
                             </div>
-                            <p className="text-[#312A68]/70 text-sm">No available slots in the coming month.</p>
+                            <p className="text-[#312A68]/70 text-xs">
+                              No available slots at the moment
+                            </p>
                           </div>
                         )}
+                      </div>
+
+                      {/* Action Button */}
+                      {availableSlots.length > 0 && (
+                        <div className="mt-4 pt-4 border-t border-gray-100">
+                          <button 
+                            onClick={() => handleViewAllSlots(court)}
+                            className="w-full text-xs bg-[#736CED] text-white px-4 py-2 rounded-full hover:bg-[#5A4BBA] transition-colors"
+                          >
+                            View All Available Times ({availableSlots.length})
+                          </button>
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+        </main>
+      </div>
+
+      {/* Available Slots Modal */}
+      {showSlotsModal && selectedCourt && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+          <div className="bg-white rounded-2xl max-w-2xl w-full max-h-[90vh] flex flex-col">
+            {/* Modal Header */}
+            <div className="p-6 border-b border-gray-200 flex-shrink-0">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h2 className="text-2xl font-bold text-[#4C3BCF]">
+                    {selectedCourt.name}
+                  </h2>
+                  <div className="inline-flex items-center gap-2 mt-2">
+                    <span className="h-2 w-2 rounded-full bg-[#6DD3CE]" />
+                    <span className="text-sm text-[#5A4BBA] capitalize font-medium">
+                      {selectedCourt.type || 'Court'}
+                    </span>
+                  </div>
+                </div>
+                <button
+                  onClick={closeSlotsModal}
+                  className="text-gray-400 hover:text-gray-600 transition-colors"
+                >
+                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+              </div>
+            </div>
+
+            {/* Modal Body */}
+            <div className="p-6 overflow-y-auto flex-1 min-h-0">
+              <div className="mb-4">
+                <h3 className="text-lg font-semibold text-[#312A68] mb-4">
+                  All Available Time Slots
+                </h3>
+                <p className="text-sm text-[#312A68]/70 mb-6">
+                  {getAvailableSlots(selectedCourt).length} available slots
+                </p>
+              </div>
+
+              {getAvailableSlots(selectedCourt).length > 0 ? (
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                  {getAvailableSlots(selectedCourt).map((slot) => (
+                    <div
+                      key={slot._id}
+                      className="bg-[#F8F6FF] p-4 rounded-xl border border-[#E7E1FF] hover:bg-[#EEE9FF] hover:border-[#736CED] transition-all cursor-pointer group"
+                    >
+                      <div className="flex items-center gap-3">
+                        <div className="w-3 h-3 bg-[#6DD3CE] rounded-full flex-shrink-0"></div>
+                        <div>
+                          <p className="font-medium text-[#312A68] group-hover:text-[#4C3BCF]">
+                            {formatFullDateTime(slot.dateTime)}
+                          </p>
+                        </div>
                       </div>
                     </div>
                   ))}
                 </div>
-              </div>
-            ))}
-          </div>
-        ) : (
-          <div className="text-center py-16">
-            <div className="w-24 h-24 bg-[#D5CFE1]/30 rounded-full flex items-center justify-center mx-auto mb-6">
-              <span className="text-[#736CED] text-4xl">🏟️</span>
+              ) : (
+                <div className="text-center py-12">
+                  <div className="w-16 h-16 bg-[#D5CFE1]/30 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <span className="text-[#736CED] text-2xl">📅</span>
+                  </div>
+                  <p className="text-[#312A68] text-lg mb-2">No Available Slots</p>
+                  <p className="text-[#312A68]/70 text-sm">
+                    All slots are currently reserved or unavailable.
+                  </p>
+                </div>
+              )}
             </div>
-            <p className="text-[#312A68] text-xl font-medium">No courts have been added yet.</p>
-            <p className="text-[#312A68]/70 mt-2">Check back later for available court bookings.</p>
+
+            {/* Modal Footer */}
+            <div className="p-6 border-t border-gray-200 flex-shrink-0">
+              <div className="flex justify-end gap-3">
+                <button
+                  onClick={closeSlotsModal}
+                  className="px-6 py-2 text-[#736CED] border border-[#736CED] rounded-full hover:bg-[#E7E1FF] transition-colors"
+                >
+                  Close
+                </button>
+                <button
+                  className="px-6 py-2 bg-[#736CED] text-white rounded-full hover:bg-[#5A4BBA] transition-colors"
+                  disabled
+                >
+                  Book Slot (Coming Soon)
+                </button>
+              </div>
+            </div>
           </div>
-        )}
-      </div>
-    
+        </div>
+      )}
+    </div>
   );
 };
 
