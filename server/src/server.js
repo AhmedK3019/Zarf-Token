@@ -2,6 +2,7 @@ import express from "express";
 import mongoose from "mongoose";
 import cors from "cors";
 import dotenv from "dotenv";
+import cookieParser from "cookie-parser";
 import boothRoutes from "./routes/boothRoutes.js";
 import loyaltyRoutes from "./routes/loyaltyRoutes.js";
 import reservationRoutes from "./routes/reservationRoutes.js";
@@ -31,6 +32,7 @@ const __dirname = dirname(__filename);
 
 dotenv.config();
 const app = express();
+app.use(cookieParser());
 app.use(express.json());
 app.use(
   cors({
