@@ -9,7 +9,7 @@ const getAllUsers = async (_req, res, next) => {
     const admins = await Admin.find();
     const eventsOffices = await EventsOffice.find();
     const vendors = await Vendor.find();
-    users.push(...admins, ...eventsOffices, ...vendors, ...users);
+    users.push(...admins, ...eventsOffices, ...vendors);
     res.json(users);
   } catch (error) {
     next(error);
