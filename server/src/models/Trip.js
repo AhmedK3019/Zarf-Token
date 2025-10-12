@@ -1,5 +1,11 @@
 import mongoose from "mongoose";
-
+const registeredPeople = new mongoose.Schema({
+  userId: { type: mongoose.Schema.ObjectId, ref: "User" },
+  firstname: { type: String, required: true },
+  lastname: { type: String, required: true },
+  email: { type: String, required: true },
+  gucid: { type: String, required: true },
+});
 const tripSchema = new mongoose.Schema({
   tripname: { type: String, required: true },
   startdate: { type: Date, required: true },
@@ -12,7 +18,7 @@ const tripSchema = new mongoose.Schema({
   price: { type: Number, required: true },
   capacity: { type: Number, required: true },
   attendees: {
-    type: [{ type: mongoose.Schema.ObjectId, ref: "User" }],
+    type: [registeredPeople],
     default: [],
   },
   type: { type: String, default: "trip" },

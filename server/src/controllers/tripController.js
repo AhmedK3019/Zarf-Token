@@ -16,6 +16,22 @@ const TripSchema = Joi.object({
   attendees: Joi.array().default([]),
 });
 
+const attendeesSchema = Joi.object({
+  firstname: Joi.string().min(3).max(13).required(),
+  lastname: Joi.string().min(3).max(13).required(),
+  gucid: Joi.string().required(),
+  email: Joi.string()
+    .email()
+    .required()
+    .pattern(
+      /^[a-zA-Z0-9._%+-]+(\.[a-zA-Z0-9._%+-]+)*@([a-zA-Z0-9-]+\.)*guc\.edu\.eg$/i
+    )
+    .messages({
+      "string.pattern.base":
+        "Email must be a valid GUC email (ending with .guc.edu.eg)",
+    }),
+});
+
 const createTrip = async (req, res, next) => {
   try {
     const { value, error } = TripSchema.validate(req.body);
@@ -81,17 +97,28 @@ const registerForTrip = async (req, res, next) => {
     if (!userId) return res.status(401).json({ message: "Invalid Token" });
     const check = await Trip.findById(id, { capacity: 1, attendees: 1 });
     if (!check) return res.status(404).json({ message: "Trip is not found" });
-    if (check.attendees.includes(userId)) {
+    if (
+      check.attendees.some((a) => a.userId?.toString() === userId.toString())
+    ) {
       return res
         .status(400)
         .json({ message: "You already registered for this trip" });
     }
     if (check.attendees.length + 1 > check.capacity) {
-      return res.status(400).json({ message: "Trip capacity is full" });
+      return res.status(400).json({ message: "Trip is full" });
     }
+    const { value, error } = attendeesSchema.validate(req.body);
+    if (error) return res.status(400).json({ message: error.message });
+    const body = {
+      userId: userId,
+      firstname: value.firstname,
+      lastname: value.lastname,
+      gucid: value.gucid,
+      email: value.email,
+    };
     const afterUpdate = await Trip.findByIdAndUpdate(
       id,
-      { $addToSet: { attendees: userId } },
+      { $addToSet: { attendees: body } },
       { new: true }
     );
     return res

@@ -1,5 +1,11 @@
 import mongoose from "mongoose";
-
+const registeredPeople = new mongoose.Schema({
+  userId: { type: mongoose.Schema.ObjectId, ref: "User" },
+  firstname: { type: String, required: true },
+  lastname: { type: String, required: true },
+  email: { type: String, required: true },
+  gucid: { type: String, required: true },
+});
 const workshopSchema = new mongoose.Schema({
   workshopname: { type: String, required: true },
   startdate: { type: Date, required: true },
@@ -16,10 +22,10 @@ const workshopSchema = new mongoose.Schema({
   },
   fundingsource: { type: String, enum: ["External", "GUC"], required: true },
   attendees: {
-    type: [{ type: mongoose.Schema.ObjectId, ref: "User" }],
+    type: [registeredPeople],
     default: [],
   },
-  extrarequiredfunding: { type: Number, required: true },
+  extrarequiredfunding: { type: Number },
   type: { type: String, default: "workshop" },
   comments: { type: String, default: "" },
   status: {

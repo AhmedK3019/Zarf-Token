@@ -11,7 +11,7 @@ const workshopSchema = Joi.object({
   shortdescription: Joi.string().required(),
   fullagenda: Joi.string().required(),
   facultyresponsibilty: Joi.string().required(),
-  proffessorsparticipating: Joi.array().length(1).required().messages({
+  professorsparticipating: Joi.array().length(1).required().messages({
     "array.length":
       '"proffessorsparticipating" must contain at least one professor',
   }),
@@ -19,18 +19,57 @@ const workshopSchema = Joi.object({
     .valid("Pending", "Approved", "Rejected")
     .default("Pending"),
   capacity: Joi.number().integer().min(1).required(),
-  price: Joi.number().min(0).required(),
+  price: Joi.number().min(1).required(),
   fundingsource: Joi.string().valid("External", "GUC").required(),
   extrarequiredfunding: Joi.number().default(0),
   attendees: Joi.array().default([]),
 });
+
+const attendeesSchema = Joi.object({
+  firstname: Joi.string().min(3).max(13).required(),
+  lastname: Joi.string().min(3).max(13).required(),
+  gucid: Joi.string().required(),
+  email: Joi.string()
+    .email()
+    .required()
+    .pattern(
+      /^[a-zA-Z0-9._%+-]+(\.[a-zA-Z0-9._%+-]+)*@([a-zA-Z0-9-]+\.)*guc\.edu\.eg$/i
+    )
+    .messages({
+      "string.pattern.base":
+        "Email must be a valid GUC email (ending with .guc.edu.eg)",
+    }),
+});
 const createWorkshop = async (req, res) => {
   try {
+    const token = req.headers.authorization?.split(" ")[1];
+    if (!token) return res.status(401).json({ message: "No token provided" });
+    let userId = unPackToken(token);
+    if (!userId) return res.status(401).json({ message: "Invalid Token" });
     const { value, error } = workshopSchema.validate(req.body);
     if (error) {
       return res.status(400).json({ message: error.details[0].message });
     }
-    const workshop = await WorkShop.create(value);
+    const body = {
+      workshopname: value.workshopname,
+      startdate: value.startdate,
+      starttime: value.starttime,
+      enddate: value.enddate,
+      endtime: value.endtime,
+      location: value.location,
+      shortdescription: value.shortdescription,
+      fullagenda: value.fullagenda,
+      facultyresponsibilty: value.facultyresponsibilty,
+      proffessorsparticipating: value.proffessorsparticipating,
+      status: value.status,
+      capacity: value.capacity,
+      price: value.price,
+      fundingsource: value.fundingsource,
+      extrarequiredfunding: value.extrarequiredfunding,
+      attendees: value.attendees,
+      createdBy: userId,
+    };
+    const workshop = await WorkShop.create(body);
     return res.status(201).json(workshop);
   } catch (error) {
     next(error);
@@ -159,7 +198,9 @@ const registerForWorkshop = async (req, res, next) => {
     const check = await WorkShop.findById(id, { capacity: 1, attendees: 1 });
     if (!check)
       return res.status(404).json({ message: "Workshop is not found" });
-    if (check.attendees.includes(userId)) {
+    if (
+      check.attendees.some((a) => a.userId?.toString() === userId.toString())
+    ) {
       return res
         .status(400)
         .json({ message: "You already registered for this workshop" });
@@ -167,9 +208,18 @@ const registerForWorkshop = async (req, res, next) => {
     if (check.attendees.length + 1 > check.capacity) {
       return res.status(400).json({ message: "Workshop is full" });
     }
+    const { value, error } = attendeesSchema.validate(req.body);
+    if (error) return res.status(400).json({ message: error.message });
+    const body = {
+      userId: userId,
+      firstname: value.firstname,
+      lastname: value.lastname,
+      gucid: value.gucid,
+      email: value.email,
+    };
     const afterUpdate = await WorkShop.findByIdAndUpdate(
       id,
-      { $addToSet: { attendees: userId } },
+      { $addToSet: { attendees: body } },
       { new: true }
     );
     return res
