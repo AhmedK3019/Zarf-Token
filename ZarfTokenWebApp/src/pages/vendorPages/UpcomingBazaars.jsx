@@ -58,6 +58,8 @@ export default function UpcomingBazars() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedBazaar, setSelectedBazaar] = useState(null);
   const [applicationData, setApplicationData] = useState(initialFormState);
+  const [showSuccess, setShowSuccess] = useState(false);
+  const [successMessage, setSuccessMessage] = useState('');
   
   
 
@@ -117,18 +119,36 @@ export default function UpcomingBazars() {
 
   const handleSubmitApplication = async (e) => {
     e.preventDefault();
+    
     const payload = {
         people: applicationData.attendees,
         boothSize: applicationData.boothSize,
     };
+    
     try {
-        const url = `/api/vendorRequests/bazar/${selectedBazaar._id}`;
+        const token = localStorage.getItem('token');
+        if (!token) {
+          alert("You need to be logged in to submit an application. Please log in and try again.");
+          return;
+        }
+        
+        const url = `/vendorRequests/bazar/${selectedBazaar._id}`;
         await api.post(url, payload);
-        alert(`Application for ${selectedBazaar.bazaarname} submitted successfully!`);
+
+        
+        setSuccessMessage(`Application for ${selectedBazaar.bazaarname} submitted successfully!`);
+        setShowSuccess(true);
         handleCloseModal();
+        
+        setTimeout(() => {
+          setShowSuccess(false);
+        }, 4000);
     } catch (err) {
         console.error("Application submission failed:", err);
-        alert("There was an error submitting your application. Please try again.");
+        console.error("Error details:", err.response?.data || err.message);
+        
+        const errorMessage = err.response?.data?.message || "There was an error submitting your application. Please try again.";
+        alert(`Error: ${errorMessage}`);
     }
   };
 
@@ -288,6 +308,30 @@ export default function UpcomingBazars() {
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* Success Notification */}
+      {showSuccess && (
+        <div className="fixed inset-0 flex items-center justify-center z-50 pointer-events-none">
+          <div className="bg-white rounded-2xl p-8 shadow-[0_25px_50px_rgba(115,108,237,0.4)] border border-[#D5CFE1] max-w-md mx-4 pointer-events-auto animate-fade-in">
+            <div className="text-center">
+              <div className="w-16 h-16 bg-gradient-to-r from-[#736CED] to-[#4C3BCF] rounded-full flex items-center justify-center mx-auto mb-4">
+                <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                </svg>
+              </div>
+              <h3 className="font-bold text-[#4C3BCF] text-xl mb-2">Submission Successful!</h3>
+              <p className="text-[#312A68] mb-4 leading-relaxed">{successMessage}</p>
+              <p className="text-[#736CED] text-sm">This message will close automatically in a few seconds.</p>
+              <button 
+                onClick={() => setShowSuccess(false)}
+                className="absolute top-4 right-4 text-gray-400 hover:text-[#736CED] transition-colors"
+              >
+                <X size={20} />
+              </button>
+            </div>
           </div>
         </div>
       )}
