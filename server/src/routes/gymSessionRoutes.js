@@ -1,26 +1,31 @@
 import express from "express";
+import authMiddleware from "../middleware/auth.js";
 import {
   createSession,
   getSessions,
   getSessionById,
   updateSession,
   deleteSession,
-  registerStudent,
+  registerUser,
   getSessionsByMonth,
-  unregisterStudent,
+  unregisterUser,
+  generateMonthSessions,
+  deleteMonthSessions,
 } from "../controllers/gymSessionController.js";
 
 const router = express.Router();
 
-router.post("/", createSession);
+router.post("/", authMiddleware, createSession); // Events Office only
 router.get("/", getSessions);
 router.get("/:id", getSessionById);
-router.put("/:id", updateSession);
+router.put("/:id", authMiddleware, updateSession); // Events Office only
 router.get("/month/:month", getSessionsByMonth);
-router.delete("/:id", deleteSession);
+router.post("/generate/:month", authMiddleware, generateMonthSessions); // Generate sessions for a month - Events Office only
+router.delete("/month/:month", authMiddleware, deleteMonthSessions); // Delete all sessions for a month - Events Office only
+router.delete("/:id", authMiddleware, deleteSession); // Events Office only
 
-// Register/unregister student
-router.post("/:id/register", registerStudent);
-router.post("/:id/unregister", unregisterStudent);
+// Register/unregister user (Student, Staff, Events Office, TA, Professor) - require authentication
+router.post("/:id/register", authMiddleware, registerUser);
+router.post("/:id/unregister", authMiddleware, unregisterUser);
 
 export default router;
