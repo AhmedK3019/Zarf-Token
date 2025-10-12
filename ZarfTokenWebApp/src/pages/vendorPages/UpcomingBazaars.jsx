@@ -1,6 +1,7 @@
 import {React, useState, useEffect } from "react";
 import api from "../../services/api";
 import { Calendar, MapPin, Clock, FileText, X } from "lucide-react";
+import { useAuthUser } from "../../context/UserContext";
 
 // Helper functions (formatDateTime, formatDate) remain the same...
 const formatDateTime = (dateStr, timeStr) => {
@@ -60,6 +61,7 @@ export default function UpcomingBazars() {
   const [applicationData, setApplicationData] = useState(initialFormState);
   const [showSuccess, setShowSuccess] = useState(false);
   const [successMessage, setSuccessMessage] = useState('');
+  const { user } = useAuthUser();
   
   
 
@@ -123,6 +125,7 @@ export default function UpcomingBazars() {
     const payload = {
         people: applicationData.attendees,
         boothSize: applicationData.boothSize,
+        vendorId: user._id,
     };
     
     try {
