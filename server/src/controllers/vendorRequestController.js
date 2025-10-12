@@ -1,4 +1,5 @@
 import VendorRequest from "../models/VendorRequest.js";
+import Vendor from "../models/Vendor.js";
 import Booth from "../models/Booth.js";
 import {
   sendBoothApprovalEmail,
@@ -127,7 +128,7 @@ const acceptRequest = async (req, res, next) => {
     request.status = "Approved";
     await request.save();
     const booth = await Booth.create({
-      boothname: vendor ? vendor.companyName : "Vendor Booth",
+      boothname: vendor ? vendor.companyname : "Vendor Booth",
       vendorId: request.vendorId,
       isBazarBooth: request.isBazarBooth,
       bazarId: request.bazarId,

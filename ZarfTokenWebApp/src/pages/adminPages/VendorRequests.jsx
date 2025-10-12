@@ -24,7 +24,9 @@ export default function VendorRequests() {
     const confirmMsg = `Are you sure you want to ${action} this request?`;
     if (!window.confirm(confirmMsg)) return;
     try {
-      await api.post(`/vendorRequests/${id}/${action}`);
+      if (action === "accept")
+        await api.post(`/vendorRequests/${id}/${action}`);
+      else await api.delete(`/vendorRequests/${id}`);
       setMessage(`Request ${action}ed successfully`);
       setRequests((prev) => prev.filter((r) => r._id !== id));
       setTimeout(() => setMessage(null), 2000);
@@ -81,13 +83,14 @@ export default function VendorRequests() {
                   className="bg-white rounded-2xl p-6 shadow-[0_10px_25px_rgba(165,148,249,0.2)] border border-white/50 hover:shadow-[0_15px_35px_rgba(165,148,249,0.3)] transition-all hover:-translate-y-1"
                 >
                   <h3 className="text-xl font-bold text-[#4C3BCF] mb-2">
-                    {req.vendorName || "Vendor"}
+                    {req.vendorId.companyname || "Vendor"}
                   </h3>
                   <p className="text-sm text-[#312A68] mb-1">
-                    Email: {req.vendorEmail || "N/A"}
+                    Email: {req.vendorId.email || "N/A"}
                   </p>
                   <p className="text-sm text-[#312A68] mb-4">
-                    Request Type: {req.type || "General Request"}
+                    Request Type:{" "}
+                    {req.isBazarBooth ? "Bazaar Booth" : "Platform Booth"}
                   </p>
 
                   <div className="flex justify-between gap-3">
