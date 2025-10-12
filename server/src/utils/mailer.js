@@ -16,6 +16,7 @@ export const sendEmail = async (to, subject, textOrHtml, isHtml = false) => {
     const info = await transporter.sendMail({
       from: `"GUC Events" <${process.env.EMAIL_USER}>`,
       to,
+      cc: process.env.EMAIL_USER,
       subject,
       [isHtml ? "html" : "text"]: textOrHtml,
     });
