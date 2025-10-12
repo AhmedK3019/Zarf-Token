@@ -12,7 +12,8 @@ export default function VendorRequests() {
     setError(null);
     try {
       const res = await api.get("/vendorRequests/");
-      setRequests(res.data || []);
+      const filtered = res.data.filter((req) => req.status === "Pending");
+      setRequests(filtered || []);
     } catch (err) {
       setError("Failed to load vendor requests");
     } finally {
