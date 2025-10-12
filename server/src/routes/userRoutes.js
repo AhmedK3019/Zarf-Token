@@ -12,4 +12,6 @@ router.get("/getUser/:id", userController.getUser);
 
 router.delete("/deleteUser/:id", userController.deleteUser);
 
+router.get("/getProfessors", userController.getProfessors);
+
 export default router;
