@@ -51,14 +51,11 @@ const getEventsByType = async (req, res, next) => {
 const getEventsRegisteredByUser = async (req, res, next) => {
   try {
     const { userId } = req.params;
-    const workshops = await Workshop.find({ attendees: userId });
-    const Bazzars = await Bazaar.find({ attendees: userId });
-    const Conferences = await Conference.find({ attendees: userId });
-    const Trips = await Trip.find({ attendees: userId });
-    const Booths = await Booth.find({ attendees: userId });
-    return res
-      .status(200)
-      .json([...workshops, ...Bazzars, ...Conferences, ...Trips, ...Booths]);
+    const workshops = await Workshop.find({
+      attendees: { $elemMatch: { userId } },
+    });
+    const trips = await Trip.find({ attendees: { $elemMatch: { userId } } });
+    return res.status(200).json([...workshops, ...trips]);
   } catch (error) {
     next(error);
   }

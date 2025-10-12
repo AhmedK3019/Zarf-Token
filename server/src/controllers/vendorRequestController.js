@@ -1,4 +1,5 @@
 import VendorRequest from "../models/VendorRequest.js";
+import Vendor from "../models/Vendor.js";
 import Booth from "../models/Booth.js";
 import {
   sendBoothApprovalEmail,
@@ -127,9 +128,10 @@ const acceptRequest = async (req, res, next) => {
     request.status = "Approved";
     await request.save();
     const booth = await Booth.create({
-      boothname: vendor ? vendor.companyName : "Vendor Booth",
+      boothname: vendor ? vendor.companyname : "Vendor Booth",
       vendorId: request.vendorId,
       isBazarBooth: request.isBazarBooth,
+      status: "Approved",
       bazarId: request.bazarId,
       boothSize: request.boothSize,
       people: request.people,
@@ -137,7 +139,7 @@ const acceptRequest = async (req, res, next) => {
       duration: request.duration,
     });
     try {
-      await mailer.sendBoothApprovalEmail(request.vendorId, booth);
+      await sendBoothApprovalEmail(vendor, booth);
     } catch (emailErr) {
       console.error(
         "Failed to send booth approval email:",
@@ -157,8 +159,12 @@ const deleteRequest = async (req, res, next) => {
       return res.status(404).json({ message: "VendorRequest not found" });
     // send a rejection email to vendor
     doc.status = "Rejected";
+    await doc.save();
+    const request = await VendorRequest.findById(req.params.id).populate(
+      "vendorId"
+    );
     try {
-      await mailer.sendBoothRejectionEmail(request.vendorId, doc);
+      await sendBoothRejectionEmail(request.vendorId, doc);
     } catch (emailErr) {
       console.error(
         "Failed to send booth rejection email:",

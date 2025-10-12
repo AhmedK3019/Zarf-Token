@@ -366,7 +366,7 @@ export default function AcceptedBooths() {
                         <div className="flex items-center gap-4 mt-3 text-sm text-[#736CED]">
                           <span className="flex items-center gap-1">
                             <Building size={14} />
-                            {booth.boothname}
+                            {booth.bazarId?.bazaarname || "Vendor"}
                           </span>
                           <span className="flex items-center gap-1">
                             <Users size={14} />
@@ -397,11 +397,8 @@ export default function AcceptedBooths() {
                       {/* Platform Card content */}
                       <div>
                         <h3 className="text-xl font-bold text-[#4C3BCF]">
-                          {booth.boothname}
+                          {booth.boothname || "Platform Storefront"}
                         </h3>
-                        <p className="text-sm text-[#312A68] mt-1">
-                          Your long-term virtual storefront
-                        </p>
                         <div className="flex items-center gap-4 mt-3 text-sm text-[#736CED]">
                           <span className="flex items-center gap-1">
                             <Users size={14} />

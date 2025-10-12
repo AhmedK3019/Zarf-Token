@@ -255,11 +255,62 @@ const AllEvents = () => {
   };
 
   const handleRegisterEvent = (event) => {
-    alert(
-      `You have registered for ${
-        event.name || event.bazaarname || "the event"
-      }!`
-    );
+    // open registration modal with the selected event
+    setRegisterModalEvent(event);
+    setShowRegisterModal(true);
+  };
+
+  // registration modal state
+  const [showRegisterModal, setShowRegisterModal] = useState(false);
+  const [registerModalEvent, setRegisterModalEvent] = useState(null);
+  const [regName, setRegName] = useState("");
+  const [regEmail, setRegEmail] = useState("");
+  const [regGucid, setRegGucid] = useState("");
+  const [regError, setRegError] = useState(null);
+  const [regLoading, setRegLoading] = useState(false);
+
+  const submitRegistration = async () => {
+    if (!registerModalEvent) return;
+    setRegError(null);
+    setRegLoading(true);
+    try {
+      if (registerModalEvent.type === "workshop") {
+        // PATCH to workshops register endpoint
+        await api.patch(
+          `/workshops/registerForaWorkshop/${registerModalEvent._id}`,
+          {
+            firstname: regName.split(" ")[0] || regName,
+            lastname: regName.split(" ").slice(1).join(" ") || "",
+            gucid: regGucid,
+            email: regEmail,
+          }
+        );
+      } else if (registerModalEvent.type === "trip") {
+        // backend uses PATCH /registerForaTrip/:id
+        await api.patch(`/trips/registerForaTrip/${registerModalEvent._id}`, {
+          firstname: regName.split(" ")[0] || regName,
+          lastname: regName.split(" ").slice(1).join(" ") || "",
+          gucid: regGucid,
+          email: regEmail,
+        });
+      } else {
+        // unsupported type
+        throw new Error("Registration for this event type is not supported");
+      }
+
+      // success
+      alert("Registration successful!");
+      setShowRegisterModal(false);
+      setRegName("");
+      setRegEmail("");
+      setRegGucid("");
+    } catch (err) {
+      setRegError(
+        err?.response?.data?.message || err?.message || "Failed to register"
+      );
+    } finally {
+      setRegLoading(false);
+    }
   };
 
   return (
@@ -523,14 +574,16 @@ const AllEvents = () => {
                         ((event.registrationdeadline &&
                           event.registrationdeadline > new Date()) ||
                           new Date(event.startdate) > new Date()) &&
-                        !event.attendees.includes(user._id) &&
+                        !event.attendees.some(
+                          (attendee) => attendee.userId === user._id
+                        ) &&
                         ((event.capacity &&
                           event.attendees.length < event.capacity) ||
                           true) && (
                           <div className="mt-3">
                             <button
                               onClick={() => handleRegisterEvent(event)}
-                              className="text-xs bg-rose-50 text-rose-700 px-3 py-1 rounded-full hover:bg-rose-100 transition-colors"
+                              className="text-xs bg-[#2DD4BF] text-white px-3 py-1 rounded-full hover:bg-[#14B8A6] transition-colors"
                             >
                               Register
                             </button>
@@ -602,6 +655,69 @@ const AllEvents = () => {
                   Close
                 </button>
               </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Registration Modal */}
+      {showRegisterModal && registerModalEvent && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-2xl max-w-md w-full p-6">
+            <div className="flex justify-between items-center mb-4">
+              <h2 className="text-xl font-bold text-[#4C3BCF]">
+                Register for{" "}
+                {registerModalEvent.name ||
+                  registerModalEvent.workshopname ||
+                  registerModalEvent.tripname}
+              </h2>
+              <button
+                onClick={() => setShowRegisterModal(false)}
+                className="text-gray-500 hover:text-gray-700 text-2xl"
+              >
+                ×
+              </button>
+            </div>
+
+            {regError && (
+              <p className="text-sm text-red-500 mb-2">{regError}</p>
+            )}
+
+            <div className="space-y-3">
+              <input
+                value={regName}
+                onChange={(e) => setRegName(e.target.value)}
+                placeholder="Full name"
+                className="w-full px-4 py-2 border rounded-md"
+              />
+              <input
+                value={regEmail}
+                onChange={(e) => setRegEmail(e.target.value)}
+                placeholder="Email"
+                className="w-full px-4 py-2 border rounded-md"
+              />
+              <input
+                value={regGucid}
+                onChange={(e) => setRegGucid(e.target.value)}
+                placeholder="GUC ID"
+                className="w-full px-4 py-2 border rounded-md"
+              />
+            </div>
+
+            <div className="mt-6 flex justify-end gap-3">
+              <button
+                onClick={() => setShowRegisterModal(false)}
+                className="px-4 py-2 rounded-full border"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={submitRegistration}
+                disabled={regLoading}
+                className="px-4 py-2 rounded-full bg-[#2DD4BF] text-white hover:bg-[#14B8A6]"
+              >
+                {regLoading ? "Submitting..." : "Submit"}
+              </button>
             </div>
           </div>
         </div>
