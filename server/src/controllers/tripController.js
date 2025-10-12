@@ -1,6 +1,5 @@
 import Trip from "../models/Trip.js";
 import Joi from "joi";
-import jwt from "jsonwebtoken";
 
 const TripSchema = Joi.object({
   tripname: Joi.string().required(),
@@ -91,10 +90,8 @@ const deleteTrip = async (req, res, next) => {
 const registerForTrip = async (req, res, next) => {
   try {
     const { id } = req.params;
-    const token = req.headers.authorization?.split(" ")[1];
-    if (!token) return res.status(401).json({ message: "No token provided" });
-    let userId = unPackToken(token);
-    if (!userId) return res.status(401).json({ message: "Invalid Token" });
+    const userId = req.userId;
+    if (!userId) return res.status(401).json({ message: "No token provided" });
     const check = await Trip.findById(id, { capacity: 1, attendees: 1 });
     if (!check) return res.status(404).json({ message: "Trip is not found" });
     if (
@@ -126,15 +123,6 @@ const registerForTrip = async (req, res, next) => {
       .json({ message: "done updating", trip: afterUpdate });
   } catch (error) {
     next(error);
-  }
-};
-
-const unPackToken = (token) => {
-  try {
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    return decoded.id;
-  } catch (error) {
-    return null;
   }
 };
 export default {

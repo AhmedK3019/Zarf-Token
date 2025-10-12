@@ -2,11 +2,13 @@ import express from "express";
 import jwt from "jsonwebtoken";
 import bcrypt from "bcryptjs";
 import User from "../models/User.js";
+import Admin from "../models/Admin.js";
+import EventsOffice from "../models/EventsOffice.js";
+import Vendor from "../models/Vendor.js";
 
 const router = express.Router();
 
 const JWT_SECRET = process.env.JWT_SECRET || "your-secret-key"; // In production, use environment variable!
-const COOKIE_MAX_AGE = 24 * 60 * 60 * 1000; // 24 hours
 const FRONTEND_URL = process.env.FRONTEND_URL || "http://localhost:5173";
 
 // Email verification endpoint
@@ -58,15 +60,8 @@ router.post("/login", async (req, res) => {
       { expiresIn: "24h" }
     );
 
-    // Set HTTP-only cookie
-    res.cookie("auth_token", token, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === "production", // Use secure in production
-      sameSite: "strict",
-      maxAge: COOKIE_MAX_AGE,
-    });
-
-    res.json({ success: true });
+    // Return token to client (client will store and send in Authorization header)
+    res.json({ success: true, token });
   } catch (error) {
     console.error("Login error:", error);
     res.status(500).json({
@@ -78,32 +73,57 @@ router.post("/login", async (req, res) => {
 
 router.get("/check", async (req, res) => {
   try {
-    const token = req.cookies.auth_token;
-    if (!token) {
+    const authHeader = req.headers.authorization;
+    if (!authHeader) return res.json({ authenticated: false });
+    const parts = authHeader.split(" ").filter(Boolean);
+    const token =
+      parts.length === 2 ? parts[1] : parts.length === 1 ? parts[0] : null;
+    if (!token) return res.json({ authenticated: false });
+
+    try {
+      const decoded = jwt.verify(token, JWT_SECRET);
+      const user = await User.findById(decoded.userId);
+      if (!user) return res.json({ authenticated: false });
+      return res.json({ authenticated: true });
+    } catch (err) {
       return res.json({ authenticated: false });
     }
+  } catch (err) {
+    return res.status(500).json({ authenticated: false });
+  }
+});
 
-    // Verify token
+router.get("/me", async (req, res) => {
+  try {
+    const authHeader = req.headers.authorization;
+    if (!authHeader)
+      return res.status(401).json({ message: "Not authenticated" });
+    const parts = authHeader.split(" ").filter(Boolean);
+    const token =
+      parts.length === 2 ? parts[1] : parts.length === 1 ? parts[0] : null;
+    if (!token) return res.status(401).json({ message: "Not authenticated" });
+
     const decoded = jwt.verify(token, JWT_SECRET);
-    const user = await User.findById(decoded.userId);
+    const userId = decoded.userId || decoded.id || decoded._id;
+    if (!userId) return res.status(401).json({ message: "Invalid token" });
 
-    if (!user) {
-      return res.json({ authenticated: false });
-    }
+    let user = await User.findById(userId).select(
+      "-password -__v -notifications"
+    );
+    if (!user) user = await Admin.findById(userId).select("-password -__v");
+    if (!user)
+      user = await EventsOffice.findById(userId).select("-password -__v");
+    if (!user) user = await Vendor.findById(userId).select("-password -__v");
 
-    res.json({ authenticated: true });
-  } catch (error) {
-    res.json({ authenticated: false });
+    if (!user) return res.status(404).json({ message: "User not found" });
+
+    return res.json({ user });
+  } catch (err) {
+    return res.status(401).json({ message: "Invalid or expired token" });
   }
 });
 
 router.post("/logout", (req, res) => {
-  res.cookie("auth_token", "", {
-    httpOnly: true,
-    secure: process.env.NODE_ENV === "production",
-    sameSite: "strict",
-    maxAge: 0,
-  });
   res.json({ success: true });
 });
 

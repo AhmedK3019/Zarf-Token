@@ -2,8 +2,8 @@ import express from "express";
 import mongoose from "mongoose";
 import cors from "cors";
 import dotenv from "dotenv";
-import cookieParser from "cookie-parser";
 import boothRoutes from "./routes/boothRoutes.js";
+import authMiddleware from "./middleware/auth.js";
 import loyaltyRoutes from "./routes/loyaltyRoutes.js";
 import reservationRoutes from "./routes/reservationRoutes.js";
 import courtRoutes from "./routes/courtRoutes.js";
@@ -32,7 +32,6 @@ const __dirname = dirname(__filename);
 
 dotenv.config();
 const app = express();
-app.use(cookieParser());
 app.use(express.json());
 app.use(
   cors({
@@ -40,7 +39,10 @@ app.use(
     credentials: true,
   })
 );
-
+// Ensure auth middleware runs for every request (populates req.user, req.userId)
+app.use("/api/allUsers", allUsersRoutes);
+app.use("/api/auth", authRoutes);
+app.use(authMiddleware);
 app.use("/api/booths", boothRoutes);
 app.use("/api/loyalty", loyaltyRoutes);
 app.use("/api/reservations", reservationRoutes);
@@ -52,7 +54,6 @@ app.use("/api/admin", adminRoutes);
 app.use("/api/eventsOffice", eventsOfficeRoutes);
 app.use("/api/vendor", vendorRoutes);
 app.use("/api/vendorRequests", vendorRequestRoutes);
-app.use("/api/allUsers", allUsersRoutes);
 app.use("/api/registerRequests", registerRequestRoutes);
 app.use("/api/trips", tripRoutes);
 app.use("/api/bazaars", bazaarRoutes);
@@ -67,7 +68,7 @@ cron.schedule("0 0 * * *", () => {
 
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 
-app.use("/api/auth", authRoutes);
+// Attach token-only auth middleware globally so every request has req.user (or null)
 
 app.get("/", (req, res) => res.send("API running 🚀"));
 

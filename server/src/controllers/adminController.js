@@ -99,12 +99,12 @@ const getAdmin = async (req, res, next) => {
 
 const createToken = (body) => {
   try {
-    let payload = {
-      id: body._id.String(),
+    const payload = {
+      userId: body._id.toString(),
       name: body.firstname,
       role: body.role,
     };
-    const token = jwt.verify(payload, process.env.JWT_SECRET, {
+    const token = jwt.sign(payload, process.env.JWT_SECRET, {
       expiresIn: "7d",
     });
     return token;

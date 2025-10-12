@@ -109,3 +109,18 @@ export const deleteBooth = async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 };
+
+export const getMyBooths = async (req, res) => {
+  try {
+    const userId = req.userId;
+    if (!userId)
+      return res.status(401).json({ error: "Authentication required" });
+
+    let booths = await Booth.find({ vendorId: userId })
+      .populate("vendorId")
+      .populate("bazarId");
+    res.json(booths);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};

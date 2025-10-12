@@ -1,1 +1,3 @@
-export { useAuthUser } from "../context/UserContext";
+import { useAuthUser } from "../context/UserContext";
+
+export { useAuthUser };

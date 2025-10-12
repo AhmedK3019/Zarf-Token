@@ -40,12 +40,10 @@ const attendeesSchema = Joi.object({
         "Email must be a valid GUC email (ending with .guc.edu.eg)",
     }),
 });
-const createWorkshop = async (req, res) => {
+const createWorkshop = async (req, res, next) => {
   try {
-    const token = req.headers.authorization?.split(" ")[1];
-    if (!token) return res.status(401).json({ message: "No token provided" });
-    let userId = unPackToken(token);
-    if (!userId) return res.status(401).json({ message: "Invalid Token" });
+    const userId = req.userId;
+    if (!userId) return res.status(401).json({ message: "No token provided" });
     const { value, error } = workshopSchema.validate(req.body);
     if (error) {
       return res.status(400).json({ message: error.details[0].message });
@@ -162,10 +160,8 @@ const requestEdits = async (req, res, next) => {
 
 const getMyWorkshops = async (req, res, next) => {
   try {
-    const token = req.headers.authorization.split(" ")[1];
-    if (!token) return res.status(401).json({ message: "Token is not found" });
-    const myId = unPackToken(token);
-    if (!myId) return res.status(401).json({ message: "Invalid token" });
+    const myId = req.userId;
+    if (!myId) return res.status(401).json({ message: "Token is not found" });
     const myWorkshops = await WorkShop.find({ createdBy: myId });
     if (!myWorkshops)
       return res
@@ -191,10 +187,8 @@ const deleteWorkshop = async (req, res, next) => {
 const registerForWorkshop = async (req, res, next) => {
   try {
     const { id } = req.params;
-    const token = req.headers.authorization?.split(" ")[1];
-    if (!token) return res.status(401).json({ message: "No token provided" });
-    let userId = unPackToken(token);
-    if (!userId) return res.status(401).json({ message: "Invalid Token" });
+    const userId = req.userId;
+    if (!userId) return res.status(401).json({ message: "No token provided" });
     const check = await WorkShop.findById(id, { capacity: 1, attendees: 1 });
     if (!check)
       return res.status(404).json({ message: "Workshop is not found" });

@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import api from "../../services/api";
 import { FileText, X } from "lucide-react";
+import { useAuthUser } from "../../context/UserContext";
 
 const initialFormState = {
   attendees: [{ name: "", email: "" }],
@@ -17,6 +18,7 @@ export default function ApplyBooth() {
   const [showSuccess, setShowSuccess] = useState(false);
   const [successMessage, setSuccessMessage] = useState('');
   const navigate = useNavigate();
+  const { user } = useAuthUser();
 
   const handleFormChange = (e) => {
     const { name, value } = e.target;
@@ -53,6 +55,7 @@ export default function ApplyBooth() {
       boothSize: formData.boothSize,
       duration: formData.duration,
       location: formData.location,
+      vendorId: user._id,
     };
 
     try {
