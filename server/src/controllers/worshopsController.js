@@ -11,15 +11,14 @@ const workshopSchema = Joi.object({
   shortdescription: Joi.string().required(),
   fullagenda: Joi.string().required(),
   facultyresponsibilty: Joi.string().required(),
-  professorsparticipating: Joi.array().length(1).required().messages({
-    "array.length":
-      '"proffessorsparticipating" must contain at least one professor',
+  professorsparticipating: Joi.array().min(1).required().messages({
+    "array.min":
+      '"professorsparticipating" must contain at least one professor',
   }),
   status: Joi.string()
     .valid("Pending", "Approved", "Rejected")
     .default("Pending"),
   capacity: Joi.number().integer().min(1).required(),
-  price: Joi.number().min(1).required(),
   fundingsource: Joi.string().valid("External", "GUC").required(),
   extrarequiredfunding: Joi.number().default(0),
   attendees: Joi.array().default([]),
@@ -58,10 +57,9 @@ const createWorkshop = async (req, res, next) => {
       shortdescription: value.shortdescription,
       fullagenda: value.fullagenda,
       facultyresponsibilty: value.facultyresponsibilty,
-      proffessorsparticipating: value.proffessorsparticipating,
+      professorsparticipating: value.professorsparticipating,
       status: value.status,
       capacity: value.capacity,
-      price: value.price,
       fundingsource: value.fundingsource,
       extrarequiredfunding: value.extrarequiredfunding,
       attendees: value.attendees,
@@ -90,6 +88,7 @@ const getWorkshop = async (req, res, next) => {
     if (!workshop) {
       return res.status(404).json({ error: "Workshop not found" });
     }
+    return res.status(200).json(workshop);
   } catch (error) {
     next(error);
   }

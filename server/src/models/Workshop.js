@@ -20,6 +20,9 @@ const workshopSchema = new mongoose.Schema({
     type: [{ type: mongoose.Schema.ObjectId, ref: "User" }],
     default: [],
   },
+  // Number of seats available for this workshop
+  capacity: { type: Number, required: true },
+  // Registration price in EGP
   fundingsource: { type: String, enum: ["External", "GUC"], required: true },
   attendees: {
     type: [registeredPeople],
