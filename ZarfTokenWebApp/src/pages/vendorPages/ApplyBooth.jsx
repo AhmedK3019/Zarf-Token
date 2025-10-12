@@ -14,7 +14,8 @@ export default function ApplyBooth() {
   const [formData, setFormData] = useState(initialFormState);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState(null);
-  // const { user } = useUserContext(); // REMOVED
+  const [showSuccess, setShowSuccess] = useState(false);
+  const [successMessage, setSuccessMessage] = useState('');
   const navigate = useNavigate();
 
   const handleFormChange = (e) => {
@@ -44,7 +45,39 @@ export default function ApplyBooth() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    alert("Form submission is currently disabled. Please implement user authentication.");
+    setIsSubmitting(true);
+    setError(null);
+
+    const payload = {
+      people: formData.attendees,
+      boothSize: formData.boothSize,
+      duration: formData.duration,
+      location: formData.location,
+    };
+
+    try {
+      const token = localStorage.getItem('token');
+      if (!token) {
+        setError("You need to be logged in to submit an application. Please log in and try again.");
+        setIsSubmitting(false);
+        return;
+      }
+
+      const response = await api.post(`/vendorRequests/platform`, payload);
+
+      setSuccessMessage(`Platform booth application submitted successfully!`);
+      setShowSuccess(true);
+      setFormData(initialFormState);
+      setTimeout(() => {
+        setShowSuccess(false);
+      }, 4000);
+    } catch (err) {
+      console.error("Application submission failed:", err);
+      const errorMessage = err.response?.data?.message || "There was an error submitting your application. Please try again.";
+      setError(errorMessage);
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -65,6 +98,13 @@ export default function ApplyBooth() {
             {/* Form Container */}
             <div className="bg-white rounded-2xl p-8 shadow-[0_25px_50px_rgba(115,108,237,0.3)] border border-white/50">
         <form onSubmit={handleSubmit}>
+          {/* Error Message */}
+          {error && (
+            <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg">
+              <p className="text-red-600 text-sm">{error}</p>
+            </div>
+          )}
+          
           <div className="space-y-8">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
@@ -146,6 +186,30 @@ export default function ApplyBooth() {
           </div>
         </main>
       </div>
+
+      {/* Success Notification */}
+      {showSuccess && (
+        <div className="fixed inset-0 flex items-center justify-center z-50 pointer-events-none">
+          <div className="bg-white rounded-2xl p-8 shadow-[0_25px_50px_rgba(115,108,237,0.4)] border border-[#D5CFE1] max-w-md mx-4 pointer-events-auto animate-fade-in">
+            <div className="text-center">
+              <div className="w-16 h-16 bg-gradient-to-r from-[#736CED] to-[#4C3BCF] rounded-full flex items-center justify-center mx-auto mb-4">
+                <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                </svg>
+              </div>
+              <h3 className="font-bold text-[#4C3BCF] text-xl mb-2">Submission Successful!</h3>
+              <p className="text-[#312A68] mb-4 leading-relaxed">{successMessage}</p>
+              <p className="text-[#736CED] text-sm">This message will close automatically in a few seconds.</p>
+              <button 
+                onClick={() => setShowSuccess(false)}
+                className="absolute top-4 right-4 text-gray-400 hover:text-[#736CED] transition-colors"
+              >
+                <X size={20} />
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
