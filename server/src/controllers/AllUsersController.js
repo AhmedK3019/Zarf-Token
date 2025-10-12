@@ -107,6 +107,12 @@ const loginUser = async (req, res, next) => {
     if (!flag) {
       return res.status(400).json({ message: "Invalid password" });
     }
+    const active = user.status === "Active";
+    if (!active) {
+      return res
+        .status(403)
+        .json({ message: "Account is not active. Contact support." });
+    }
     const token = createToken(user);
 
     const userObj =

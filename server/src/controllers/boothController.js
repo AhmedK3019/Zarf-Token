@@ -112,10 +112,11 @@ export const deleteBooth = async (req, res) => {
 
 export const getMyBooths = async (req, res) => {
   try {
-    const user = req.user;
-    if (!user)
+    const userId = req.userId;
+    if (!userId)
       return res.status(401).json({ error: "Authentication required" });
-    let booths = await Booth.find({ vendorId: user._id })
+
+    let booths = await Booth.find({ vendorId: userId })
       .populate("vendorId")
       .populate("bazarId");
     res.json(booths);
