@@ -109,3 +109,12 @@ export const deleteBooth = async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 };
+
+export const getMyBooths = async (req, res) => {
+  try {
+    let booths = await Booth.find().populate("vendorId").populate("bazarId");
+    res.json(booths);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};

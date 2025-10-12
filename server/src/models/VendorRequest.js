@@ -32,7 +32,7 @@ const vendorRequestSchema = new mongoose.Schema(
       enum: ["Pending", "Approved", "Rejected"],
       default: "Pending",
     },
-    bazarId: { type: mongoose.Schema.Types.ObjectId, ref: "Bazar" },
+    bazarId: { type: mongoose.Schema.Types.ObjectId, ref: "Bazaar" },
   },
   { timestamps: true }
 );
