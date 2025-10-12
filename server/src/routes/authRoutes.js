@@ -9,7 +9,6 @@ import Vendor from "../models/Vendor.js";
 const router = express.Router();
 
 const JWT_SECRET = process.env.JWT_SECRET || "your-secret-key"; // In production, use environment variable!
-const COOKIE_MAX_AGE = 24 * 60 * 60 * 1000; // 24 hours
 const FRONTEND_URL = process.env.FRONTEND_URL || "http://localhost:5173";
 
 // Email verification endpoint
@@ -94,7 +93,6 @@ router.get("/check", async (req, res) => {
   }
 });
 
-// Return current logged-in user (supports cookie-based auth)
 router.get("/me", async (req, res) => {
   try {
     const authHeader = req.headers.authorization;
