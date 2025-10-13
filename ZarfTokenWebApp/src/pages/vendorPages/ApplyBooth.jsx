@@ -1,15 +1,25 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import api from "../../services/api";
-import { FileText, X } from "lucide-react";
+import {X} from "lucide-react";
 import { useAuthUser } from "../../context/UserContext";
+import InteractiveMap from "./InteractiveMap"; // Corrected import path for InteractiveMap
 
+
+const boothLocations = [
+  { id: 'North West Platform Entrance', label: 'North West Platform', x: 17, y: 40, width: 8, height: 8 },
+  { id: 'West Platform Entrance', label: 'West Platform Entrance', x: 17, y: 57, width: 8, height: 8 },
+  { id: 'West Platform Alley', label: 'West Entrance Alley', x: 17, y: 65, width: 8, height: 8 },
+  { id: 'East Platform Alley', label: 'East PLatform Alley', x: 85, y: 62, width: 8, height: 8 },
+];
+
+// Set the initial form state, defaulting to the first available location.
 const initialFormState = {
   boothname: "",
   attendees: [{ name: "", email: "" }],
   boothSize: "2x2",
   duration: 1,
-  location: "Platform Area - Main Entrance",
+  location: boothLocations[0].id,
 };
 
 export default function ApplyBooth() {
@@ -24,6 +34,10 @@ export default function ApplyBooth() {
   const handleFormChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const handleLocationSelect = (locationId) => {
+    setFormData((prev) => ({ ...prev, location: locationId }));
   };
 
   const handleAttendeeChange = (index, field, value) => {
@@ -96,71 +110,70 @@ export default function ApplyBooth() {
                 Request a Platform Booth
               </h1>
               <p className="text-lg text-[#312A68] max-w-2xl mx-auto">
-                Apply for a standalone booth in the main student activity area and showcase your business.
+                Apply for a standalone booth in the main student activity area by selecting a location on the map.
               </p>
             </div>
 
             {/* Form Container */}
             <div className="bg-white rounded-2xl p-8 shadow-[0_25px_50px_rgba(115,108,237,0.3)] border border-white/50">
-        <form onSubmit={handleSubmit}>
-          {/* Error Message */}
-          {error && (
-            <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg">
-              <p className="text-red-600 text-sm">{error}</p>
-            </div>
-          )}
-          
-          <div className="space-y-8">
-            {/* Booth Name Field */}
-            <div>
-              <label htmlFor="boothname" className="block text-sm font-medium text-[#4C3BCF] mb-2">
-                Booth Name *
-              </label>
-              <input
-                type="text"
-                id="boothname"
-                name="boothname"
-                value={formData.boothname}
-                onChange={handleFormChange}
-                placeholder="Enter your booth name (e.g., Tech Solutions, Food Corner, etc.)"
-                required
-                className="w-full rounded-lg border-2 border-gray-200 shadow-sm focus:border-[#736CED] focus:ring-[#736CED] text-[#312A68] px-4 py-3"
-              />
-            </div>
+              <form onSubmit={handleSubmit}>
+                {error && (
+                  <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg">
+                    <p className="text-red-600 text-sm">{error}</p>
+                  </div>
+                )}
+                
+                <div className="space-y-8">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    {/* Interactive Map */}
+                    <div className="md:col-span-1">
+                      <InteractiveMap 
+                          locations={boothLocations}
+                          selectedLocation={formData.location}
+                          onLocationSelect={handleLocationSelect}
+                      />
+                    </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div>
-                <label htmlFor="location" className="block text-sm font-medium text-[#4C3BCF] mb-2">
-                  Location
-                </label>
-                <select id="location" name="location" value={formData.location} onChange={handleFormChange} className="w-full rounded-lg border-2 border-gray-200 shadow-sm focus:border-[#736CED] focus:ring-[#736CED] text-[#312A68]">
-                  <option>Platform Area - Main Entrance</option>
-                  <option>Platform Area - Near Food Stalls</option>
-                </select>
-              </div>
+                    {/* Form Fields */}
+                    <div className="space-y-6 md:col-span-1 mt-23">
+                       <div>
+                        <label htmlFor="boothname" className="block text-sm font-medium text-[#4C3BCF] mb-2">
+                          Booth Name *
+                        </label>
+                        <input
+                          type="text"
+                          id="boothname"
+                          name="boothname"
+                          value={formData.boothname}
+                          onChange={handleFormChange}
+                          placeholder="e.g., Tech Solutions, Food Corner"
+                          required
+                          className="w-full rounded-lg border-2 border-gray-200 shadow-sm focus:border-[#736CED] focus:ring-[#736CED] text-[#312A68] px-4 py-3"
+                        />
+                      </div>
+                      <div>
+                        <label htmlFor="duration" className="block text-sm font-medium text-[#4C3BCF] mb-2">
+                          Duration (in weeks)
+                        </label>
+                        <select id="duration" name="duration" value={formData.duration} onChange={handleFormChange} className="w-full rounded-lg border-2 border-gray-200 shadow-sm focus:border-[#736CED] focus:ring-[#736CED] text-[#312A68]">
+                          <option value="1">1 Week</option>
+                          <option value="2">2 Weeks</option>
+                          <option value="3">3 Weeks</option>
+                          <option value="4">4 Weeks</option>
+                        </select>
+                      </div>
 
-              <div>
-                <label htmlFor="duration" className="block text-sm font-medium text-[#4C3BCF] mb-2">
-                  Duration (in weeks)
-                </label>
-                <select id="duration" name="duration" value={formData.duration} onChange={handleFormChange} className="w-full rounded-lg border-2 border-gray-200 shadow-sm focus:border-[#736CED] focus:ring-[#736CED] text-[#312A68]">
-                  <option value="1">1 Week</option>
-                  <option value="2">2 Weeks</option>
-                  <option value="3">3 Weeks</option>
-                  <option value="4">4 Weeks</option>
-                </select>
-              </div>
-            </div>
-
-            <div>
-              <label htmlFor="boothSize" className="block text-sm font-medium text-[#4C3BCF] mb-2">
-                Booth Size
-              </label>
-              <select id="boothSize" name="boothSize" value={formData.boothSize} onChange={handleFormChange} className="w-full rounded-lg border-2 border-gray-200 shadow-sm focus:border-[#736CED] focus:ring-[#736CED] text-[#312A68]">
-                <option value="2x2">2x2</option>
-                <option value="4x4">4x4</option>
-              </select>
-            </div>
+                      <div>
+                        <label htmlFor="boothSize" className="block text-sm font-medium text-[#4C3BCF] mb-2">
+                          Booth Size
+                        </label>
+                        <select id="boothSize" name="boothSize" value={formData.boothSize} onChange={handleFormChange} className="w-full rounded-lg border-2 border-gray-200 shadow-sm focus:border-[#736CED] focus:ring-[#736CED] text-[#312A68]">
+                          <option value="2x2">2x2</option>
+                          <option value="4x4">4x4</option>
+                        </select>
+                      </div>
+                    </div>
+                  </div>
 
             <div>
               <label className="block text-sm font-medium text-[#4C3BCF] mb-2">
