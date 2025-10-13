@@ -20,6 +20,7 @@ const vendorRequestSchema = new mongoose.Schema(
       ],
     },
     duration: { type: Number, enum: [1, 2, 3, 4] }, // in weeks
+    boothname: { type: String }, // name of the booth
     boothSize: {
       type: String,
       enum: ["2x2", "4x4"],

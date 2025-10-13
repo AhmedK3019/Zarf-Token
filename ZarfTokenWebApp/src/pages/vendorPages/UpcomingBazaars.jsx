@@ -21,6 +21,7 @@ const formatDate = (dateStr) => {
 const initialFormState = {
   attendees: [{ name: "", email: "" }],
   boothSize: "2x2",
+  boothname: "",
 };
 
 
@@ -125,6 +126,7 @@ export default function UpcomingBazars() {
     const payload = {
         people: applicationData.attendees,
         boothSize: applicationData.boothSize,
+        boothname: applicationData.boothname,
         vendorId: user._id,
     };
     
@@ -261,6 +263,21 @@ export default function UpcomingBazars() {
                   <p className="text-sm text-[#312A68] mt-1">Fill in your booth details below.</p>
                 </div>
                 <button type="button" onClick={handleCloseModal} className="text-gray-400 hover:text-[#736CED] text-2xl transition-colors"><X size={24} /></button>
+              </div>
+
+              <div className="mb-6">
+                <label htmlFor="boothname" className="block text-sm font-medium text-[#4C3BCF] mb-2">
+                  Booth Name
+                </label>
+                <input 
+                  type="text" 
+                  id="boothname" 
+                  name="boothname" 
+                  value={applicationData.boothname} 
+                  onChange={handleFormChange} 
+                  placeholder="Enter your booth/shop name" 
+                  className="w-full rounded-lg border-2 border-gray-200 shadow-sm focus:border-[#736CED] focus:ring-[#736CED] text-[#312A68]" 
+                />
               </div>
 
               <div className="mb-6">

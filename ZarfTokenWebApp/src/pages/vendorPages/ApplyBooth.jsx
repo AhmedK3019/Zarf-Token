@@ -5,6 +5,7 @@ import { FileText, X } from "lucide-react";
 import { useAuthUser } from "../../context/UserContext";
 
 const initialFormState = {
+  boothname: "",
   attendees: [{ name: "", email: "" }],
   boothSize: "2x2",
   duration: 1,
@@ -51,6 +52,7 @@ export default function ApplyBooth() {
     setError(null);
 
     const payload = {
+      boothname: formData.boothname,
       people: formData.attendees,
       boothSize: formData.boothSize,
       duration: formData.duration,
@@ -109,6 +111,23 @@ export default function ApplyBooth() {
           )}
           
           <div className="space-y-8">
+            {/* Booth Name Field */}
+            <div>
+              <label htmlFor="boothname" className="block text-sm font-medium text-[#4C3BCF] mb-2">
+                Booth Name *
+              </label>
+              <input
+                type="text"
+                id="boothname"
+                name="boothname"
+                value={formData.boothname}
+                onChange={handleFormChange}
+                placeholder="Enter your booth name (e.g., Tech Solutions, Food Corner, etc.)"
+                required
+                className="w-full rounded-lg border-2 border-gray-200 shadow-sm focus:border-[#736CED] focus:ring-[#736CED] text-[#312A68] px-4 py-3"
+              />
+            </div>
+
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
                 <label htmlFor="location" className="block text-sm font-medium text-[#4C3BCF] mb-2">

@@ -13,7 +13,7 @@ const createBazarRequest = async (req, res, next) => {
     if (!vendorId)
       return res.status(401).json({ message: "Authentication required" });
 
-    const { people, boothSize } = req.body;
+    const { people, boothSize, boothname } = req.body;
     if (!people || !Array.isArray(people) || people.length < 1)
       return res
         .status(400)
@@ -25,6 +25,7 @@ const createBazarRequest = async (req, res, next) => {
       vendorId,
       people,
       boothSize,
+      boothname,
       isBazarBooth: true,
       bazarId: req.params.bazarId,
     });
@@ -41,7 +42,7 @@ const createPlatformRequest = async (req, res, next) => {
     if (!vendorId)
       return res.status(401).json({ message: "Authentication required" });
 
-    const { people, duration, location, boothSize } = req.body;
+    const { people, duration, location, boothSize, boothname } = req.body;
     if (!people || !Array.isArray(people) || people.length < 1)
       return res
         .status(400)
@@ -59,6 +60,7 @@ const createPlatformRequest = async (req, res, next) => {
       duration,
       location,
       boothSize,
+      boothname,
       isBazarBooth: false,
     });
     res.status(201).json(doc);

@@ -10,6 +10,7 @@ import {
   Globe,
   AlertCircle,
   CheckCircle,
+  Square,
 } from "lucide-react";
 import api from "../../services/api";
 import { useAuthUser } from "../../context/UserContext";
@@ -88,8 +89,13 @@ function DetailsModal({ request, onClose }) {
           <div className="sticky top-0 bg-white/80 backdrop-blur-lg border-b border-gray-200 p-6 flex justify-between items-center">
             <div>
               <h2 className="text-2xl font-bold text-[#4C3BCF]">
-                {request.bazarId?.bazaarname || "Bazaar Request"}
+                {request.boothname || "Bazaar Booth Request"}
               </h2>
+              {request.bazarId?.bazaarname && (
+                <p className="text-lg font-semibold text-[#736CED] mt-1">
+                  at {request.bazarId.bazaarname}
+                </p>
+              )}
               <div className="flex items-center gap-3 mt-2">
                 <StatusBadge status={request.status} />
                 <p className="text-sm text-[#312A68] flex items-center gap-2">
@@ -107,6 +113,15 @@ function DetailsModal({ request, onClose }) {
           </div>
           <div className="p-6 space-y-6">
             <div className="space-y-4">
+              {request.boothname && (
+                <div className="flex items-start gap-3">
+                  <Building size={16} className="mt-1 text-[#736CED] flex-shrink-0" />
+                  <div>
+                    <span className="font-semibold">Booth Name:</span>{" "}
+                    {request.boothname}
+                  </div>
+                </div>
+              )}
               <div className="flex items-start gap-3">
                 <Info size={16} className="mt-1 text-[#736CED] flex-shrink-0" />
                 <div>
@@ -201,13 +216,10 @@ function DetailsModal({ request, onClose }) {
         <div className="sticky top-0 bg-white/80 backdrop-blur-lg border-b border-gray-200 p-6 flex justify-between items-center">
           <div>
             <h2 className="text-2xl font-bold text-[#4C3BCF]">
-              Platform Booth Request
+              {request.boothname || "Platform Booth Request"}
             </h2>
             <div className="flex items-center gap-3 mt-2">
               <StatusBadge status={request.status} />
-              <p className="text-sm text-[#312A68] flex items-center gap-2">
-                <Globe size={14} /> Virtual Storefront
-              </p>
             </div>
           </div>
           <button
@@ -219,6 +231,15 @@ function DetailsModal({ request, onClose }) {
         </div>
         <div className="p-6 space-y-6">
           <div className="space-y-4">
+            {request.boothname && (
+              <div className="flex items-start gap-3">
+                <Building size={16} className="mt-1 text-[#736CED] flex-shrink-0" />
+                <div>
+                  <span className="font-semibold">Booth Name:</span>{" "}
+                  {request.boothname}
+                </div>
+              </div>
+            )}
             <div className="flex items-start gap-3">
               <Info size={16} className="mt-1 text-[#736CED] flex-shrink-0" />
               <div>
@@ -290,9 +311,22 @@ export default function MyRequests() {
   const [error, setError] = useState(null);
   const [selectedRequest, setSelectedRequest] = useState(null);
   const [view, setView] = useState("bazaar");
+  const [expandedDescriptions, setExpandedDescriptions] = useState(new Set());
 
   // Get user from context
   const { user } = useAuthUser();
+
+  const toggleDescription = (requestId) => {
+    setExpandedDescriptions(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(requestId)) {
+        newSet.delete(requestId);
+      } else {
+        newSet.add(requestId);
+      }
+      return newSet;
+    });
+  };
 
   useEffect(() => {
     const fetchRequests = async () => {
@@ -403,28 +437,39 @@ export default function MyRequests() {
                   request.isBazarBooth ? (
                     <div
                       key={request._id}
-                      className="bg-white rounded-2xl p-6 shadow-lg flex flex-col"
+                      className="bg-white rounded-2xl p-6 shadow-lg flex flex-col min-h-[280px]"
                     >
                       {/* Bazaar Request Card */}
                       <div>
                         <div className="flex items-start justify-between mb-2">
                           <h3 className="text-xl font-bold text-[#4C3BCF]">
-                            {request.bazarId?.bazaarname || "Bazaar Request"}
+                            {request.boothname || "Bazaar Booth Request"}
                           </h3>
                           <StatusBadge status={request.status} />
                         </div>
-                        <p className="text-sm text-[#312A68] mt-1">
+                        {request.bazarId?.bazaarname && (
+                          <p className="text-lg font-semibold text-[#736CED] mt-1">
+                            at {request.bazarId.bazaarname}
+                          </p>
+                        )}
+                        <p 
+                          className={`text-sm text-[#312A68] mt-1 cursor-pointer hover:text-[#4C3BCF] transition-colors ${
+                            expandedDescriptions.has(request._id) ? '' : 'line-clamp-2'
+                          }`}
+                          onClick={() => toggleDescription(request._id)}
+                          title="Click to expand/collapse"
+                        >
                           {request.bazarId?.shortdescription ||
                             "Bazaar booth application"}
                         </p>
                         <div className="flex items-center gap-4 mt-3 text-sm text-[#736CED]">
                           <span className="flex items-center gap-1">
-                            <Building size={14} />
+                            <Square size={14} />
                             {request.boothSize}
                           </span>
                           <span className="flex items-center gap-1">
                             <Users size={14} />
-                            {request.people?.length || 0} members
+                            {request.people?.length || 0}
                           </span>
                         </div>
                         {request.bazarId?.location && (
@@ -450,22 +495,20 @@ export default function MyRequests() {
                   ) : (
                     <div
                       key={request._id}
-                      className="bg-white rounded-2xl p-6 shadow-lg flex flex-col"
+                      className="bg-white rounded-2xl p-6 shadow-lg flex flex-col min-h-[280px]"
                     >
                       {/* Platform Request Card */}
                       <div>
                         <div className="flex items-start justify-between mb-2">
                           <h3 className="text-xl font-bold text-[#4C3BCF]">
-                            Platform Booth Request
+                            {request.boothname || "Platform Booth Request"}
                           </h3>
                           <StatusBadge status={request.status} />
                         </div>
-                        <p className="text-sm text-[#312A68] mt-1">
-                          Virtual storefront application
-                        </p>
+                        
                         <div className="flex items-center gap-4 mt-3 text-sm text-[#736CED]">
                           <span className="flex items-center gap-1">
-                            <Building size={14} />
+                            <Square size={14} />
                             {request.boothSize}
                           </span>
                           <span className="flex items-center gap-1">
@@ -474,7 +517,7 @@ export default function MyRequests() {
                           </span>
                           <span className="flex items-center gap-1">
                             <Users size={14} />
-                            {request.people?.length || 0} members
+                            {request.people?.length || 0}
                           </span>
                         </div>
                         {request.location && (
