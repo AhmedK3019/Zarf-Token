@@ -12,8 +12,8 @@ export default function SignUpRequests() {
     setLoading(true);
     setError(null);
     try {
-      const res = await api.get("/registerRequest/getAllRegisterRequests");
-      setRequests(res.data || []);
+      const res = await api.get("/registerRequests/getAllRegisterRequests");
+      setRequests(res.data.requests || []);
     } catch (err) {
       console.error(err);
       setError("Failed to load registration requests");
@@ -22,11 +22,9 @@ export default function SignUpRequests() {
     }
   };
 
-
   const handleRoleChange = (id, role) => {
     setSelectedRoles((prev) => ({ ...prev, [id]: role }));
   };
-
 
   const handleAccept = async (id) => {
     const chosenRole = selectedRoles[id];
@@ -38,11 +36,7 @@ export default function SignUpRequests() {
     if (!window.confirm(`Accept this request as ${chosenRole}?`)) return;
 
     try {
-
-      await api.post(`/registerRequest/setRole/${id}`, { role: chosenRole });
-
-
-      await api.patch(`/registerRequest/updateRegisterRequest/${id}`);
+      await api.post(`/registerRequests/setRole/${id}`, { role: chosenRole });
 
       setRequests((prev) => prev.filter((r) => r._id !== id));
       setMessage(`Request approved as ${chosenRole}`);
@@ -54,9 +48,9 @@ export default function SignUpRequests() {
     }
   };
 
-
   const handleReject = async (id) => {
-    if (!window.confirm("Are you sure you want to reject this request?")) return;
+    if (!window.confirm("Are you sure you want to reject this request?"))
+      return;
     try {
       await api.delete(`/registerRequest/deleteRegisterRequest/${id}`);
       setRequests((prev) => prev.filter((r) => r._id !== id));
@@ -77,7 +71,6 @@ export default function SignUpRequests() {
     <div className="min-h-screen w-full overflow-hidden bg-[#D5CFE1] text-[#1F1B3B]">
       <div className="relative flex min-h-screen w-full flex-col items-center px-6 py-8">
         <div className="w-full max-w-6xl">
-       
           <div className="mb-10 text-center">
             <h1 className="text-4xl font-bold text-[#736CED] sm:text-5xl mb-4">
               Sign-Up Requests
@@ -99,7 +92,6 @@ export default function SignUpRequests() {
             </div>
           )}
 
-      
           {loading ? (
             <div className="text-center py-12">
               <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-[#736CED]"></div>
@@ -117,16 +109,15 @@ export default function SignUpRequests() {
                   className="bg-white rounded-2xl p-6 shadow-[0_10px_25px_rgba(165,148,249,0.2)] border border-white/50 hover:shadow-[0_15px_35px_rgba(165,148,249,0.3)] transition-all hover:-translate-y-1"
                 >
                   <h3 className="text-xl font-bold text-[#4C3BCF] mb-2">
-                    {req.firstName} {req.lastName}
+                    {req.firstname} {req.lastname}
                   </h3>
                   <p className="text-sm text-[#312A68] mb-1">
                     Email: {req.email}
                   </p>
                   <p className="text-sm text-[#312A68] mb-4">
-                    Department: {req.department || "N/A"}
+                    GUC ID: {req.gucid || "N/A"}
                   </p>
 
-                 
                   <div className="mb-4">
                     <label className="block text-sm font-medium text-[#312A68] mb-1">
                       Assign Role
@@ -168,7 +159,6 @@ export default function SignUpRequests() {
         </div>
       </div>
 
-     
       <footer className="relative z-10 w-full px-6 py-6 text-center text-sm text-[#312A68]/80">
         {new Date().getFullYear()} Zarf Token. All rights reserved.
       </footer>
