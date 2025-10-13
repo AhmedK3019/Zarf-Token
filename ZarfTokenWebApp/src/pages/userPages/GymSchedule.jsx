@@ -352,13 +352,26 @@ export default function GymSchedule() {
                   new Date().getDate() === day && 
                   new Date().getMonth() === currentMonth && 
                   new Date().getFullYear() === currentYear;
-
+                const isRegisteredOnDate = daySessions && daySessions.some(session => isUserRegistered(session));
+                // Map light color to even darker color for registered days
+                const colorMap = {
+                  'bg-purple-100': 'bg-purple-300',
+                  'bg-green-100': 'bg-green-300',
+                  'bg-blue-100': 'bg-blue-300',
+                  'bg-pink-100': 'bg-pink-300',
+                  'bg-orange-100': 'bg-orange-300',
+                  'bg-red-100': 'bg-red-300',
+                  'bg-gray-100': 'bg-gray-300',
+                };
+                const baseColor = workoutType ? workoutType.color : 'bg-white';
+                const registeredColor = workoutType ? colorMap[workoutType.color] || 'bg-gray-300' : 'bg-gray-300';
                 return (
                   <div
                     key={index}
-                    className={`min-h-[120px] border-r border-b border-gray-200 p-2 ${
-                      !day ? 'bg-gray-50' : workoutType ? workoutType.color : 'bg-white'
+                    className={`min-h-[120px] border-r border-b border-gray-200 p-2 transition-colors duration-150 ${
+                      !day ? 'bg-gray-50' : isRegisteredOnDate ? registeredColor : baseColor
                     } ${isToday ? 'ring-2 ring-[#4C3BCF] ring-inset' : ''}`}
+                    style={{ cursor: day ? 'pointer' : 'default' }}
                   >
                     {day && (
                       <>
@@ -378,20 +391,27 @@ export default function GymSchedule() {
 
                         {daySessions.length > 0 ? (
                           <div className="space-y-1">
-                            {daySessions.map((session, sessionIndex) => (
-                              <div
-                                key={sessionIndex}
-                                onClick={() => setSelectedSession(session)}
-                                className="bg-white bg-opacity-80 p-2 rounded text-xs cursor-pointer hover:bg-opacity-100 transition-all"
-                              >
-                                <div className="font-medium text-[#4C3BCF]">
-                                  {formatTime(session.time)}
+                            {daySessions.map((session, sessionIndex) => {
+                              const isRegistered = isUserRegistered(session);
+                              const sessionDate = new Date(session.date);
+                              const today = new Date();
+                              today.setHours(0,0,0,0);
+                              const isPast = sessionDate < today;
+                              return (
+                                <div
+                                  key={sessionIndex}
+                                  onClick={() => !isPast && setSelectedSession(session)}
+                                  className={`p-2 rounded text-xs cursor-pointer transition-all ${isRegistered ? 'bg-green-200 text-green-900' : 'bg-white hover:bg-gray-200'} ${isPast ? 'opacity-50 cursor-not-allowed' : ''}`}
+                                >
+                                  <div className="font-medium text-[#4C3BCF]">
+                                    {formatTime(session.time)} ({session.duration} min)
+                                  </div>
+                                  <div className="text-gray-600">
+                                    {session.registered?.length || 0}/{session.maxParticipants}
+                                  </div>
                                 </div>
-                                <div className="text-gray-600">
-                                  {session.registered?.length || 0}/{session.maxParticipants}
-                                </div>
-                              </div>
-                            ))}
+                              );
+                            })}
                           </div>
                         ) : workoutType && workoutType.type !== 'Rest Day' && (
                           <div className="text-xs text-gray-500 italic">
