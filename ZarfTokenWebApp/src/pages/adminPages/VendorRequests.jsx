@@ -1,11 +1,120 @@
-import { useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import api from "../../services/api";
+import {
+  Clock,
+  MapPin,
+  Calendar,
+  Users,
+  X,
+  Building,
+  Info,
+  Globe,
+  AlertCircle
+} from "lucide-react";
+
+// --- ADDED: Utility and Badge Components (copied from MyRequests.jsx) ---
+function formatDate(dateStr) {
+  try {
+    const d = new Date(dateStr);
+    return d.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
+  } catch (e) { return dateStr; }
+}
+
+function formatDateTime(dateStr, timeStr) {
+  try {
+    const d = new Date(dateStr);
+    if (timeStr) {
+      const [hours, minutes] = timeStr.split(":");
+      d.setHours(parseInt(hours, 10), parseInt(minutes, 10));
+    }
+    return d.toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric", hour: "numeric", minute: "2-digit", hour12: true });
+  } catch (e) { return `${formatDate(dateStr)} ${timeStr || ""}`; }
+}
+
+function StatusBadge({ status }) {
+  const config = {
+    Pending: { icon: Clock, color: "text-yellow-600 bg-yellow-50 border-yellow-200", label: "Pending Review" },
+    Rejected: { icon: AlertCircle, color: "text-red-600 bg-red-50 border-red-200", label: "Rejected" },
+  };
+  const { icon: Icon, color, label } = config[status] || config.Pending;
+  return (
+    <span className={`inline-flex items-center gap-1 px-2 py-1 text-xs font-medium rounded-md border ${color}`}>
+      <Icon size={12} /> {label}
+    </span>
+  );
+}
+
+// --- ADDED: Details Modal Component (adapted from MyRequests.jsx) ---
+function DetailsModal({ request, onClose }) {
+  if (!request) return null;
+
+  // Bazaar Request Modal
+  if (request.isBazarBooth) {
+    return (
+      <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black bg-opacity-60 backdrop-blur-sm animate-fade-in">
+        <div className="bg-white rounded-2xl w-full max-w-2xl shadow-2xl m-4 max-h-[90vh] overflow-y-auto transform animate-slide-up">
+          <div className="sticky top-0 bg-white/80 backdrop-blur-lg border-b p-6 flex justify-between items-center">
+            <div>
+              <h2 className="text-2xl font-bold text-[#4C3BCF]">{request.bazarId?.bazaarname || "Bazaar Request"}</h2>
+              <p className="text-lg font-semibold text-[#736CED] mt-1">From: {request.vendorId?.companyname || "N/A"}</p>
+            </div>
+            <button onClick={onClose} className="p-2 rounded-full text-gray-500 hover:bg-gray-100 transition-colors"><X size={24} /></button>
+          </div>
+          <div className="p-6 space-y-4">
+            <div className="flex items-start gap-3"><Info size={16} className="mt-1 text-[#736CED]" /><div><span className="font-semibold">Booth Size:</span> {request.boothSize}</div></div>
+            <div className="flex items-start gap-3"><Calendar size={16} className="mt-1 text-[#736CED]" />
+              <div>
+                <span className="font-semibold">Event Dates:</span> {
+                  formatDate(request.bazarId?.startdate)
+                }{request.bazarId?.enddate ? ` – ${formatDate(request.bazarId.enddate)}` : ""}
+              </div>
+            </div>
+            <div className="flex items-start gap-3"><Users size={16} className="mt-1 text-[#736CED]" />
+              <div>
+                <span className="font-semibold">Team Members:</span>
+                <ul className="mt-2 space-y-1">{request.people.map((p, i) => <li key={i} className="text-sm bg-gray-50 p-2 rounded">{p.name} - {p.email}</li>)}</ul>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Platform Request Modal
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black bg-opacity-60 backdrop-blur-sm animate-fade-in">
+      <div className="bg-white rounded-2xl w-full max-w-2xl shadow-2xl m-4 max-h-[90vh] overflow-y-auto transform animate-slide-up">
+        <div className="sticky top-0 bg-white/80 backdrop-blur-lg border-b p-6 flex justify-between items-center">
+          <div>
+            <h2 className="text-2xl font-bold text-[#4C3BCF]">Platform Request</h2>
+            <p className="text-lg font-semibold text-[#736CED] mt-1">From: {request.vendorId?.companyname || "N/A"}</p>
+          </div>
+          <button onClick={onClose} className="p-2 rounded-full text-gray-500 hover:bg-gray-100 transition-colors"><X size={24} /></button>
+        </div>
+        <div className="p-6 space-y-4">
+          <div className="flex items-start gap-3"><Info size={16} className="mt-1 text-[#736CED]" /><div><span className="font-semibold">Booth Size:</span> {request.boothSize}</div></div>
+          <div className="flex items-start gap-3"><MapPin size={16} className="mt-1 text-[#736CED]" /><div><span className="font-semibold">Requested Location:</span> {request.location}</div></div>
+          <div className="flex items-start gap-3"><Clock size={16} className="mt-1 text-[#736CED]" /><div><span className="font-semibold">Duration:</span> {request.duration} weeks</div></div>
+          <div className="flex items-start gap-3"><Users size={16} className="mt-1 text-[#736CED]" />
+            <div>
+              <span className="font-semibold">Team Members:</span>
+              <ul className="mt-2 space-y-1">{request.people.map((p, i) => <li key={i} className="text-sm bg-gray-50 p-2 rounded">{p.name} - {p.email}</li>)}</ul>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 
 export default function VendorRequests() {
   const [requests, setRequests] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [message, setMessage] = useState(null);
+  const [selectedRequest, setSelectedRequest] = useState(null);
 
   const fetchRequests = async () => {
     setLoading(true);
@@ -81,32 +190,45 @@ export default function VendorRequests() {
               {requests.map((req) => (
                 <div
                   key={req._id}
-                  className="bg-white rounded-2xl p-6 shadow-[0_10px_25px_rgba(165,148,249,0.2)] border border-white/50 hover:shadow-[0_15px_35px_rgba(165,148,249,0.3)] transition-all hover:-translate-y-1"
+                  className="bg-white rounded-2xl p-6 shadow-lg flex flex-col justify-between"
                 >
-                  <h3 className="text-xl font-bold text-[#4C3BCF] mb-2">
-                    {req.vendorId.companyname || "Vendor"}
-                  </h3>
-                  <p className="text-sm text-[#312A68] mb-1">
-                    Email: {req.vendorId.email || "N/A"}
-                  </p>
-                  <p className="text-sm text-[#312A68] mb-4">
-                    Request Type:{" "}
-                    {req.isBazarBooth ? "Bazaar Booth" : "Platform Booth"}
-                  </p>
+                  <div>
+                    <h3 className="text-xl font-bold text-[#4C3BCF] mb-2">
+                      {req.vendorId.companyname || "Vendor"}
+                    </h3>
+                    <p className="text-sm text-[#312A68] mb-1 flex flex-row items-center whitespace-nowrap">
+                      Email: {req.vendorId.email || "N/A"}
+                    </p>
+                    <p className="text-sm text-[#312A68] mb-4">
+                      Request Type:{" "}
+                      {req.isBazarBooth ? "Bazaar Booth" : "Platform Booth"}
+                    </p>
+                  </div>
 
-                  <div className="flex justify-between gap-3">
+                  <div className="text-left mb-4">
                     <button
-                      onClick={() => handleAction(req._id, "accept")}
-                      className="flex-1 bg-[#6DD3CE] text-white font-medium px-4 py-2 rounded-full hover:bg-[#54C6EB] transition-colors"
+                      onClick={() => setSelectedRequest(req)}
+                      className="text-sm font-semibold text-[#736CED] hover:text-[#4C3BCF] transition-colors"
                     >
-                      Accept
+                      View Details
                     </button>
-                    <button
-                      onClick={() => handleAction(req._id, "reject")}
-                      className="flex-1 bg-[#C14953] text-white font-medium px-4 py-2 rounded-full hover:bg-red-600 transition-colors"
-                    >
-                      Reject
-                    </button>
+                    <div className="mt-4 border-t pt-4">
+                    </div>
+
+                    <div className="flex justify-between gap-3">
+                      <button
+                        onClick={() => handleAction(req._id, "accept")}
+                        className="flex-1 bg-[#6DD3CE] text-white font-medium px-4 py-2 rounded-full hover:bg-[#54C6EB] transition-colors"
+                      >
+                        Accept
+                      </button>
+                      <button
+                        onClick={() => handleAction(req._id, "reject")}
+                        className="flex-1 bg-[#C14953] text-white font-medium px-4 py-2 rounded-full hover:bg-red-600 transition-colors"
+                      >
+                        Reject
+                      </button>
+                    </div>
                   </div>
                 </div>
               ))}
@@ -120,6 +242,16 @@ export default function VendorRequests() {
       </footer>
 
       <div className="pointer-events-none absolute bottom-[-12%] left-1/2 h-64 w-[130%] -translate-x-1/2 rounded-[50%] bg-gradient-to-r from-[#736CED] via-[#A594F9] to-[#6DD3CE] opacity-70 -z-10" />
+
+
+      {/* --- ADDED: Conditional rendering of the modal --- */}
+      {selectedRequest && (
+        <DetailsModal
+          request={selectedRequest}
+          onClose={() => setSelectedRequest(null)}
+        />
+      )}
     </div>
+
   );
 }
