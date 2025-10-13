@@ -1,13 +1,23 @@
 ﻿import React, { useEffect, useMemo, useState } from "react";
 import api from "../../services/api";
-import { CheckCircle, XCircle, Flag, Clock, FileText, Users, Calendar, X, RefreshCw } from "lucide-react";
+import {
+  CheckCircle,
+  XCircle,
+  Flag,
+  Clock,
+  FileText,
+  Users,
+  Calendar,
+  X,
+  RefreshCw,
+} from "lucide-react";
 
 const COLORS = {
   primary: "#736CED",
   secondary: "#6DD3CE",
   accent: "#C14953",
   muted: "#D5CFE1",
-  info: "#54C6EB"
+  info: "#54C6EB",
 };
 
 const categoryColors = {
@@ -27,28 +37,42 @@ const statusConfig = {
   Pending: {
     color: COLORS.info,
     icon: Clock,
-    badge: "bg-[#54C6EB] text-white border border-[#2f9ec8]/60 shadow-[0_2px_6px_rgba(84,198,235,0.35)]",
+    badge:
+      "bg-[#54C6EB] text-white border border-[#2f9ec8]/60 shadow-[0_2px_6px_rgba(84,198,235,0.35)]",
   },
   Accepted: {
     color: COLORS.secondary,
     icon: CheckCircle,
-    badge: "bg-[#6DD3CE] text-slate-900 border border-[#36a69f]/50 shadow-[0_2px_6px_rgba(109,211,206,0.35)]",
+    badge:
+      "bg-[#6DD3CE] text-slate-900 border border-[#36a69f]/50 shadow-[0_2px_6px_rgba(109,211,206,0.35)]",
   },
   Rejected: {
     color: COLORS.accent,
     icon: XCircle,
-    badge: "bg-[#C14953] text-white border border-[#a63e47]/60 shadow-[0_2px_6px_rgba(193,73,83,0.35)]",
+    badge:
+      "bg-[#C14953] text-white border border-[#a63e47]/60 shadow-[0_2px_6px_rgba(193,73,83,0.35)]",
   },
   Flagged: {
     color: "#facc15",
     icon: Flag,
-    badge: "bg-[#facc15] text-slate-900 border border-[#f59e0b]/50 shadow-[0_2px_6px_rgba(250,204,21,0.35)]",
+    badge:
+      "bg-[#facc15] text-slate-900 border border-[#f59e0b]/50 shadow-[0_2px_6px_rgba(250,204,21,0.35)]",
   },
 };
 
 const statusButtonConfig = [
-  { status: "Accepted", label: "Accept & Publish", icon: CheckCircle, variant: "primary" },
-  { status: "Rejected", label: "Reject Workshop", icon: XCircle, variant: "danger" },
+  {
+    status: "Accepted",
+    label: "Accept & Publish",
+    icon: CheckCircle,
+    variant: "primary",
+  },
+  {
+    status: "Rejected",
+    label: "Reject Workshop",
+    icon: XCircle,
+    variant: "danger",
+  },
 ];
 
 const requiresComment = new Set(["Flagged", "Rejected"]);
@@ -61,8 +85,7 @@ const BUTTON_VARIANTS = {
     "bg-gradient-to-r from-[#736CED] to-[#6DD3CE] text-white shadow-[0_6px_15px_rgba(115,108,237,0.35)] hover:-translate-y-0.5 hover:shadow-[0_10px_24px_rgba(115,108,237,0.4)] hover:brightness-110 focus-visible:ring-[#736CED]/40",
   secondary:
     "bg-white text-[#736CED] border-2 border-[#736CED]/40 shadow-sm hover:-translate-y-0.5 hover:bg-[#736CED]/10 hover:text-[#4f4ac1] focus-visible:ring-[#736CED]/30",
-  info:
-    "bg-white text-[#54C6EB] border-2 border-[#54C6EB]/40 shadow-sm hover:-translate-y-0.5 hover:bg-[#54C6EB]/10 hover:text-[#2a8db0] focus-visible:ring-[#54C6EB]/30",
+  info: "bg-white text-[#54C6EB] border-2 border-[#54C6EB]/40 shadow-sm hover:-translate-y-0.5 hover:bg-[#54C6EB]/10 hover:text-[#2a8db0] focus-visible:ring-[#54C6EB]/30",
   danger:
     "bg-[#C14953] text-white shadow-[0_6px_15px_rgba(193,73,83,0.35)] hover:-translate-y-0.5 hover:bg-[#a63e47] focus-visible:ring-[#C14953]/40",
 };
@@ -74,7 +97,9 @@ function formatDateRange(dateISO, durationHours) {
     month: "short",
     year: "numeric",
   }).format(date);
-  const durationLabel = `${durationHours} ${durationHours === 1 ? "hour" : "hours"}`;
+  const durationLabel = `${durationHours} ${
+    durationHours === 1 ? "hour" : "hours"
+  }`;
   return `${formattedDate} • ${durationLabel}`;
 }
 
@@ -101,11 +126,21 @@ function normalizeWorkshop(doc) {
   if (doc.startdate && doc.starttime && doc.enddate && doc.endtime) {
     const start = new Date(`${doc.startdate}T${doc.starttime}`);
     const end = new Date(`${doc.enddate}T${doc.endtime}`);
-    if (!Number.isNaN(start.getTime()) && !Number.isNaN(end.getTime()) && end > start) {
-      durationHours = Math.max(1, Math.round((end.getTime() - start.getTime()) / (1000 * 60 * 60)));
+    if (
+      !Number.isNaN(start.getTime()) &&
+      !Number.isNaN(end.getTime()) &&
+      end > start
+    ) {
+      durationHours = Math.max(
+        1,
+        Math.round((end.getTime() - start.getTime()) / (1000 * 60 * 60))
+      );
     }
   } else if (startDateValue && endDateValue && endDateValue > startDateValue) {
-    durationHours = Math.max(1, Math.round((endDateValue - startDateValue) / (1000 * 60 * 60)));
+    durationHours = Math.max(
+      1,
+      Math.round((endDateValue - startDateValue) / (1000 * 60 * 60))
+    );
   }
 
   const agendaText = doc.fullagenda || "";
@@ -134,7 +169,9 @@ function normalizeWorkshop(doc) {
     durationHours,
     submittedAt: doc.createdAt || doc.startdate || new Date().toISOString(),
     overview: agendaText || doc.shortdescription || "No overview provided.",
-    objectives: objectives.length ? objectives : ["No detailed objectives provided."],
+    objectives: objectives.length
+      ? objectives
+      : ["No detailed objectives provided."],
     audience: doc.audience || "General audience",
     attachments: [],
     lastActionComment:
@@ -142,6 +179,7 @@ function normalizeWorkshop(doc) {
         ? doc.comments[doc.comments.length - 1]?.message
         : "",
     raw: doc,
+    createdBy: doc.createdBy,
   };
 }
 
@@ -202,7 +240,8 @@ function SkeletonCard() {
 function WorkshopCard({ workshop, onView }) {
   const [isHovered, setIsHovered] = useState(false);
   const accentColor = categoryColors[workshop.category] || COLORS.primary;
-  const categoryChipClass = categoryChipStyles[workshop.category] ?? categoryChipStyles.default;
+  const categoryChipClass =
+    categoryChipStyles[workshop.category] ?? categoryChipStyles.default;
 
   return (
     <article
@@ -210,7 +249,7 @@ function WorkshopCard({ workshop, onView }) {
       style={{
         animationDelay: `${Math.random() * 200}ms`,
         borderLeftWidth: "4px",
-        borderLeftColor: accentColor
+        borderLeftColor: accentColor,
       }}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
@@ -222,9 +261,13 @@ function WorkshopCard({ workshop, onView }) {
         ></div>
         <div className="relative flex items-start justify-between gap-4">
           <div className="flex-1">
-            <p className="text-xs uppercase tracking-wider text-white/70 font-semibold">Professor</p>
+            <p className="text-xs uppercase tracking-wider text-white/70 font-semibold">
+              {workshop.createdBy.firstname} {workshop.createdBy.lastname}
+            </p>
             <h3 className="text-lg font-bold mt-1">{workshop.professorName}</h3>
-            <p className="text-sm text-white/80 mt-0.5">{workshop.department}</p>
+            <p className="text-sm text-white/80 mt-0.5">
+              {workshop.department}
+            </p>
           </div>
           <StatusBadge status={workshop.status} />
         </div>
@@ -232,7 +275,9 @@ function WorkshopCard({ workshop, onView }) {
 
       <div className="px-6 py-6 space-y-4">
         <div className="flex items-start justify-between gap-3">
-          <h4 className="text-xl font-bold text-[#736CED] flex-1 leading-tight">{workshop.title}</h4>
+          <h4 className="text-xl font-bold text-[#736CED] flex-1 leading-tight">
+            {workshop.title}
+          </h4>
           <span
             className={classNames(
               "px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wide shadow-[0_2px_6px_rgba(0,0,0,0.15)] whitespace-nowrap",
@@ -243,17 +288,25 @@ function WorkshopCard({ workshop, onView }) {
           </span>
         </div>
 
-        <p className="text-sm leading-relaxed text-gray-700 line-clamp-2">{workshop.description}</p>
+        <p className="text-sm leading-relaxed text-gray-700 line-clamp-2">
+          {workshop.description}
+        </p>
 
         <div className="flex items-center justify-between gap-4 pt-2">
           <div className="flex items-center gap-2 text-sm font-medium text-gray-600">
             <Calendar className="w-4 h-4 text-[#736CED]" />
-            <span>{formatDateRange(workshop.dateISO, workshop.durationHours)}</span>
+            <span>
+              {formatDateRange(workshop.dateISO, workshop.durationHours)}
+            </span>
           </div>
           <button
             type="button"
             onClick={() => onView(workshop)}
-            className={classNames(BUTTON_BASE, BUTTON_VARIANTS.primary, "px-5 py-2.5")}
+            className={classNames(
+              BUTTON_BASE,
+              BUTTON_VARIANTS.primary,
+              "px-5 py-2.5"
+            )}
           >
             <FileText className="w-4 h-4" />
             View Details
@@ -319,7 +372,9 @@ function WorkshopModal({
 
   const handleSubmitRequest = async () => {
     if (!workshopId) {
-      setRequestError("Unable to determine workshop identifier. Please contact support.");
+      setRequestError(
+        "Unable to determine workshop identifier. Please contact support."
+      );
       return;
     }
 
@@ -344,7 +399,8 @@ function WorkshopModal({
     } catch (error) {
       console.error("Failed to submit edit request:", error);
       const message =
-        error?.response?.data?.message || "Failed to send edit request. Please try again.";
+        error?.response?.data?.message ||
+        "Failed to send edit request. Please try again.";
       setRequestError(message);
     } finally {
       setIsSubmittingRequest(false);
@@ -352,30 +408,37 @@ function WorkshopModal({
   };
 
   const statusColor = statusConfig[workshop.status]?.color || COLORS.primary;
-  const requestButtonText = showRequestForm ? "Close Request Edits" : "Request Edits";
+  const requestButtonText = showRequestForm
+    ? "Close Request Edits"
+    : "Request Edits";
 
   return (
-    <div 
+    <div
       className="fixed inset-0 z-50 flex items-center justify-center px-4 py-8 overflow-y-auto"
       onClick={handleBackdropClick}
     >
-      <div className="absolute inset-0 bg-slate-900/60 backdrop-blur-md transition-opacity duration-300" style={{ opacity: animateIn ? 1 : 0 }}></div>
-      
-      <div 
+      <div
+        className="absolute inset-0 bg-slate-900/60 backdrop-blur-md transition-opacity duration-300"
+        style={{ opacity: animateIn ? 1 : 0 }}
+      ></div>
+
+      <div
         className="relative z-10 w-full max-w-4xl my-8 transition-all duration-500"
         style={{
           opacity: animateIn ? 1 : 0,
-          transform: animateIn ? "translateY(0) scale(1)" : "translateY(20px) scale(0.95)"
+          transform: animateIn
+            ? "translateY(0) scale(1)"
+            : "translateY(20px) scale(0.95)",
         }}
       >
         <div className="overflow-hidden rounded-3xl bg-white/95 backdrop-blur-xl shadow-2xl border border-white/50">
           {/* Progress bar */}
           <div className="h-1.5 w-full bg-gray-100">
-            <div 
+            <div
               className="h-full transition-all duration-500"
-              style={{ 
-                width: "100%", 
-                background: `linear-gradient(90deg, ${statusColor}, ${statusColor}cc)`
+              style={{
+                width: "100%",
+                background: `linear-gradient(90deg, ${statusColor}, ${statusColor}cc)`,
               }}
             ></div>
           </div>
@@ -403,10 +466,15 @@ function WorkshopModal({
 
           <div className="px-8 py-8 space-y-8 max-h-[calc(100vh-200px)] overflow-y-auto">
             {/* Overview Section */}
-            <section className="space-y-3 animate-fade-in" style={{ animationDelay: "100ms" }}>
+            <section
+              className="space-y-3 animate-fade-in"
+              style={{ animationDelay: "100ms" }}
+            >
               <div className="flex items-center gap-2">
                 <FileText className="w-5 h-5 text-[#736CED]" />
-                <h3 className="text-lg font-bold text-[#736CED]">Workshop Overview</h3>
+                <h3 className="text-lg font-bold text-[#736CED]">
+                  Workshop Overview
+                </h3>
               </div>
               <p className="text-sm leading-relaxed text-gray-700 pl-7">
                 {workshop.overview}
@@ -414,15 +482,23 @@ function WorkshopModal({
             </section>
 
             {/* Objectives Section */}
-            <section className="space-y-3 animate-fade-in" style={{ animationDelay: "200ms" }}>
+            <section
+              className="space-y-3 animate-fade-in"
+              style={{ animationDelay: "200ms" }}
+            >
               <div className="flex items-center gap-2">
                 <CheckCircle className="w-5 h-5 text-[#736CED]" />
-                <h3 className="text-lg font-bold text-[#736CED]">Learning Objectives</h3>
+                <h3 className="text-lg font-bold text-[#736CED]">
+                  Learning Objectives
+                </h3>
               </div>
               <ul className="space-y-2 pl-7">
                 {workshop.objectives.map((objective, idx) => (
-                  <li key={idx} className="flex items-start gap-3 text-sm text-gray-700">
-                    <span 
+                  <li
+                    key={idx}
+                    className="flex items-start gap-3 text-sm text-gray-700"
+                  >
+                    <span
                       className="mt-1.5 h-2 w-2 rounded-full flex-shrink-0"
                       style={{ backgroundColor: COLORS.secondary }}
                     ></span>
@@ -433,18 +509,27 @@ function WorkshopModal({
             </section>
 
             {/* Info Grid */}
-            <div className="grid gap-4 sm:grid-cols-2 animate-fade-in" style={{ animationDelay: "300ms" }}>
+            <div
+              className="grid gap-4 sm:grid-cols-2 animate-fade-in"
+              style={{ animationDelay: "300ms" }}
+            >
               <div className="rounded-2xl border border-[#736CED]/20 bg-gradient-to-br from-[#736CED]/5 to-[#6DD3CE]/5 backdrop-blur-sm px-6 py-4">
                 <div className="flex items-center gap-2 mb-2">
                   <Users className="w-4 h-4 text-[#736CED]" />
-                  <p className="font-bold text-[#736CED] text-sm">Target Audience</p>
+                  <p className="font-bold text-[#736CED] text-sm">
+                    Target Audience
+                  </p>
                 </div>
-                <p className="text-sm text-gray-700 leading-relaxed">{workshop.audience}</p>
+                <p className="text-sm text-gray-700 leading-relaxed">
+                  {workshop.audience}
+                </p>
               </div>
               <div className="rounded-2xl border border-[#736CED]/20 bg-gradient-to-br from-[#6DD3CE]/5 to-[#736CED]/5 backdrop-blur-sm px-6 py-4">
                 <div className="flex items-center gap-2 mb-2">
                   <Calendar className="w-4 h-4 text-[#736CED]" />
-                  <p className="font-bold text-[#736CED] text-sm">Proposed Schedule</p>
+                  <p className="font-bold text-[#736CED] text-sm">
+                    Proposed Schedule
+                  </p>
                 </div>
                 <p className="text-sm text-gray-700 leading-relaxed">
                   {formatDateRange(workshop.dateISO, workshop.durationHours)}
@@ -454,10 +539,15 @@ function WorkshopModal({
 
             {/* Attachments */}
             {workshop.attachments?.length > 0 && (
-              <section className="space-y-3 animate-fade-in" style={{ animationDelay: "400ms" }}>
+              <section
+                className="space-y-3 animate-fade-in"
+                style={{ animationDelay: "400ms" }}
+              >
                 <div className="flex items-center gap-2">
                   <FileText className="w-5 h-5 text-[#736CED]" />
-                  <h3 className="text-lg font-bold text-[#736CED]">Attached Materials</h3>
+                  <h3 className="text-lg font-bold text-[#736CED]">
+                    Attached Materials
+                  </h3>
                 </div>
                 <div className="grid gap-3 sm:grid-cols-2">
                   {workshop.attachments.map((attachment) => (
@@ -466,8 +556,12 @@ function WorkshopModal({
                       href={attachment.url}
                       className="flex flex-col gap-2 rounded-2xl border border-[#736CED]/20 bg-white/80 backdrop-blur-sm px-5 py-4 transition-all duration-300 hover:scale-105 hover:shadow-lg hover:border-[#736CED]/40 focus:outline-none focus:ring-2 focus:ring-[#736CED]/40"
                     >
-                      <span className="font-semibold text-[#736CED]">{attachment.label}</span>
-                      <span className="text-xs text-gray-500">{attachment.type}</span>
+                      <span className="font-semibold text-[#736CED]">
+                        {attachment.label}
+                      </span>
+                      <span className="text-xs text-gray-500">
+                        {attachment.type}
+                      </span>
                     </a>
                   ))}
                 </div>
@@ -475,10 +569,15 @@ function WorkshopModal({
             )}
 
             {/* Status Update Section */}
-            <section className="space-y-4 pt-4 border-t border-gray-200 animate-fade-in" style={{ animationDelay: "500ms" }}>
+            <section
+              className="space-y-4 pt-4 border-t border-gray-200 animate-fade-in"
+              style={{ animationDelay: "500ms" }}
+            >
               <div className="flex items-center gap-2">
                 <RefreshCw className="w-5 h-5 text-[#736CED]" />
-                <h3 className="text-lg font-bold text-[#736CED]">Update Status</h3>
+                <h3 className="text-lg font-bold text-[#736CED]">
+                  Update Status
+                </h3>
               </div>
 
               <div className="grid gap-3 sm:grid-cols-2">
@@ -491,7 +590,8 @@ function WorkshopModal({
                       onClick={() => onStatusUpdate(config.status)}
                       className={classNames(
                         BUTTON_BASE,
-                        BUTTON_VARIANTS[config.variant] ?? BUTTON_VARIANTS.primary
+                        BUTTON_VARIANTS[config.variant] ??
+                          BUTTON_VARIANTS.primary
                       )}
                     >
                       <Icon className="w-4 h-4" />
@@ -564,7 +664,12 @@ function WorkshopModal({
               )}
 
               <label className="block">
-                <span className="text-sm font-semibold text-gray-700">Comment {requiresComment.has(workshop.status) ? "(required)" : "(optional)"}</span>
+                <span className="text-sm font-semibold text-gray-700">
+                  Comment{" "}
+                  {requiresComment.has(workshop.status)
+                    ? "(required)"
+                    : "(optional)"}
+                </span>
                 <textarea
                   value={comment}
                   onChange={(e) => setComment(e.target.value)}
@@ -572,8 +677,8 @@ function WorkshopModal({
                   placeholder="Add context for the professor or future reviewers..."
                   className={classNames(
                     "mt-2 w-full rounded-2xl border bg-white/80 backdrop-blur-sm px-4 py-3 text-sm text-gray-700 transition-all focus:outline-none focus:ring-2",
-                    commentError 
-                      ? "border-rose-300 focus:ring-rose-300" 
+                    commentError
+                      ? "border-rose-300 focus:ring-rose-300"
                       : "border-gray-300 focus:ring-[#736CED]/40 focus:border-[#736CED]/40"
                   )}
                 />
@@ -609,21 +714,26 @@ function Toast({ feedback, onDismiss }) {
   const Icon = config?.icon || CheckCircle;
 
   return (
-    <div 
+    <div
       className="fixed bottom-6 right-6 z-[60] transition-all duration-300"
       style={{
         opacity: isVisible ? 1 : 0,
-        transform: isVisible ? "translateY(0)" : "translateY(20px)"
+        transform: isVisible ? "translateY(0)" : "translateY(20px)",
       }}
     >
-      <div 
+      <div
         className="flex items-center gap-3 px-6 py-4 rounded-2xl bg-white/95 backdrop-blur-xl shadow-2xl border border-white/50 max-w-sm"
         style={{
-          background: `linear-gradient(135deg, ${config?.color}15, white)`
+          background: `linear-gradient(135deg, ${config?.color}15, white)`,
         }}
       >
-        <Icon className="w-5 h-5 flex-shrink-0" style={{ color: config?.color }} />
-        <span className="text-sm font-semibold text-gray-800">{feedback.message}</span>
+        <Icon
+          className="w-5 h-5 flex-shrink-0"
+          style={{ color: config?.color }}
+        />
+        <span className="text-sm font-semibold text-gray-800">
+          {feedback.message}
+        </span>
       </div>
     </div>
   );
@@ -685,13 +795,17 @@ export default function WorkshopRequests() {
 
   const filteredWorkshops = useMemo(() => {
     return workshops.filter((workshop) => {
-      const matchCategory = categoryFilter === "All Categories" || workshop.category === categoryFilter;
-      const matchStatus = statusFilter === "All" || workshop.status === statusFilter;
+      const matchCategory =
+        categoryFilter === "All Categories" ||
+        workshop.category === categoryFilter;
+      const matchStatus =
+        statusFilter === "All" || workshop.status === statusFilter;
       return matchCategory && matchStatus;
     });
   }, [workshops, categoryFilter, statusFilter]);
 
-  const hasActiveFilters = categoryFilter !== "All Categories" || statusFilter !== "All";
+  const hasActiveFilters =
+    categoryFilter !== "All Categories" || statusFilter !== "All";
 
   const resetFilters = () => {
     setCategoryFilter("All Categories");
@@ -725,7 +839,7 @@ export default function WorkshopRequests() {
                 ...item,
                 status: nextStatus,
                 lastActionComment: modalComment.trim(),
-                lastUpdatedAt: new Date().toISOString()
+                lastUpdatedAt: new Date().toISOString(),
               }
             : item
         )
@@ -735,14 +849,17 @@ export default function WorkshopRequests() {
         Accepted: "Workshop accepted and published successfully!",
         Flagged: "Workshop flagged for review with comments.",
         Rejected: "Workshop rejected with feedback.",
-        Pending: "Workshop status set to pending."
+        Pending: "Workshop status set to pending.",
       };
 
       setFeedback({ tone: nextStatus, message: messages[nextStatus] });
       setSelectedWorkshop(null);
     } catch (err) {
       console.error("Error updating workshop:", err);
-      setFeedback({ tone: "Rejected", message: "Failed to update workshop. Please try again." });
+      setFeedback({
+        tone: "Rejected",
+        message: "Failed to update workshop. Please try again.",
+      });
     }
   };
 
@@ -751,32 +868,36 @@ export default function WorkshopRequests() {
   };
 
   return (
-    <div className="min-h-screen w-full px-6 py-10" style={{ backgroundColor: COLORS.muted }}>
+    <div
+      className="min-h-screen w-full px-6 py-10"
+      style={{ backgroundColor: COLORS.muted }}
+    >
       <div className="mx-auto w-full max-w-7xl">
         {/* Hero Header */}
         <header className="text-center space-y-3 mb-12 animate-fade-in">
           <h1 className="text-5xl sm:text-6xl font-black leading-tight">
             <span className="text-[#736CED]">Workshops & Approvals.</span>
             <br />
-            <span 
+            <span
               className="bg-clip-text text-transparent"
               style={{
-                backgroundImage: `linear-gradient(135deg, ${COLORS.primary}, ${COLORS.secondary})`
+                backgroundImage: `linear-gradient(135deg, ${COLORS.primary}, ${COLORS.secondary})`,
               }}
             >
               Streamlined.
             </span>
           </h1>
-          <div 
+          <div
             className="h-1 w-32 mx-auto rounded-full animate-pulse"
             style={{
-              background: `linear-gradient(90deg, ${COLORS.primary}, ${COLORS.secondary})`
+              background: `linear-gradient(90deg, ${COLORS.primary}, ${COLORS.secondary})`,
             }}
           ></div>
           <p className="text-base text-gray-600 max-w-2xl mx-auto leading-relaxed pt-2">
-            <span className="font-semibold text-[#736CED]">Review, approve, or reject workshops in one place.
+            <span className="font-semibold text-[#736CED]">
+              Review, approve, or reject workshops in one place.
               <br />
-                          Fast. Organized. Effortless.
+              Fast. Organized. Effortless.
             </span>
           </p>
         </header>
@@ -793,7 +914,9 @@ export default function WorkshopRequests() {
               className="w-full rounded-xl border-2 border-[#736CED]/20 bg-white/80 backdrop-blur-sm px-4 py-3 text-sm font-semibold text-[#736CED] shadow-sm transition-all focus:border-[#736CED]/50 focus:outline-none focus:ring-2 focus:ring-[#736CED]/30 hover:border-[#736CED]/40"
             >
               {categories.map((category) => (
-                <option key={category} value={category}>{category}</option>
+                <option key={category} value={category}>
+                  {category}
+                </option>
               ))}
             </select>
           </label>
@@ -805,9 +928,13 @@ export default function WorkshopRequests() {
               onChange={(e) => setStatusFilter(e.target.value)}
               className="w-full rounded-xl border-2 border-[#736CED]/20 bg-white/80 backdrop-blur-sm px-4 py-3 text-sm font-semibold text-[#736CED] shadow-sm transition-all focus:border-[#736CED]/50 focus:outline-none focus:ring-2 focus:ring-[#736CED]/30 hover:border-[#736CED]/40"
             >
-              {["All", "Pending", "Accepted", "Rejected", "Flagged"].map((status) => (
-                <option key={status} value={status}>{status}</option>
-              ))}
+              {["All", "Pending", "Accepted", "Rejected", "Flagged"].map(
+                (status) => (
+                  <option key={status} value={status}>
+                    {status}
+                  </option>
+                )
+              )}
             </select>
           </label>
 
@@ -832,9 +959,9 @@ export default function WorkshopRequests() {
             </>
           ) : filteredWorkshops.length ? (
             filteredWorkshops.map((workshop) => (
-              <WorkshopCard 
-                key={workshop.id} 
-                workshop={workshop} 
+              <WorkshopCard
+                key={workshop.id}
+                workshop={workshop}
                 onView={setSelectedWorkshop}
               />
             ))
@@ -842,8 +969,12 @@ export default function WorkshopRequests() {
             <div className="col-span-full rounded-3xl border-2 border-dashed border-[#736CED]/30 bg-[#FDFBFF] backdrop-blur-sm px-8 py-16 text-center">
               <div className="flex flex-col items-center gap-3">
                 <FileText className="w-16 h-16 text-[#736CED]/30" />
-                <p className="text-lg font-semibold text-[#736CED]/70">No workshops match the current filters</p>
-                <p className="text-sm text-gray-500">Try adjusting your search criteria</p>
+                <p className="text-lg font-semibold text-[#736CED]/70">
+                  No workshops match the current filters
+                </p>
+                <p className="text-sm text-gray-500">
+                  Try adjusting your search criteria
+                </p>
               </div>
             </div>
           )}
@@ -864,7 +995,9 @@ export default function WorkshopRequests() {
       )}
 
       {/* Toast */}
-      {feedback && <Toast feedback={feedback} onDismiss={() => setFeedback(null)} />}
+      {feedback && (
+        <Toast feedback={feedback} onDismiss={() => setFeedback(null)} />
+      )}
 
       <style>{`
         @keyframes fade-in {
