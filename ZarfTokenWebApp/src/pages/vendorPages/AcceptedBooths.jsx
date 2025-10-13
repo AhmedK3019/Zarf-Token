@@ -56,9 +56,14 @@ function DetailsModal({ booth, onClose, getPlatformBoothEndDate }) {
         <div className="bg-white rounded-2xl w-full max-w-2xl shadow-2xl m-4 max-h-[90vh] overflow-y-auto transform animate-slide-up">
           <div className="sticky top-0 bg-white/80 backdrop-blur-lg border-b border-gray-200 p-6 flex justify-between items-center">
             <div>
-              <h2 className="text-2xl font-bold text-[#4C3BCF]">
-                {booth.bazarId?.bazaarname}
+               <h2 className="text-2xl font-bold text-[#4C3BCF]">
+                {booth.boothname || "Bazaar Booth Request"}
               </h2>
+              {booth.bazarId?.bazaarname && (
+                <p className="text-lg font-semibold text-[#736CED] mt-1">
+                  at {booth.bazarId.bazaarname}
+                </p>
+              )}
               <p className="text-sm text-[#312A68] flex items-center gap-2 mt-1">
                 <MapPin size={14} /> {booth.bazarId?.location}
               </p>
@@ -136,18 +141,16 @@ function DetailsModal({ booth, onClose, getPlatformBoothEndDate }) {
                     size={16}
                     className="mt-1 text-[#736CED] flex-shrink-0"
                   />
-                  <div>
+                  <div className="flex flex-wrap items-center gap-2">
                     <span className="font-semibold">Team Members:</span>
-                    <ul className="mt-2 space-y-1">
-                      {booth.people.map((person, index) => (
-                        <li
-                          key={index}
-                          className="text-sm bg-gray-50 p-2 rounded"
-                        >
-                          <strong>{person.name}</strong> - {person.email}
-                        </li>
-                      ))}
-                    </ul>
+                    {booth.people.map((person, index) => (
+                      <span
+                        key={index}
+                        className="inline-block bg-gray-50 px-2 py-1 rounded text-xs font-medium text-[#312A68]"
+                      >
+                        {person.name}
+                      </span>
+                    ))}
                   </div>
                 </div>
               )}
@@ -351,82 +354,58 @@ export default function AcceptedBooths() {
               </div>
             ) : (
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                {filteredItems.map((booth) =>
-                  booth.isBazarBooth ? (
-                    <div
-                      key={booth._id}
-                      className="bg-white rounded-2xl p-6 shadow-lg flex flex-col"
-                    >
-                      {/* Bazaar Card content */}
-                      <div>
-                        <h3 className="text-xl font-bold text-[#4C3BCF]">
-                          {booth.bazarId?.bazaarname || "Bazaar Booth"}
-                        </h3>
-
-                        <div className="flex items-center gap-4 mt-3 text-sm text-[#736CED]">
-                          <span className="flex items-center gap-1">
-                            <Building size={14} />
-                            {booth.bazarId?.bazaarname || "Vendor"}
-                          </span>
-                          <span className="flex items-center gap-1">
-                            <Users size={14} />
-                            {booth.boothSize}
-                          </span>
-                        </div>
-                        {booth.bazarId && (
-                          <div className="flex items-center gap-2 mt-2 text-sm text-[#312A68]">
-                            <MapPin size={14} />
-                            {booth.bazarId.location}
-                          </div>
+                {filteredItems.map((booth) => (
+                  <div
+                    key={booth._id}
+                    className="bg-white rounded-2xl p-6 shadow-lg flex flex-col"
+                  >
+                    <div>
+                      <h3 className="text-xl font-bold text-[#4C3BCF]">
+                        {booth.boothname || (booth.isBazarBooth ? "Bazaar Booth" : "Platform Storefront")}
+                      </h3>
+                      {booth.bazarId?.bazaarname && (
+                          <p className="text-lg font-semibold text-[#736CED] mt-1">
+                            at {booth.bazarId.bazaarname}
+                          </p>
                         )}
+                      <div className="flex flex-wrap gap-4 mt-3 text-sm text-[#736CED]">
+                        
+                        <span className="flex items-center gap-1">
+                          <Info size={14} />
+                          {booth.boothSize}
+                        </span>
+                        <span className="flex items-center gap-1">
+                          <Clock size={14} />
+                          {booth.duration ? `${booth.duration} weeks` : (booth.bazarId?.startdate && booth.bazarId?.enddate ? `${formatDate(booth.bazarId.startdate)} - ${formatDate(booth.bazarId.enddate)}` : "")}
+                        </span>
+                        <span className="flex items-center gap-1">
+                          <Users size={14} className="mt-1 text-[#736CED] flex-shrink-0" />
+                          <span>{booth.people ? booth.people.length : 0}</span>
+                        </span>
                       </div>
-                      <div className="mt-auto pt-4 border-t">
-                        <button
-                          onClick={() => setSelectedBooth(booth)}
-                          className="text-sm font-semibold text-[#736CED] hover:text-[#4C3BCF] transition-colors"
-                        >
-                          View Details
-                        </button>
-                      </div>
-                    </div>
-                  ) : (
-                    <div
-                      key={booth._id}
-                      className="bg-white rounded-2xl p-6 shadow-lg flex flex-col"
-                    >
-                      {/* Platform Card content */}
-                      <div>
-                        <h3 className="text-xl font-bold text-[#4C3BCF]">
-                          {booth.boothname || "Platform Storefront"}
-                        </h3>
-                        <div className="flex items-center gap-4 mt-3 text-sm text-[#736CED]">
-                          <span className="flex items-center gap-1">
-                            <Users size={14} />
-                            {booth.boothSize}
-                          </span>
-                          <span className="flex items-center gap-1">
-                            <Clock size={14} />
-                            {booth.duration} weeks
-                          </span>
+                      {booth.location && (
+                        <div className="flex items-center gap-2 mt-2 text-sm text-[#312A68]">
+                          <MapPin size={14} />
+                          {booth.location}
                         </div>
-                        {booth.location && (
-                          <div className="flex items-center gap-2 mt-2 text-sm text-[#312A68]">
-                            <MapPin size={14} />
-                            {booth.location}
-                          </div>
-                        )}
-                      </div>
-                      <div className="mt-auto pt-4 border-t">
-                        <button
-                          onClick={() => setSelectedBooth(booth)}
-                          className="text-sm font-semibold text-[#736CED] hover:text-[#4C3BCF] transition-colors"
-                        >
-                          View Details
-                        </button>
-                      </div>
+                      )}
+                      {booth.isBazarBooth && booth.bazarId?.location && (
+                        <div className="flex items-center gap-2 mt-2 text-sm text-[#312A68]">
+                          <MapPin size={14} />
+                          {booth.bazarId.location}
+                        </div>
+                      )}
                     </div>
-                  )
-                )}
+                    <div className="mt-auto pt-4">
+                      <button
+                        onClick={() => setSelectedBooth(booth)}
+                        className="text-sm font-semibold text-[#736CED] hover:text-[#4C3BCF] transition-colors"
+                      >
+                        View Details
+                      </button>
+                    </div>
+                  </div>
+                ))}
               </div>
             )}
           </div>

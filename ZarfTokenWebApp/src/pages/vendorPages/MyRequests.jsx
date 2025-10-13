@@ -483,7 +483,7 @@ export default function MyRequests() {
                           Submitted {formatDate(request.createdAt)}
                         </div>
                       </div>
-                      <div className="mt-auto pt-4 border-t">
+                      <div className="mt-auto pt-4">
                         <button
                           onClick={() => setSelectedRequest(request)}
                           className="text-sm font-semibold text-[#736CED] hover:text-[#4C3BCF] transition-colors"
@@ -495,7 +495,7 @@ export default function MyRequests() {
                   ) : (
                     <div
                       key={request._id}
-                      className="bg-white rounded-2xl p-6 shadow-lg flex flex-col min-h-[280px]"
+                      className="bg-white rounded-2xl p-6 shadow-lg flex flex-col min-h-[180px]"
                     >
                       {/* Platform Request Card */}
                       <div>
@@ -505,7 +505,6 @@ export default function MyRequests() {
                           </h3>
                           <StatusBadge status={request.status} />
                         </div>
-                        
                         <div className="flex items-center gap-4 mt-3 text-sm text-[#736CED]">
                           <span className="flex items-center gap-1">
                             <Square size={14} />
@@ -531,7 +530,7 @@ export default function MyRequests() {
                           Submitted {formatDate(request.createdAt)}
                         </div>
                       </div>
-                      <div className="mt-auto pt-4 border-t">
+                      <div className="mt-auto pt-4">
                         <button
                           onClick={() => setSelectedRequest(request)}
                           className="text-sm font-semibold text-[#736CED] hover:text-[#4C3BCF] transition-colors"
