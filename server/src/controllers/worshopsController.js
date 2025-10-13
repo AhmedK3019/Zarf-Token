@@ -74,7 +74,9 @@ const createWorkshop = async (req, res, next) => {
 
 const getAllWorkshops = async (_req, res, next) => {
   try {
-    const workshops = await WorkShop.find({}, { __v: 0 });
+    const workshops = await WorkShop.find({}, { __v: 0 })
+      .populate("professorsparticipating", "firstname lastname email")
+      .populate("createdBy", "firstname lastname email");
     return res.status(200).json(workshops);
   } catch (error) {
     next(error);
@@ -84,7 +86,9 @@ const getAllWorkshops = async (_req, res, next) => {
 const getWorkshop = async (req, res, next) => {
   try {
     const { id } = req.params;
-    const workshop = await WorkShop.findById({ _id: id }, { __v: 0 });
+    const workshop = await WorkShop.findById({ _id: id }, { __v: 0 })
+      .populate("professorsparticipating", "firstname lastname email")
+      .populate("createdBy", "firstname lastname email");
     if (!workshop) {
       return res.status(404).json({ error: "Workshop not found" });
     }
@@ -161,7 +165,9 @@ const getMyWorkshops = async (req, res, next) => {
   try {
     const myId = req.userId;
     if (!myId) return res.status(401).json({ message: "Token is not found" });
-    const myWorkshops = await WorkShop.find({ createdBy: myId });
+    const myWorkshops = await WorkShop.find({ createdBy: myId })
+      .populate("professorsparticipating", "firstname lastname email")
+      .populate("createdBy", "firstname lastname email");
     if (!myWorkshops)
       return res
         .status(404)
