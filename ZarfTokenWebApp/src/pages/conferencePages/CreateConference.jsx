@@ -13,7 +13,7 @@ function CreateConference() {
     conferencelink: "",
     requiredbudget: "",
     sourceoffunding: "",
-    extrarequiredresources: 0,
+    extrarequiredresources: "",
   });
   const [successMessage, setSuccessMessage] = useState("");
   const [errorvalues, setErrors] = useState({});
@@ -52,7 +52,7 @@ function CreateConference() {
       errorValues.requiredbudget = "Please enter the required budget";
     }
     if (conferenceData.sourceoffunding.trim() === "") {
-      errorValues.sourceoffunding = "Please enter the source of funding";
+      errorValues.sourceoffunding = "Please select  the source of funding";
     }
     return errorValues;
   };
@@ -78,16 +78,14 @@ function CreateConference() {
         conferencelink: conferenceData.conferencelink,
         requiredbudget: conferenceData.requiredbudget,
         sourceoffunding: conferenceData.sourceoffunding,
-        extrarequiredresources: conferenceData.extrarequiredresources || 0,
+        extrarequiredresources: conferenceData.extrarequiredresources,
       };
       if (
-        (new Date(conferenceData.enddate) -
-          new Date(conferenceData.startdate)) /
-          (1000 * 60 * 60 * 24) <=
+        new Date(conferenceData.enddate) - new Date(conferenceData.startdate) <=
         0
       ) {
         setErrors({
-          general: "Start date should be less than the end date",
+          general: "Start date should be before the end date",
         });
         setSuccessMessage("");
         return;
@@ -105,7 +103,7 @@ function CreateConference() {
           28
       ) {
         setErrors({
-          general: "Duration should be between 1 and 4 weeks inclusive",
+          general: "Duration should be between 1 to 4 weeks inclusive",
         });
         setSuccessMessage("");
         return;
@@ -117,18 +115,26 @@ function CreateConference() {
         setSuccessMessage("");
         return;
       }
-      if (conferenceData.extrarequiredresources < 0) {
-        setErrors({
-          general: "Extra required resources must be a positive number",
-        });
-        setSuccessMessage("");
-        return;
-      }
       await api.post("/conferences/createConference", body);
       setErrors({});
       setSuccessMessage("Created the conference successfully");
+      setConferenceData({
+        conferencename: "",
+        startdate: "",
+        starttime: "",
+        enddate: "",
+        endtime: "",
+        shortdescription: "",
+        location: "",
+        fullagenda: "",
+        conferencelink: "",
+        requiredbudget: "",
+        sourceoffunding: "",
+        extrarequiredresources: "",
+      });
     } catch (error) {
-      setErrors({ general: error.message });
+      console.log(error);
+      setErrors({ general: error.response.data.message });
       setSuccessMessage("");
     }
   };
@@ -165,12 +171,14 @@ function CreateConference() {
               id="conferenceName"
               placeholder="ex: AI Research Summit"
               value={conferenceData.conferencename}
-              onChange={(e) =>
+              onChange={(e) => {
                 setConferenceData({
                   ...conferenceData,
                   conferencename: e.target.value,
-                })
-              }
+                });
+                setSuccessMessage("");
+                setErrors({});
+              }}
               className="w-full border border-purple-oklch(29.3% 0.136 325.661) rounded-xl px-4 py-2 focus:ring-2 focus:ring-purple-oklch(29.3% 0.136 325.661) focus:outline-none"
             />
             {errorvalues.conferencename && (
@@ -192,12 +200,14 @@ function CreateConference() {
                 type="date"
                 id="startDate"
                 value={conferenceData.startdate}
-                onChange={(e) =>
+                onChange={(e) => {
                   setConferenceData({
                     ...conferenceData,
                     startdate: e.target.value,
-                  })
-                }
+                  });
+                  setSuccessMessage("");
+                  setErrors({});
+                }}
                 className="w-full border border-purple-oklch(29.3% 0.136 325.661) rounded-xl px-4 py-2 focus:ring-2 focus:ring-purple-oklch(29.3% 0.136 325.661) focus:outline-none"
               />
               {errorvalues.startdate && (
@@ -218,12 +228,14 @@ function CreateConference() {
                 type="time"
                 id="startTime"
                 value={conferenceData.starttime}
-                onChange={(e) =>
+                onChange={(e) => {
                   setConferenceData({
                     ...conferenceData,
                     starttime: e.target.value,
-                  })
-                }
+                  });
+                  setSuccessMessage("");
+                  setErrors({});
+                }}
                 className="w-full border border-purple-oklch(29.3% 0.136 325.661) rounded-xl px-4 py-2 focus:ring-2 focus:ring-purple-oklch(29.3% 0.136 325.661) focus:outline-none"
               />
               {errorvalues.starttime && (
@@ -246,12 +258,14 @@ function CreateConference() {
                 type="date"
                 id="endDate"
                 value={conferenceData.enddate}
-                onChange={(e) =>
+                onChange={(e) => {
                   setConferenceData({
                     ...conferenceData,
                     enddate: e.target.value,
-                  })
-                }
+                  });
+                  setErrors({});
+                  setSuccessMessage("");
+                }}
                 className="w-full border border-purple-oklch(29.3% 0.136 325.661) rounded-xl px-4 py-2 focus:ring-2 focus:ring-purple-oklch(29.3% 0.136 325.661) focus:outline-none"
               />
               {errorvalues.enddate && (
@@ -272,12 +286,14 @@ function CreateConference() {
                 type="time"
                 id="endTime"
                 value={conferenceData.endtime}
-                onChange={(e) =>
+                onChange={(e) => {
                   setConferenceData({
                     ...conferenceData,
                     endtime: e.target.value,
-                  })
-                }
+                  });
+                  setSuccessMessage("");
+                  setErrors({});
+                }}
                 className="w-full border border-purple-oklch(29.3% 0.136 325.661) rounded-xl px-4 py-2 focus:ring-2 focus:ring-purple-oklch(29.3% 0.136 325.661) focus:outline-none"
               />
               {errorvalues.endtime && (
@@ -300,12 +316,14 @@ function CreateConference() {
               id="location"
               placeholder="ex: GUC Berlin"
               value={conferenceData.location}
-              onChange={(e) =>
+              onChange={(e) => {
                 setConferenceData({
                   ...conferenceData,
                   location: e.target.value,
-                })
-              }
+                });
+                setSuccessMessage("");
+                setErrors({});
+              }}
               className="w-full border border-purple-oklch(29.3% 0.136 325.661) rounded-xl px-4 py-2 focus:ring-2 focus:ring-purple-oklch(29.3% 0.136 325.661) focus:outline-none"
             />
             {errorvalues.location && (
@@ -315,7 +333,6 @@ function CreateConference() {
             )}
           </div>
 
-          {/* Short Description */}
           <div>
             <label
               htmlFor="shortDescription"
@@ -328,12 +345,14 @@ function CreateConference() {
               id="shortDescription"
               placeholder="ex: Annual research gathering"
               value={conferenceData.shortdescription}
-              onChange={(e) =>
+              onChange={(e) => {
                 setConferenceData({
                   ...conferenceData,
                   shortdescription: e.target.value,
-                })
-              }
+                });
+                setSuccessMessage("");
+                setErrors({});
+              }}
               className="w-full border border-purple-oklch(29.3% 0.136 325.661) rounded-xl px-4 py-2 focus:ring-2 focus:ring-purple-oklch(29.3% 0.136 325.661) focus:outline-none"
             />
             {errorvalues.shortdescription && (
@@ -354,12 +373,14 @@ function CreateConference() {
               id="fullAgenda"
               placeholder="ex: Opening session, keynote, workshops..."
               value={conferenceData.fullagenda}
-              onChange={(e) =>
+              onChange={(e) => {
                 setConferenceData({
                   ...conferenceData,
                   fullagenda: e.target.value,
-                })
-              }
+                });
+                setSuccessMessage("");
+                setErrors({});
+              }}
               rows="3"
               className="w-full border border-purple-oklch(29.3% 0.136 325.661)rounded-xl px-4 py-2 focus:ring-2 focus:ring-purple-oklch(29.3% 0.136 325.661) focus:outline-none"
             />
@@ -382,12 +403,14 @@ function CreateConference() {
               id="conferenceLink"
               placeholder="ex: https://conference.example.com"
               value={conferenceData.conferencelink}
-              onChange={(e) =>
+              onChange={(e) => {
                 setConferenceData({
                   ...conferenceData,
                   conferencelink: e.target.value,
-                })
-              }
+                });
+                setSuccessMessage("");
+                setErrors({});
+              }}
               className="w-full border border-purple-oklch(29.3% 0.136 325.661) rounded-xl px-4 py-2 focus:ring-2 focus:ring-purple-oklch(29.3% 0.136 325.661) focus:outline-none"
             />
             {errorvalues.conferencelink && (
@@ -410,12 +433,14 @@ function CreateConference() {
                 id="requiredbudget"
                 placeholder="ex: 10000"
                 value={conferenceData.requiredbudget}
-                onChange={(e) =>
+                onChange={(e) => {
                   setConferenceData({
                     ...conferenceData,
                     requiredbudget: e.target.value,
-                  })
-                }
+                  });
+                  setSuccessMessage("");
+                  setErrors({});
+                }}
                 className="w-full border border-purple-oklch(29.3% 0.136 325.661) rounded-xl px-4 py-2 focus:ring-2 focus:ring-purple-oklch(29.3% 0.136 325.661) focus:outline-none"
               />
               {errorvalues.requiredbudget && (
@@ -432,19 +457,24 @@ function CreateConference() {
               >
                 Source of funding:
               </label>
-              <input
-                type="text"
+              <select
+                name="sourceoffunding"
                 id="sourceoffunding"
-                placeholder="ex: Research grant, sponsorship"
                 value={conferenceData.sourceoffunding}
-                onChange={(e) =>
+                onChange={(e) => {
                   setConferenceData({
                     ...conferenceData,
                     sourceoffunding: e.target.value,
-                  })
-                }
+                  });
+                  setSuccessMessage("");
+                  setErrors({});
+                }}
                 className="w-full border border-purple-oklch(29.3% 0.136 325.661) rounded-xl px-4 py-2 focus:ring-2 focus:ring-purple-oklch(29.3% 0.136 325.661) focus:outline-none"
-              />
+              >
+                <option value="">Select a funding source</option>
+                <option>External</option>
+                <option>GUC</option>
+              </select>
               {errorvalues.sourceoffunding && (
                 <p className="text-red-500 text-sm mt-1">
                   {errorvalues.sourceoffunding}
@@ -461,16 +491,18 @@ function CreateConference() {
               Extra required resources:
             </label>
             <input
-              type="number"
+              type="text"
               id="extrarequiredresources"
-              placeholder="ex: 3"
+              placeholder="ex: extra speakers "
               value={conferenceData.extrarequiredresources}
-              onChange={(e) =>
+              onChange={(e) => {
                 setConferenceData({
                   ...conferenceData,
                   extrarequiredresources: e.target.value,
-                })
-              }
+                });
+                setSuccessMessage("");
+                setErrors({});
+              }}
               className="w-full border border-purple-oklch(29.3% 0.136 325.661) rounded-xl px-4 py-2 focus:ring-2 focus:ring-purple-oklch(29.3% 0.136 325.661) focus:outline-none"
             />
           </div>

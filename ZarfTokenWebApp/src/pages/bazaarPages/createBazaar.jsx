@@ -40,7 +40,7 @@ function CreateBazaar() {
     }
     if (bazaarData.registrationdeadline.trim() === "") {
       errorValues.registrationdeadline =
-        "Please enter the registrationdeadline";
+        "Please enter the registration deadline";
     }
 
     return errorValues;
@@ -66,9 +66,9 @@ function CreateBazaar() {
         shortdescription: bazaarData.shortdescription,
         registrationdeadline: bazaarData.registrationdeadline,
       };
-      if (new Date(bazaarData.startdate) - new Date(bazaarData.enddate) <= 0) {
+      if (new Date(bazaarData.enddate) - new Date(bazaarData.startdate) <= 0) {
         setError({
-          general: "Start date should be less than the end date",
+          general: "Start date should be before the end date",
         });
         setSuccessMessage("");
         return;
@@ -84,7 +84,7 @@ function CreateBazaar() {
           28
       ) {
         setError({
-          general: "Duration should be between 1 and 4 weeks inclusive",
+          general: "Duration should be between 1 to 4 weeks inclusive",
         });
         setSuccessMessage("");
         return;
@@ -95,7 +95,7 @@ function CreateBazaar() {
         0
       ) {
         setError({
-          general: "Registration deadline should be less than the start date",
+          general: "Registration deadline should be before the start date",
         });
         setSuccessMessage("");
         return;
@@ -104,6 +104,16 @@ function CreateBazaar() {
       await api.post("/bazaars/createBazaar", body);
       setSuccessMessage("Bazaar created successfully!");
       setError({});
+      setBazaarData({
+        bazaarname: "",
+        startdate: "",
+        starttime: "",
+        enddate: "",
+        endtime: "",
+        location: "",
+        shortdescription: "",
+        registrationdeadline: "",
+      });
     } catch (error) {
       setSuccessMessage("");
       setError({ general: error.message });
@@ -145,6 +155,7 @@ function CreateBazaar() {
               onChange={(e) => {
                 setBazaarData({ ...bazaarData, bazaarname: e.target.value });
                 setSuccessMessage("");
+                setError({});
               }}
               className="w-full border border-purple-oklch(29.3% 0.136 325.661) rounded-xl px-4 py-2 focus:ring-2 focus:ring-purple-oklch(29.3% 0.136 325.661) focus:outline-none"
             />
@@ -170,6 +181,7 @@ function CreateBazaar() {
                 onChange={(e) => {
                   setBazaarData({ ...bazaarData, startdate: e.target.value });
                   setSuccessMessage("");
+                  setError({});
                 }}
                 className="w-full border border-purple-oklch(29.3% 0.136 325.661) rounded-xl px-4 py-2 focus:ring-2 focus:ring-purple-oklch(29.3% 0.136 325.661) focus:outline-none"
               />
@@ -194,6 +206,7 @@ function CreateBazaar() {
                 onChange={(e) => {
                   setBazaarData({ ...bazaarData, starttime: e.target.value });
                   setSuccessMessage("");
+                  setError({});
                 }}
                 className="w-full border border-purple-oklch(29.3% 0.136 325.661) rounded-xl px-4 py-2 focus:ring-2 focus:ring-purple-oklch(29.3% 0.136 325.661) focus:outline-none"
               />
@@ -220,6 +233,7 @@ function CreateBazaar() {
                 onChange={(e) => {
                   setBazaarData({ ...bazaarData, enddate: e.target.value });
                   setSuccessMessage("");
+                  setError({});
                 }}
                 className="w-full border border-purple-oklch(29.3% 0.136 325.661) rounded-xl px-4 py-2 focus:ring-2 focus:ring-purple-oklch(29.3% 0.136 325.661) focus:outline-none"
               />
@@ -244,6 +258,7 @@ function CreateBazaar() {
                 onChange={(e) => {
                   setBazaarData({ ...bazaarData, endtime: e.target.value });
                   setSuccessMessage("");
+                  setError({});
                 }}
                 className="w-full border border-purple-oklch(29.3% 0.136 325.661) rounded-xl px-4 py-2 focus:ring-2 focus:ring-purple-oklch(29.3% 0.136 325.661) focus:outline-none"
               />
@@ -270,6 +285,7 @@ function CreateBazaar() {
               onChange={(e) => {
                 setBazaarData({ ...bazaarData, location: e.target.value });
                 setSuccessMessage("");
+                setError({});
               }}
               className="w-full border border-purple-oklch(29.3% 0.136 325.661) rounded-xl px-4 py-2 focus:ring-2 focus:ring-purple-oklch(29.3% 0.136 325.661) focus:outline-none"
             />
@@ -298,6 +314,7 @@ function CreateBazaar() {
                   shortdescription: e.target.value,
                 });
                 setSuccessMessage("");
+                setError({});
               }}
               className="w-full border border-purple-oklch(29.3% 0.136 325.661) rounded-xl px-4 py-2 focus:ring-2 focus:ring-purple-oklch(29.3% 0.136 325.661) focus:outline-none"
             />
@@ -325,6 +342,7 @@ function CreateBazaar() {
                   registrationdeadline: e.target.value,
                 });
                 setSuccessMessage("");
+                setError({});
               }}
               className="w-full border border-purple-oklch(29.3% 0.136 325.661) rounded-xl px-4 py-2 focus:ring-2 focus:ring-purple-oklch(29.3% 0.136 325.661) focus:outline-none"
             />

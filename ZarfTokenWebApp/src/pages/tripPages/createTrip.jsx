@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { generatePath } from "react-router-dom";
 
 function CreateTrip() {
   const [tripData, setTripData] = useState({
@@ -74,41 +75,37 @@ function CreateTrip() {
         price: tripData.price,
         capacity: tripData.capacity,
       };
-      if (
-        (new Date(tripData.enddate) - new Date(tripData.startdate)) /
-          (1000 * 60 * 60 * 24) <=
-        0
-      ) {
+      if (new Date(tripData.enddate) - new Date(tripData.startdate) <= 0) {
         setError({
-          general: "Start date should be smaller than the end date",
+          general: "Start date should be before the end date",
         });
         setSuccessMessage("");
         return;
       }
       if (
-        (new Date(tripData.enddate) - new Date(bazaarData.startdate)) /
+        (new Date(tripData.enddate) - new Date(tripData.startdate)) /
           (1000 * 60 * 60 * 24) +
           1 <
           7 ||
-        (new Date(tripData.enddate) - new Date(bazaarData.startdate)) /
+        (new Date(tripData.enddate) - new Date(tripData.startdate)) /
           (1000 * 60 * 60 * 24) +
           1 >
           28
       ) {
         setError({
-          general: "Duration should be between 1 and 4 weeks inclusive",
+          general: "Duration should be between 1 to 4 weeks inclusive",
         });
         setSuccessMessage("");
         return;
       }
-      if (tripData.capacity < 0) {
+      if (tripData.capacity <= 0) {
         setError({
           general: "Capacity must be a positive number",
         });
         setSuccessMessage("");
         return;
       }
-      if (tripData.price < 0) {
+      if (tripData.price <= 0) {
         setError({
           general: "Price must be a positive number",
         });
@@ -116,13 +113,12 @@ function CreateTrip() {
         return;
       }
       if (
-        (new Date(tripData.registerationdeadline) -
-          new Date(tripData.startdate)) /
-          (1000 * 60 * 60 * 24) >=
+        new Date(tripData.registerationdeadline) -
+          new Date(tripData.startdate) >=
         0
       ) {
         setError({
-          general: "Register deadline should be less than the start date",
+          general: "Register deadline should be before the start date",
         });
         setSuccessMessage("");
         return;
@@ -191,6 +187,7 @@ function CreateTrip() {
               onChange={(e) => {
                 setTripData({ ...tripData, tripname: e.target.value });
                 setSuccessMessage("");
+                setError({});
               }}
               className="w-full border border-purple-oklch(29.3% 0.136 325.661) rounded-xl px-4 py-2 focus:ring-2 focus:ring-purple-oklch(29.3% 0.136 325.661) focus:outline-none"
             />
@@ -215,6 +212,7 @@ function CreateTrip() {
                 onChange={(e) => {
                   setTripData({ ...tripData, startdate: e.target.value });
                   setSuccessMessage("");
+                  setError({});
                 }}
                 className="w-full border border-purple-oklch(29.3% 0.136 325.661) rounded-xl px-4 py-2 focus:ring-2 focus:ring-purple-oklch(29.3% 0.136 325.661) focus:outline-none"
               />
@@ -239,6 +237,7 @@ function CreateTrip() {
                 onChange={(e) => {
                   setTripData({ ...tripData, starttime: e.target.value });
                   setSuccessMessage("");
+                  setError({});
                 }}
                 className="w-full border border-purple-oklch(29.3% 0.136 325.661) rounded-xl px-4 py-2 focus:ring-2 focus:ring-purple-oklch(29.3% 0.136 325.661) focus:outline-none"
               />
@@ -264,6 +263,7 @@ function CreateTrip() {
                 onChange={(e) => {
                   setTripData({ ...tripData, enddate: e.target.value });
                   setSuccessMessage("");
+                  setError({});
                 }}
                 className="w-full border border-purple-oklch(29.3% 0.136 325.661) rounded-xl px-4 py-2 focus:ring-2 focus:ring-purple-oklch(29.3% 0.136 325.661) focus:outline-none"
               />
@@ -288,6 +288,7 @@ function CreateTrip() {
                 onChange={(e) => {
                   setTripData({ ...tripData, endtime: e.target.value });
                   setSuccessMessage("");
+                  setError({});
                 }}
                 className="w-full border border-purple-oklch(29.3% 0.136 325.661) rounded-xl px-4 py-2 focus:ring-2 focus:ring-purple-oklch(29.3% 0.136 325.661) focus:outline-none"
               />
@@ -314,6 +315,7 @@ function CreateTrip() {
               onChange={(e) => {
                 setTripData({ ...tripData, location: e.target.value });
                 setSuccessMessage("");
+                setError({});
               }}
               className="w-full border border-purple-oklch(29.3% 0.136 325.661) rounded-xl px-4 py-2 focus:ring-2 focus:ring-purple-oklch(29.3% 0.136 325.661) focus:outline-none"
             />
@@ -339,6 +341,7 @@ function CreateTrip() {
               onChange={(e) => {
                 setTripData({ ...tripData, shortdescription: e.target.value });
                 setSuccessMessage("");
+                setError({});
               }}
               className="w-full border border-purple-oklch(29.3% 0.136 325.661) rounded-xl px-4 py-2 focus:ring-2 focus:ring--purple-oklch(29.3% 0.136 325.661) focus:outline-none"
             />
@@ -366,6 +369,7 @@ function CreateTrip() {
                   registerationdeadline: e.target.value,
                 });
                 setSuccessMessage("");
+                setError({});
               }}
               className="w-full border border-purple-oklch(29.3% 0.136 325.661) rounded-xl px-4 py-2 focus:ring-2 focus:-purple-oklch(29.3% 0.136 325.661) focus:outline-none"
             />
@@ -392,6 +396,7 @@ function CreateTrip() {
                 onChange={(e) => {
                   setTripData({ ...tripData, price: e.target.value });
                   setSuccessMessage("");
+                  setError({});
                 }}
                 className="w-full border border-purple-oklch(29.3% 0.136 325.661) rounded-xl px-4 py-2 focus:ring-2 focus:ring-purple-oklch(29.3% 0.136 325.661) focus:outline-none"
               />
@@ -415,6 +420,7 @@ function CreateTrip() {
                 onChange={(e) => {
                   setTripData({ ...tripData, capacity: e.target.value });
                   setSuccessMessage("");
+                  setError({});
                 }}
                 className="w-full border border-purple-oklch(29.3% 0.136 325.661) rounded-xl px-4 py-2 focus:ring-2 focus:ring-purple-oklch(29.3% 0.136 325.661) focus:outline-none"
               />

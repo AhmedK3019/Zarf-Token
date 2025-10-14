@@ -74,6 +74,7 @@ function EditTrip() {
       setError(errorMessages);
       return;
     }
+
     try {
       let body = {
         tripname: tripData.tripname,
@@ -87,22 +88,64 @@ function EditTrip() {
         price: tripData.price,
         capacity: tripData.capacity,
       };
-
-      try {
-        await api.put(`/trips/updateTrip/${id}`, body);
-        setSuccessMessage("Trip updated successfully!");
-        setError({});
-      } catch (error) {
-        setSuccessMessage("");
+      if (new Date(tripData.enddate) - new Date(tripData.startdate) <= 0) {
         setError({
-          general:
-            error.response?.data?.message ||
-            "An error occurred while updating the trip.",
+          general: "Start date should be before the end date",
         });
+        setSuccessMessage("");
+        return;
       }
+      if (
+        (new Date(tripData.enddate) - new Date(bazaarData.startdate)) /
+          (1000 * 60 * 60 * 24) +
+          1 <
+          7 ||
+        (new Date(tripData.enddate) - new Date(bazaarData.startdate)) /
+          (1000 * 60 * 60 * 24) +
+          1 >
+          28
+      ) {
+        setError({
+          general: "Duration should be between 1 to 4 weeks inclusive",
+        });
+        setSuccessMessage("");
+        return;
+      }
+      if (tripData.capacity < 0) {
+        setError({
+          general: "Capacity must be a positive number",
+        });
+        setSuccessMessage("");
+        return;
+      }
+      if (tripData.price < 0) {
+        setError({
+          general: "Price must be a positive number",
+        });
+        setSuccessMessage("");
+        return;
+      }
+      if (
+        new Date(tripData.registerationdeadline) -
+          new Date(tripData.startdate) >=
+        0
+      ) {
+        setError({
+          general: "Register deadline should be before the start date",
+        });
+        setSuccessMessage("");
+        return;
+      }
+      await api.put(`/trips/updateTrip/${id}`, body);
+      setSuccessMessage("Trip updated successfully!");
+      setError({});
     } catch (error) {
       setSuccessMessage("");
-      setError({ general: error.message });
+      setError({
+        general:
+          error.response?.data?.message ||
+          "An error occurred while updating the trip.",
+      });
     }
   };
   return (
@@ -286,7 +329,10 @@ function EditTrip() {
               placeholder="ex: describe in brief words"
               value={tripData.shortdescription}
               onChange={(e) => {
-                setTripData({ ...tripData, shortdescription: e.target.value });
+                setTripData({
+                  ...tripData,
+                  shortdescription: e.target.value,
+                });
                 setSuccessMessage("");
               }}
               className="w-full border border-gray-300 rounded-xl px-4 py-2 focus:ring-2 focus:ring-purple-400 focus:outline-none"
