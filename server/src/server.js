@@ -27,6 +27,7 @@ import vendorRequestRoutes from "./routes/vendorRequestRoutes.js";
 import conferenceRoutes from "./routes/conferenceRoutes.js";
 import workshopRoutes from "./routes/workshopRoutes.js";
 import allEventsRoutes from "./routes/allEventsRoutes.js";
+import Admin from "./models/Admin.js";
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
@@ -76,6 +77,19 @@ const PORT = process.env.PORT || 3000;
 const connectDB = async () => {
   try {
     const conn = await mongoose.connect(process.env.MONGO_URI);
+    const adminExists = await Admin.findOne({ email: "admin@guc.edu.eg" });
+    if (!adminExists) {
+      console.log("Creating admin user...");
+      await Admin.create({
+        firstname: "Admin",
+        lastname: "User",
+        email: "admin@guc.edu.eg",
+        password: "admin123",
+        role: "Admin",
+        status: "Active",
+      });
+      console.log("Admin user created successfully");
+    }
     console.log(`MongoDB Connected: ${conn.connection.host}`);
     // short migration: remove legacy unique index on `username` if it exists
     try {
