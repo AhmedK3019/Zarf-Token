@@ -17,15 +17,22 @@ function EditTrip() {
     capacity: "",
   });
   useEffect(() => {
-    api.get(`/trips/getTrip/${id}`).then((res) => {
-      const trip = res.data.trip;
-      setTripData({
-        ...trip,
-        startdate: trip.startdate?.slice(0, 10) || "",
-        enddate: trip.enddate?.slice(0, 10) || "",
-        registerationdeadline: trip.registerationdeadline?.slice(0, 10) || "",
+    api
+      .get(`/trips/getTrip/${id}`)
+      .then((res) => {
+        const trip = res.data.trip;
+        setTripData({
+          ...trip,
+          startdate: trip.startdate?.slice(0, 10) || "",
+          enddate: trip.enddate?.slice(0, 10) || "",
+          registerationdeadline: trip.registerationdeadline?.slice(0, 10) || "",
+        });
+      })
+      .catch((err) => {
+        setError({ general: err.message });
+        setSuccessMessage("");
+        return;
       });
-    });
   }, [id]);
   const [successMessage, setSuccessMessage] = useState("");
   const [errorvalues, setError] = useState({});
@@ -54,12 +61,12 @@ function EditTrip() {
     }
     if (tripData.registerationdeadline.trim() == "") {
       errorValue.registerationdeadline =
-        "Please enter the registeration deadline";
+        "Please enter the registration deadline";
     }
-    if (tripData.price.trim() == "") {
+    if (!tripData.price) {
       errorValue.price = "Please enter the trip's price";
     }
-    if (tripData.capacity.trim() == "") {
+    if (!tripData.capacity) {
       errorValue.capacity = "Please enter the trip's capacity";
     }
 
@@ -72,6 +79,7 @@ function EditTrip() {
     const errorMessages = validateForm();
     if (Object.keys(errorMessages).length > 0) {
       setError(errorMessages);
+      console.log(errorMessages);
       return;
     }
 
@@ -96,11 +104,11 @@ function EditTrip() {
         return;
       }
       if (
-        (new Date(tripData.enddate) - new Date(bazaarData.startdate)) /
+        (new Date(tripData.enddate) - new Date(tripData.startdate)) /
           (1000 * 60 * 60 * 24) +
           1 <
           7 ||
-        (new Date(tripData.enddate) - new Date(bazaarData.startdate)) /
+        (new Date(tripData.enddate) - new Date(tripData.startdate)) /
           (1000 * 60 * 60 * 24) +
           1 >
           28
@@ -131,7 +139,7 @@ function EditTrip() {
         0
       ) {
         setError({
-          general: "Register deadline should be before the start date",
+          general: "Registration deadline should be before the start date",
         });
         setSuccessMessage("");
         return;
@@ -142,14 +150,12 @@ function EditTrip() {
     } catch (error) {
       setSuccessMessage("");
       setError({
-        general:
-          error.response?.data?.message ||
-          "An error occurred while updating the trip.",
+        general: error.message || "An error occurred while updating the trip.",
       });
     }
   };
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-purple-100 to-purple-200 py-10 px-4">
+    <div className="min-h-screen flex items-center justify-center bg-transparent py-10 px-4">
       <div className="bg-white rounded-3xl shadow-xl w-full max-w-2xl p-8">
         <h2 className="text-2xl font-semibold text-center text-gray-800 mb-6">
           Edit Trip
@@ -183,8 +189,9 @@ function EditTrip() {
               onChange={(e) => {
                 setTripData({ ...tripData, tripname: e.target.value });
                 setSuccessMessage("");
+                setError({});
               }}
-              className="w-full border border-gray-300 rounded-xl px-4 py-2 focus:ring-2 focus:ring-purple-400 focus:outline-none"
+              className="w-full border border-purple-oklch(29.3% 0.136 325.661) rounded-xl px-4 py-2 focus:ring-2 focus:ring-purple-oklch(29.3% 0.136 325.661) focus:outline-none"
             />
             {errorvalues.tripname && (
               <p className="text-red-500 text-sm mt-1">
@@ -207,8 +214,9 @@ function EditTrip() {
                 onChange={(e) => {
                   setTripData({ ...tripData, startdate: e.target.value });
                   setSuccessMessage("");
+                  setError({});
                 }}
-                className="w-full border border-gray-300 rounded-xl px-4 py-2 focus:ring-2 focus:ring-purple-400 focus:outline-none"
+                className="w-full border border-purple-oklch(29.3% 0.136 325.661) rounded-xl px-4 py-2 focus:ring-2 focus:ring-purple-oklch(29.3% 0.136 325.661) focus:outline-none"
               />
               {errorvalues.startdate && (
                 <p className="text-red-500 text-sm mt-1">
@@ -231,8 +239,9 @@ function EditTrip() {
                 onChange={(e) => {
                   setTripData({ ...tripData, starttime: e.target.value });
                   setSuccessMessage("");
+                  setError({});
                 }}
-                className="w-full border border-gray-300 rounded-xl px-4 py-2 focus:ring-2 focus:ring-purple-400 focus:outline-none"
+                className="w-full border border-purple-oklch(29.3% 0.136 325.661) rounded-xl px-4 py-2 focus:ring-2 focus:ring-purple-oklch(29.3% 0.136 325.661) focus:outline-none"
               />
               {errorvalues.starttime && (
                 <p className="text-red-500 text-sm mt-1">
@@ -256,8 +265,9 @@ function EditTrip() {
                 onChange={(e) => {
                   setTripData({ ...tripData, enddate: e.target.value });
                   setSuccessMessage("");
+                  setError({});
                 }}
-                className="w-full border border-gray-300 rounded-xl px-4 py-2 focus:ring-2 focus:ring-purple-400 focus:outline-none"
+                className="w-full border border-purple-oklch(29.3% 0.136 325.661) rounded-xl px-4 py-2 focus:ring-2 focus:ring-purple-oklch(29.3% 0.136 325.661) focus:outline-none"
               />
               {errorvalues.enddate && (
                 <p className="text-red-500 text-sm mt-1">
@@ -280,8 +290,9 @@ function EditTrip() {
                 onChange={(e) => {
                   setTripData({ ...tripData, endtime: e.target.value });
                   setSuccessMessage("");
+                  setError({});
                 }}
-                className="w-full border border-gray-300 rounded-xl px-4 py-2 focus:ring-2 focus:ring-purple-400 focus:outline-none"
+                className="w-full border border-purple-oklch(29.3% 0.136 325.661) rounded-xl px-4 py-2 focus:ring-2 focus:ring-purple-oklch(29.3% 0.136 325.661) focus:outline-none"
               />
               {errorvalues.endtime && (
                 <p className="text-red-500 text-sm mt-1">
@@ -306,6 +317,7 @@ function EditTrip() {
               onChange={(e) => {
                 setTripData({ ...tripData, location: e.target.value });
                 setSuccessMessage("");
+                setError({});
               }}
               className="w-full border border-purple-oklch(29.3% 0.136 325.661) rounded-xl px-4 py-2 focus:ring-2 focus:ring-purple-oklch(29.3% 0.136 325.661) focus:outline-none"
             />
@@ -329,13 +341,11 @@ function EditTrip() {
               placeholder="ex: describe in brief words"
               value={tripData.shortdescription}
               onChange={(e) => {
-                setTripData({
-                  ...tripData,
-                  shortdescription: e.target.value,
-                });
+                setTripData({ ...tripData, shortdescription: e.target.value });
                 setSuccessMessage("");
+                setError({});
               }}
-              className="w-full border border-gray-300 rounded-xl px-4 py-2 focus:ring-2 focus:ring-purple-400 focus:outline-none"
+              className="w-full border border-purple-oklch(29.3% 0.136 325.661) rounded-xl px-4 py-2 focus:ring-2 focus:ring--purple-oklch(29.3% 0.136 325.661) focus:outline-none"
             />
             {errorvalues.shortdescription && (
               <p className="text-red-500 text-sm mt-1">
@@ -361,8 +371,9 @@ function EditTrip() {
                   registerationdeadline: e.target.value,
                 });
                 setSuccessMessage("");
+                setError({});
               }}
-              className="w-full border border-gray-300 rounded-xl px-4 py-2 focus:ring-2 focus:ring-purple-400 focus:outline-none"
+              className="w-full border border-purple-oklch(29.3% 0.136 325.661) rounded-xl px-4 py-2 focus:ring-2 focus:-purple-oklch(29.3% 0.136 325.661) focus:outline-none"
             />
             {errorvalues.registerationdeadline && (
               <p className="text-red-500 text-sm mt-1">
@@ -387,8 +398,9 @@ function EditTrip() {
                 onChange={(e) => {
                   setTripData({ ...tripData, price: e.target.value });
                   setSuccessMessage("");
+                  setError({});
                 }}
-                className="w-full border border-gray-300 rounded-xl px-4 py-2 focus:ring-2 focus:ring-purple-400 focus:outline-none"
+                className="w-full border border-purple-oklch(29.3% 0.136 325.661) rounded-xl px-4 py-2 focus:ring-2 focus:ring-purple-oklch(29.3% 0.136 325.661) focus:outline-none"
               />
               {errorvalues.price && (
                 <p className="text-red-500 text-sm mt-1">{errorvalues.price}</p>
@@ -410,8 +422,9 @@ function EditTrip() {
                 onChange={(e) => {
                   setTripData({ ...tripData, capacity: e.target.value });
                   setSuccessMessage("");
+                  setError({});
                 }}
-                className="w-full border border-gray-300 rounded-xl px-4 py-2 focus:ring-2 focus:ring-purple-400 focus:outline-none"
+                className="w-full border border-purple-oklch(29.3% 0.136 325.661) rounded-xl px-4 py-2 focus:ring-2 focus:ring-purple-oklch(29.3% 0.136 325.661) focus:outline-none"
               />
               {errorvalues.capacity && (
                 <p className="text-red-500 text-sm mt-1">
@@ -425,7 +438,7 @@ function EditTrip() {
             type="submit"
             className="w-full rounded-full border border-primary/40 bg-white px-4 py-2 text-lg font-semibold text-primary tracking-wide shadow-[0_12px_24px_rgba(115,108,237,0.25)] transition-transform hover:-translate-y-0.5 hover:bg-secondary/20 hover:shadow-[0_16px_30px_rgba(115,108,237,0.3)]"
           >
-            Submit
+            Update Trip
           </button>
         </form>
       </div>

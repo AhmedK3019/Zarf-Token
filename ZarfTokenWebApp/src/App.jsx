@@ -11,7 +11,9 @@ import ProtectedRoute from "./components/ProtectedRoute";
 import SignUp from "./pages/signUp";
 import "./App.css";
 import { useAuthUser } from "./hooks/auth";
-
+// import EditBazaar from "./pages/bazaarPages/EditBazaar";
+// import EditTrip from "./pages/tripPages/EditTrip";
+// import EditConference from "./pages/conferencePages/EditConference";
 function App() {
   useEffect(() => {
     document.title = "ZarfToken";
@@ -58,6 +60,9 @@ function App() {
             </ProtectedRoute>
           }
         />
+        {/* <Route path="/editConference/:id" element={<EditConference />} />
+        <Route path="/editBazaar/:id" element={<EditBazaar />} />
+        <Route path="/editTrip/:id" element={<EditTrip />} /> */}
       </Routes>
     </Router>
   );
