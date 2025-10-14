@@ -97,21 +97,10 @@ export default function MyWorkshops() {
     const fetch = async () => {
       try {
         const res = await api.get("/workshops/getAllWorkshops");
-        const items = res.data.workshops || res.data || [];
+        const items = res.data.myworkshops || res.data || [];
         const myId = user?._id || user?.id;
 
-        const filtered = items.filter((w) => {
-          if (!myId) return false;
-          const isOwner = String(w.createdBy) === String(myId);
-          const isParticipant = Array.isArray(w.professorsparticipating)
-            ? w.professorsparticipating.some(
-                (pid) => String(pid) === String(myId)
-              )
-            : false;
-          return isOwner || isParticipant;
-        });
-
-        setWorkshops(filtered);
+        setWorkshops(items);
       } catch (err) {
         setError("Failed to load workshops");
       } finally {
@@ -139,8 +128,17 @@ export default function MyWorkshops() {
   };
 
   const startEdit = (workshop) => {
+    // Normalize professors participating into an array of ids for the edit form
+    const profs =
+      workshop.professorsparticipating ||
+      workshop.professorsParticipating ||
+      workshop.professors ||
+      [];
+    const profIds = Array.isArray(profs)
+      ? profs.map((p) => (p && (p._id || p.id) ? p._id || p.id : String(p)))
+      : [];
     setEditing(workshop._id);
-    setForm({ ...workshop });
+    setForm({ ...workshop, professorsparticipating: profIds });
   };
 
   const cancelEdit = () => {
@@ -150,13 +148,36 @@ export default function MyWorkshops() {
 
   const saveEdit = async () => {
     try {
-      await api.put(`/workshops/updateWorkshop/${editing}`, {
-        ...form,
-        extrarequiredfunding: Number(form.extrarequiredfunding),
-        capacity: Number(form.capacity),
-      });
+      // Prepare payload: normalize professors to ids and numeric fields
+      const payload = { ...form };
+      if (Array.isArray(payload.professorsparticipating)) {
+        payload.professorsparticipating = payload.professorsparticipating.map(
+          (p) => (p && (p._id || p.id) ? p._id || p.id : String(p))
+        );
+      } else {
+        payload.professorsparticipating = [];
+      }
+      if (payload.extrarequiredfunding !== undefined)
+        payload.extrarequiredfunding =
+          Number(payload.extrarequiredfunding) || 0;
+      if (payload.capacity !== undefined)
+        payload.capacity = Number(payload.capacity) || 0;
+
+      delete payload._id;
+      delete payload.type;
+      delete payload.createdBy;
+      delete payload.createdAt;
+      delete payload.attendees;
+      delete payload.comments;
+      const res = await api.put(
+        `/workshops/updateWorkshop/${editing}`,
+        payload
+      );
+      // prefer server's returned workshop if present
+      const updated =
+        res?.data?.workshop || res?.data?.updatedWorkshop || payload;
       setWorkshops((prev) =>
-        prev.map((w) => (w._id === editing ? { ...w, ...form } : w))
+        prev.map((w) => (w._id === editing ? { ...w, ...updated } : w))
       );
       cancelEdit();
     } catch (err) {
