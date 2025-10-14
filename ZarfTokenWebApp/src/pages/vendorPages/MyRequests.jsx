@@ -115,7 +115,10 @@ function DetailsModal({ request, onClose }) {
             <div className="space-y-4">
               {request.boothname && (
                 <div className="flex items-start gap-3">
-                  <Building size={16} className="mt-1 text-[#736CED] flex-shrink-0" />
+                  <Building
+                    size={16}
+                    className="mt-1 text-[#736CED] flex-shrink-0"
+                  />
                   <div>
                     <span className="font-semibold">Booth Name:</span>{" "}
                     {request.boothname}
@@ -233,7 +236,10 @@ function DetailsModal({ request, onClose }) {
           <div className="space-y-4">
             {request.boothname && (
               <div className="flex items-start gap-3">
-                <Building size={16} className="mt-1 text-[#736CED] flex-shrink-0" />
+                <Building
+                  size={16}
+                  className="mt-1 text-[#736CED] flex-shrink-0"
+                />
                 <div>
                   <span className="font-semibold">Booth Name:</span>{" "}
                   {request.boothname}
@@ -317,7 +323,7 @@ export default function MyRequests() {
   const { user } = useAuthUser();
 
   const toggleDescription = (requestId) => {
-    setExpandedDescriptions(prev => {
+    setExpandedDescriptions((prev) => {
       const newSet = new Set(prev);
       if (newSet.has(requestId)) {
         newSet.delete(requestId);
@@ -338,8 +344,6 @@ export default function MyRequests() {
         const response = await api.get(
           `/vendorRequests/mine?vendorId=${user._id}`
         );
-
-        console.log("API Response:", response.data);
 
         // Only filter by status (backend handles vendor filtering)
         const vendorRequests = response.data.filter(
@@ -452,9 +456,11 @@ export default function MyRequests() {
                             at {request.bazarId.bazaarname}
                           </p>
                         )}
-                        <p 
+                        <p
                           className={`text-sm text-[#312A68] mt-1 cursor-pointer hover:text-[#4C3BCF] transition-colors ${
-                            expandedDescriptions.has(request._id) ? '' : 'line-clamp-2'
+                            expandedDescriptions.has(request._id)
+                              ? ""
+                              : "line-clamp-2"
                           }`}
                           onClick={() => toggleDescription(request._id)}
                           title="Click to expand/collapse"

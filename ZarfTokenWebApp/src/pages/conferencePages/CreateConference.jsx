@@ -133,7 +133,6 @@ function CreateConference() {
         extrarequiredresources: "",
       });
     } catch (error) {
-      console.log(error);
       setErrors({ general: error.response.data.message });
       setSuccessMessage("");
     }

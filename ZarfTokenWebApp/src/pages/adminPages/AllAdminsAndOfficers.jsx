@@ -1,26 +1,24 @@
 import React, { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import api from "../../services/api";
 import { useAuthUser } from "../../hooks/auth";
 
 export default function AllAdminsAndOfficers() {
   const [users, setUsers] = useState([]);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const { user } = useAuthUser();
+  const navigate = useNavigate();
 
   const fetchUsers = async () => {
-    setLoading(true);
     setError(null);
     try {
       const res = await api.get("/allUsers/allAdminsAndOfficers");
       // API returns an array
       // remove current user from list
-      const filtered = (
-        res.data ||
-        res.data?.result ||
-        res.data?.users ||
-        res.data
-      ).filter((u) => (u._id || u.id) !== user._id);
+      const payload =
+        res.data || res.data?.result || res.data?.users || res.data;
+      const filtered = Array.isArray(payload) ? payload : [];
       setUsers(filtered);
     } catch (err) {
       console.error(err);
@@ -30,9 +28,29 @@ export default function AllAdminsAndOfficers() {
     }
   };
 
+  // Polling configuration: set to false to disable polling
+  const ENABLE_POLLING = true;
+  const POLL_MS = 10000; // 10 seconds
+
+  // Retry loading once user is available (hydrate may be async)
   useEffect(() => {
+    let mounted = true;
     fetchUsers();
-  }, []);
+
+    if (ENABLE_POLLING) {
+      const id = setInterval(() => {
+        if (mounted) fetchUsers();
+      }, POLL_MS);
+      return () => {
+        mounted = false;
+        clearInterval(id);
+      };
+    }
+
+    return () => {
+      mounted = false;
+    };
+  }, [user]);
 
   const handleDelete = async (id, role) => {
     const ok = window.confirm("Are you sure you want to delete this user?");
@@ -47,6 +65,13 @@ export default function AllAdminsAndOfficers() {
       }
       // remove from UI
       setUsers((prev) => prev.filter((u) => u._id !== id && u.id !== id));
+      if (id === user?._id) {
+        localStorage.removeItem("token");
+        window.alert(
+          "You have deleted your own account. You will be logged out."
+        );
+        window.location.href = "/";
+      }
     } catch (err) {
       console.error(err);
       alert("Failed to delete user. See console for details.");
@@ -96,7 +121,8 @@ export default function AllAdminsAndOfficers() {
                           <span className="capitalize">{u.role || "user"}</span>
                         </div>
                         <h3 className="text-lg font-semibold text-[#4C3BCF]">
-                          {u.firstname} {u.lastname}
+                          {u.firstname} {u.lastname}{" "}
+                          {id === user?._id ? "(You)" : ""}
                         </h3>
                         <p className="text-sm text-[#312A68]">{u.email}</p>
                       </div>

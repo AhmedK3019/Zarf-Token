@@ -1,30 +1,28 @@
 import React, { useState, useEffect } from "react";
 import api from "../../services/api";
-import {
-  Clock,
-  MapPin,
-  Calendar,
-  Users,
-  Info,
-  Square
-} from "lucide-react";
+import { Clock, MapPin, Calendar, Users, Info, Square } from "lucide-react";
 
 // --- ADDED: Utility and Badge Components (copied from MyRequests.jsx) ---
 function formatDate(dateStr) {
   try {
     const d = new Date(dateStr);
-    return d.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
-  } catch (e) { return dateStr; }
+    return d.toLocaleDateString("en-US", {
+      month: "short",
+      day: "numeric",
+      year: "numeric",
+    });
+  } catch (e) {
+    return dateStr;
+  }
 }
 
 export default function VendorRequests() {
   const [requests, setRequests] = useState([]);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [message, setMessage] = useState(null);
 
   const fetchRequests = async () => {
-    setLoading(true);
     setError(null);
     try {
       const res = await api.get("/vendorRequests/");
@@ -53,8 +51,27 @@ export default function VendorRequests() {
     }
   };
 
+  const ENABLE_POLLING = true;
+  const POLL_MS = 10000;
+
   useEffect(() => {
+    let mounted = true;
     fetchRequests();
+
+    if (ENABLE_POLLING) {
+      const id = setInterval(() => {
+        if (mounted) fetchRequests();
+      }, POLL_MS);
+      return () => {
+        mounted = false;
+        clearInterval(id);
+      };
+    }
+
+    // cleanup function when polling disabled
+    return () => {
+      mounted = false;
+    };
   }, []);
 
   return (
@@ -103,32 +120,124 @@ export default function VendorRequests() {
                     <h3 className="text-xl font-bold text-[#4C3BCF] mb-1">
                       {req.vendorId?.companyname || "Vendor"}
                     </h3>
-                    <p className="text-xs font-semibold text-[#736CED] mb-4"> Vendor: {req.vendorId?.email || "N/A"}</p>
-                    
+                    <p className="text-xs font-semibold text-[#736CED] mb-4">
+                      {" "}
+                      Vendor: {req.vendorId?.email || "N/A"}
+                    </p>
+
                     <div className="border-t border-gray-100 pt-4 space-y-3 text-sm">
                       {req.isBazarBooth ? (
                         <>
-                          <div className="flex items-start gap-2"><Info size={14} className="text-[#736CED] mt-0.5" /><span><strong>Type:</strong> Bazaar Booth</span></div>
-                          <div className="flex items-start gap-2"><Calendar size={14} className="text-[#736CED] mt-0.5" /><span><strong>Event:</strong> {req.bazarId?.bazaarname || 'N/A'}</span></div>
-                          <div className="flex items-start gap-2"><Calendar size={14} className="text-[#736CED] mt-0.5" />
-                            <span><strong>Dates:</strong> {formatDate(req.bazarId?.startdate)}{req.bazarId?.enddate ? ` – ${formatDate(req.bazarId.enddate)}` : ""}</span>
+                          <div className="flex items-start gap-2">
+                            <Info size={14} className="text-[#736CED] mt-0.5" />
+                            <span>
+                              <strong>Type:</strong> Bazaar Booth
+                            </span>
                           </div>
-                          <div className="flex items-start gap-2"><Square size={14} className="text-[#736CED] mt-0.5" /><span><strong>Size:</strong> {req.boothSize}</span></div>
-                          <div className="flex items-start gap-2"><Users size={14} className="text-[#736CED] mt-0.5" />
-                            <span><strong>Team Members:</strong> {req.people.length}
-                              <ul className="mt-1 space-y-1 pl-2">{req.people.map((p, i) => <li key={i} className="text-xs bg-gray-50 p-1 rounded">{p.name} - {p.email}</li>)}</ul>
+                          <div className="flex items-start gap-2">
+                            <Calendar
+                              size={14}
+                              className="text-[#736CED] mt-0.5"
+                            />
+                            <span>
+                              <strong>Event:</strong>{" "}
+                              {req.bazarId?.bazaarname || "N/A"}
+                            </span>
+                          </div>
+                          <div className="flex items-start gap-2">
+                            <Calendar
+                              size={14}
+                              className="text-[#736CED] mt-0.5"
+                            />
+                            <span>
+                              <strong>Dates:</strong>{" "}
+                              {formatDate(req.bazarId?.startdate)}
+                              {req.bazarId?.enddate
+                                ? ` – ${formatDate(req.bazarId.enddate)}`
+                                : ""}
+                            </span>
+                          </div>
+                          <div className="flex items-start gap-2">
+                            <Square
+                              size={14}
+                              className="text-[#736CED] mt-0.5"
+                            />
+                            <span>
+                              <strong>Size:</strong> {req.boothSize}
+                            </span>
+                          </div>
+                          <div className="flex items-start gap-2">
+                            <Users
+                              size={14}
+                              className="text-[#736CED] mt-0.5"
+                            />
+                            <span>
+                              <strong>Team Members:</strong> {req.people.length}
+                              <ul className="mt-1 space-y-1 pl-2">
+                                {req.people.map((p, i) => (
+                                  <li
+                                    key={i}
+                                    className="text-xs bg-gray-50 p-1 rounded"
+                                  >
+                                    {p.name} - {p.email}
+                                  </li>
+                                ))}
+                              </ul>
                             </span>
                           </div>
                         </>
                       ) : (
                         <>
-                           <div className="flex items-start gap-2"><Info size={14} className="text-[#736CED] mt-0.5" /><span><strong>Type:</strong> Platform Booth</span></div>
-                           <div className="flex items-start gap-2"><Square size={14} className="text-[#736CED] mt-0.5" /><span><strong>Size:</strong> {req.boothSize}</span></div>
-                           <div className="flex items-start gap-2"><MapPin size={14} className="text-[#736CED] mt-0.5" /><span><strong>Location:</strong> {req.location}</span></div>
-                           <div className="flex items-start gap-2"><Clock size={14} className="text-[#736CED] mt-0.5" /><span><strong>Duration:</strong> {req.duration} weeks</span></div>
-                           <div className="flex items-start gap-2"><Users size={14} className="text-[#736CED] mt-0.5" />
-                           <span><strong>Team:</strong> {req.people.length}
-                              <ul className="mt-1 space-y-1 pl-2">{req.people.map((p, i) => <li key={i} className="text-xs bg-gray-50 p-1 rounded">{p.name} - {p.email}</li>)}</ul>
+                          <div className="flex items-start gap-2">
+                            <Info size={14} className="text-[#736CED] mt-0.5" />
+                            <span>
+                              <strong>Type:</strong> Platform Booth
+                            </span>
+                          </div>
+                          <div className="flex items-start gap-2">
+                            <Square
+                              size={14}
+                              className="text-[#736CED] mt-0.5"
+                            />
+                            <span>
+                              <strong>Size:</strong> {req.boothSize}
+                            </span>
+                          </div>
+                          <div className="flex items-start gap-2">
+                            <MapPin
+                              size={14}
+                              className="text-[#736CED] mt-0.5"
+                            />
+                            <span>
+                              <strong>Location:</strong> {req.location}
+                            </span>
+                          </div>
+                          <div className="flex items-start gap-2">
+                            <Clock
+                              size={14}
+                              className="text-[#736CED] mt-0.5"
+                            />
+                            <span>
+                              <strong>Duration:</strong> {req.duration} weeks
+                            </span>
+                          </div>
+                          <div className="flex items-start gap-2">
+                            <Users
+                              size={14}
+                              className="text-[#736CED] mt-0.5"
+                            />
+                            <span>
+                              <strong>Team:</strong> {req.people.length}
+                              <ul className="mt-1 space-y-1 pl-2">
+                                {req.people.map((p, i) => (
+                                  <li
+                                    key={i}
+                                    className="text-xs bg-gray-50 p-1 rounded"
+                                  >
+                                    {p.name} - {p.email}
+                                  </li>
+                                ))}
+                              </ul>
                             </span>
                           </div>
                         </>
