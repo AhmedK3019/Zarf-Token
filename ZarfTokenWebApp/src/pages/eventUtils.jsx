@@ -1,9 +1,4 @@
-/**
- * Combines a date object and a time string (e.g., "14:00") into a single JS Date object.
- * @param {Date | string} date - The date object or string.
- * @param {string} time - The time string in HH:mm format.
- * @returns {Date | null} A combined Date object or null if inputs are invalid.
- */
+
 const combineDateTime = (date, time) => {
   if (!date || !time) return null;
   const dateObj = new Date(date);
@@ -14,12 +9,7 @@ const combineDateTime = (date, time) => {
   return dateObj;
 };
 
-/**
- * Normalizes an event object from the backend to have a consistent structure for the frontend.
- * This acts as an adapter between the raw API data and the UI components.
- * @param {object} event - The raw event object from the API.
- * @returns {object} A normalized event object.
- */
+
 export const getEventDetails = (event) => {
   if (!event) return {};
 
@@ -55,11 +45,7 @@ export const getEventDetails = (event) => {
   };
 };
 
-/**
- * Formats a date object into a more readable string.
- * @param {Date} dateObj - The date object to format.
- * @returns {string | null} The formatted date string or null if input is invalid.
- */
+
 export const formatDate = (dateObj) => {
   if (!dateObj || !(dateObj instanceof Date)) return null;
   return dateObj.toLocaleString("en-US", {
