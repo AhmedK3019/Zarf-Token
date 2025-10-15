@@ -40,10 +40,6 @@ const EventDetailsModal = ({ event: rawEvent, onClose }) => {
             <h2 className="text-2xl font-bold text-[#4C3BCF]">
               {event.name}
             </h2>
-            <p className="text-sm text-[#312A68] flex items-center gap-2 mt-1">
-              <Globe size={14} /> Platform Storefront
-            </p>
-            {rawEvent.status && <p className="text-xs mt-2 font-semibold text-gray-600">Status: {rawEvent.status}</p>}
           </div>
           <button
             onClick={onClose}
@@ -71,7 +67,7 @@ const EventDetailsModal = ({ event: rawEvent, onClose }) => {
             ) : (
               /* For platform booths - show duration */
               <div className="flex items-start gap-3">
-                <Clock size={16} className="mt-1 text-[#736CED] flex-shrink-0" />
+                <Calendar size={16} className="mt-1 text-[#736CED] flex-shrink-0" />
                 <div><span className="font-semibold">Duration:</span> {rawEvent.duration} weeks</div>
               </div>
             )}
@@ -81,7 +77,7 @@ const EventDetailsModal = ({ event: rawEvent, onClose }) => {
                 <div>
                   <span className="font-semibold">Team Members:</span>
                   <ul className="mt-2 space-y-1">
-                    {rawEvent.people.map((person, index) => (<li key={index} className="text-sm bg-gray-50 p-2 rounded"><strong>{person.name}</strong> - {person.email}</li>))}
+                    {rawEvent.people.map((person, index) => (<li key={index} className="text-sm bg-gray-50 p-2 rounded"><strong>• {person.name}</strong></li>))}
                   </ul>
                 </div>
               </div>

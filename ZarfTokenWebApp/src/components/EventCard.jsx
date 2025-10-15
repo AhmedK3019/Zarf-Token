@@ -10,6 +10,7 @@ import {
   Store,
   ChevronDown,
   ChevronUp,
+  Calendar,
 } from "lucide-react";
 
 const EventCard = ({
@@ -90,7 +91,12 @@ const EventCard = ({
               Vendor: {event.vendor}
             </p>
           )}
-
+          {event.duration && !isBazaarBooth && (
+            <p className="flex items-center gap-2">
+              <span><Calendar size={16} className="mt-1 text-[#736CED] flex-shrink-0"/></span> 
+              {event.duration} week(s)
+            </p>
+          )}
           {event.location && !isBazaarBooth && (
             <p className="flex items-center gap-2">
               <span><MapPin size={16} className="mt-1 text-[#736CED] flex-shrink-0"/></span> 
