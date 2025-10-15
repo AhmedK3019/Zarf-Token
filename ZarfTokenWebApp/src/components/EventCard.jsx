@@ -27,6 +27,7 @@ const EventCard = ({
   const [isDescriptionExpanded, setIsDescriptionExpanded] = useState(false);
   const [hasOverflow, setHasOverflow] = useState(false);
   const descriptionRef = useRef(null);
+  const isRegistered = event.attendees.some((attendee) => attendee.userId === user?._id);
 
   // Check if description overflows one line
   useEffect(() => {
@@ -49,11 +50,12 @@ const EventCard = ({
   const canRegister =
     userIsEligible &&
     (event.type === "trip" || event.type === "workshop") &&
-    event.registrationDeadline &&
-    new Date(event.registrationDeadline) > new Date() &&
-    !event.attendees.some((attendee) => attendee.userId === user?._id) &&
+    // Use the original data to check for both field name spellings
+    (rawEvent.registrationdeadline || rawEvent.registerationdeadline) &&
+    new Date() < new Date(rawEvent.registrationdeadline || rawEvent.registerationdeadline) &&
+    !isRegistered && // Use the variable here
     (event.capacity ? event.attendees.length < event.capacity : true);
-    
+
   const isBazaar = event.type === 'bazaar';
   const isPlatformBooth = event.type === 'booth' && !event.original.isBazarBooth;
   const isBazaarBooth = event.type === 'booth' && event.original.isBazarBooth;
@@ -80,61 +82,61 @@ const EventCard = ({
           {/* Your existing event details... */}
           {isBazaarBooth && event.original.bazarId && (
             <p className="flex items-center gap-2">
-              <span><Store size={16} className="mt-1 text-[#736CED] flex-shrink-0"/></span> 
+              <span><Store size={16} className="mt-1 text-[#736CED] flex-shrink-0" /></span>
               Part of: {event.original.bazarId.bazaarname || 'Bazaar'}
             </p>
           )}
 
           {isPlatformBooth && event.vendor && (
             <p className="flex items-center gap-2">
-              <span><Building size={16} className="mt-1 text-[#736CED] flex-shrink-0"/></span> 
+              <span><Building size={16} className="mt-1 text-[#736CED] flex-shrink-0" /></span>
               Vendor: {event.vendor}
             </p>
           )}
           {event.duration && !isBazaarBooth && (
             <p className="flex items-center gap-2">
-              <span><Calendar size={16} className="mt-1 text-[#736CED] flex-shrink-0"/></span> 
+              <span><Calendar size={16} className="mt-1 text-[#736CED] flex-shrink-0" /></span>
               {event.duration} week(s)
             </p>
           )}
           {event.location && !isBazaarBooth && (
             <p className="flex items-center gap-2">
-              <span><MapPin size={16} className="mt-1 text-[#736CED] flex-shrink-0"/></span> 
+              <span><MapPin size={16} className="mt-1 text-[#736CED] flex-shrink-0" /></span>
               {event.location}
             </p>
           )}
 
           {isBazaarBooth && event.location && (
             <p className="flex items-center gap-2">
-              <span><MapPin size={16} className="mt-1 text-[#736CED] flex-shrink-0"/></span> 
+              <span><MapPin size={16} className="mt-1 text-[#736CED] flex-shrink-0" /></span>
               Booth Location: {event.location}
             </p>
           )}
 
           {event.price > 0 && (
             <p className="flex items-center gap-2">
-              <span><DollarSign size={16} className="mt-1 text-[#736CED] flex-shrink-0"/></span> 
+              <span><DollarSign size={16} className="mt-1 text-[#736CED] flex-shrink-0" /></span>
               Price: {event.price} EGP
             </p>
           )}
-          
+
           {event.startDate && (
             <p className="flex items-center gap-2">
-              <span><Clock size={16} className="mt-1 text-[#736CED] flex-shrink-0"/></span> 
+              <span><Clock size={16} className="mt-1 text-[#736CED] flex-shrink-0" /></span>
               {formatDate(event.startDate)}
             </p>
           )}
-          
+
           {event.endDate && (
             <p className="flex items-center gap-2">
-              <span><Clock size={16} className="mt-1 text-[#736CED] flex-shrink-0"/></span> 
+              <span><Clock size={16} className="mt-1 text-[#736CED] flex-shrink-0" /></span>
               Ends: {formatDate(event.endDate)}
             </p>
           )}
 
           {event.registrationDeadline && (
             <p className="flex items-center gap-2 text-[#E53E3E]">
-              <span><ClockAlert size={16} className="mt-1 text-[#736CED] flex-shrink-0"/></span> 
+              <span><ClockAlert size={16} className="mt-1 text-[#736CED] flex-shrink-0" /></span>
               Register by: {formatDate(new Date(event.registrationDeadline))}
             </p>
           )}
@@ -143,18 +145,16 @@ const EventCard = ({
         {/* Description with smart expand/collapse */}
         {event.description && (
           <div className="mt-4">
-            <div 
+            <div
               ref={descriptionRef}
-              className={`text-[#312A68] text-sm leading-relaxed ${
-                hasOverflow ? 'cursor-pointer hover:text-[#4C3BCF]' : ''
-              } transition-colors ${
-                isDescriptionExpanded ? 'line-clamp-none' : 'line-clamp-1'
-              }`}
+              className={`text-[#312A68] text-sm leading-relaxed ${hasOverflow ? 'cursor-pointer hover:text-[#4C3BCF]' : ''
+                } transition-colors ${isDescriptionExpanded ? 'line-clamp-none' : 'line-clamp-1'
+                }`}
               onClick={toggleDescription}
             >
               {event.description}
             </div>
-            
+
             {/* Only show Read more/Show less if description overflows */}
             {hasOverflow && (
               <button
@@ -180,45 +180,53 @@ const EventCard = ({
         {event.faculty && (
           <p className="text-xs text-[#312A68]/70">Faculty: {event.faculty}</p>
         )}
-        
+
         {event.website && (
           <a
             href={event.website}
             target="_blank"
             rel="noopener noreferrer"
-            className="text-xs text-[#736CED] hover:underline"
+            className="text-xs font-semibold !text-[#736CED] hover:!text-[#4C3BCF] transition-colors underline"
           >
             Visit Website →
           </a>
         )}
 
         <div className="mt-3 flex flex-wrap gap-2">
-            {canDelete && (
-                <button onClick={() => onDelete(event.original)} className="text-xs bg-rose-50 text-rose-700 px-3 py-1 rounded-full hover:bg-rose-100 transition-colors">
-                Delete
-                </button>
-            )}
+          {canDelete && (
+            <button onClick={() => onDelete(event.original)} className="text-xs bg-rose-50 text-rose-700 px-3 py-1 rounded-full hover:bg-rose-100 transition-colors">
+              Delete
+            </button>
+          )}
 
-            {canRegister && (
-                <button onClick={() => onRegister(event.original)} className="text-xs bg-[#2DD4BF] text-white px-3 py-1 rounded-full hover:bg-[#14B8A6] transition-colors">
-                Register
-                </button>
-            )}
+          {/* Show Registered button if already registered */}
+          {isRegistered && (
+            <button disabled className="text-xs bg-gray-300 text-gray-600 px-3 py-1 rounded-full transition-colors hover:bg-gray-400 cursor-not-allowed">
+              Registered ✓
+            </button>
+          )}
 
-            {isBazaar && (
-              <button
-                onClick={() => onViewBooths(event.original)}
-                className="text-xs bg-[#736CED] text-white px-3 py-1 rounded-full font-semibold hover:bg-[#5A4BBA] transition-colors shadow"
-              >
-                View Booths
-              </button>
-            )}
-            
-            {(isPlatformBooth || isBazaarBooth) && (
-              <button onClick={() => onViewDetails(event.original)} className="text-xs font-semibold text-[#736CED] hover:text-[#4C3BCF] transition-colors">
-                View Details
-              </button>
-            )}
+          {/* Show Register button if eligible and not registered */}
+          {canRegister && (
+            <button onClick={() => onRegister(event.original)} className="text-xs bg-[#2DD4BF] text-white px-3 py-1 rounded-full hover:bg-[#14B8A6] transition-colors">
+              Register
+            </button>
+          )}
+
+          {isBazaar && (
+            <button
+              onClick={() => onViewBooths(event.original)}
+              className="text-xs font-semibold text-[#736CED] hover:text-[#4C3BCF] transition-colors"
+            >
+              View Booths
+            </button>
+          )}
+
+          {(isPlatformBooth || isBazaarBooth) && (
+            <button onClick={() => onViewDetails(event.original)} className="text-xs font-semibold text-[#736CED] hover:text-[#4C3BCF] transition-colors">
+              View Details
+            </button>
+          )}
         </div>
       </div>
     </div>

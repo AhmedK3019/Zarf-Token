@@ -6,6 +6,124 @@ import EventCard from "../components/EventCard";
 import { getEventDetails, formatDate } from "./eventUtils";
 import EventDetailsModal from "../components/EventDetailsModal";
 
+// ===== EXTRACTED MODAL COMPONENTS =====
+
+const RegistrationModal = ({ 
+  registerModalEvent, 
+  regName, 
+  setRegName, 
+  regEmail, 
+  setRegEmail, 
+  regGucid, 
+  setRegGucid, 
+  regError, 
+  regLoading, 
+  onClose, 
+  onSubmit 
+}) => {
+  if (!registerModalEvent) return null;
+
+  return (
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+      <div className="bg-white rounded-2xl max-w-md w-full p-6">
+        <div className="flex justify-between items-center mb-4">
+          <h2 className="text-xl font-bold text-[#4C3BCF]">
+            Register for {getEventDetails(registerModalEvent).name}
+          </h2>
+          <button onClick={onClose} className="text-gray-500 hover:text-gray-700 text-2xl">×</button>
+        </div>
+        {regError && <p className="text-sm text-red-500 mb-2">{regError}</p>}
+        <div className="space-y-3">
+          <input 
+            value={regName} 
+            onChange={(e) => setRegName(e.target.value)} 
+            placeholder="Full name" 
+            className="w-full px-4 py-2 border rounded-md" 
+          />
+          <input 
+            value={regEmail} 
+            onChange={(e) => setRegEmail(e.target.value)} 
+            placeholder="Email" 
+            className="w-full px-4 py-2 border rounded-md" 
+          />
+          <input 
+            value={regGucid} 
+            onChange={(e) => setRegGucid(e.target.value)} 
+            placeholder="GUC ID" 
+            className="w-full px-4 py-2 border rounded-md" 
+          />
+        </div>
+        <div className="mt-6 flex justify-end gap-3">
+          <button onClick={onClose} className="px-4 py-2 rounded-full border">Cancel</button>
+          <button onClick={onSubmit} disabled={regLoading} className="px-4 py-2 rounded-full bg-[#2DD4BF] text-white hover:bg-[#14B8A6]">
+            {regLoading ? "Submitting..." : "Submit"}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+const BoothsModalContent = ({ 
+  selectedBazaar, 
+  bazaarBooths, 
+  bazaarBoothsLoading, 
+  onClose 
+}) => {
+  if (!selectedBazaar) return null;
+
+  return (
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+      <div className="bg-white rounded-2xl max-w-2xl w-full max-h-[80vh] overflow-y-auto">
+        <div className="p-6">
+          <div className="flex justify-between items-center mb-4">
+            <h2 className="text-2xl font-bold text-[#4C3BCF]">
+              Booths at {getEventDetails(selectedBazaar).name}
+            </h2>
+            <button onClick={onClose} className="text-gray-500 hover:text-gray-700 text-2xl">×</button>
+          </div>
+          
+          {bazaarBoothsLoading ? (
+            <div className="flex flex-col items-center justify-center py-12">
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#736CED] mb-4"></div>
+              <p className="text-[#312A68]">Loading booths...</p>
+            </div>
+          ) : bazaarBooths.length === 0 ? (
+            <div className="text-center text-[#312A68] py-8">
+              <p>No booths available for this bazaar.</p>
+            </div>
+          ) : (
+            <div className="grid gap-4">
+              {bazaarBooths.map((booth) => (
+                <div key={booth._id} className="border border-gray-200 rounded-xl p-4 bg-gray-50">
+                  <h3 className="font-semibold text-[#4C3BCF] text-lg">{booth.boothname || 'Unnamed Booth'}</h3>
+                  <p className="text-[#312A68] text-sm mt-1">
+                    <strong>Vendor:</strong> {booth.vendorId?.companyname || 'N/A'}
+                  </p>
+                  <p className="text-[#312A68] text-sm"><strong>Booth Size:</strong> {booth.boothSize || 'N/A'}</p>
+                  
+                  {booth.people && booth.people.length > 0 && (
+                    <div className="mt-2">
+                      <p className="text-[#312A68] text-sm font-semibold">Team Members:</p>
+                      <ul className="text-[#312A68] text-sm ml-2 space-y-1">
+                        {booth.people.map((person, index) => (
+                          <li key={index}>• {typeof person === 'string' ? person : person.name}</li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+};
+
+// ===== MAIN COMPONENT =====
+
 const AllEvents = () => {
   const { category } = useParams();
   const { user } = useAuthUser();
@@ -233,82 +351,6 @@ const AllEvents = () => {
     }
   };
 
-  // ===== RENDER COMPONENTS =====
-
-  const BoothsModalContent = () => (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-2xl max-w-2xl w-full max-h-[80vh] overflow-y-auto">
-        <div className="p-6">
-          <div className="flex justify-between items-center mb-4">
-            <h2 className="text-2xl font-bold text-[#4C3BCF]">
-              Booths at {getEventDetails(selectedBazaar).name}
-            </h2>
-            <button onClick={closeBoothsModal} className="text-gray-500 hover:text-gray-700 text-2xl">×</button>
-          </div>
-          
-          {bazaarBoothsLoading ? (
-            <div className="flex flex-col items-center justify-center py-12">
-              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#736CED] mb-4"></div>
-              <p className="text-[#312A68]">Loading booths...</p>
-            </div>
-          ) : bazaarBooths.length === 0 ? (
-            <div className="text-center text-[#312A68] py-8">
-              <p>No booths available for this bazaar.</p>
-            </div>
-          ) : (
-            <div className="grid gap-4">
-              {bazaarBooths.map((booth) => (
-                <div key={booth._id} className="border border-gray-200 rounded-xl p-4 bg-gray-50">
-                  <h3 className="font-semibold text-[#4C3BCF] text-lg">{booth.boothname || 'Unnamed Booth'}</h3>
-                  <p className="text-[#312A68] text-sm mt-1">
-                    <strong>Vendor:</strong> {booth.vendorId?.companyname || 'N/A'} - {booth.vendorId?.email}
-                  </p>
-                  <p className="text-[#312A68] text-sm"><strong>Booth Size:</strong> {booth.boothSize || 'N/A'}</p>
-                  
-                  {booth.people && booth.people.length > 0 && (
-                    <div className="mt-2">
-                      <p className="text-[#312A68] text-sm font-semibold">Team Members:</p>
-                      <ul className="text-[#312A68] text-sm ml-2">
-                        {booth.people.map((person, index) => (
-                          <li key={index}>• {person.name} ({person.email})</li>
-                        ))}
-                      </ul>
-                    </div>
-                  )}
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
-      </div>
-    </div>
-  );
-
-  const RegistrationModalContent = () => (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-2xl max-w-md w-full p-6">
-        <div className="flex justify-between items-center mb-4">
-          <h2 className="text-xl font-bold text-[#4C3BCF]">
-            Register for {getEventDetails(registerModalEvent).name}
-          </h2>
-          <button onClick={closeRegisterModal} className="text-gray-500 hover:text-gray-700 text-2xl">×</button>
-        </div>
-        {regError && <p className="text-sm text-red-500 mb-2">{regError}</p>}
-        <div className="space-y-3">
-          <input value={regName} onChange={(e) => setRegName(e.target.value)} placeholder="Full name" className="w-full px-4 py-2 border rounded-md" />
-          <input value={regEmail} onChange={(e) => setRegEmail(e.target.value)} placeholder="Email" className="w-full px-4 py-2 border rounded-md" />
-          <input value={regGucid} onChange={(e) => setRegGucid(e.target.value)} placeholder="GUC ID" className="w-full px-4 py-2 border rounded-md" />
-        </div>
-        <div className="mt-6 flex justify-end gap-3">
-          <button onClick={closeRegisterModal} className="px-4 py-2 rounded-full border">Cancel</button>
-          <button onClick={submitRegistration} disabled={regLoading} className="px-4 py-2 rounded-full bg-[#2DD4BF] text-white hover:bg-[#14B8A6]">
-            {regLoading ? "Submitting..." : "Submit"}
-          </button>
-        </div>
-      </div>
-    </div>
-  );
-
   // ===== MAIN RENDER =====
   return (
     <div className="min-h-screen w-full overflow-hidden bg-[#D5CFE1] text-[#1F1B3B]">
@@ -381,8 +423,31 @@ const AllEvents = () => {
       {showDetailsModal && selectedEvent && (
         <EventDetailsModal event={selectedEvent} onClose={() => setShowDetailsModal(false)} />
       )}
-      {showBoothsModal && selectedBazaar && <BoothsModalContent />}
-      {showRegisterModal && registerModalEvent && <RegistrationModalContent />}
+      
+      {showBoothsModal && (
+        <BoothsModalContent
+          selectedBazaar={selectedBazaar}
+          bazaarBooths={bazaarBooths}
+          bazaarBoothsLoading={bazaarBoothsLoading}
+          onClose={closeBoothsModal}
+        />
+      )}
+      
+      {showRegisterModal && (
+        <RegistrationModal
+          registerModalEvent={registerModalEvent}
+          regName={regName}
+          setRegName={setRegName}
+          regEmail={regEmail}
+          setRegEmail={setRegEmail}
+          regGucid={regGucid}
+          setRegGucid={setRegGucid}
+          regError={regError}
+          regLoading={regLoading}
+          onClose={closeRegisterModal}
+          onSubmit={submitRegistration}
+        />
+      )}
     </div>
   );
 };
