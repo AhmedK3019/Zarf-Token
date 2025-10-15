@@ -3,13 +3,12 @@ import api from "../../services/api";
 
 export default function SignUpRequests() {
   const [requests, setRequests] = useState([]);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [message, setMessage] = useState(null);
   const [selectedRoles, setSelectedRoles] = useState({});
 
   const fetchRequests = async () => {
-    setLoading(true);
     setError(null);
     try {
       const res = await api.get("/registerRequests/getAllRegisterRequests");
@@ -63,8 +62,27 @@ export default function SignUpRequests() {
     }
   };
 
+  const ENABLE_POLLING = true;
+  const POLL_MS = 10000;
+
   useEffect(() => {
+    let mounted = true;
     fetchRequests();
+
+    if (ENABLE_POLLING) {
+      const id = setInterval(() => {
+        if (mounted) fetchRequests();
+      }, POLL_MS);
+      return () => {
+        mounted = false;
+        clearInterval(id);
+      };
+    }
+
+    // cleanup function when polling disabled
+    return () => {
+      mounted = false;
+    };
   }, []);
 
   return (

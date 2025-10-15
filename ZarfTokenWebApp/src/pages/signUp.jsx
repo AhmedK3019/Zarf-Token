@@ -254,6 +254,7 @@ export default function SignUp() {
 
   const handleSubmit = async (event) => {
     setErrors({});
+    setSuccessMessage("");
     event.preventDefault();
 
     const validationErrors = validateForm();
@@ -298,9 +299,18 @@ export default function SignUp() {
       // axios returns the parsed response in res.data
       const data = res?.data;
 
-      // treat any non-2xx status as error
+      // treat any non-2xx status as error — but prefer backend message
       if (res?.status >= 400) {
-        throw new Error(data?.message || "Signup failed");
+        const serverMsg =
+          data?.message ||
+          data?.error ||
+          JSON.stringify(data) ||
+          "Signup failed";
+        const fieldErrors = data?.errors || data?.fieldErrors || null;
+        const err = new Error(serverMsg);
+        err.status = res.status;
+        err.fieldErrors = fieldErrors;
+        throw err;
       }
 
       if (data?.user?.role === "Student") {
@@ -318,8 +328,33 @@ export default function SignUp() {
       if (logoInputRef.current) logoInputRef.current.value = "";
       if (taxInputRef.current) taxInputRef.current.value = "";
     } catch (err) {
-      console.error(err);
-      setErrors({ general: err.message });
+      console.error("Signup error:", err);
+
+      // axios error shape: err.response?.data
+      const resp = err?.response?.data ?? null;
+
+      // Prefer structured server messages when available
+      const serverMessage =
+        resp?.message || resp?.error || err?.message || "Signup failed";
+
+      // If backend returned field-level errors (common shapes), map them
+      // Examples supported: { errors: { field: msg } } or { fieldErrors: [{ field, message }] }
+      let nextErrors = {};
+      if (resp?.errors && typeof resp.errors === "object") {
+        // If errors is an object map
+        nextErrors = { ...resp.errors };
+      } else if (Array.isArray(resp?.fieldErrors)) {
+        resp.fieldErrors.forEach((fe) => {
+          if (fe.field) nextErrors[fe.field] = fe.message || serverMessage;
+        });
+      } else if (err?.fieldErrors && typeof err.fieldErrors === "object") {
+        nextErrors = { ...err.fieldErrors };
+      }
+
+      // Always include a general message under 'general'
+      if (!nextErrors.general) nextErrors.general = serverMessage;
+
+      setErrors(nextErrors);
       setSuccessMessage("");
     }
   };

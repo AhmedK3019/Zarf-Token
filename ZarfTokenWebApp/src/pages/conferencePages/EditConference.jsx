@@ -1,12 +1,10 @@
 import React, { useState, useEffect } from "react";
 import api from "../../services/api";
 import { useParams } from "react-router-dom";
-import { get } from "mongoose";
-import axios from "axios";
 
 const EditConference = () => {
-  const [id] = useParams();
-  const [setConferenceData, conferenceData] = useState({
+  const { id } = useParams();
+  const [conferenceData, setConferenceData] = useState({
     conferencename: "",
     startdate: "",
     starttime: "",
@@ -18,9 +16,9 @@ const EditConference = () => {
     conferencelink: "",
     requiredbudget: "",
     sourceoffunding: "",
-    extrarequiredresources: 0,
+    extrarequiredresources: "",
   });
-  const [errors, setErrors] = useState({});
+  const [errorvalues, setErrors] = useState({});
   const [successMessage, setSuccessMessage] = useState("");
   useEffect(() => {
     const getForm = async () => {
@@ -29,8 +27,8 @@ const EditConference = () => {
         const conference = result.data.conference;
         setConferenceData({
           ...conference,
-          startdate: bazaar.startdate?.slice(0, 10) || "",
-          enddate: bazaar.enddate?.slice(0, 10) || "",
+          startdate: conference.startdate?.slice(0, 10) || "",
+          enddate: conference.enddate?.slice(0, 10) || "",
         });
       } catch (error) {
         setErrors({ general: error.message });
@@ -38,8 +36,8 @@ const EditConference = () => {
         return;
       }
     };
+    getForm();
   }, [id]);
-  getForm();
 
   const validateForm = () => {
     let errorValues = {};
@@ -145,10 +143,12 @@ const EditConference = () => {
         setSuccessMessage("");
         return;
       }
-      await axios.put(`/conferences/updateConference/${id}`, body);
+      console.log(body);
+      await api.put(`/conferences/updateConference/${id}`, body);
       setErrors({});
       setSuccessMessage("Conference updated successfully !!");
     } catch (error) {
+      console.log(error);
       setErrors({ general: error.message });
       setSuccessMessage("");
       return;
@@ -186,12 +186,14 @@ const EditConference = () => {
               id="conferenceName"
               placeholder="ex: AI Research Summit"
               value={conferenceData.conferencename}
-              onChange={(e) =>
+              onChange={(e) => {
                 setConferenceData({
                   ...conferenceData,
                   conferencename: e.target.value,
-                })
-              }
+                });
+                setErrors({});
+                setSuccessMessage("");
+              }}
               className="w-full border border-purple-oklch(29.3% 0.136 325.661) rounded-xl px-4 py-2 focus:ring-2 focus:ring-purple-oklch(29.3% 0.136 325.661) focus:outline-none"
             />
             {errorvalues.conferencename && (
@@ -213,12 +215,14 @@ const EditConference = () => {
                 type="date"
                 id="startDate"
                 value={conferenceData.startdate}
-                onChange={(e) =>
+                onChange={(e) => {
                   setConferenceData({
                     ...conferenceData,
                     startdate: e.target.value,
-                  })
-                }
+                  });
+                  setSuccessMessage("");
+                  setErrors({});
+                }}
                 className="w-full border border-purple-oklch(29.3% 0.136 325.661) rounded-xl px-4 py-2 focus:ring-2 focus:ring-purple-oklch(29.3% 0.136 325.661) focus:outline-none"
               />
               {errorvalues.startdate && (
@@ -239,12 +243,14 @@ const EditConference = () => {
                 type="time"
                 id="startTime"
                 value={conferenceData.starttime}
-                onChange={(e) =>
+                onChange={(e) => {
                   setConferenceData({
                     ...conferenceData,
                     starttime: e.target.value,
-                  })
-                }
+                  });
+                  setSuccessMessage("");
+                  setErrors({});
+                }}
                 className="w-full border border-purple-oklch(29.3% 0.136 325.661) rounded-xl px-4 py-2 focus:ring-2 focus:ring-purple-oklch(29.3% 0.136 325.661) focus:outline-none"
               />
               {errorvalues.starttime && (
@@ -267,12 +273,14 @@ const EditConference = () => {
                 type="date"
                 id="endDate"
                 value={conferenceData.enddate}
-                onChange={(e) =>
+                onChange={(e) => {
                   setConferenceData({
                     ...conferenceData,
                     enddate: e.target.value,
-                  })
-                }
+                  });
+                  setErrors({});
+                  setSuccessMessage("");
+                }}
                 className="w-full border border-purple-oklch(29.3% 0.136 325.661) rounded-xl px-4 py-2 focus:ring-2 focus:ring-purple-oklch(29.3% 0.136 325.661) focus:outline-none"
               />
               {errorvalues.enddate && (
@@ -293,12 +301,14 @@ const EditConference = () => {
                 type="time"
                 id="endTime"
                 value={conferenceData.endtime}
-                onChange={(e) =>
+                onChange={(e) => {
                   setConferenceData({
                     ...conferenceData,
                     endtime: e.target.value,
-                  })
-                }
+                  });
+                  setErrors({});
+                  setSuccessMessage("");
+                }}
                 className="w-full border border-purple-oklch(29.3% 0.136 325.661) rounded-xl px-4 py-2 focus:ring-2 focus:ring-purple-oklch(29.3% 0.136 325.661) focus:outline-none"
               />
               {errorvalues.endtime && (
@@ -321,12 +331,14 @@ const EditConference = () => {
               id="location"
               placeholder="ex: GUC Berlin"
               value={conferenceData.location}
-              onChange={(e) =>
+              onChange={(e) => {
                 setConferenceData({
                   ...conferenceData,
                   location: e.target.value,
-                })
-              }
+                });
+                setErrors({});
+                setSuccessMessage("");
+              }}
               className="w-full border border-purple-oklch(29.3% 0.136 325.661) rounded-xl px-4 py-2 focus:ring-2 focus:ring-purple-oklch(29.3% 0.136 325.661) focus:outline-none"
             />
             {errorvalues.location && (
@@ -348,12 +360,14 @@ const EditConference = () => {
               id="shortDescription"
               placeholder="ex: Annual research gathering"
               value={conferenceData.shortdescription}
-              onChange={(e) =>
+              onChange={(e) => {
                 setConferenceData({
                   ...conferenceData,
                   shortdescription: e.target.value,
-                })
-              }
+                });
+                setErrors({});
+                setSuccessMessage("");
+              }}
               className="w-full border border-purple-oklch(29.3% 0.136 325.661) rounded-xl px-4 py-2 focus:ring-2 focus:ring-purple-oklch(29.3% 0.136 325.661) focus:outline-none"
             />
             {errorvalues.shortdescription && (
@@ -374,12 +388,14 @@ const EditConference = () => {
               id="fullAgenda"
               placeholder="ex: Opening session, keynote, workshops..."
               value={conferenceData.fullagenda}
-              onChange={(e) =>
+              onChange={(e) => {
                 setConferenceData({
                   ...conferenceData,
                   fullagenda: e.target.value,
-                })
-              }
+                });
+                setErrors({});
+                setSuccessMessage("");
+              }}
               rows="3"
               className="w-full border border-purple-oklch(29.3% 0.136 325.661)rounded-xl px-4 py-2 focus:ring-2 focus:ring-purple-oklch(29.3% 0.136 325.661) focus:outline-none"
             />
@@ -402,12 +418,14 @@ const EditConference = () => {
               id="conferenceLink"
               placeholder="ex: https://conference.example.com"
               value={conferenceData.conferencelink}
-              onChange={(e) =>
+              onChange={(e) => {
                 setConferenceData({
                   ...conferenceData,
                   conferencelink: e.target.value,
-                })
-              }
+                });
+                setErrors({});
+                setSuccessMessage("");
+              }}
               className="w-full border border-purple-oklch(29.3% 0.136 325.661) rounded-xl px-4 py-2 focus:ring-2 focus:ring-purple-oklch(29.3% 0.136 325.661) focus:outline-none"
             />
             {errorvalues.conferencelink && (
@@ -430,12 +448,14 @@ const EditConference = () => {
                 id="requiredbudget"
                 placeholder="ex: 10000"
                 value={conferenceData.requiredbudget}
-                onChange={(e) =>
+                onChange={(e) => {
                   setConferenceData({
                     ...conferenceData,
                     requiredbudget: e.target.value,
-                  })
-                }
+                  });
+                  setErrors({});
+                  setSuccessMessage("");
+                }}
                 className="w-full border border-purple-oklch(29.3% 0.136 325.661) rounded-xl px-4 py-2 focus:ring-2 focus:ring-purple-oklch(29.3% 0.136 325.661) focus:outline-none"
               />
               {errorvalues.requiredbudget && (
@@ -452,19 +472,24 @@ const EditConference = () => {
               >
                 Source of funding:
               </label>
-              <input
-                type="text"
+              <select
+                name="sourceoffunding"
                 id="sourceoffunding"
-                placeholder="ex: Research grant, sponsorship"
                 value={conferenceData.sourceoffunding}
-                onChange={(e) =>
+                onChange={(e) => {
                   setConferenceData({
                     ...conferenceData,
                     sourceoffunding: e.target.value,
-                  })
-                }
+                  });
+                  setSuccessMessage("");
+                  setErrors({});
+                }}
                 className="w-full border border-purple-oklch(29.3% 0.136 325.661) rounded-xl px-4 py-2 focus:ring-2 focus:ring-purple-oklch(29.3% 0.136 325.661) focus:outline-none"
-              />
+              >
+                <option value="">Select a funding source</option>
+                <option>External</option>
+                <option>GUC</option>
+              </select>
               {errorvalues.sourceoffunding && (
                 <p className="text-red-500 text-sm mt-1">
                   {errorvalues.sourceoffunding}
@@ -481,16 +506,18 @@ const EditConference = () => {
               Extra required resources:
             </label>
             <input
-              type="number"
+              type="text"
               id="extrarequiredresources"
               placeholder="ex: 3"
               value={conferenceData.extrarequiredresources}
-              onChange={(e) =>
+              onChange={(e) => {
                 setConferenceData({
                   ...conferenceData,
                   extrarequiredresources: e.target.value,
-                })
-              }
+                });
+                setErrors({});
+                setSuccessMessage("");
+              }}
               className="w-full border border-purple-oklch(29.3% 0.136 325.661) rounded-xl px-4 py-2 focus:ring-2 focus:ring-purple-oklch(29.3% 0.136 325.661) focus:outline-none"
             />
           </div>
@@ -507,4 +534,4 @@ const EditConference = () => {
   );
 };
 
-export default EditConference();
+export default EditConference;

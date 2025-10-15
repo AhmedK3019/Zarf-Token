@@ -30,7 +30,7 @@ const resolveRoleRoute = async (email, password) => {
       case "Student":
       case "Professor":
       case "TA":
-      case "staff":
+      case "Staff":
         return roleRoutes.user;
       default:
         return null;
@@ -79,6 +79,7 @@ const Hero = () => {
   };
 
   const handleSubmit = async (event) => {
+    setErrors({ email: "", password: "", role: "" });
     event.preventDefault();
 
     const nextErrors = { email: "", password: "", role: "" };

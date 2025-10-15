@@ -4,6 +4,7 @@ import { useParams } from "react-router-dom";
 
 const EditBazaar = () => {
   const { id } = useParams();
+  console.log(id);
   const [bazaarData, setBazaarData] = useState({
     bazaarname: "",
     startdate: "",
