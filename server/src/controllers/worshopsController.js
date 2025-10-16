@@ -119,8 +119,6 @@ const updateWorkshop = async (req, res, next) => {
   }
 };
 
-// (TODO : Update workshop status )
-
 const updateWorkshopStatus = async (req, res, next) => {
   try {
     const { id } = req.params;

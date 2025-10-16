@@ -10,7 +10,9 @@ import {
   Calendar,
   X,
   RefreshCw,
+  MapPin,
 } from "lucide-react";
+import App from "../../App";
 
 const COLORS = {
   primary: "#736CED",
@@ -40,7 +42,7 @@ const statusConfig = {
     badge:
       "bg-[#54C6EB] text-white border border-[#2f9ec8]/60 shadow-[0_2px_6px_rgba(84,198,235,0.35)]",
   },
-  Accepted: {
+  Approved: {
     color: COLORS.secondary,
     icon: CheckCircle,
     badge:
@@ -62,7 +64,7 @@ const statusConfig = {
 
 const statusButtonConfig = [
   {
-    status: "Accepted",
+    status: "Approved",
     label: "Accept & Publish",
     icon: CheckCircle,
     variant: "primary",
@@ -90,15 +92,15 @@ const BUTTON_VARIANTS = {
     "bg-[#C14953] text-white shadow-[0_6px_15px_rgba(193,73,83,0.35)] hover:-translate-y-0.5 hover:bg-[#a63e47] focus-visible:ring-[#C14953]/40",
 };
 
-function formatDateRange(dateISO, durationHours) {
+function formatDateRange(dateISO, durationDays) {
   const date = new Date(dateISO);
   const formattedDate = new Intl.DateTimeFormat("en-GB", {
     day: "2-digit",
     month: "short",
     year: "numeric",
   }).format(date);
-  const durationLabel = `${durationHours} ${
-    durationHours === 1 ? "hour" : "hours"
+  const durationLabel = `${durationDays} ${
+    durationDays === 1 ? "day" : "days"
   }`;
   return `${formattedDate} • ${durationLabel}`;
 }
@@ -122,62 +124,32 @@ function normalizeWorkshop(doc) {
   const startDateValue = doc.startdate ? new Date(doc.startdate) : null;
   const endDateValue = doc.enddate ? new Date(doc.enddate) : null;
 
-  let durationHours = 1;
-  if (doc.startdate && doc.starttime && doc.enddate && doc.endtime) {
-    const start = new Date(`${doc.startdate}T${doc.starttime}`);
-    const end = new Date(`${doc.enddate}T${doc.endtime}`);
-    if (
-      !Number.isNaN(start.getTime()) &&
-      !Number.isNaN(end.getTime()) &&
-      end > start
-    ) {
-      durationHours = Math.max(
-        1,
-        Math.round((end.getTime() - start.getTime()) / (1000 * 60 * 60))
-      );
-    }
-  } else if (startDateValue && endDateValue && endDateValue > startDateValue) {
-    durationHours = Math.max(
-      1,
-      Math.round((endDateValue - startDateValue) / (1000 * 60 * 60))
-    );
-  }
-
-  const agendaText = doc.fullagenda || "";
-  const objectives =
-    Array.isArray(doc.objectives) && doc.objectives.length
-      ? doc.objectives
-      : agendaText
-          .split(/\r?\n+/)
-          .map((line) => line.trim())
-          .filter(Boolean)
-          .slice(0, 5);
-
   return {
     id: doc._id,
     _id: doc._id,
-    professorName: doc.facultyresponsibilty || "Events Office",
-    department: doc.location || "Location TBA",
+    professorName:
+      doc.createdBy.firstname + " " + doc.createdBy.lastname || "Events Office",
+    department: doc.facultyresponsibilty || "GUC",
     title: doc.workshopname || "Untitled Workshop",
     description: doc.shortdescription || "No short description provided.",
-    category:
-      doc.type && doc.type !== "workshop"
-        ? doc.type.charAt(0).toUpperCase() + doc.type.slice(1)
-        : "Workshop",
+    category: doc.shortdescription || "Uncategorized",
     status: doc.status || "Pending",
+    location: doc.location || "TBD",
     dateISO: startDateValue ? startDateValue.toISOString() : doc.createdAt,
-    durationHours,
+    durationDays:
+      endDateValue && startDateValue
+        ? Math.max(
+            1,
+            Math.round((endDateValue - startDateValue) / (1000 * 60 * 60 * 24))
+          )
+        : 0,
     submittedAt: doc.createdAt || doc.startdate || new Date().toISOString(),
-    overview: agendaText || doc.shortdescription || "No overview provided.",
-    objectives: objectives.length
-      ? objectives
-      : ["No detailed objectives provided."],
-    audience: doc.audience || "General audience",
-    attachments: [],
+    overview: doc.shortdescription || "No overview provided.",
+    professors: doc.professorsparticipating || [],
     lastActionComment:
       Array.isArray(doc.comments) && doc.comments.length
         ? doc.comments[doc.comments.length - 1]?.message
-        : "",
+        : doc.comments || "",
     raw: doc,
     createdBy: doc.createdBy,
   };
@@ -262,7 +234,8 @@ function WorkshopCard({ workshop, onView }) {
         <div className="relative flex items-start justify-between gap-4">
           <div className="flex-1">
             <p className="text-xs uppercase tracking-wider text-white/70 font-semibold">
-              {workshop.createdBy.firstname} {workshop.createdBy.lastname}
+              {new Date(workshop.raw.startdate).toLocaleDateString()} -{" "}
+              {new Date(workshop.raw.enddate).toLocaleDateString()}
             </p>
             <h3 className="text-lg font-bold mt-1">{workshop.professorName}</h3>
             <p className="text-sm text-white/80 mt-0.5">
@@ -284,7 +257,7 @@ function WorkshopCard({ workshop, onView }) {
               categoryChipClass
             )}
           >
-            {workshop.category}
+            {workshop.location}
           </span>
         </div>
 
@@ -296,7 +269,7 @@ function WorkshopCard({ workshop, onView }) {
           <div className="flex items-center gap-2 text-sm font-medium text-gray-600">
             <Calendar className="w-4 h-4 text-[#736CED]" />
             <span>
-              {formatDateRange(workshop.dateISO, workshop.durationHours)}
+              {formatDateRange(workshop.dateISO, workshop.durationDays)}
             </span>
           </div>
           <button
@@ -387,8 +360,8 @@ function WorkshopModal({
       setIsSubmittingRequest(true);
       setRequestError("");
 
-      await api.post(`/workshops/${workshopId}/request-edits`, {
-        message: requestMessage.trim(),
+      await api.patch(`/workshops/requestEdits/${workshopId}`, {
+        comments: requestMessage.trim(),
       });
 
       setRequestMessage("");
@@ -489,23 +462,27 @@ function WorkshopModal({
               <div className="flex items-center gap-2">
                 <CheckCircle className="w-5 h-5 text-[#736CED]" />
                 <h3 className="text-lg font-bold text-[#736CED]">
-                  Learning Objectives
+                  Full Agenda
                 </h3>
               </div>
-              <ul className="space-y-2 pl-7">
-                {workshop.objectives.map((objective, idx) => (
-                  <li
-                    key={idx}
-                    className="flex items-start gap-3 text-sm text-gray-700"
-                  >
-                    <span
-                      className="mt-1.5 h-2 w-2 rounded-full flex-shrink-0"
-                      style={{ backgroundColor: COLORS.secondary }}
-                    ></span>
-                    <span className="leading-relaxed">{objective}</span>
-                  </li>
-                ))}
-              </ul>
+              <p className="text-sm leading-relaxed text-gray-700 pl-7 whitespace-pre-line">
+                {workshop.raw.fullagenda ||
+                  "No detailed agenda provided by the professor."}
+              </p>
+            </section>
+
+            {/* Location Section */}
+            <section
+              className="space-y-3 animate-fade-in"
+              style={{ animationDelay: "250ms" }}
+            >
+              <div className="flex items-center gap-2">
+                <MapPin className="w-5 h-5 text-[#736CED]" />
+                <h3 className="text-lg font-bold text-[#736CED]">Location</h3>
+              </div>
+              <p className="text-sm leading-relaxed text-gray-700 pl-7">
+                {workshop.location || "No location provided by the professor."}
+              </p>
             </section>
 
             {/* Info Grid */}
@@ -517,11 +494,15 @@ function WorkshopModal({
                 <div className="flex items-center gap-2 mb-2">
                   <Users className="w-4 h-4 text-[#736CED]" />
                   <p className="font-bold text-[#736CED] text-sm">
-                    Target Audience
+                    Professors Participating
                   </p>
                 </div>
                 <p className="text-sm text-gray-700 leading-relaxed">
-                  {workshop.audience}
+                  {workshop.professors.map((professor) => (
+                    <span key={professor._id}>
+                      {professor.firstname} {professor.lastname}
+                    </span>
+                  ))}
                 </p>
               </div>
               <div className="rounded-2xl border border-[#736CED]/20 bg-gradient-to-br from-[#6DD3CE]/5 to-[#736CED]/5 backdrop-blur-sm px-6 py-4">
@@ -532,41 +513,10 @@ function WorkshopModal({
                   </p>
                 </div>
                 <p className="text-sm text-gray-700 leading-relaxed">
-                  {formatDateRange(workshop.dateISO, workshop.durationHours)}
+                  {formatDateRange(workshop.dateISO, workshop.durationDays)}
                 </p>
               </div>
             </div>
-
-            {/* Attachments */}
-            {workshop.attachments?.length > 0 && (
-              <section
-                className="space-y-3 animate-fade-in"
-                style={{ animationDelay: "400ms" }}
-              >
-                <div className="flex items-center gap-2">
-                  <FileText className="w-5 h-5 text-[#736CED]" />
-                  <h3 className="text-lg font-bold text-[#736CED]">
-                    Attached Materials
-                  </h3>
-                </div>
-                <div className="grid gap-3 sm:grid-cols-2">
-                  {workshop.attachments.map((attachment) => (
-                    <a
-                      key={attachment.id}
-                      href={attachment.url}
-                      className="flex flex-col gap-2 rounded-2xl border border-[#736CED]/20 bg-white/80 backdrop-blur-sm px-5 py-4 transition-all duration-300 hover:scale-105 hover:shadow-lg hover:border-[#736CED]/40 focus:outline-none focus:ring-2 focus:ring-[#736CED]/40"
-                    >
-                      <span className="font-semibold text-[#736CED]">
-                        {attachment.label}
-                      </span>
-                      <span className="text-xs text-gray-500">
-                        {attachment.type}
-                      </span>
-                    </a>
-                  ))}
-                </div>
-              </section>
-            )}
 
             {/* Status Update Section */}
             <section
@@ -579,40 +529,48 @@ function WorkshopModal({
                   Update Status
                 </h3>
               </div>
-
-              <div className="grid gap-3 sm:grid-cols-2">
-                {statusButtonConfig.map((config) => {
-                  const Icon = config.icon;
-                  return (
-                    <button
-                      key={config.status}
-                      type="button"
-                      onClick={() => onStatusUpdate(config.status)}
-                      className={classNames(
-                        BUTTON_BASE,
-                        BUTTON_VARIANTS[config.variant] ??
-                          BUTTON_VARIANTS.primary
-                      )}
-                    >
-                      <Icon className="w-4 h-4" />
-                      {config.label}
-                    </button>
-                  );
-                })}
-              </div>
-
-              <button
-                type="button"
-                onClick={handleToggleRequestForm}
-                className={classNames(
-                  BUTTON_BASE,
-                  BUTTON_VARIANTS.info,
-                  "w-full sm:w-auto"
-                )}
-              >
-                <Flag className="w-4 h-4" />
-                {requestButtonText}
-              </button>
+              {workshop.status === "Pending" && (
+                <div className="grid gap-3 sm:grid-cols-2">
+                  {statusButtonConfig.map((config) => {
+                    const Icon = config.icon;
+                    return (
+                      <button
+                        key={config.status}
+                        type="button"
+                        onClick={() => onStatusUpdate(config.status)}
+                        className={classNames(
+                          BUTTON_BASE,
+                          BUTTON_VARIANTS[config.variant] ??
+                            BUTTON_VARIANTS.primary
+                        )}
+                      >
+                        <Icon className="w-4 h-4" />
+                        {config.label}
+                      </button>
+                    );
+                  })}
+                </div>
+              )}
+              {workshop.status === "Pending" && (
+                <button
+                  type="button"
+                  onClick={handleToggleRequestForm}
+                  className={classNames(
+                    BUTTON_BASE,
+                    BUTTON_VARIANTS.info,
+                    "w-full sm:w-auto"
+                  )}
+                >
+                  <Flag className="w-4 h-4" />
+                  {requestButtonText}
+                </button>
+              )}
+              {workshop.status !== "Pending" && (
+                <p className="text-sm text-gray-700">
+                  This workshop has been{" "}
+                  <span className="font-semibold">{workshop.status}</span>.
+                </p>
+              )}
 
               {showRequestForm && (
                 <div className="rounded-2xl border border-[#54C6EB]/30 bg-gradient-to-br from-white via-white to-[#54C6EB]/10 px-6 py-5 shadow-[0_4px_12px_rgba(84,198,235,0.15)] space-y-4">
@@ -813,23 +771,14 @@ export default function WorkshopRequests() {
   };
 
   const handleStatusUpdate = async (nextStatus) => {
+    console.log("Updating status to:", selectedWorkshop, nextStatus);
     if (!selectedWorkshop) return;
 
-    if (requiresComment.has(nextStatus) && !modalComment.trim()) {
-      setCommentError("Please add a comment before completing this action.");
-      return;
-    }
-
     try {
-      // Backend integration: PATCH request
-      // await fetch(`/api/workshops/${selectedWorkshop.id}`, {
-      //   method: "PATCH",
-      //   headers: { "Content-Type": "application/json" },
-      //   body: JSON.stringify({
-      //     status: nextStatus,
-      //     comment: modalComment.trim(),
-      //   }),
-      // });
+      await api.patch(
+        `/workshops/updateWorkshopStatus/${selectedWorkshop.id}`,
+        { status: nextStatus }
+      );
 
       // Optimistic update
       setWorkshops((prev) =>
@@ -846,7 +795,7 @@ export default function WorkshopRequests() {
       );
 
       const messages = {
-        Accepted: "Workshop accepted and published successfully!",
+        Approved: "Workshop accepted and published successfully!",
         Flagged: "Workshop flagged for review with comments.",
         Rejected: "Workshop rejected with feedback.",
         Pending: "Workshop status set to pending.",
@@ -928,7 +877,7 @@ export default function WorkshopRequests() {
               onChange={(e) => setStatusFilter(e.target.value)}
               className="w-full rounded-xl border-2 border-[#736CED]/20 bg-white/80 backdrop-blur-sm px-4 py-3 text-sm font-semibold text-[#736CED] shadow-sm transition-all focus:border-[#736CED]/50 focus:outline-none focus:ring-2 focus:ring-[#736CED]/30 hover:border-[#736CED]/40"
             >
-              {["All", "Pending", "Accepted", "Rejected", "Flagged"].map(
+              {["All", "Pending", "Approved", "Rejected", "Flagged"].map(
                 (status) => (
                   <option key={status} value={status}>
                     {status}
