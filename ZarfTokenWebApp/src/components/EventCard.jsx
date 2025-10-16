@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from "react";
-import { getEventDetails, formatDate } from "../pages/eventUtils";
+import { getEventDetails, formatSimpleDate } from "../pages/eventUtils";
 import {
   Clock,
   MapPin,
@@ -35,7 +35,6 @@ const EventCard = ({
   useEffect(() => {
     if (descriptionRef.current && event.description) {
       const element = descriptionRef.current;
-      // Check if the content is taller than one line
       setHasOverflow(element.scrollHeight > element.clientHeight);
     }
   }, [event.description]);
@@ -52,19 +51,15 @@ const EventCard = ({
   const canRegister =
     userIsEligible &&
     (event.type === "trip" || event.type === "workshop") &&
-    // Use the original data to check for both field name spellings
-    (rawEvent.registrationdeadline || rawEvent.registerationdeadline) &&
-    new Date() <
-      new Date(
-        rawEvent.registrationdeadline || rawEvent.registerationdeadline
-      ) &&
-    !isRegistered && // Use the variable here
+    event.registrationDeadline &&
+    new Date() < new Date(event.registrationDeadline) &&
+    !isRegistered &&
     (event.capacity ? event.attendees.length < event.capacity : true);
 
   const isBazaar = event.type === "bazaar";
-  const isPlatformBooth =
-    event.type === "booth" && !event.original.isBazarBooth;
+  const isPlatformBooth = event.type === "booth" && !event.original.isBazarBooth;
   const isBazaarBooth = event.type === "booth" && event.original.isBazarBooth;
+  const isWorkshop = event.type === "workshop";
 
   const toggleDescription = () => {
     if (hasOverflow) {
@@ -83,111 +78,64 @@ const EventCard = ({
         <h3 className="text-xl font-bold text-[#4C3BCF] mb-3">{event.name}</h3>
 
         <div className="space-y-2 text-sm text-[#312A68]">
-          {/* Your existing event details... */}
           {isBazaarBooth && event.original.bazarId && (
             <p className="flex items-center gap-2">
-              <span>
-                <Store
-                  size={16}
-                  className="mt-1 text-[#736CED] flex-shrink-0"
-                />
-              </span>
+              <Store size={16} className="mt-1 text-[#736CED] flex-shrink-0" />
               Part of: {event.original.bazarId.bazaarname || "Bazaar"}
             </p>
           )}
 
           {isPlatformBooth && event.vendor && (
             <p className="flex items-center gap-2">
-              <span>
-                <Building
-                  size={16}
-                  className="mt-1 text-[#736CED] flex-shrink-0"
-                />
-              </span>
+              <Building size={16} className="mt-1 text-[#736CED] flex-shrink-0" />
               Vendor: {event.vendor}
             </p>
           )}
-          {event.duration && !isBazaarBooth && (
-            <p className="flex items-center gap-2">
-              <span>
-                <Calendar
-                  size={16}
-                  className="mt-1 text-[#736CED] flex-shrink-0"
-                />
-              </span>
-              {event.duration} week(s)
-            </p>
-          )}
+          
           {event.location && !isBazaarBooth && (
             <p className="flex items-center gap-2">
-              <span>
-                <MapPin
-                  size={16}
-                  className="mt-1 text-[#736CED] flex-shrink-0"
-                />
-              </span>
+              <MapPin size={16} className="mt-1 text-[#736CED] flex-shrink-0" />
               {event.location}
+            </p>
+          )}
+
+          {event.duration && event.type === "booth" && (
+            <p className="flex items-center gap-2">
+              <Calendar size={16} className="mt-1 text-[#736CED] flex-shrink-0" />
+              {event.duration} week{event.duration > 1 ? "s" : ""}
             </p>
           )}
 
           {isBazaarBooth && event.location && (
             <p className="flex items-center gap-2">
-              <span>
-                <MapPin
-                  size={16}
-                  className="mt-1 text-[#736CED] flex-shrink-0"
-                />
-              </span>
+              <MapPin size={16} className="mt-1 text-[#736CED] flex-shrink-0" />
               Booth Location: {event.location}
             </p>
           )}
 
           {event.price > 0 && (
             <p className="flex items-center gap-2">
-              <span>
-                <DollarSign
-                  size={16}
-                  className="mt-1 text-[#736CED] flex-shrink-0"
-                />
-              </span>
+              <DollarSign size={16} className="mt-1 text-[#736CED] flex-shrink-0" />
               Price: {event.price} EGP
             </p>
           )}
 
+          {/* Simplified Date Display */}
           {event.startDate && (
-            <p className="flex items-center gap-2">
+            <div className="flex items-center gap-2">
+              <Calendar size={16} className="mt-1 text-[#736CED] flex-shrink-0" />
               <span>
-                <Clock
-                  size={16}
-                  className="mt-1 text-[#736CED] flex-shrink-0"
-                />
+                Starts {formatSimpleDate(event.startDate)}
+                {event.duration && ` • ${event.duration} ${event.type === 'workshop' ? 'day' : 'week'}${event.duration === 1 ? '' : 's'}`}
               </span>
-              {formatDate(event.startDate)}
-            </p>
-          )}
-
-          {event.endDate && (
-            <p className="flex items-center gap-2">
-              <span>
-                <Clock
-                  size={16}
-                  className="mt-1 text-[#736CED] flex-shrink-0"
-                />
-              </span>
-              Ends: {formatDate(event.endDate)}
-            </p>
+            </div>
           )}
 
           {event.registrationDeadline && (
-            <p className="flex items-center gap-2 text-[#E53E3E]">
-              <span>
-                <ClockAlert
-                  size={16}
-                  className="mt-1 text-[#736CED] flex-shrink-0"
-                />
-              </span>
-              Register by: {formatDate(new Date(event.registrationDeadline))}
-            </p>
+            <div className="flex items-center gap-2 text-[#E53E3E]">
+              <ClockAlert size={16} className="mt-1 text-[#E53E3E] flex-shrink-0" />
+              <span>Register by: {formatSimpleDate(new Date(event.registrationDeadline))}</span>
+            </div>
           )}
         </div>
 
@@ -206,7 +154,6 @@ const EventCard = ({
               {event.description}
             </div>
 
-            {/* Only show Read more/Show less if description overflows */}
             {hasOverflow && (
               <button
                 onClick={toggleDescription}
@@ -253,7 +200,6 @@ const EventCard = ({
             </button>
           )}
 
-          {/* Show Registered button if already registered */}
           {isRegistered && (
             <button
               disabled
@@ -263,7 +209,6 @@ const EventCard = ({
             </button>
           )}
 
-          {/* Show Register button if eligible and not registered */}
           {canRegister && (
             <button
               onClick={() => onRegister(event.original)}
@@ -294,7 +239,7 @@ const EventCard = ({
             </button>
           )}
 
-          {(isPlatformBooth || isBazaarBooth) && (
+          {(isPlatformBooth || isBazaarBooth || isWorkshop) && (
             <button
               onClick={() => onViewDetails(event.original)}
               className="text-xs font-semibold text-[#736CED] hover:text-[#4C3BCF] transition-colors"
