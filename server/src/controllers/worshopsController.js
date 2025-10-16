@@ -7,6 +7,7 @@ const workshopSchema = Joi.object({
   starttime: Joi.string().required(),
   enddate: Joi.date().required(),
   endtime: Joi.string().required(),
+  registrationDeadline: Joi.date().required(),
   location: Joi.string().valid("GUC Cairo", "GUC Berlin").required(),
   shortdescription: Joi.string().required(),
   fullagenda: Joi.string().required(),
@@ -43,7 +44,32 @@ const createWorkshop = async (req, res, next) => {
   try {
     const userId = req.userId;
     if (!userId) return res.status(401).json({ message: "No token provided" });
-    const { value, error } = workshopSchema.validate(req.body);
+    // normalize common misspellings from older clients
+    console.log(req.body);
+    const normalizedBody = { ...req.body };
+    // accept registerationDeadline or registerationdeadline (misspelled) and map to registrationDeadline
+    if (
+      (Object.prototype.hasOwnProperty.call(
+        normalizedBody,
+        "registerationDeadline"
+      ) ||
+        Object.prototype.hasOwnProperty.call(
+          normalizedBody,
+          "registerationdeadline"
+        )) &&
+      !Object.prototype.hasOwnProperty.call(
+        normalizedBody,
+        "registrationDeadline"
+      )
+    ) {
+      normalizedBody.registrationDeadline =
+        normalizedBody.registerationDeadline ||
+        normalizedBody.registerationdeadline;
+      delete normalizedBody.registerationDeadline;
+      delete normalizedBody.registerationdeadline;
+    }
+
+    const { value, error } = workshopSchema.validate(normalizedBody);
     if (error) {
       return res.status(400).json({ message: error.details[0].message });
     }
@@ -53,6 +79,7 @@ const createWorkshop = async (req, res, next) => {
       starttime: value.starttime,
       enddate: value.enddate,
       endtime: value.endtime,
+      registrationDeadline: value.registrationDeadline,
       location: value.location,
       shortdescription: value.shortdescription,
       fullagenda: value.fullagenda,
@@ -101,7 +128,29 @@ const getWorkshop = async (req, res, next) => {
 const updateWorkshop = async (req, res, next) => {
   try {
     const { id } = req.params;
-    const { value, error } = workshopSchema.validate(req.body);
+    // normalize payload like in createWorkshop
+    const normalizedBody = { ...req.body };
+    if (
+      (Object.prototype.hasOwnProperty.call(
+        normalizedBody,
+        "registerationDeadline"
+      ) ||
+        Object.prototype.hasOwnProperty.call(
+          normalizedBody,
+          "registerationdeadline"
+        )) &&
+      !Object.prototype.hasOwnProperty.call(
+        normalizedBody,
+        "registrationDeadline"
+      )
+    ) {
+      normalizedBody.registrationDeadline =
+        normalizedBody.registerationDeadline ||
+        normalizedBody.registerationdeadline;
+      delete normalizedBody.registerationDeadline;
+      delete normalizedBody.registerationdeadline;
+    }
+    const { value, error } = workshopSchema.validate(normalizedBody);
     if (error) {
       return res.status(400).json({ message: error.details[0].message });
     }

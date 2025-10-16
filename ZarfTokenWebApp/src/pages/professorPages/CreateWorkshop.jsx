@@ -12,6 +12,7 @@ export default function CreateWorkshop() {
     starttime: "",
     enddate: "",
     endtime: "",
+    registrationDeadline: "",
     location: "GUC Cairo",
     shortdescription: "",
     fullagenda: "",
@@ -67,6 +68,14 @@ export default function CreateWorkshop() {
 
   const handleChange = (e) => {
     const { name, value } = e.target;
+    // start date should not be after end date
+    if (name === "startdate" && form.enddate && value > form.enddate) {
+      setForm((prev) => ({ ...prev, enddate: value }));
+    }
+    // end date should not be before start date
+    if (name === "enddate" && form.startdate && value < form.startdate) {
+      setForm((prev) => ({ ...prev, startdate: value }));
+    }
     setForm((prev) => ({ ...prev, [name]: value }));
   };
 
@@ -187,8 +196,20 @@ export default function CreateWorkshop() {
                     required
                   />
                 </div>
+                <div>
+                  <label className="block text-sm font-medium">
+                    Registration Deadline
+                  </label>
+                  <input
+                    type="date"
+                    name="registrationDeadline"
+                    value={form.registrationDeadline}
+                    onChange={handleChange}
+                    className="mt-1 block w-full rounded-md border border-[#736CED] px-3 py-2 bg-white/70"
+                    required
+                  />
+                </div>
               </div>
-
               <div>
                 <label className="block text-sm font-medium">Location</label>
                 <select

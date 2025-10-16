@@ -36,6 +36,7 @@ const workshopSchema = new mongoose.Schema({
     enum: ["Pending", "Approved", "Rejected", "Cancelled", "Completed"],
     default: "Pending",
   },
+  registrationDeadline: { type: Date },
   createdBy: { type: mongoose.Schema.ObjectId, ref: "User", required: true },
   createdAt: { type: Date, default: Date.now },
 });
