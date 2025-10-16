@@ -1,6 +1,82 @@
 import React, { useEffect, useState, useCallback } from "react";
 import api from "../../services/api";
 import { useAuthUser } from "../../hooks/auth";
+import {
+  CheckCircle,
+  XCircle,
+  Flag,
+  Clock,
+  FileText,
+  Users,
+  Calendar,
+  X,
+  RefreshCw,
+  MapPin,
+  HandCoins,
+} from "lucide-react";
+
+const COLORS = {
+  primary: "#736CED",
+  secondary: "#6DD3CE",
+  accent: "#C14953",
+  muted: "#D5CFE1",
+  info: "#54C6EB",
+};
+
+const statusConfig = {
+  Pending: {
+    color: COLORS.info,
+    icon: Clock,
+    badge:
+      "bg-[#54C6EB] text-white border border-[#2f9ec8]/60 shadow-[0_2px_6px_rgba(84,198,235,0.35)]",
+  },
+  Approved: {
+    color: COLORS.secondary,
+    icon: CheckCircle,
+    badge:
+      "bg-[#6DD3CE] text-slate-900 border border-[#36a69f]/50 shadow-[0_2px_6px_rgba(109,211,206,0.35)]",
+  },
+  Rejected: {
+    color: COLORS.accent,
+    icon: XCircle,
+    badge:
+      "bg-[#C14953] text-white border border-[#a63e47]/60 shadow-[0_2px_6px_rgba(193,73,83,0.35)]",
+  },
+};
+
+const BUTTON_BASE =
+  "inline-flex items-center justify-center gap-2 rounded-full px-6 py-3.5 text-base font-semibold transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2";
+
+const BUTTON_VARIANTS = {
+  primary:
+    "bg-gradient-to-r from-[#736CED] to-[#6DD3CE] text-white shadow-[0_6px_15px_rgba(115,108,237,0.35)] hover:-translate-y-0.5 hover:shadow-[0_10px_24px_rgba(115,108,237,0.4)] hover:brightness-110 focus-visible:ring-[#736CED]/40",
+  secondary:
+    "bg-white text-[#736CED] border-2 border-[#736CED]/40 shadow-sm hover:-translate-y-0.5 hover:bg-[#736CED]/10 hover:text-[#4f4ac1] focus-visible:ring-[#736CED]/30",
+  info: "bg-white text-[#54C6EB] border-2 border-[#54C6EB]/40 shadow-sm hover:-translate-y-0.5 hover:bg-[#54C6EB]/10 hover:text-[#2a8db0] focus-visible:ring-[#54C6EB]/30",
+  danger:
+    "bg-[#C14953] text-white shadow-[0_6px_15px_rgba(193,73,83,0.35)] hover:-translate-y-0.5 hover:bg-[#a63e47] focus-visible:ring-[#C14953]/40",
+};
+
+function classNames(...values) {
+  return values.filter(Boolean).join(" ");
+}
+
+function StatusBadge({ status }) {
+  const config = statusConfig[status] ?? statusConfig.Pending;
+  const Icon = config.icon;
+
+  return (
+    <span
+      className={classNames(
+        "inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-bold uppercase tracking-wide shadow-[0_2px_6px_rgba(0,0,0,0.15)]",
+        config.badge
+      )}
+    >
+      {Icon ? <Icon className="w-3.5 h-3.5" /> : null}
+      {status}
+    </span>
+  );
+}
 
 export default function MyWorkshops() {
   const { user } = useAuthUser();
@@ -11,6 +87,33 @@ export default function MyWorkshops() {
   const [error, setError] = useState("");
   const [professors, setProfessors] = useState([]);
   const [profSearch, setProfSearch] = useState("");
+  // Track accept/reject decision per workshop to update the inline message
+  const [editDecisionById, setEditDecisionById] = useState({});
+
+  const handleAcceptEdits = async (_evt) => {
+    try {
+      const res = await api.post(`/workshops/acceptEdits/${editing}`);
+      setWorkshops((prev) =>
+        prev.map((w) => (w._id === editing ? { ...w, ...res.data } : w))
+      );
+      setEditDecisionById((prev) => ({ ...prev, [editing]: "accepted" }));
+    } catch (error) {
+      setError("Failed to accept edits");
+    }
+  };
+
+  const handleRejectEdits = async (_evt) => {
+    try {
+      const res = await api.post(`/workshops/rejectEdits/${editing}`);
+      // Keep the card visible and reflect rejection locally
+      setWorkshops((prev) =>
+        prev.map((w) => (w._id === editing ? { ...w, ...res.data } : w))
+      );
+      setEditDecisionById((prev) => ({ ...prev, [editing]: "rejected" }));
+    } catch (error) {
+      setError("Failed to reject edits");
+    }
+  };
 
   const COLORS = {
     primary: "#736CED",
@@ -257,15 +360,15 @@ export default function MyWorkshops() {
                               {w.location}
                             </p>
                           </div>
-                          <span className="inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-bold uppercase tracking-wide bg-white/20 text-white border border-white/30">
-                            {w.status || "Pending"}
-                          </span>
+                          <div>
+                            <StatusBadge status={w.status} />
+                          </div>
                         </div>
                       </div>
 
                       <div className="px-6 py-6 space-y-4">
                         <div className="flex items-start justify-between gap-3">
-                          <h4 className="text-xl font-bold text-slate-800">
+                          <h4 className="text-xl font-bold text-[#736CED] flex-1 leading-tight">
                             {w.workshopname}
                           </h4>
                           <div className="flex gap-2">
@@ -318,16 +421,16 @@ export default function MyWorkshops() {
                             )}
                           </div>
                         </div>
-
-                        <div>
-                          <span className={categoryChipStyles.default}>
-                            Workshop
-                          </span>
-                        </div>
-
                         <p className="text-sm leading-relaxed text-gray-700">
                           {w.shortdescription}
                         </p>
+
+                        {w.fundingsource === "GUC" ? (
+                          <p>Funded by GUC</p>
+                        ) : (
+                          <p>External Funding</p>
+                        )}
+
                         <div className="text-sm text-gray-600">
                           {w.startdate && w.enddate ? (
                             <span>
@@ -425,6 +528,24 @@ export default function MyWorkshops() {
                               </div>
                               <div>
                                 <label className="text-xs text-[#312A68]">
+                                  Registration Deadline
+                                </label>
+                                <input
+                                  type="date"
+                                  name="registrationDeadline"
+                                  value={
+                                    form.registrationDeadline
+                                      ? String(
+                                          form.registrationDeadline
+                                        ).substring(0, 10)
+                                      : ""
+                                  }
+                                  onChange={handleChange}
+                                  className="w-full border rounded px-3 py-2"
+                                />
+                              </div>
+                              <div>
+                                <label className="text-xs text-[#312A68]">
                                   Faculty Responsible
                                 </label>
                                 <select
@@ -455,6 +576,19 @@ export default function MyWorkshops() {
                                   <option>GUC</option>
                                   <option>External</option>
                                 </select>
+                              </div>
+                              <div>
+                                <label className="text-xs text-[#312A68]">
+                                  Required Budget (EGP)
+                                </label>
+                                <input
+                                  type="number"
+                                  name="requiredFunding"
+                                  value={form.requiredFunding ?? 0}
+                                  onChange={handleChange}
+                                  className="w-full border rounded px-3 py-2"
+                                  min={0}
+                                />
                               </div>
                               <div>
                                 <label className="text-xs text-[#312A68]">
@@ -595,51 +729,110 @@ export default function MyWorkshops() {
                                 Select at least one professor.
                               </p>
                             </div>
+                            {w?.currentMessage?.awaitingResponseFrom ===
+                              "Professor" && (
+                              <div>
+                                {editDecisionById[w._id] ? (
+                                  <div className="rounded-md border border-slate-200 bg-white/70 px-3 py-2 text-sm font-semibold text-slate-700">
+                                    {editDecisionById[w._id] === "accepted"
+                                      ? "Edits Accepted"
+                                      : "Edits Rejected"}
+                                  </div>
+                                ) : (
+                                  <>
+                                    <div>
+                                      <label className="text-xs text-[#312A68]">
+                                        Events office has requested the
+                                        following changes:
+                                      </label>
+                                      <textarea
+                                        value={w.comments || ""}
+                                        readOnly
+                                        className="w-full border rounded px-3 py-2 bg-gray-100"
+                                        rows={3}
+                                      />
+                                    </div>
+                                    <div className="flex justify-end mt-4">
+                                      <button
+                                        className={classNames(
+                                          BUTTON_BASE,
+                                          BUTTON_VARIANTS.primary,
+                                          "w-full sm:w-auto mr-3"
+                                        )}
+                                        onClick={handleAcceptEdits}
+                                      >
+                                        Accept Edits
+                                      </button>
+                                      <button
+                                        className={classNames(
+                                          BUTTON_BASE,
+                                          BUTTON_VARIANTS.danger,
+                                          "w-full sm:w-auto"
+                                        )}
+                                        onClick={handleRejectEdits}
+                                      >
+                                        Reject Edits
+                                      </button>
+                                    </div>
+                                  </>
+                                )}
+                              </div>
+                            )}
                           </div>
                         )}
 
-                        {normalizedComments.length > 0 && (
-                          <div className="w-full">
-                            <div className="rounded-2xl border border-slate-200/70 bg-white/60 backdrop-blur-sm p-4 shadow-sm">
-                              <h4 className="text-base font-semibold text-slate-800 mb-3">
-                                Reviewer Comments
-                              </h4>
-                              <ul className="space-y-3">
-                                {normalizedComments.map((comment, index) => (
-                                  <li
-                                    key={`${workshopId}-comment-${index}`}
-                                    className="rounded-xl bg-white border border-slate-200 px-4 py-3 shadow-[0_2px_6px_rgba(15,23,42,0.05)]"
-                                  >
-                                    <p className="text-sm text-slate-700 leading-relaxed">
-                                      {comment.message || String(comment)}
-                                    </p>
-                                    {(comment.author || comment.date) && (
-                                      <div className="mt-2 text-xs text-slate-500 flex flex-wrap items-center gap-2">
-                                        {comment.author && (
-                                          <span className="font-semibold text-[#736CED]">
-                                            {comment.author}
-                                          </span>
-                                        )}
-                                        {comment.author && comment.date && (
-                                          <span
-                                            aria-hidden="true"
-                                            className="text-slate-300"
-                                          >
-                                            |
-                                          </span>
-                                        )}
-                                        {comment.date && (
-                                          <span>
-                                            {formatCommentDate(comment.date)}
-                                          </span>
-                                        )}
-                                      </div>
+                        {w.currentMessage.awaitingResponseFrom ===
+                          "Professor" && (
+                          <>
+                            {normalizedComments.length > 0 && (
+                              <div className="w-full">
+                                <div className="rounded-2xl border border-slate-200/70 bg-white/60 backdrop-blur-sm p-4 shadow-sm">
+                                  <h4 className="text-base font-semibold text-slate-800 mb-3">
+                                    Reviewer Comments
+                                  </h4>
+                                  <ul className="space-y-3">
+                                    {normalizedComments.map(
+                                      (comment, index) => (
+                                        <li
+                                          key={`${workshopId}-comment-${index}`}
+                                          className="rounded-xl bg-white border border-slate-200 px-4 py-3 shadow-[0_2px_6px_rgba(15,23,42,0.05)]"
+                                        >
+                                          <p className="text-sm text-slate-700 leading-relaxed">
+                                            {comment.message || String(comment)}
+                                          </p>
+                                          {(comment.author || comment.date) && (
+                                            <div className="mt-2 text-xs text-slate-500 flex flex-wrap items-center gap-2">
+                                              {comment.author && (
+                                                <span className="font-semibold text-[#736CED]">
+                                                  {comment.author}
+                                                </span>
+                                              )}
+                                              {comment.author &&
+                                                comment.date && (
+                                                  <span
+                                                    aria-hidden="true"
+                                                    className="text-slate-300"
+                                                  >
+                                                    |
+                                                  </span>
+                                                )}
+                                              {comment.date && (
+                                                <span>
+                                                  {formatCommentDate(
+                                                    comment.date
+                                                  )}
+                                                </span>
+                                              )}
+                                            </div>
+                                          )}
+                                        </li>
+                                      )
                                     )}
-                                  </li>
-                                ))}
-                              </ul>
-                            </div>
-                          </div>
+                                  </ul>
+                                </div>
+                              </div>
+                            )}
+                          </>
                         )}
                       </div>
                     </article>
