@@ -11,6 +11,7 @@ import {
   X,
   RefreshCw,
   MapPin,
+  HandCoins,
 } from "lucide-react";
 import App from "../../App";
 
@@ -484,6 +485,46 @@ function WorkshopModal({
                 {workshop.location || "No location provided by the professor."}
               </p>
             </section>
+            {/* Capacity Section */}
+            <section
+              className="space-y-3 animate-fade-in"
+              style={{ animationDelay: "250ms" }}
+            >
+              <div className="flex items-center gap-2">
+                <Users className="w-4 h-4 text-[#736CED]" />
+                <h3 className="text-lg font-bold text-[#736CED]">Capacity</h3>
+              </div>
+              <p className="text-sm leading-relaxed text-gray-700 pl-7">
+                {workshop.raw.capacity ||
+                  "No capacity provided by the professor."}
+              </p>
+            </section>
+
+            {/* Funding Section */}
+            <section
+              className="space-y-3 animate-fade-in"
+              style={{ animationDelay: "250ms" }}
+            >
+              <div className="flex items-center gap-2">
+                <HandCoins className="w-4 h-4 text-[#736CED]" />
+                <h3 className="text-lg font-bold text-[#736CED]">Funding</h3>
+              </div>
+              <p className="text-sm leading-relaxed text-gray-700 pl-7">
+                {workshop.raw.fundingsource === "GUC"
+                  ? "Funded By GUC"
+                  : "External Funding"}
+              </p>
+              <p className="text-sm leading-relaxed text-gray-700 pl-7">
+                {workshop.raw.requiredFunding
+                  ? `Required Budget: $${workshop.raw.requiredFunding}`
+                  : "No required budget provided by the professor."}
+              </p>
+              <p className="text-sm leading-relaxed text-gray-700 pl-7">
+                {workshop.raw.extrafundingrequired
+                  ? `Extra Required Resources: $${workshop.raw.extrafundingrequired}`
+                  : "No extra required resources."}
+              </p>
+            </section>
 
             {/* Info Grid */}
             <div
@@ -513,7 +554,33 @@ function WorkshopModal({
                   </p>
                 </div>
                 <p className="text-sm text-gray-700 leading-relaxed">
-                  {formatDateRange(workshop.dateISO, workshop.durationDays)}
+                  From: {new Date(workshop.raw.startdate).toLocaleDateString()}{" "}
+                  {workshop.raw.starttime &&
+                    ` - ${new Date(
+                      `1970-01-01T${workshop.raw.starttime}`
+                    ).toLocaleTimeString([], {
+                      hour: "2-digit",
+                      minute: "2-digit",
+                    })}`}
+                </p>
+                <p className="text-sm text-gray-700 leading-relaxed">
+                  To: {new Date(workshop.raw.enddate).toLocaleDateString()}{" "}
+                  {workshop.raw.endtime &&
+                    ` - ${new Date(
+                      `1970-01-01T${workshop.raw.endtime}`
+                    ).toLocaleTimeString([], {
+                      hour: "2-digit",
+                      minute: "2-digit",
+                    })}`}
+                </p>
+                {/*Registration Deadline*/}
+                <p className="text-sm text-red-700 leading-relaxed">
+                  Registration Deadline:{" "}
+                  {workshop.raw.registrationDeadline
+                    ? new Date(
+                        workshop.raw.registrationDeadline
+                      ).toLocaleDateString()
+                    : "No registration deadline provided by the professor."}
                 </p>
               </div>
             </div>

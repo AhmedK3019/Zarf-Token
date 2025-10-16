@@ -21,6 +21,7 @@ const workshopSchema = Joi.object({
     .default("Pending"),
   capacity: Joi.number().integer().min(1).required(),
   fundingsource: Joi.string().valid("External", "GUC").required(),
+  requiredFunding: Joi.number().required(),
   extrarequiredfunding: Joi.number().default(0),
   attendees: Joi.array().default([]),
 });
@@ -88,6 +89,7 @@ const createWorkshop = async (req, res, next) => {
       status: value.status,
       capacity: value.capacity,
       fundingsource: value.fundingsource,
+      requiredFunding: value.requiredFunding,
       extrarequiredfunding: value.extrarequiredfunding,
       attendees: value.attendees,
       createdBy: userId,

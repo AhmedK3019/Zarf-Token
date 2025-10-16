@@ -28,6 +28,7 @@ const workshopSchema = new mongoose.Schema({
     type: [registeredPeople],
     default: [],
   },
+  requiredFunding: { type: Number, required: true },
   extrarequiredfunding: { type: Number },
   type: { type: String, default: "workshop" },
   comments: { type: String, default: "" },

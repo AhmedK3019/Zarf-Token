@@ -19,6 +19,7 @@ export default function CreateWorkshop() {
     facultyresponsibilty: "IET",
     professorsparticipating: [],
     fundingsource: "GUC",
+    requiredFunding: 0,
     extrarequiredfunding: 0,
     capacity: 20,
   });
@@ -356,12 +357,12 @@ export default function CreateWorkshop() {
                 </div>
                 <div>
                   <label className="block text-sm font-medium">
-                    Extra Funding Required (EGP)
+                    Funding Required (EGP)
                   </label>
                   <input
                     type="number"
-                    name="extrarequiredfunding"
-                    value={form.extrarequiredfunding}
+                    name="requiredFunding"
+                    value={form.requiredFunding}
                     onChange={handleChange}
                     className="mt-1 block w-full rounded-md border border-[#736CED] px-3 py-2 bg-white/70"
                     min={0}
@@ -380,6 +381,19 @@ export default function CreateWorkshop() {
                     className="mt-1 block w-full rounded-md border border-[#736CED] px-3 py-2 bg-white/70"
                     min={1}
                     required
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium">
+                    Extra Funding Required (EGP)
+                  </label>
+                  <input
+                    type="number"
+                    name="extrarequiredfunding"
+                    value={form.extrarequiredfunding}
+                    onChange={handleChange}
+                    className="mt-1 block w-full rounded-md border border-[#736CED] px-3 py-2 bg-white/70"
+                    min={0}
                   />
                 </div>
               </div>
