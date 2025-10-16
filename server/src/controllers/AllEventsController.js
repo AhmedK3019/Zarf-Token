@@ -6,11 +6,13 @@ import Booth from "../models/Booth.js";
 
 const getAllEvents = async (_req, res, next) => {
   try {
-    const workshops = await Workshop.find();
+    const workshops = await Workshop.find()
+      .populate("professorsparticipating", "firstname lastname email")
+      .populate("createdBy", "firstname lastname email");
     const Bazzars = await Bazaar.find();
     const Conferences = await Conference.find();
     const Trips = await Trip.find();
-    const Booths = await Booth.find();
+    const Booths = await Booth.find().populate("vendorId").populate("bazarId");
     return res
       .status(200)
       .json([...workshops, ...Bazzars, ...Conferences, ...Trips, ...Booths]);
@@ -25,7 +27,9 @@ const getEventsByType = async (req, res, next) => {
     let events;
     switch (type) {
       case "workshops":
-        events = await Workshop.find();
+        events = await Workshop.find()
+          .populate("professorsparticipating", "firstname lastname email")
+          .populate("createdBy", "firstname lastname email");
         break;
       case "bazaars":
         events = await Bazaar.find();
@@ -37,7 +41,7 @@ const getEventsByType = async (req, res, next) => {
         events = await Trip.find();
         break;
       case "booths":
-        events = await Booth.find();
+        events = await Booth.find().populate("vendorId").populate("bazarId");
         break;
       default:
         return res.status(400).json({ message: "Invalid event type" });
@@ -53,7 +57,9 @@ const getEventsRegisteredByUser = async (req, res, next) => {
     const { userId } = req.params;
     const workshops = await Workshop.find({
       attendees: { $elemMatch: { userId } },
-    });
+    })
+      .populate("professorsparticipating", "firstname lastname email")
+      .populate("createdBy", "firstname lastname email");
     const trips = await Trip.find({ attendees: { $elemMatch: { userId } } });
     return res.status(200).json([...workshops, ...trips]);
   } catch (error) {
