@@ -864,7 +864,7 @@ export default function WorkshopRequests() {
       const messages = {
         Approved: "Workshop accepted and published successfully!",
         Flagged: "Workshop flagged for review with comments.",
-        Rejected: "Workshop rejected with feedback.",
+        Rejected: "Workshop rejected.",
         Pending: "Workshop status set to pending.",
       };
 

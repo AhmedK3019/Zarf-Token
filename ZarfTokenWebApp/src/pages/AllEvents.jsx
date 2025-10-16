@@ -233,7 +233,7 @@ const AllEvents = () => {
           visibleEvents = eventsData.filter(
             (event) =>
               (event.type !== "booth" || !event.isBazarBooth) &&
-              (event.type !== "workshop" || event.status !== "Pending")
+              (event.type !== "workshop" || event.status === "Approved")
           );
         }
         setEvents(visibleEvents);
