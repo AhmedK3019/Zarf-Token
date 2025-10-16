@@ -15,6 +15,8 @@ export function UserProvider({ children }) {
   const [logoutReason, setLogoutReason] = useState(null);
   // prevent scheduling multiple redirects (avoids reload loops)
   const redirectScheduledRef = useRef(false);
+  // track whether this tab ever had an authenticated user
+  const hasUserEverRef = useRef(false);
 
   const login = useCallback(async (email, password) => {
     const res = await api.post("/allUsers/login", { email, password });
@@ -23,6 +25,7 @@ export function UserProvider({ children }) {
       localStorage.setItem("token", res.data.token);
     }
     setUser(res.data.user);
+    hasUserEverRef.current = true;
     return res.data;
   }, []);
 
@@ -46,6 +49,7 @@ export function UserProvider({ children }) {
             if (payload.name) restored.name = payload.name;
             if (payload.id) restored._id = payload.id;
             setUser((prev) => ({ ...(prev || {}), ...restored }));
+            hasUserEverRef.current = true;
             return;
           }
         } catch (err) {
@@ -58,6 +62,7 @@ export function UserProvider({ children }) {
       try {
         const res = await api.get("/auth/me");
         if (res?.data?.user) setUser(res.data.user);
+        if (res?.data?.user) hasUserEverRef.current = true;
       } catch (err) {
         // user not logged in or token invalid/expired
         setUser(null);
@@ -86,15 +91,31 @@ export function UserProvider({ children }) {
         e?.detail?.reason ||
         localStorage.getItem("__auth_logout_reason__") ||
         "Session expired";
+      // only show logout reason if this tab ever had a logged-in user
+      if (!hasUserEverRef.current) {
+        // still clear token if present but don't show message or redirect
+        logout();
+        return;
+      }
       setLogoutReason(reason);
       logout();
       // redirect to login after short delay to allow user to read message
       if (shouldRedirectToLogin() && !redirectScheduledRef.current) {
-        redirectScheduledRef.current = true;
-        try {
-          redirectTimer = setTimeout(() => (window.location.href = "/"), 1500);
-        } catch (e) {
-          // ignore if window not available
+        // cross-tab lock to avoid multiple tabs all redirecting at the same time
+        if (!localStorage.getItem("__auth_redirecting__")) {
+          localStorage.setItem("__auth_redirecting__", "1");
+          redirectScheduledRef.current = true;
+          try {
+            // use replace to avoid adding an extra history entry which can cause a reload
+            redirectTimer = setTimeout(
+              () => window.location.replace("/"),
+              1500
+            );
+          } catch (e) {
+            // ignore if window not available
+            localStorage.removeItem("__auth_redirecting__");
+            redirectScheduledRef.current = false;
+          }
         }
       }
     };
@@ -103,16 +124,25 @@ export function UserProvider({ children }) {
       if (e.key === "__auth_logout__") {
         const reason =
           localStorage.getItem("__auth_logout_reason__") || "Session expired";
+        if (!hasUserEverRef.current) {
+          logout();
+          return;
+        }
         setLogoutReason(reason);
         logout();
         if (shouldRedirectToLogin() && !redirectScheduledRef.current) {
-          redirectScheduledRef.current = true;
-          try {
-            redirectTimer = setTimeout(
-              () => (window.location.href = "/"),
-              1500
-            );
-          } catch (e) {}
+          if (!localStorage.getItem("__auth_redirecting__")) {
+            localStorage.setItem("__auth_redirecting__", "1");
+            redirectScheduledRef.current = true;
+            try {
+              redirectTimer = setTimeout(
+                () => window.location.replace("/"),
+                1500
+              );
+            } catch (e) {
+              localStorage.removeItem("__auth_redirecting__");
+            }
+          }
         }
       }
       // If token removed in another tab
@@ -143,18 +173,27 @@ export function UserProvider({ children }) {
                   redirectTimer = null;
                 }
                 redirectScheduledRef.current = false;
+                // clear cross-tab redirect lock so other tabs can redirect later if needed
+                try {
+                  localStorage.removeItem("__auth_redirecting__");
+                } catch (e) {}
               }
             } catch (err) {
               setLogoutReason("Session invalid; please sign in again");
               logout();
               if (shouldRedirectToLogin() && !redirectScheduledRef.current) {
-                redirectScheduledRef.current = true;
-                try {
-                  redirectTimer = setTimeout(
-                    () => (window.location.href = "/"),
-                    1500
-                  );
-                } catch (e) {}
+                if (!localStorage.getItem("__auth_redirecting__")) {
+                  localStorage.setItem("__auth_redirecting__", "1");
+                  redirectScheduledRef.current = true;
+                  try {
+                    redirectTimer = setTimeout(
+                      () => window.location.replace("/"),
+                      1500
+                    );
+                  } catch (e) {
+                    localStorage.removeItem("__auth_redirecting__");
+                  }
+                }
               }
             }
           })();
