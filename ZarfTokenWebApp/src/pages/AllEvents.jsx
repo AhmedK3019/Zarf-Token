@@ -8,18 +8,18 @@ import EventDetailsModal from "../components/EventDetailsModal";
 
 // ===== EXTRACTED MODAL COMPONENTS =====
 
-const RegistrationModal = ({ 
-  registerModalEvent, 
-  regName, 
-  setRegName, 
-  regEmail, 
-  setRegEmail, 
-  regGucid, 
-  setRegGucid, 
-  regError, 
-  regLoading, 
-  onClose, 
-  onSubmit 
+const RegistrationModal = ({
+  registerModalEvent,
+  regName,
+  setRegName,
+  regEmail,
+  setRegEmail,
+  regGucid,
+  setRegGucid,
+  regError,
+  regLoading,
+  onClose,
+  onSubmit,
 }) => {
   if (!registerModalEvent) return null;
 
@@ -30,32 +30,46 @@ const RegistrationModal = ({
           <h2 className="text-xl font-bold text-[#4C3BCF]">
             Register for {getEventDetails(registerModalEvent).name}
           </h2>
-          <button onClick={onClose} className="text-gray-500 hover:text-gray-700 text-2xl">×</button>
+          <button
+            onClick={onClose}
+            className="text-gray-500 hover:text-gray-700 text-2xl"
+          >
+            ×
+          </button>
         </div>
         {regError && <p className="text-sm text-red-500 mb-2">{regError}</p>}
         <div className="space-y-3">
-          <input 
-            value={regName} 
-            onChange={(e) => setRegName(e.target.value)} 
-            placeholder="Full name" 
-            className="w-full px-4 py-2 border rounded-md" 
+          <input
+            value={regName}
+            onChange={(e) => setRegName(e.target.value)}
+            placeholder="Full name"
+            className="w-full px-4 py-2 border rounded-md"
           />
-          <input 
-            value={regEmail} 
-            onChange={(e) => setRegEmail(e.target.value)} 
-            placeholder="Email" 
-            className="w-full px-4 py-2 border rounded-md" 
+          <input
+            value={regEmail}
+            onChange={(e) => setRegEmail(e.target.value)}
+            placeholder="Email"
+            className="w-full px-4 py-2 border rounded-md"
           />
-          <input 
-            value={regGucid} 
-            onChange={(e) => setRegGucid(e.target.value)} 
-            placeholder="GUC ID" 
-            className="w-full px-4 py-2 border rounded-md" 
+          <input
+            value={regGucid}
+            onChange={(e) => setRegGucid(e.target.value)}
+            placeholder="GUC ID"
+            className="w-full px-4 py-2 border rounded-md"
           />
         </div>
         <div className="mt-6 flex justify-end gap-3">
-          <button onClick={onClose} className="px-4 py-2 rounded-full border">Cancel</button>
-          <button onClick={onSubmit} disabled={regLoading} className="px-4 py-2 rounded-full bg-[#2DD4BF] text-white hover:bg-[#14B8A6]">
+          <button
+            onClick={onClose}
+            className="px-4 py-2 rounded-full border hover:bg-gray-100"
+          >
+            Cancel
+          </button>
+          <button
+            onClick={onSubmit}
+            disabled={regLoading}
+            className="px-4 py-2 rounded-full bg-[#2DD4BF] text-white hover:bg-[#14B8A6]"
+          >
             {regLoading ? "Submitting..." : "Submit"}
           </button>
         </div>
@@ -64,11 +78,11 @@ const RegistrationModal = ({
   );
 };
 
-const BoothsModalContent = ({ 
-  selectedBazaar, 
-  bazaarBooths, 
-  bazaarBoothsLoading, 
-  onClose 
+const BoothsModalContent = ({
+  selectedBazaar,
+  bazaarBooths,
+  bazaarBoothsLoading,
+  onClose,
 }) => {
   if (!selectedBazaar) return null;
 
@@ -80,9 +94,14 @@ const BoothsModalContent = ({
             <h2 className="text-2xl font-bold text-[#4C3BCF]">
               Booths at {getEventDetails(selectedBazaar).name}
             </h2>
-            <button onClick={onClose} className="text-gray-500 hover:text-gray-700 text-2xl">×</button>
+            <button
+              onClick={onClose}
+              className="text-gray-500 hover:text-gray-700 text-2xl"
+            >
+              ×
+            </button>
           </div>
-          
+
           {bazaarBoothsLoading ? (
             <div className="flex flex-col items-center justify-center py-12">
               <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#736CED] mb-4"></div>
@@ -95,19 +114,32 @@ const BoothsModalContent = ({
           ) : (
             <div className="grid gap-4">
               {bazaarBooths.map((booth) => (
-                <div key={booth._id} className="border border-gray-200 rounded-xl p-4 bg-gray-50">
-                  <h3 className="font-semibold text-[#4C3BCF] text-lg">{booth.boothname || 'Unnamed Booth'}</h3>
+                <div
+                  key={booth._id}
+                  className="border border-gray-200 rounded-xl p-4 bg-gray-50"
+                >
+                  <h3 className="font-semibold text-[#4C3BCF] text-lg">
+                    {booth.boothname || "Unnamed Booth"}
+                  </h3>
                   <p className="text-[#312A68] text-sm mt-1">
-                    <strong>Vendor:</strong> {booth.vendorId?.companyname || 'N/A'}
+                    <strong>Vendor:</strong>{" "}
+                    {booth.vendorId?.companyname || "N/A"}
                   </p>
-                  <p className="text-[#312A68] text-sm"><strong>Booth Size:</strong> {booth.boothSize || 'N/A'}</p>
-                  
+                  <p className="text-[#312A68] text-sm">
+                    <strong>Booth Size:</strong> {booth.boothSize || "N/A"}
+                  </p>
+
                   {booth.people && booth.people.length > 0 && (
                     <div className="mt-2">
-                      <p className="text-[#312A68] text-sm font-semibold">Team Members:</p>
+                      <p className="text-[#312A68] text-sm font-semibold">
+                        Team Members:
+                      </p>
                       <ul className="text-[#312A68] text-sm ml-2 space-y-1">
                         {booth.people.map((person, index) => (
-                          <li key={index}>• {typeof person === 'string' ? person : person.name}</li>
+                          <li key={index}>
+                            •{" "}
+                            {typeof person === "string" ? person : person.name}
+                          </li>
                         ))}
                       </ul>
                     </div>
@@ -129,7 +161,7 @@ const AllEvents = () => {
   const { user } = useAuthUser();
 
   // ===== STATE GROUPS =====
-  
+
   // Event Data State
   const [selectedCategory, setSelectedCategory] = useState(category || "all");
   const [events, setEvents] = useState([]);
@@ -145,10 +177,10 @@ const AllEvents = () => {
   const [bazaarBooths, setBazaarBooths] = useState([]);
   const [bazaarBoothsLoading, setBazaarBoothsLoading] = useState(false);
   const [showBoothsModal, setShowBoothsModal] = useState(false);
-  
+
   const [showRegisterModal, setShowRegisterModal] = useState(false);
   const [registerModalEvent, setRegisterModalEvent] = useState(null);
-  
+
   const [showDetailsModal, setShowDetailsModal] = useState(false);
   const [selectedEvent, setSelectedEvent] = useState(null);
 
@@ -169,8 +201,12 @@ const AllEvents = () => {
     { id: "booths", name: "Platform Booths" },
   ];
 
-  const userIsPrivileged = user?.role?.toLowerCase().includes("admin") || user?.role?.toLowerCase().includes("event");
-  const userIsEligible = ["student", "professor", "staff", "ta"].some(role => user?.role?.toLowerCase().includes(role));
+  const userIsPrivileged =
+    user?.role?.toLowerCase().includes("admin") ||
+    user?.role?.toLowerCase().includes("event");
+  const userIsEligible = ["student", "professor", "staff", "ta"].some((role) =>
+    user?.role?.toLowerCase().includes(role)
+  );
 
   // ===== EFFECTS =====
 
@@ -182,16 +218,22 @@ const AllEvents = () => {
       setEvents([]);
       setFilteredEvents([]);
       try {
-        const endpoint = selectedCategory === "all" ? "/allEvents/getAllEvents" : `/allEvents/getEventsByType/${selectedCategory}`;
+        const endpoint =
+          selectedCategory === "all"
+            ? "/allEvents/getAllEvents"
+            : `/allEvents/getEventsByType/${selectedCategory}`;
         const response = await api.get(endpoint);
         const eventsData = response.data || [];
         let visibleEvents;
-        if (selectedCategory === 'booths') {
-          visibleEvents = eventsData.filter(event => event.type === 'booth' && !event.isBazarBooth);
+        if (selectedCategory === "booths") {
+          visibleEvents = eventsData.filter(
+            (event) => event.type === "booth" && !event.isBazarBooth
+          );
         } else {
-          visibleEvents = eventsData.filter(event =>
-            (event.type !== 'booth' || !event.isBazarBooth) &&
-            (event.type !== 'workshop' || event.status !== 'Pending')
+          visibleEvents = eventsData.filter(
+            (event) =>
+              (event.type !== "booth" || !event.isBazarBooth) &&
+              (event.type !== "workshop" || event.status !== "Pending")
           );
         }
         setEvents(visibleEvents);
@@ -218,7 +260,9 @@ const AllEvents = () => {
       return (
         event.name?.toLowerCase().includes(lowercasedSearch) ||
         event.faculty?.toLowerCase().includes(lowercasedSearch) ||
-        event.professors?.some((prof) => prof.name?.toLowerCase().includes(lowercasedSearch)) ||
+        event.professors?.some((prof) =>
+          prof.name?.toLowerCase().includes(lowercasedSearch)
+        ) ||
         event.vendor?.toLowerCase().includes(lowercasedSearch) ||
         event.location?.toLowerCase().includes(lowercasedSearch) ||
         event.description?.toLowerCase().includes(lowercasedSearch)
@@ -230,7 +274,12 @@ const AllEvents = () => {
   // ===== EVENT HANDLERS =====
 
   const handleDeleteEvent = async (event) => {
-    if (!window.confirm(`Are you sure you want to delete "${getEventDetails(event).name}"?`)) return;
+    if (
+      !window.confirm(
+        `Are you sure you want to delete "${getEventDetails(event).name}"?`
+      )
+    )
+      return;
 
     try {
       const endpoints = {
@@ -241,7 +290,8 @@ const AllEvents = () => {
         trip: `/trips/deleteTrip/${event._id}`,
       };
 
-      if (!endpoints[event.type]) throw new Error("Invalid event type for deletion.");
+      if (!endpoints[event.type])
+        throw new Error("Invalid event type for deletion.");
       await api.delete(endpoints[event.type]);
 
       const updatedEvents = events.filter((e) => e._id !== event._id);
@@ -261,13 +311,13 @@ const AllEvents = () => {
     setSelectedBazaar(bazaar);
     setShowBoothsModal(true);
     setBazaarBoothsLoading(true);
-    
+
     try {
       const bazaarId = bazaar._id || bazaar.id;
       const res = await api.get(`/booths/${bazaarId}`);
-      await new Promise(resolve => setTimeout(resolve, 800));
+      await new Promise((resolve) => setTimeout(resolve, 800));
       setBazaarBooths(res.data || []);
-    } catch (err) { 
+    } catch (err) {
       console.error("Error fetching booths:", err);
       setBazaarBooths([]);
     } finally {
@@ -276,7 +326,12 @@ const AllEvents = () => {
   };
 
   const handleViewDetails = async (event) => {
-    if (event.type === 'booth' && event.isBazarBooth && event.bazarId && typeof event.bazarId === 'string') {
+    if (
+      event.type === "booth" &&
+      event.isBazarBooth &&
+      event.bazarId &&
+      typeof event.bazarId === "string"
+    ) {
       try {
         console.log("Fetching bazaar data for:", event.bazarId);
         const bazaarRes = await api.get(`/bazaars/getBazaar/${event.bazarId}`);
@@ -284,7 +339,7 @@ const AllEvents = () => {
 
         const updatedEvent = {
           ...event,
-          bazarId: bazaarRes.data
+          bazarId: bazaarRes.data,
         };
         setSelectedEvent(updatedEvent);
         setShowDetailsModal(true);
@@ -305,14 +360,14 @@ const AllEvents = () => {
     setShowRegisterModal(false);
     setRegisterModalEvent(null);
     setRegError(null);
-  }
+  };
 
   const closeBoothsModal = () => {
     setShowBoothsModal(false);
     setSelectedBazaar(null);
     setBazaarBooths([]);
     setBazaarBoothsLoading(false);
-  }
+  };
 
   const submitRegistration = async () => {
     if (!registerModalEvent) return;
@@ -329,8 +384,8 @@ const AllEvents = () => {
       const { type, _id } = registerModalEvent;
       const endpoints = {
         workshop: `/workshops/registerForaWorkshop/${_id}`,
-        trip: `/trips/registerForaTrip/${_id}`
-      }
+        trip: `/trips/registerForaTrip/${_id}`,
+      };
 
       if (!endpoints[type]) {
         throw new Error("Registration for this event type is not supported");
@@ -339,13 +394,15 @@ const AllEvents = () => {
       await api.patch(endpoints[type], payload);
       alert("Registration successful!");
       closeRegisterModal();
-      
+
       // Refetch events
       const currentCategory = selectedCategory;
-      setSelectedCategory('');
+      setSelectedCategory("");
       setSelectedCategory(currentCategory);
     } catch (err) {
-      setRegError(err?.response?.data?.message || err?.message || "Failed to register");
+      setRegError(
+        err?.response?.data?.message || err?.message || "Failed to register"
+      );
     } finally {
       setRegLoading(false);
     }
@@ -358,8 +415,12 @@ const AllEvents = () => {
         <div className="w-full max-w-6xl">
           {/* Header */}
           <div className="mb-12 text-center">
-            <h1 className="text-4xl font-bold text-[#736CED] sm:text-5xl mb-4">Campus Events & Booths</h1>
-            <p className="text-lg text-[#312A68] max-w-2xl mx-auto">Discover amazing events and platform booths across campus.</p>
+            <h1 className="text-4xl font-bold text-[#736CED] sm:text-5xl mb-4">
+              Campus Events & Booths
+            </h1>
+            <p className="text-lg text-[#312A68] max-w-2xl mx-auto">
+              Discover amazing events and platform booths across campus.
+            </p>
           </div>
 
           {/* Category Filters */}
@@ -414,16 +475,21 @@ const AllEvents = () => {
               ))}
             </div>
           ) : (
-            <p className="text-center py-12">No events found for this category.</p>
+            <p className="text-center py-12">
+              No events found for this category.
+            </p>
           )}
         </div>
       </main>
 
       {/* Modals */}
       {showDetailsModal && selectedEvent && (
-        <EventDetailsModal event={selectedEvent} onClose={() => setShowDetailsModal(false)} />
+        <EventDetailsModal
+          event={selectedEvent}
+          onClose={() => setShowDetailsModal(false)}
+        />
       )}
-      
+
       {showBoothsModal && (
         <BoothsModalContent
           selectedBazaar={selectedBazaar}
@@ -432,7 +498,7 @@ const AllEvents = () => {
           onClose={closeBoothsModal}
         />
       )}
-      
+
       {showRegisterModal && (
         <RegistrationModal
           registerModalEvent={registerModalEvent}
