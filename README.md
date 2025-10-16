@@ -12,7 +12,7 @@ A web-based platform designed to streamline the planning, management, and partic
 
 ## Motivation
 
-University events nurtures engagement and professional development, but managing them often involves unproductive communication and inefficient processes.
+Events at GUC nurtures engagement and professional development, but managing them often involves unproductive communication and inefficient processes.
 
 Zarf Token solves these challenges by providing a unified platform that simplifies event management, enables seamless registration, facilitates proposals, streamlines participation, and ensures transparent workflows for all stakeholders.
 
@@ -27,7 +27,7 @@ Zarf Token solves these challenges by providing a unified platform that simplifi
 
 **Project Progress:** In Active Development
 
-**Completed Features:** 0 system requirements implemented
+**Completed Features:** 31 system requirements implemented, 27 system requirements tested
 
 **Sprint Overview:**
 - Sprint 1 (Current)
@@ -94,9 +94,9 @@ The project uses a carefully selected color palette to ensure visual consistency
 
 **MERN Stack:**
 
-- **MongoDB:-** NoSQL database for flexible data management (Version: TBD)
-- **Express.js:-** Backend web application framework (Version: TBD)
-- **React.js:-** Frontend library for building user interfaces (Version: TBD)
+- **MongoDB:-** NoSQL database for flexible data management (Version: v8.2.1)
+- **Express.js:-** Backend web application framework (Version: 5.1.0)
+- **React.js:-** Frontend library for building user interfaces (Version: 19.1.1)
 - **Node.js:-** JavaScript runtime environment (Version: 22.16.0)
 
 **Additional Technologies & Libraries:**
@@ -152,7 +152,7 @@ We distinguished Zarf Token through comprehensive role-based functionality and a
 
 **Prerequisites:**
 - Node.js (v22.16.0)
-- MongoDB (Version: TBD)
+- MongoDB (Version: v8.2.1)
 - npm package manager
 - Git
 
@@ -284,7 +284,7 @@ API documentation with request/response examples, error codes, and usage guideli
 - Complete feature path validation
 
 **Test Coverage Goals:**
-- Minimum 80% code coverage
+- Minimum 92% code coverage
 - All critical paths tested
 - Edge cases and error handling validated
 
@@ -368,15 +368,18 @@ We welcome contributions from our GUCians!!!! Whether you're fixing bugs, adding
 
 **Acknowledgments:**
 
-This project was developed under the supervision of Dr. Mervat, following Agile methodology principles. We would like to thank:
+This project was developed under the supervision of Dr. Mervat, following Agile methodology principles.
+We would like to sincerely thank:
 
-- Our course instructors for guidance and support
-- The student community for feedback and requirements gathering
+- Dr. Noha Hamid for her constructive criticism, guidance and support
+- ACL TAs for their guidance and support
+- All the free online resources
 - Open-source community for the amazing tools and frameworks that made this possible
 
 **Inspiration & Resources:**
 
 - MERN Stack documentation and best practices
+- The Pragmatic Programmer ~ Andy Hunt and Dave Thomas
 - Agile methodology guidelines
 - Open-source project management tools
 
@@ -384,15 +387,9 @@ This project was developed under the supervision of Dr. Mervat, following Agile 
 
 ## License
 
-**License Type:** TBD
-
-*License information will be updated once determined. Common options include:*
-
-- MIT License - Permissive open-source license
-- Apache License 2.0 - Permissive with patent protection
-- GNU GPL - Copyleft license requiring open-source derivatives
-
-The license will be chosen based on project requirements and university guidelines.
+**License Type:**
+Distributed under the MIT License. See `LICENSE` for more information.
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
 ---
 
