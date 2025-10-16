@@ -34,9 +34,21 @@ Zarf Token solves these challenges by providing a unified platform that simplifi
 - Sprint 2
 - Sprint 3
 
-**Status:** The project is currently in its initial development phase. We are working on establishing the foundational architecture and implementing core system requirements for Sprint 1.
+**Status:** Zarf Token is currently in its initial development phase. We are working on establishing the foundational architecture and implementing core system requirements for Sprint 1.
 
-**Known Issues:** TBD
+## Known Issues
+
+**Code Quality & Architecture**
+- Edge cases are not consistently handled across the codebase
+- Legacy code from earlier versions remains in some pages (e.g., `AllEvents.jsx`)
+- `MyWorkshops.jsx` and `WorkshopRequests.jsx` inconsistently access backend response data—sometimes using raw values, sometimes through card component functions—resulting in fragmented, difficult-to-maintain code
+
+**Data Synchronization & State Management**
+- Only a subset of pages implement auto-refresh (10-second intervals) to reflect backend changes
+- Operations on deleted instances (e.g., attempting to edit a removed workshop) are not properly handled and may cause errors
+
+**Data Model**
+- The current `Workshop` model conflates all workshop states (Pending, Approved, Rejected). A dedicated `WorkshopRequests` model should be implemented to separate request management from approved workshops
 
 **Notes:** Following Agile methodology, each sprint will deliver a fully functional version with all specified system requirements.
 
@@ -108,6 +120,7 @@ The project uses a carefully selected color palette to ensure visual consistency
 - **react-router-dom** - Routing library for React applications
 - **qrcode** - QR code generation library
 - **lucide-react** - Icon library for React components
+- **Tailwind CSS** - Utility-first CSS framework for styling
 
 **Development Tools:**
 - Testing framework (TBD)
@@ -338,16 +351,22 @@ API documentation with request/response examples, error codes, and usage guideli
 **Detailed Usage Instructions:** TBD (Comprehensive user guides with screenshots will be added for each role.)
 
 ## Contribute
+We welcome contributions from our GUCians!! Whether you're fixing bugs, adding features, or improving documentation, your help is appreciated and encouraged!!
 
-We welcome contributions from our GUCians!!!! Whether you're fixing bugs, adding features, or improving documentation, your help is appreciated and encouraged!!!
+**Areas for Contribution:**
+- Address any of the known issues listed above
+- Improve edge case handling throughout the codebase
+- Refactor legacy code in pages like `AllEvents.jsx`
+- Implement consistent data access patterns in `MyWorkshops.jsx` and `WorkshopRequests.jsx`
+- Add auto-refresh functionality to remaining pages
+- Create a dedicated `WorkshopRequests` model to separate workshop states
 
 **How to Contribute:**
-
 1. **Fork the Repository:** Create your own fork of the project
 2. **Create a Branch:** Make a new branch for your feature or bugfix
-   ```bash
+```bash
    git checkout -b feature/your-feature-name
-   ```
+```
 3. **Make Your Changes:** Implement your improvements following our code style guidelines
 4. **Test Your Changes:** Ensure all tests pass and add new tests if needed
 5. **Commit Your Changes:** Use clear, descriptive commit messages
