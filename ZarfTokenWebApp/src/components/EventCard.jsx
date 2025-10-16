@@ -273,7 +273,8 @@ const EventCard = ({
             </button>
           )}
 
-          {!canRegister &&
+          {userIsEligible &&
+            !canRegister &&
             !isRegistered &&
             (event.type === "trip" || event.type === "workshop") && (
               <button
