@@ -259,13 +259,10 @@ const AllEvents = () => {
       const event = getEventDetails(rawEvent);
       return (
         event.name?.toLowerCase().includes(lowercasedSearch) ||
-        event.faculty?.toLowerCase().includes(lowercasedSearch) ||
         event.professors?.some((prof) =>
-          prof.name?.toLowerCase().includes(lowercasedSearch)
+          `${prof.firstname} ${prof.lastname}`.toLowerCase().includes(lowercasedSearch)
         ) ||
-        event.vendor?.toLowerCase().includes(lowercasedSearch) ||
-        event.location?.toLowerCase().includes(lowercasedSearch) ||
-        event.description?.toLowerCase().includes(lowercasedSearch)
+        event.type?.toLowerCase().includes(lowercasedSearch)
       );
     });
     setFilteredEvents(filtered);
@@ -429,11 +426,10 @@ const AllEvents = () => {
               <button
                 key={cat.id}
                 onClick={() => setSelectedCategory(cat.id)}
-                className={`px-6 py-3 rounded-full font-semibold transition-all ${
-                  selectedCategory === cat.id
+                className={`px-6 py-3 rounded-full font-semibold transition-all ${selectedCategory === cat.id
                     ? "bg-[#736CED] text-white shadow-[0_10px_25px_rgba(115,108,237,0.3)]"
                     : "bg-white/70 text-[#736CED] border border-[#736CED] hover:bg-[#E7E1FF]"
-                }`}
+                  }`}
               >
                 {cat.name}
               </button>
@@ -445,7 +441,7 @@ const AllEvents = () => {
             <div className="relative max-w-2xl mx-auto">
               <input
                 type="text"
-                placeholder="Search events by name, faculty, location, and more..."
+                placeholder="Search by event name, professor name, or event type..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 className="w-full px-6 py-4 pr-12 rounded-full border border-[#736CED] bg-white/70 focus:outline-none focus:ring-2 focus:ring-[#736CED]"
