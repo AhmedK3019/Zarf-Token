@@ -23,19 +23,6 @@ const COLORS = {
   info: "#54C6EB",
 };
 
-const categoryColors = {
-  Technical: COLORS.primary,
-  Career: "#F97316",
-  "Soft Skills": COLORS.accent,
-};
-
-const categoryChipStyles = {
-  Technical: "bg-[#736CED] text-white",
-  Career: "bg-[#F97316] text-white",
-  "Soft Skills": "bg-[#C14953] text-white",
-  default: "bg-[#736CED] text-white",
-};
-
 const statusConfig = {
   Pending: {
     color: COLORS.info,
@@ -55,12 +42,6 @@ const statusConfig = {
     badge:
       "bg-[#C14953] text-white border border-[#a63e47]/60 shadow-[0_2px_6px_rgba(193,73,83,0.35)]",
   },
-  Flagged: {
-    color: "#facc15",
-    icon: Flag,
-    badge:
-      "bg-[#facc15] text-slate-900 border border-[#f59e0b]/50 shadow-[0_2px_6px_rgba(250,204,21,0.35)]",
-  },
 };
 
 const statusButtonConfig = [
@@ -78,7 +59,7 @@ const statusButtonConfig = [
   },
 ];
 
-const requiresComment = new Set(["Flagged", "Rejected"]);
+const requiresComment = new Set(["Rejected"]);
 
 const BUTTON_BASE =
   "inline-flex items-center justify-center gap-2 rounded-full px-6 py-3.5 text-base font-semibold transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2";
@@ -212,9 +193,7 @@ function SkeletonCard() {
 // Workshop Card Component
 function WorkshopCard({ workshop, onView }) {
   const [isHovered, setIsHovered] = useState(false);
-  const accentColor = categoryColors[workshop.category] || COLORS.primary;
-  const categoryChipClass =
-    categoryChipStyles[workshop.category] ?? categoryChipStyles.default;
+  const accentColor = COLORS.primary;
 
   return (
     <article
@@ -252,12 +231,7 @@ function WorkshopCard({ workshop, onView }) {
           <h4 className="text-xl font-bold text-[#736CED] flex-1 leading-tight">
             {workshop.title}
           </h4>
-          <span
-            className={classNames(
-              "px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wide shadow-[0_2px_6px_rgba(0,0,0,0.15)] whitespace-nowrap",
-              categoryChipClass
-            )}
-          >
+          <span className="px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wide shadow-[0_2px_6px_rgba(0,0,0,0.15)] whitespace-nowrap bg-[#736CED] text-white">
             {workshop.location}
           </span>
         </div>
@@ -265,6 +239,19 @@ function WorkshopCard({ workshop, onView }) {
         <p className="text-sm leading-relaxed text-gray-700 line-clamp-2">
           {workshop.description}
         </p>
+
+        {workshop.raw.currentMessage.awaitingResponseFrom === "Professor" && (
+          <p className="text-xs text-gray-500 italic">
+            Awaiting response from Professor On requested edits
+          </p>
+        )}
+
+        {workshop.raw.currentMessage.awaitingResponseFrom ===
+          "Event office" && (
+          <p className="text-xs text-gray-500 italic">
+            {workshop.raw.currentMessage.message}
+          </p>
+        )}
 
         <div className="flex items-center justify-between gap-4 pt-2">
           <div className="flex items-center gap-2 text-sm font-medium text-gray-600">
@@ -618,24 +605,32 @@ function WorkshopModal({
                   })}
                 </div>
               )}
-              {workshop.status === "Pending" && (
-                <button
-                  type="button"
-                  onClick={handleToggleRequestForm}
-                  className={classNames(
-                    BUTTON_BASE,
-                    BUTTON_VARIANTS.info,
-                    "w-full sm:w-auto"
-                  )}
-                >
-                  <Flag className="w-4 h-4" />
-                  {requestButtonText}
-                </button>
-              )}
+              {workshop.status === "Pending" &&
+                workshop.raw.currentMessage.awaitingResponseFrom !==
+                  "Professor" && (
+                  <button
+                    type="button"
+                    onClick={handleToggleRequestForm}
+                    className={classNames(
+                      BUTTON_BASE,
+                      BUTTON_VARIANTS.info,
+                      "w-full sm:w-auto"
+                    )}
+                  >
+                    <Flag className="w-4 h-4" />
+                    {requestButtonText}
+                  </button>
+                )}
               {workshop.status !== "Pending" && (
                 <p className="text-sm text-gray-700">
                   This workshop has been{" "}
                   <span className="font-semibold">{workshop.status}</span>.
+                </p>
+              )}
+              {workshop.raw.currentMessage.awaitingResponseFrom ===
+                "Professor" && (
+                <p className="text-xs text-gray-500 italic">
+                  Awaiting response from Professor On requested edits
                 </p>
               )}
 
@@ -687,33 +682,6 @@ function WorkshopModal({
                   </div>
                 </div>
               )}
-
-              <label className="block">
-                <span className="text-sm font-semibold text-gray-700">
-                  Comment{" "}
-                  {requiresComment.has(workshop.status)
-                    ? "(required)"
-                    : "(optional)"}
-                </span>
-                <textarea
-                  value={comment}
-                  onChange={(e) => setComment(e.target.value)}
-                  rows={4}
-                  placeholder="Add context for the professor or future reviewers..."
-                  className={classNames(
-                    "mt-2 w-full rounded-2xl border bg-white/80 backdrop-blur-sm px-4 py-3 text-sm text-gray-700 transition-all focus:outline-none focus:ring-2",
-                    commentError
-                      ? "border-rose-300 focus:ring-rose-300"
-                      : "border-gray-300 focus:ring-[#736CED]/40 focus:border-[#736CED]/40"
-                  )}
-                />
-                {commentError && (
-                  <p className="mt-2 text-xs font-semibold text-rose-600 flex items-center gap-1">
-                    <XCircle className="w-3.5 h-3.5" />
-                    {commentError}
-                  </p>
-                )}
-              </label>
             </section>
           </div>
         </div>
@@ -766,7 +734,6 @@ function Toast({ feedback, onDismiss }) {
 
 // Main Component
 export default function WorkshopRequests() {
-  const [categoryFilter, setCategoryFilter] = useState("All Categories");
   const [statusFilter, setStatusFilter] = useState("All");
   const [workshops, setWorkshops] = useState([]);
   const [selectedWorkshop, setSelectedWorkshop] = useState(null);
@@ -813,32 +780,21 @@ export default function WorkshopRequests() {
     setCommentError("");
   }, [selectedWorkshop, workshops]);
 
-  const categories = useMemo(() => {
-    const unique = new Set(workshops.map((item) => item.category));
-    return ["All Categories", ...Array.from(unique)];
-  }, [workshops]);
-
   const filteredWorkshops = useMemo(() => {
     return workshops.filter((workshop) => {
-      const matchCategory =
-        categoryFilter === "All Categories" ||
-        workshop.category === categoryFilter;
       const matchStatus =
         statusFilter === "All" || workshop.status === statusFilter;
-      return matchCategory && matchStatus;
+      return matchStatus;
     });
-  }, [workshops, categoryFilter, statusFilter]);
+  }, [workshops, statusFilter]);
 
-  const hasActiveFilters =
-    categoryFilter !== "All Categories" || statusFilter !== "All";
+  const hasActiveFilters = statusFilter !== "All";
 
   const resetFilters = () => {
-    setCategoryFilter("All Categories");
     setStatusFilter("All");
   };
 
   const handleStatusUpdate = async (nextStatus) => {
-    console.log("Updating status to:", selectedWorkshop, nextStatus);
     if (!selectedWorkshop) return;
 
     try {
@@ -863,7 +819,6 @@ export default function WorkshopRequests() {
 
       const messages = {
         Approved: "Workshop accepted and published successfully!",
-        Flagged: "Workshop flagged for review with comments.",
         Rejected: "Workshop rejected.",
         Pending: "Workshop status set to pending.",
       };
@@ -921,36 +876,17 @@ export default function WorkshopRequests() {
         {/* Filters */}
         <section className="mb-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           <label className="flex flex-col gap-2">
-            <span className="text-sm font-bold text-[#736CED] flex items-center gap-2">
-              Category
-            </span>
-            <select
-              value={categoryFilter}
-              onChange={(e) => setCategoryFilter(e.target.value)}
-              className="w-full rounded-xl border-2 border-[#736CED]/20 bg-white/80 backdrop-blur-sm px-4 py-3 text-sm font-semibold text-[#736CED] shadow-sm transition-all focus:border-[#736CED]/50 focus:outline-none focus:ring-2 focus:ring-[#736CED]/30 hover:border-[#736CED]/40"
-            >
-              {categories.map((category) => (
-                <option key={category} value={category}>
-                  {category}
-                </option>
-              ))}
-            </select>
-          </label>
-
-          <label className="flex flex-col gap-2">
             <span className="text-sm font-bold text-[#736CED]">Status</span>
             <select
               value={statusFilter}
               onChange={(e) => setStatusFilter(e.target.value)}
               className="w-full rounded-xl border-2 border-[#736CED]/20 bg-white/80 backdrop-blur-sm px-4 py-3 text-sm font-semibold text-[#736CED] shadow-sm transition-all focus:border-[#736CED]/50 focus:outline-none focus:ring-2 focus:ring-[#736CED]/30 hover:border-[#736CED]/40"
             >
-              {["All", "Pending", "Approved", "Rejected", "Flagged"].map(
-                (status) => (
-                  <option key={status} value={status}>
-                    {status}
-                  </option>
-                )
-              )}
+              {["All", "Pending", "Approved", "Rejected"].map((status) => (
+                <option key={status} value={status}>
+                  {status}
+                </option>
+              ))}
             </select>
           </label>
 
