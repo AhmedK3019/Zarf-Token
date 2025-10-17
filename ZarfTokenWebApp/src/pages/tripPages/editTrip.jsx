@@ -103,22 +103,22 @@ function EditTrip() {
         setSuccessMessage("");
         return;
       }
-      if (
-        (new Date(tripData.enddate) - new Date(tripData.startdate)) /
-          (1000 * 60 * 60 * 24) +
-          1 <
-          7 ||
-        (new Date(tripData.enddate) - new Date(tripData.startdate)) /
-          (1000 * 60 * 60 * 24) +
-          1 >
-          28
-      ) {
-        setError({
-          general: "Duration should be between 1 to 4 weeks inclusive",
-        });
-        setSuccessMessage("");
-        return;
-      }
+      // if (
+      //   (new Date(tripData.enddate) - new Date(tripData.startdate)) /
+      //     (1000 * 60 * 60 * 24) +
+      //     1 <
+      //     7 ||
+      //   (new Date(tripData.enddate) - new Date(tripData.startdate)) /
+      //     (1000 * 60 * 60 * 24) +
+      //     1 >
+      //     28
+      // ) {
+      //   setError({
+      //     general: "Duration should be between 1 to 4 weeks inclusive",
+      //   });
+      //   setSuccessMessage("");
+      //   return;
+      // }
       if (tripData.capacity < 0) {
         setError({
           general: "Capacity must be a positive number",
@@ -147,6 +147,8 @@ function EditTrip() {
       await api.put(`/trips/updateTrip/${id}`, body);
       setSuccessMessage("Trip updated successfully!");
       setError({});
+      window.location.href =
+        "http://localhost:5173/dashboard/eventsOffice/all-events";
     } catch (error) {
       setSuccessMessage("");
       setError({

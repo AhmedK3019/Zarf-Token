@@ -6,6 +6,7 @@ const EditConference = () => {
   const { id } = useParams();
   const [conferenceData, setConferenceData] = useState({
     conferencename: "",
+    professorname: "",
     startdate: "",
     starttime: "",
     enddate: "",
@@ -44,6 +45,9 @@ const EditConference = () => {
 
     if (conferenceData.conferencename.trim() === "") {
       errorValues.conferencename = "Please enter the conference name";
+    }
+    if (conferenceData.professorname.trim() === "") {
+      errorValues.professorname = "Please enter the professor name";
     }
     if (conferenceData.startdate.trim() === "") {
       errorValues.startdate = "Please enter the start date";
@@ -89,6 +93,7 @@ const EditConference = () => {
     try {
       const body = {
         conferencename: conferenceData.conferencename,
+        professorname: conferenceData.professorname,
         startdate: conferenceData.startdate,
         starttime: conferenceData.starttime,
         enddate: conferenceData.enddate,
@@ -111,24 +116,24 @@ const EditConference = () => {
         setSuccessMessage("");
         return;
       }
-      if (
-        (new Date(conferenceData.enddate) -
-          new Date(conferenceData.startdate)) /
-          (1000 * 60 * 60 * 24) +
-          1 <
-          7 ||
-        (new Date(conferenceData.enddate) -
-          new Date(conferenceData.startdate)) /
-          (1000 * 60 * 60 * 24) +
-          1 >
-          28
-      ) {
-        setErrors({
-          general: "Duration should be between 1 to 4 weeks inclusive",
-        });
-        setSuccessMessage("");
-        return;
-      }
+      // if (
+      //   (new Date(conferenceData.enddate) -
+      //     new Date(conferenceData.startdate)) /
+      //     (1000 * 60 * 60 * 24) +
+      //     1 <
+      //     7 ||
+      //   (new Date(conferenceData.enddate) -
+      //     new Date(conferenceData.startdate)) /
+      //     (1000 * 60 * 60 * 24) +
+      //     1 >
+      //     28
+      // ) {
+      //   setErrors({
+      //     general: "Duration should be between 1 to 4 weeks inclusive",
+      //   });
+      //   setSuccessMessage("");
+      //   return;
+      // }
       if (conferenceData.requiredbudget <= 0) {
         setErrors({
           general: "Required budget must be a positive number",
@@ -147,6 +152,8 @@ const EditConference = () => {
       await api.put(`/conferences/updateConference/${id}`, body);
       setErrors({});
       setSuccessMessage("Conference updated successfully !!");
+      window.location.href =
+        "http://localhost:5173/dashboard/eventsOffice/all-events";
     } catch (error) {
       console.log(error);
       setErrors({ general: error.message });
@@ -174,33 +181,64 @@ const EditConference = () => {
         )}
 
         <form onSubmit={handleSubmission} className="space-y-5">
-          <div>
-            <label
-              htmlFor="conferenceName"
-              className="block text-gray-700 font-medium mb-1"
-            >
-              Conference name:
-            </label>
-            <input
-              type="text"
-              id="conferenceName"
-              placeholder="ex: AI Research Summit"
-              value={conferenceData.conferencename}
-              onChange={(e) => {
-                setConferenceData({
-                  ...conferenceData,
-                  conferencename: e.target.value,
-                });
-                setErrors({});
-                setSuccessMessage("");
-              }}
-              className="w-full border border-purple-oklch(29.3% 0.136 325.661) rounded-xl px-4 py-2 focus:ring-2 focus:ring-purple-oklch(29.3% 0.136 325.661) focus:outline-none"
-            />
-            {errorvalues.conferencename && (
-              <p className="text-red-500 text-sm mt-1">
-                {errorvalues.conferencename}
-              </p>
-            )}
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label
+                htmlFor="conferenceName"
+                className="block text-gray-700 font-medium mb-1"
+              >
+                Conference name:
+              </label>
+              <input
+                type="text"
+                id="conferenceName"
+                placeholder="ex: AI Research Summit"
+                value={conferenceData.conferencename}
+                onChange={(e) => {
+                  setConferenceData({
+                    ...conferenceData,
+                    conferencename: e.target.value,
+                  });
+                  setSuccessMessage("");
+                  setErrors({});
+                }}
+                className="w-full border border-purple-oklch(29.3% 0.136 325.661) rounded-xl px-4 py-2 focus:ring-2 focus:ring-purple-oklch(29.3% 0.136 325.661) focus:outline-none"
+              />
+              {errorvalues.conferencename && (
+                <p className="text-red-500 text-sm mt-1">
+                  {errorvalues.conferencename}
+                </p>
+              )}
+            </div>
+
+            <div>
+              <label
+                htmlFor="professorName"
+                className="block text-gray-700 font-medium mb-1"
+              >
+                Professor name:
+              </label>
+              <input
+                type="text"
+                id="professorName"
+                placeholder="ex: Dr Samy"
+                value={conferenceData.professorname}
+                onChange={(e) => {
+                  setConferenceData({
+                    ...conferenceData,
+                    professorname: e.target.value,
+                  });
+                  setSuccessMessage("");
+                  setErrors({});
+                }}
+                className="w-full border border-purple-oklch(29.3% 0.136 325.661) rounded-xl px-4 py-2 focus:ring-2 focus:ring-purple-oklch(29.3% 0.136 325.661) focus:outline-none"
+              />
+              {errorvalues.professorname && (
+                <p className="text-red-500 text-sm mt-1">
+                  {errorvalues.professorname}
+                </p>
+              )}
+            </div>
           </div>
 
           <div className="grid grid-cols-2 gap-4">

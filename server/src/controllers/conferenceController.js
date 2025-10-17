@@ -3,6 +3,7 @@ import Joi from "joi";
 
 const conferenceSchema = Joi.object({
   conferencename: Joi.string().required(),
+  professorname: Joi.string().required(),
   startdate: Joi.date().required(),
   starttime: Joi.string().required(),
   enddate: Joi.date().required(),

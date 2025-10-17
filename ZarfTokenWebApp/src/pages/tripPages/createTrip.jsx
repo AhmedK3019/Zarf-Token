@@ -82,22 +82,22 @@ function CreateTrip() {
         setSuccessMessage("");
         return;
       }
-      if (
-        (new Date(tripData.enddate) - new Date(tripData.startdate)) /
-          (1000 * 60 * 60 * 24) +
-          1 <
-          7 ||
-        (new Date(tripData.enddate) - new Date(tripData.startdate)) /
-          (1000 * 60 * 60 * 24) +
-          1 >
-          28
-      ) {
-        setError({
-          general: "Duration should be between 1 to 4 weeks inclusive",
-        });
-        setSuccessMessage("");
-        return;
-      }
+      // if (
+      //   (new Date(tripData.enddate) - new Date(tripData.startdate)) /
+      //     (1000 * 60 * 60 * 24) +
+      //     1 <
+      //     7 ||
+      //   (new Date(tripData.enddate) - new Date(tripData.startdate)) /
+      //     (1000 * 60 * 60 * 24) +
+      //     1 >
+      //     28
+      // ) {
+      //   setError({
+      //     general: "Duration should be between 1 to 4 weeks inclusive",
+      //   });
+      //   setSuccessMessage("");
+      //   return;
+      // }
       if (tripData.capacity <= 0) {
         setError({
           general: "Capacity must be a positive number",

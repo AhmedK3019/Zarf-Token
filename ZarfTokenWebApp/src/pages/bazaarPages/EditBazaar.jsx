@@ -126,6 +126,8 @@ const EditBazaar = () => {
       await api.put(`/bazaars/updateBazaar/${id}`, body);
       setSuccessMessage("Bazaar is updated successfully");
       setErrors({});
+      window.location.href =
+        "http://localhost:5173/dashboard/eventsOffice/all-events";
     } catch (error) {
       setSuccessMessage("");
       setErrors({ general: error.message });

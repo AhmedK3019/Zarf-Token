@@ -2,6 +2,7 @@ import mongoose from "mongoose";
 
 const conferenceSchema = new mongoose.Schema({
   conferencename: { type: String, required: true },
+  professorname: { type: String, required: true },
   startdate: { type: Date, required: true },
   starttime: { type: String, required: true },
   enddate: { type: Date, required: true },
