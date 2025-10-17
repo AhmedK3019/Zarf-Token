@@ -274,6 +274,9 @@ const AllEvents = () => {
       }
       return (
         event.name?.toLowerCase().includes(lowercasedSearch) ||
+        `${event.createdBy?.firstname} ${event.createdBy?.lastname}`
+          .toLowerCase()
+          .includes(lowercasedSearch) ||
         event.professors?.some((prof) =>
           `${prof.firstname} ${prof.lastname}`
             .toLowerCase()
