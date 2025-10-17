@@ -257,12 +257,16 @@ const AllEvents = () => {
     const lowercasedSearch = searchTerm.toLowerCase().trim();
     const filtered = events.filter((rawEvent) => {
       const event = getEventDetails(rawEvent);
+      let searchtype = "";
+      if (event.type === "booth") {
+        searchtype = "platform booth";
+      }
       return (
         event.name?.toLowerCase().includes(lowercasedSearch) ||
         event.professors?.some((prof) =>
           `${prof.firstname} ${prof.lastname}`.toLowerCase().includes(lowercasedSearch)
         ) ||
-        event.type?.toLowerCase().includes(lowercasedSearch)
+        event.type?.toLowerCase().includes(lowercasedSearch) || searchtype.toLowerCase().includes(lowercasedSearch)
       );
     });
     setFilteredEvents(filtered);
