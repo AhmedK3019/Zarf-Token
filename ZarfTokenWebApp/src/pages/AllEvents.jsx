@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useParams } from "react-router-dom";
 import api from "../services/api";
 import { useAuthUser } from "../hooks/auth";
@@ -184,6 +184,9 @@ const AllEvents = () => {
   const [showDetailsModal, setShowDetailsModal] = useState(false);
   const [selectedEvent, setSelectedEvent] = useState(null);
 
+  // Guard against race conditions when switching filters during initial load
+  const lastFetchIdRef = useRef(0);
+
   // Registration Form State
   const [regName, setRegName] = useState(user?.name || "");
   const [regEmail, setRegEmail] = useState(user?.email || "");
@@ -213,6 +216,7 @@ const AllEvents = () => {
   // Fetch events based on category
   useEffect(() => {
     const fetchEventsByCategory = async () => {
+      const fetchId = ++lastFetchIdRef.current;
       setLoading(true);
       setError(null);
       setEvents([]);
@@ -223,6 +227,8 @@ const AllEvents = () => {
             ? "/allEvents/getAllEvents"
             : `/allEvents/getEventsByType/${selectedCategory}`;
         const response = await api.get(endpoint);
+        // Ignore if a newer request has been initiated
+        if (fetchId !== lastFetchIdRef.current) return;
         const eventsData = response.data || [];
         let visibleEvents;
         if (selectedCategory === "booths") {
@@ -239,9 +245,14 @@ const AllEvents = () => {
         setEvents(visibleEvents);
         setFilteredEvents(visibleEvents);
       } catch (err) {
-        setError("Failed to fetch events. Please try again.");
+        // Only report errors for the latest request
+        if (fetchId === lastFetchIdRef.current) {
+          setError("Failed to fetch events. Please try again.");
+        }
       } finally {
-        setLoading(false);
+        if (fetchId === lastFetchIdRef.current) {
+          setLoading(false);
+        }
       }
     };
     fetchEventsByCategory();
@@ -264,9 +275,12 @@ const AllEvents = () => {
       return (
         event.name?.toLowerCase().includes(lowercasedSearch) ||
         event.professors?.some((prof) =>
-          `${prof.firstname} ${prof.lastname}`.toLowerCase().includes(lowercasedSearch)
+          `${prof.firstname} ${prof.lastname}`
+            .toLowerCase()
+            .includes(lowercasedSearch)
         ) ||
-        event.type?.toLowerCase().includes(lowercasedSearch) || searchtype.toLowerCase().includes(lowercasedSearch)
+        event.type?.toLowerCase().includes(lowercasedSearch) ||
+        searchtype.toLowerCase().includes(lowercasedSearch)
       );
     });
     setFilteredEvents(filtered);
@@ -430,10 +444,11 @@ const AllEvents = () => {
               <button
                 key={cat.id}
                 onClick={() => setSelectedCategory(cat.id)}
-                className={`px-6 py-3 rounded-full font-semibold transition-all ${selectedCategory === cat.id
+                className={`px-6 py-3 rounded-full font-semibold transition-all ${
+                  selectedCategory === cat.id
                     ? "bg-[#736CED] text-white shadow-[0_10px_25px_rgba(115,108,237,0.3)]"
                     : "bg-white/70 text-[#736CED] border border-[#736CED] hover:bg-[#E7E1FF]"
-                  }`}
+                }`}
               >
                 {cat.name}
               </button>
