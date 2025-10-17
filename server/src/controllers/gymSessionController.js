@@ -308,121 +308,6 @@ export const unregisterUser = async (req, res) => {
   }
 };
 
-// Fixed weekly gym schedule
-const FIXED_SCHEDULE = {
-  0: { type: "Rest Day", sessions: [] }, // Sunday - no sessions
-  1: { type: "Yoga", sessions: [
-    { time: "08:00", duration: 60, maxParticipants: 20 },
-    { time: "18:00", duration: 60, maxParticipants: 20 }
-  ]}, // Monday
-  2: { type: "Pilates", sessions: [
-    { time: "09:00", duration: 45, maxParticipants: 15 },
-    { time: "17:30", duration: 45, maxParticipants: 15 }
-  ]}, // Tuesday
-  3: { type: "Aerobics", sessions: [
-    { time: "08:30", duration: 50, maxParticipants: 25 },
-    { time: "18:30", duration: 50, maxParticipants: 25 }
-  ]}, // Wednesday
-  4: { type: "Zumba", sessions: [
-    { time: "09:30", duration: 55, maxParticipants: 30 },
-    { time: "19:00", duration: 55, maxParticipants: 30 }
-  ]}, // Thursday
-  5: { type: "Cross Circuit", sessions: [
-    { time: "08:00", duration: 45, maxParticipants: 12 },
-    { time: "17:00", duration: 45, maxParticipants: 12 }
-  ]}, // Friday
-  6: { type: "Kickboxing", sessions: [
-    { time: "10:00", duration: 60, maxParticipants: 18 },
-    { time: "16:00", duration: 60, maxParticipants: 18 }
-  ]} // Saturday
-};
-
-// Generate gym sessions for a specific month based on fixed schedule
-export const generateMonthSessions = async (req, res) => {
-  try {
-    const userId = req.userId;
-    if (!userId) {
-      return res.status(401).json({ error: "Authentication required" });
-    }
-
-    // Check if user is Events Office - only Events Office can generate sessions
-    let isEventsOffice = false;
-    
-    // First check if it's an EventsOffice user
-    const eventsOfficeUser = await EventsOffice.findById(userId);
-    if (eventsOfficeUser) {
-      isEventsOffice = true;
-    } else {
-      // Check if it's a regular user with Events Office role
-      const regularUser = await User.findById(userId);
-      if (regularUser && (regularUser.role === "Events Office" || regularUser.role === "Event office")) {
-        isEventsOffice = true;
-      }
-    }
-    
-    if (!isEventsOffice) {
-      return res.status(403).json({ 
-        error: "Access denied. Only Events Office can generate gym sessions." 
-      });
-    }
-
-    const { month } = req.params; // expect format YYYY-MM
-    const [year, monthNum] = month.split('-');
-    
-    const startDate = new Date(parseInt(year), parseInt(monthNum) - 1, 1);
-    const endDate = new Date(parseInt(year), parseInt(monthNum), 0);
-    
-    // Check if sessions already exist for this month
-    const existingSessions = await GymSession.find({
-      date: {
-        $gte: startDate,
-        $lte: endDate
-      }
-    });
-    
-    if (existingSessions.length > 0) {
-      return res.status(400).json({ 
-        error: "Sessions already exist for this month. Delete existing sessions first." 
-      });
-    }
-    
-    const sessionsToCreate = [];
-    
-    // Loop through each day of the month
-    for (let day = 1; day <= endDate.getDate(); day++) {
-      // Create date in UTC to avoid timezone issues
-      const currentDate = new Date(Date.UTC(parseInt(year), parseInt(monthNum) - 1, day));
-      const dayOfWeek = currentDate.getUTCDay();
-      const daySchedule = FIXED_SCHEDULE[dayOfWeek];
-      
-      if (daySchedule && daySchedule.sessions.length > 0) {
-        // Create sessions for this day
-        for (const sessionTemplate of daySchedule.sessions) {
-          sessionsToCreate.push({
-            date: currentDate,
-            time: sessionTemplate.time,
-            duration: sessionTemplate.duration,
-            type: daySchedule.type,
-            maxParticipants: sessionTemplate.maxParticipants,
-            registered: []
-          });
-        }
-      }
-    }
-    
-    // Create all sessions
-    const createdSessions = await GymSession.insertMany(sessionsToCreate);
-    
-    res.json({
-      message: `Generated ${createdSessions.length} sessions for ${month}`,
-      sessions: createdSessions
-    });
-    
-  } catch (err) {
-    res.status(500).json({ error: err.message });
-  }
-};
-
 // Delete all gym sessions for a specific month
 export const deleteMonthSessions = async (req, res) => {
   try {
@@ -431,24 +316,14 @@ export const deleteMonthSessions = async (req, res) => {
       return res.status(401).json({ error: "Authentication required" });
     }
 
-    // Check if user is Events Office - only Events Office can delete sessions
-    let isEventsOffice = false;
-    
-    // First check if it's an EventsOffice user
+    // Check if user is Events Office
     const eventsOfficeUser = await EventsOffice.findById(userId);
-    if (eventsOfficeUser) {
-      isEventsOffice = true;
-    } else {
-      // Check if it's a regular user with Events Office role
-      const regularUser = await User.findById(userId);
-      if (regularUser && (regularUser.role === "Events Office" || regularUser.role === "Event office")) {
-        isEventsOffice = true;
-      }
-    }
+    const regularUser = await User.findById(userId);
+    const isEventsOffice = eventsOfficeUser || (regularUser && (regularUser.role === "Events Office" || regularUser.role === "Event office"));
     
     if (!isEventsOffice) {
       return res.status(403).json({ 
-        error: "Access denied. Only Events Office can delete gym sessions." 
+        error: "Access denied. Only Events Office can delete all sessions." 
       });
     }
 
@@ -461,11 +336,9 @@ export const deleteMonthSessions = async (req, res) => {
       });
     }
 
-    // Create date range for the month
     const startDate = new Date(Date.UTC(parseInt(year), parseInt(monthNum) - 1, 1));
     const endDate = new Date(Date.UTC(parseInt(year), parseInt(monthNum), 1));
 
-    // Delete all sessions for this month
     const deleteResult = await GymSession.deleteMany({
       date: {
         $gte: startDate,
@@ -482,3 +355,4 @@ export const deleteMonthSessions = async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 };
+
