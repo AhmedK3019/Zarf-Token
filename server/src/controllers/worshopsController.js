@@ -24,6 +24,10 @@ const workshopSchema = Joi.object({
   requiredFunding: Joi.number().required(),
   extrarequiredfunding: Joi.number().default(0),
   attendees: Joi.array().default([]),
+  currentMessage: Joi.object({
+    awaitingResponseFrom: Joi.string().default(""),
+    message: Joi.string().default(""),
+  }),
 });
 
 const attendeesSchema = Joi.object({
@@ -93,6 +97,7 @@ const createWorkshop = async (req, res, next) => {
       extrarequiredfunding: value.extrarequiredfunding,
       attendees: value.attendees,
       createdBy: userId,
+      currentMessage: value.currentMessage,
     };
     const workshop = await WorkShop.create(body);
     return res.status(201).json(workshop);
@@ -181,6 +186,10 @@ const updateWorkshopStatus = async (req, res, next) => {
     );
     if (!updatedStatus)
       return res.status(404).json({ message: "Workshop is not found" });
+    updatedStatus.currentMessage.awaitingResponseFrom = "";
+    updatedStatus.currentMessage.message = "";
+    updatedStatus.comments = "";
+    await updatedStatus.save();
     return res.status(200).json({
       message: "Status is updated successfully",
       workshop: updatedStatus,
@@ -201,8 +210,48 @@ const requestEdits = async (req, res, next) => {
     );
     if (!updatedComment)
       return res.status(404).json({ message: "Workshop is not found" });
+    updatedComment.currentMessage.message =
+      "The Events Office requested edits.";
+    updatedComment.currentMessage.awaitingResponseFrom = "Professor";
+    await updatedComment.save();
     return res.status(200).json({
       message: "Edits are requested successfully",
+      workshop: updatedComment,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+const acceptEdits = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+    const updatedComment = await WorkShop.findById(id);
+    if (!updatedComment)
+      return res.status(404).json({ message: "Workshop is not found" });
+    updatedComment.currentMessage.awaitingResponseFrom = "Event office";
+    updatedComment.currentMessage.message = "Professor has accepted the edits.";
+    await updatedComment.save();
+    return res.status(200).json({
+      message: "Edits are accepted successfully",
+      workshop: updatedComment,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+const rejectEdits = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+    const updatedComment = await WorkShop.findById(id);
+    if (!updatedComment)
+      return res.status(404).json({ message: "Workshop is not found" });
+    updatedComment.currentMessage.awaitingResponseFrom = "Event office";
+    updatedComment.currentMessage.message = "Professor has rejected the edits.";
+    await updatedComment.save();
+    return res.status(200).json({
+      message: "Edits are rejected successfully",
       workshop: updatedComment,
     });
   } catch (error) {
@@ -296,4 +345,6 @@ export default {
   updateWorkshopStatus,
   getMyWorkshops,
   requestEdits,
+  acceptEdits,
+  rejectEdits,
 };

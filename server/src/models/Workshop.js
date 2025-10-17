@@ -38,6 +38,10 @@ const workshopSchema = new mongoose.Schema({
     default: "Pending",
   },
   registrationDeadline: { type: Date },
+  currentMessage: {
+    awaitingResponseFrom: { type: String, default: "" },
+    message: { type: String, default: "" },
+  },
   createdBy: { type: mongoose.Schema.ObjectId, ref: "User", required: true },
   createdAt: { type: Date, default: Date.now },
 });

@@ -280,7 +280,7 @@ const EventCard = ({
             </button>
           )}
 
-          {(isPlatformBooth || isBazaarBooth || isWorkshop) && (
+          {(isPlatformBooth || isBazaarBooth || isWorkshop || event.type === "trip" || event.type === "conference") && (
             <button
               onClick={() => onViewDetails(event.original)}
               className="text-xs font-semibold text-[#736CED] hover:text-[#4C3BCF] transition-colors"
