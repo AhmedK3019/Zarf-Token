@@ -1,5 +1,6 @@
 import Bazaar from "../models/Bazaar.js";
 import Joi from "joi";
+import Booth from "../models/Booth.js";
 
 const bazaarSchema = Joi.object({
   bazaarname: Joi.string().required(),
@@ -62,6 +63,7 @@ const deleteBazaar = async (req, res, next) => {
   try {
     const { id } = req.params;
     await Bazaar.findByIdAndDelete(id);
+    await Booth.deleteMany({ bazaarId: id });
     return res.json({ message: "bazaar is deleted successfully" });
   } catch (err) {
     next(err);

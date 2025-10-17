@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useParams } from "react-router-dom";
 import api from "../services/api";
 import { useAuthUser } from "../hooks/auth";
@@ -184,6 +184,9 @@ const AllEvents = () => {
   const [showDetailsModal, setShowDetailsModal] = useState(false);
   const [selectedEvent, setSelectedEvent] = useState(null);
 
+  // Guard against race conditions when switching filters during initial load
+  const lastFetchIdRef = useRef(0);
+
   // Registration Form State
   const [regName, setRegName] = useState(user?.name || "");
   const [regEmail, setRegEmail] = useState(user?.email || "");
@@ -213,6 +216,7 @@ const AllEvents = () => {
   // Fetch events based on category
   useEffect(() => {
     const fetchEventsByCategory = async () => {
+      const fetchId = ++lastFetchIdRef.current;
       setLoading(true);
       setError(null);
       setEvents([]);
@@ -223,6 +227,8 @@ const AllEvents = () => {
             ? "/allEvents/getAllEvents"
             : `/allEvents/getEventsByType/${selectedCategory}`;
         const response = await api.get(endpoint);
+        // Ignore if a newer request has been initiated
+        if (fetchId !== lastFetchIdRef.current) return;
         const eventsData = response.data || [];
         let visibleEvents;
         if (selectedCategory === "booths") {
@@ -239,9 +245,14 @@ const AllEvents = () => {
         setEvents(visibleEvents);
         setFilteredEvents(visibleEvents);
       } catch (err) {
-        setError("Failed to fetch events. Please try again.");
+        // Only report errors for the latest request
+        if (fetchId === lastFetchIdRef.current) {
+          setError("Failed to fetch events. Please try again.");
+        }
       } finally {
-        setLoading(false);
+        if (fetchId === lastFetchIdRef.current) {
+          setLoading(false);
+        }
       }
     };
     fetchEventsByCategory();
@@ -257,15 +268,22 @@ const AllEvents = () => {
     const lowercasedSearch = searchTerm.toLowerCase().trim();
     const filtered = events.filter((rawEvent) => {
       const event = getEventDetails(rawEvent);
+      let searchtype = "";
+      if (event.type === "booth") {
+        searchtype = "platform booth";
+      }
       return (
         event.name?.toLowerCase().includes(lowercasedSearch) ||
-        event.faculty?.toLowerCase().includes(lowercasedSearch) ||
+        `${event.createdBy?.firstname} ${event.createdBy?.lastname}`
+          .toLowerCase()
+          .includes(lowercasedSearch) ||
         event.professors?.some((prof) =>
-          prof.name?.toLowerCase().includes(lowercasedSearch)
+          `${prof.firstname} ${prof.lastname}`
+            .toLowerCase()
+            .includes(lowercasedSearch)
         ) ||
-        event.vendor?.toLowerCase().includes(lowercasedSearch) ||
-        event.location?.toLowerCase().includes(lowercasedSearch) ||
-        event.description?.toLowerCase().includes(lowercasedSearch)
+        event.type?.toLowerCase().includes(lowercasedSearch) ||
+        searchtype.toLowerCase().includes(lowercasedSearch)
       );
     });
     setFilteredEvents(filtered);
@@ -445,7 +463,7 @@ const AllEvents = () => {
             <div className="relative max-w-2xl mx-auto">
               <input
                 type="text"
-                placeholder="Search events by name, faculty, location, and more..."
+                placeholder="Search by event name, professor name, or event type..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 className="w-full px-6 py-4 pr-12 rounded-full border border-[#736CED] bg-white/70 focus:outline-none focus:ring-2 focus:ring-[#736CED]"

@@ -9,7 +9,6 @@ import {
   registerUser,
   getSessionsByMonth,
   unregisterUser,
-  generateMonthSessions,
   deleteMonthSessions,
 } from "../controllers/gymSessionController.js";
 
@@ -20,7 +19,6 @@ router.get("/", getSessions);
 router.get("/:id", getSessionById);
 router.put("/:id", authMiddleware, updateSession); // Events Office only
 router.get("/month/:month", getSessionsByMonth);
-router.post("/generate/:month", authMiddleware, generateMonthSessions); // Generate sessions for a month - Events Office only
 router.delete("/month/:month", authMiddleware, deleteMonthSessions); // Delete all sessions for a month - Events Office only
 router.delete("/:id", authMiddleware, deleteSession); // Events Office only
 

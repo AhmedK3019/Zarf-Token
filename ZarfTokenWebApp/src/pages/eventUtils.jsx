@@ -13,9 +13,9 @@ export const getEventDetails = (event) => {
 
   // Calculate duration for workshops based on start and end dates
   let duration = event.duration; // For booths that already have duration
-  
+
   // For workshops, calculate duration from start and end dates
-  if (event.type === 'workshop' && event.startdate && event.enddate) {
+  if (event.type === "workshop" && event.startdate && event.enddate) {
     const start = new Date(event.startdate);
     const end = new Date(event.enddate);
     const diffTime = Math.abs(end - start);
@@ -24,20 +24,23 @@ export const getEventDetails = (event) => {
   }
 
   // Handle registration deadline - check all possible field names
-  const registrationDeadline = 
-    event.registrationDeadline || 
-    event.registrationdeadline || 
-    event.registerationDeadline || 
+  const registrationDeadline =
+    event.registrationDeadline ||
+    event.registrationdeadline ||
+    event.registerationDeadline ||
     event.registerationdeadline;
 
   // Handle professors
   let professors = [];
-  if (event.professorsparticipating && event.professorsparticipating.length > 0) {
-    professors = event.professorsparticipating.map(prof => {
-      if (typeof prof === 'object' && prof.firstname) {
+  if (
+    event.professorsparticipating &&
+    event.professorsparticipating.length > 0
+  ) {
+    professors = event.professorsparticipating.map((prof) => {
+      if (typeof prof === "object" && prof.firstname) {
         return prof;
       } else {
-        return { firstname: 'Professor', lastname: 'Unavailable', email: '' };
+        return { firstname: "Professor", lastname: "Unavailable", email: "" };
       }
     });
   }
@@ -73,6 +76,7 @@ export const getEventDetails = (event) => {
     requiredFunding: event.requiredFunding || event.requiredbudget,
     extrarequiredfunding: event.extrarequiredfunding,
     extrarequiredresources: event.extrarequiredresources,
+    createdBy: event.createdBy,
   };
   return result;
 };
