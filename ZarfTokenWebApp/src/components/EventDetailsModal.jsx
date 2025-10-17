@@ -13,6 +13,7 @@ import {
   DollarSign,
   PlusCircle,
   ClockAlert,
+  Globe,
 } from "lucide-react";
 
 const localFormatDate = (date) => {
@@ -184,6 +185,98 @@ const EventDetailsModal = ({ event: rawEvent, onClose }) => {
               )}
             </div>
           )}
+          {/* TRIP DETAILS RENDER */}
+          {event.type === "trip" && (
+            <div className="space-y-4 text-[#312A68]">
+              <div className="flex items-start gap-3">
+                <Users size={16} className="mt-1 text-[#736CED] flex-shrink-0" />
+                <div>
+                  <span className="font-semibold">Registration Status:</span>
+                  <p className="text-sm mt-1">
+                    {event.attendees?.length || 0} of {event.capacity} people registered
+                    {event.capacity && (
+                      <span className="text-gray-600 ml-2">
+                        ({Math.round(((event.attendees?.length || 0) / event.capacity) * 100)}% full)
+                      </span>
+                    )}
+                  </p>
+                </div>
+              </div>
+
+              {event.description && (
+                <div className="flex items-start gap-3">
+                  <Info size={16} className="mt-1 text-[#736CED] flex-shrink-0" />
+                  <div>
+                    <span className="font-semibold">Full Description:</span>
+                    <p className="text-sm mt-1 whitespace-pre-wrap">{event.description}</p>
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
+          {/* CONFERENCE DETAILS RENDER */}
+          {event.type === "conference" && (
+            <div className="space-y-4 text-[#312A68]">
+              <div className="flex items-start gap-3">
+                <Clock size={16} className="mt-1 text-[#736CED] flex-shrink-0" />
+                <div><span className="font-semibold">Start Date:</span> {event.startDate ? localFormatDate(event.startDate) : 'N/A'}</div>
+              </div>
+
+              <div className="flex items-start gap-3">
+                <Calendar size={16} className="mt-1 text-[#736CED] flex-shrink-0" />
+                <div><span className="font-semibold">End Date:</span> {localFormatDate(event.endDate)}</div>
+              </div>
+
+              <div className="flex items-start gap-3">
+                <MapPin size={16} className="mt-1 text-[#736CED] flex-shrink-0" />
+                <div><span className="font-semibold">Location:</span> {event.location}</div>
+              </div>
+
+              {/* Conference Agenda */}
+              <div className="flex items-start gap-3">
+                <BookOpen size={16} className="mt-1 text-[#736CED] flex-shrink-0" />
+                <div>
+                  <span className="font-semibold">Conference Agenda:</span>
+                  <p className="text-sm whitespace-pre-wrap mt-1 bg-gray-50 p-3 rounded-md">{event.fullagenda || 'No agenda provided.'}</p>
+                </div>
+              </div>
+
+              {event.website && (
+                <div className="flex items-start gap-3">
+                  <Globe size={16} className="mt-1 text-[#736CED] flex-shrink-0" />
+                  <div>
+                    <span className="font-semibold">Conference Link:</span>
+                    <a href={event.website} target="_blank" rel="noopener noreferrer" className="text-sm text-[#736CED] hover:underline ml-2 block mt-1">
+                      {event.website}
+                    </a>
+                  </div>
+                </div>
+              )}
+
+              {event.fundingsource && (
+                <div className="flex items-start gap-3">
+                  <Briefcase size={16} className="mt-1 text-[#736CED] flex-shrink-0" />
+                  <div><span className="font-semibold">Funding Source:</span> {event.fundingsource}</div>
+                </div>
+              )}
+
+              {event.requiredFunding > 0 && (
+                <div className="flex items-start gap-3">
+                  <DollarSign size={16} className="mt-1 text-[#736CED] flex-shrink-0" />
+                  <div><span className="font-semibold">Required Budget:</span> {event.requiredFunding.toLocaleString()} EGP</div>
+                </div>
+              )}
+
+              {event.extrarequiredresources && (
+                <div className="flex items-start gap-3">
+                  <PlusCircle size={16} className="mt-1 text-[#736CED] flex-shrink-0" />
+                  <div><span className="font-semibold">Extra Required Resources:</span> {event.extrarequiredresources}</div>
+                </div>
+              )}
+            </div>
+          )}
+
+
         </div>
       </div>
     </div>

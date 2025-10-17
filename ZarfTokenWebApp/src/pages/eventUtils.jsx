@@ -69,9 +69,10 @@ export const getEventDetails = (event) => {
     duration: duration,
     boothSize: event.boothSize,
     fullagenda: event.fullagenda,
-    fundingsource: event.fundingsource,
-    requiredFunding: event.requiredFunding,
+    fundingsource: event.fundingsource || event.sourceoffunding,
+    requiredFunding: event.requiredFunding || event.requiredbudget,
     extrarequiredfunding: event.extrarequiredfunding,
+    extrarequiredresources: event.extrarequiredresources,
   };
   return result;
 };
