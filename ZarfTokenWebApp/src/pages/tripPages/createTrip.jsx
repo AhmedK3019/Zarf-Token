@@ -1,7 +1,8 @@
 import React, { useState } from "react";
-import { generatePath } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 
 function CreateTrip() {
+  const navigate = useNavigate();
   const [tripData, setTripData] = useState({
     tripname: "",
     startdate: "",
@@ -147,6 +148,7 @@ function CreateTrip() {
       });
       setSuccessMessage("Trip created successfully!");
       setError({});
+      navigate("/dashboard/eventsOffice/all-events");
     } catch (error) {
       setSuccessMessage("");
       setError({ general: error.message });
@@ -431,13 +433,24 @@ function CreateTrip() {
               )}
             </div>
           </div>
+          <div className="grid grid-cols-2 gap-4">
+            <button
+              type="submit"
+              className="w-full rounded-full border border-primary/40 bg-white px-4 py-2 text-lg font-semibold text-primary tracking-wide shadow-[0_12px_24px_rgba(115,108,237,0.25)] transition-transform hover:-translate-y-0.5 hover:bg-secondary/20 hover:shadow-[0_16px_30px_rgba(115,108,237,0.3)]"
+            >
+              Submit
+            </button>
 
-          <button
-            type="submit"
-            className="w-full rounded-full border border-primary/40 bg-white px-4 py-2 text-lg font-semibold text-primary tracking-wide shadow-[0_12px_24px_rgba(115,108,237,0.25)] transition-transform hover:-translate-y-0.5 hover:bg-secondary/20 hover:shadow-[0_16px_30px_rgba(115,108,237,0.3)]"
-          >
-            Submit
-          </button>
+            <button
+              type="button"
+              onClick={() => {
+                navigate(-1);
+              }}
+              className="w-full rounded-full border border-red-500 bg-red-500 px-4 py-2 text-lg font-semibold text-white tracking-wide shadow-[0_12px_24px_rgba(239,68,68,0.25)] transition-transform hover:-translate-y-0.5 hover:bg-red-600 hover:shadow-[0_16px_30px_rgba(239,68,68,0.3)]"
+            >
+              Cancel
+            </button>
+          </div>
         </form>
       </div>
     </div>
