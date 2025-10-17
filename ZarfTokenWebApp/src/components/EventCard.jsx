@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect } from "react";
 import { getEventDetails, formatSimpleDate } from "../pages/eventUtils";
+import { useNavigate } from "react-router-dom";
 import {
   Clock,
   MapPin,
@@ -23,6 +24,7 @@ const EventCard = ({
   onViewBooths,
   onViewDetails,
 }) => {
+  const navigate = useNavigate();
   const event = getEventDetails(rawEvent);
   const [isDescriptionExpanded, setIsDescriptionExpanded] = useState(false);
   const [hasOverflow, setHasOverflow] = useState(false);
@@ -31,6 +33,9 @@ const EventCard = ({
     (attendee) => attendee.userId === user?._id
   );
 
+  const onUpdate = (type) => {
+    navigate(`/dashboard/eventsOffice/edit-event/${type}/${event.id}`);
+  };
   // Check if description overflows one line
   useEffect(() => {
     if (descriptionRef.current && event.description) {
@@ -47,7 +52,12 @@ const EventCard = ({
       event.type === "conference" ||
       (event.type === "workshop" && event.attendees.length === 0) ||
       (event.type === "trip" && event.attendees.length === 0));
-
+  const canUpdate =
+    user?.role?.toLowerCase().includes("event") &&
+    (event.type === "bazaar" ||
+      event.type === "conference" ||
+      event.type === "trip") &&
+    new Date(event.startDate) > Date.now();
   const canRegister =
     userIsEligible &&
     (event.type === "trip" || event.type === "workshop") &&
@@ -57,7 +67,8 @@ const EventCard = ({
     (event.capacity ? event.attendees.length < event.capacity : true);
 
   const isBazaar = event.type === "bazaar";
-  const isPlatformBooth = event.type === "booth" && !event.original.isBazarBooth;
+  const isPlatformBooth =
+    event.type === "booth" && !event.original.isBazarBooth;
   const isBazaarBooth = event.type === "booth" && event.original.isBazarBooth;
   const isWorkshop = event.type === "workshop";
 
@@ -87,11 +98,14 @@ const EventCard = ({
 
           {isPlatformBooth && event.vendor && (
             <p className="flex items-center gap-2">
-              <Building size={16} className="mt-1 text-[#736CED] flex-shrink-0" />
+              <Building
+                size={16}
+                className="mt-1 text-[#736CED] flex-shrink-0"
+              />
               Vendor: {event.vendor}
             </p>
           )}
-          
+
           {event.location && !isBazaarBooth && (
             <p className="flex items-center gap-2">
               <MapPin size={16} className="mt-1 text-[#736CED] flex-shrink-0" />
@@ -101,7 +115,10 @@ const EventCard = ({
 
           {event.duration && event.type === "booth" && (
             <p className="flex items-center gap-2">
-              <Calendar size={16} className="mt-1 text-[#736CED] flex-shrink-0" />
+              <Calendar
+                size={16}
+                className="mt-1 text-[#736CED] flex-shrink-0"
+              />
               {event.duration} week{event.duration > 1 ? "s" : ""}
             </p>
           )}
@@ -115,7 +132,10 @@ const EventCard = ({
 
           {event.price > 0 && (
             <p className="flex items-center gap-2">
-              <DollarSign size={16} className="mt-1 text-[#736CED] flex-shrink-0" />
+              <DollarSign
+                size={16}
+                className="mt-1 text-[#736CED] flex-shrink-0"
+              />
               Price: {event.price} EGP
             </p>
           )}
@@ -123,18 +143,30 @@ const EventCard = ({
           {/* Simplified Date Display */}
           {event.startDate && (
             <div className="flex items-center gap-2">
-              <Calendar size={16} className="mt-1 text-[#736CED] flex-shrink-0" />
+              <Calendar
+                size={16}
+                className="mt-1 text-[#736CED] flex-shrink-0"
+              />
               <span>
                 Starts {formatSimpleDate(event.startDate)}
-                {event.duration && ` • ${event.duration} ${event.type === 'workshop' ? 'day' : 'week'}${event.duration === 1 ? '' : 's'}`}
+                {event.duration &&
+                  ` • ${event.duration} ${
+                    event.type === "workshop" ? "day" : "week"
+                  }${event.duration === 1 ? "" : "s"}`}
               </span>
             </div>
           )}
 
           {event.registrationDeadline && (
             <div className="flex items-center gap-2 text-[#E53E3E]">
-              <ClockAlert size={16} className="mt-1 text-[#E53E3E] flex-shrink-0" />
-              <span>Register by: {formatSimpleDate(new Date(event.registrationDeadline))}</span>
+              <ClockAlert
+                size={16}
+                className="mt-1 text-[#E53E3E] flex-shrink-0"
+              />
+              <span>
+                Register by:{" "}
+                {formatSimpleDate(new Date(event.registrationDeadline))}
+              </span>
             </div>
           )}
         </div>
@@ -197,6 +229,15 @@ const EventCard = ({
               className="text-xs bg-rose-50 text-rose-700 px-3 py-1 rounded-full hover:bg-rose-100 transition-colors"
             >
               Delete
+            </button>
+          )}
+
+          {canUpdate && (
+            <button
+              onClick={() => onUpdate(event.type)}
+              className="text-xs bg-purple-50 text-purple-700 px-3 py-1 rounded-full hover:bg-purple-100 transition-colors"
+            >
+              Update
             </button>
           )}
 

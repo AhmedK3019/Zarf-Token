@@ -11,7 +11,7 @@ import VendorRequests from "../adminPages/VendorRequests";
 import VendorPoll from "./VendorPoll";
 import GymSchedule from "../userPages/GymSchedule";
 import NotFound from "../NotFoundPage";
-
+import EditEvent from "./EditEvents";
 const mainDashboardEventsOffice = () => {
   return (
     <div>
@@ -29,6 +29,7 @@ const mainDashboardEventsOffice = () => {
           <Route path="vendor-requests" element={<VendorRequests />} />
           <Route path="vendor-poll" element={<VendorPoll />} />
           <Route path="gym-schedule" element={<GymSchedule />} />
+          <Route path="edit-event/:type/:id" element={<EditEvent />} />
           <Route path="*" element={<NotFound />}></Route>
         </Routes>
       </main>
