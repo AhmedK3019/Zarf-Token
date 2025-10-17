@@ -129,15 +129,15 @@ The project uses a carefully selected color palette to ensure visual consistency
 
 We distinguished Zarf Token through comprehensive role-based functionality and amazing workflow management:
 
-**Feature 1:**
+**Feature 1:** TBD in Sprints 2 and 3
 
-**Feature 2:**
+**Feature 2:** TBD in Sprints 2 and 3
 
-**Feature 3:**
+**Feature 3:** TBD in Sprints 2 and 3
 
-**Feature 4:**
+**Feature 4:** TBD in Sprints 2 and 3
 
-**Feature 5:**
+**Feature 5:** TBD in Sprints 2 and 3
 
 ## Code Examples
 
