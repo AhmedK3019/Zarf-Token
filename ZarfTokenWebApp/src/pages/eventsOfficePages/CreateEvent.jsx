@@ -1,14 +1,35 @@
 import React, { useState } from "react";
-import CreateBazaar from "../bazaarPages/createBazaar";
+import CreateBazaar from "../bazaarPages/CreateBazaar";
 import CreateConference from "../conferencePages/CreateConference";
 import CreateTrip from "../tripPages/CreateTrip";
 
 export default function CreateEvent() {
   const [currentForm, setCurrentForm] = useState("");
   const selectForm = () => {
-    if (currentForm === "Trip") return <CreateTrip />;
-    if (currentForm === "Bazaar") return <CreateBazaar />;
-    if (currentForm === "Conference") return <CreateConference />;
+    if (currentForm === "Trip")
+      return (
+        <CreateTrip
+          onCancel={() => {
+            setCurrentForm("");
+          }}
+        />
+      );
+    if (currentForm === "Bazaar")
+      return (
+        <CreateBazaar
+          onCancel={() => {
+            setCurrentForm("");
+          }}
+        />
+      );
+    if (currentForm === "Conference")
+      return (
+        <CreateConference
+          onCancel={() => {
+            setCurrentForm("");
+          }}
+        />
+      );
     return null;
   };
 

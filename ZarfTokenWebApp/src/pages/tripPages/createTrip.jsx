@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 
-function CreateTrip() {
+function CreateTrip({ onCancel }) {
   const navigate = useNavigate();
   const [tripData, setTripData] = useState({
     tripname: "",
@@ -443,9 +443,7 @@ function CreateTrip() {
 
             <button
               type="button"
-              onClick={() => {
-                navigate(-1);
-              }}
+              onClick={onCancel}
               className="w-full rounded-full border border-red-500 bg-red-500 px-4 py-2 text-lg font-semibold text-white tracking-wide shadow-[0_12px_24px_rgba(239,68,68,0.25)] transition-transform hover:-translate-y-0.5 hover:bg-red-600 hover:shadow-[0_16px_30px_rgba(239,68,68,0.3)]"
             >
               Cancel
