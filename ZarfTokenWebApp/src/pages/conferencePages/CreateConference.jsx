@@ -88,7 +88,7 @@ function CreateConference({ onCancel }) {
         extrarequiredresources: conferenceData.extrarequiredresources,
       };
       if (
-        new Date(conferenceData.enddate) - new Date(conferenceData.startdate) <=
+        new Date(conferenceData.enddate) - new Date(conferenceData.startdate) <
         0
       ) {
         setErrors({

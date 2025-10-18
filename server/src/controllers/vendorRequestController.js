@@ -1,6 +1,7 @@
 import VendorRequest from "../models/VendorRequest.js";
 import Vendor from "../models/Vendor.js";
 import Booth from "../models/Booth.js";
+import Bazaar from "../models/Bazaar.js";
 import {
   sendBoothApprovalEmail,
   sendBoothRejectionEmail,
@@ -10,6 +11,14 @@ import {
 const createBazarRequest = async (req, res, next) => {
   try {
     const vendorId = req.user?._id || req.user?.id;
+    const bazarId = req.params.bazarId;
+    const bazar = await Bazaar.findById(bazarId);
+    // calculate duration from bazar dates
+    // booth duration is an enum: "1 week", "2 weeks", "3 weeks"
+    // so round to nearest week
+    const duration = Math.round(
+      (bazar.enddate - bazar.startdate) / (1000 * 60 * 60 * 24 * 7)
+    );
     if (!vendorId)
       return res.status(401).json({ message: "Authentication required" });
 
@@ -27,6 +36,7 @@ const createBazarRequest = async (req, res, next) => {
       boothSize,
       boothname,
       isBazarBooth: true,
+      duration,
       bazarId: req.params.bazarId,
     });
     res.status(201).json(doc);

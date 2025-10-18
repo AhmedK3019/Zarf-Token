@@ -76,6 +76,7 @@ export const getEventDetails = (event) => {
     requiredFunding: event.requiredFunding || event.requiredbudget,
     extrarequiredfunding: event.extrarequiredfunding,
     extrarequiredresources: event.extrarequiredresources,
+    professorname: event.professorname,
     createdBy: event.createdBy,
   };
   return result;

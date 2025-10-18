@@ -51,7 +51,7 @@ export default function SignUpRequests() {
     if (!window.confirm("Are you sure you want to reject this request?"))
       return;
     try {
-      await api.delete(`/registerRequest/deleteRegisterRequest/${id}`);
+      await api.delete(`/registerRequests/deleteRegisterRequest/${id}`);
       setRequests((prev) => prev.filter((r) => r._id !== id));
       setMessage("Request rejected successfully");
       setTimeout(() => setMessage(null), 2500);

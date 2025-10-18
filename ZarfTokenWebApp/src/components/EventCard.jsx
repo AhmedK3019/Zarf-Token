@@ -89,6 +89,13 @@ const EventCard = ({
         <h3 className="text-xl font-bold text-[#4C3BCF] mb-3">{event.name}</h3>
 
         <div className="space-y-2 text-sm text-[#312A68]">
+          {event.type === "conference" && (
+            <p className="flex items-center gap-2">
+              <User size={16} className="mt-1 text-[#736CED] flex-shrink-0" />
+              {event.professorname}
+            </p>
+          )}
+
           {isBazaarBooth && event.original.bazarId && (
             <p className="flex items-center gap-2">
               <Store size={16} className="mt-1 text-[#736CED] flex-shrink-0" />
@@ -280,7 +287,11 @@ const EventCard = ({
             </button>
           )}
 
-          {(isPlatformBooth || isBazaarBooth || isWorkshop || event.type === "trip" || event.type === "conference") && (
+          {(isPlatformBooth ||
+            isBazaarBooth ||
+            isWorkshop ||
+            event.type === "trip" ||
+            event.type === "conference") && (
             <button
               onClick={() => onViewDetails(event.original)}
               className="text-xs font-semibold text-[#736CED] hover:text-[#4C3BCF] transition-colors"

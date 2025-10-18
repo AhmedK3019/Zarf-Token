@@ -1,16 +1,43 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import api from "../../services/api";
-import {X} from "lucide-react";
+import { X } from "lucide-react";
 import { useAuthUser } from "../../context/UserContext";
 import InteractiveMap from "./InteractiveMap"; // Corrected import path for InteractiveMap
 
-
 const boothLocations = [
-  { id: 'North West Platform Entrance', label: 'North West Platform', x: 17, y: 40, width: 8, height: 8 },
-  { id: 'West Platform Entrance', label: 'West Platform Entrance', x: 17, y: 57, width: 8, height: 8 },
-  { id: 'West Platform Alley', label: 'West Entrance Alley', x: 17, y: 65, width: 8, height: 8 },
-  { id: 'East Platform Alley', label: 'East PLatform Alley', x: 85, y: 62, width: 8, height: 8 },
+  {
+    id: "North West Platform Entrance",
+    label: "North West Platform",
+    x: 17,
+    y: 40,
+    width: 8,
+    height: 8,
+  },
+  {
+    id: "West Platform Entrance",
+    label: "West Platform Entrance",
+    x: 17,
+    y: 57,
+    width: 8,
+    height: 8,
+  },
+  {
+    id: "West Platform Alley",
+    label: "West Entrance Alley",
+    x: 17,
+    y: 65,
+    width: 8,
+    height: 8,
+  },
+  {
+    id: "East Platform Alley",
+    label: "East PLatform Alley",
+    x: 85,
+    y: 62,
+    width: 8,
+    height: 8,
+  },
 ];
 
 // Set the initial form state, defaulting to the first available location.
@@ -27,7 +54,7 @@ export default function ApplyBooth() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState(null);
   const [showSuccess, setShowSuccess] = useState(false);
-  const [successMessage, setSuccessMessage] = useState('');
+  const [successMessage, setSuccessMessage] = useState("");
   const navigate = useNavigate();
   const { user } = useAuthUser();
 
@@ -75,9 +102,11 @@ export default function ApplyBooth() {
     };
 
     try {
-      const token = localStorage.getItem('token');
+      const token = localStorage.getItem("token");
       if (!token) {
-        setError("You need to be logged in to submit an application. Please log in and try again.");
+        setError(
+          "You need to be logged in to submit an application. Please log in and try again."
+        );
         setIsSubmitting(false);
         return;
       }
@@ -87,12 +116,15 @@ export default function ApplyBooth() {
       setSuccessMessage(`Platform booth application submitted successfully!`);
       setShowSuccess(true);
       setFormData(initialFormState);
+      formData.attendees = [{ name: "", email: "" }];
       setTimeout(() => {
         setShowSuccess(false);
       }, 4000);
     } catch (err) {
       console.error("Application submission failed:", err);
-      const errorMessage = err.response?.data?.message || "There was an error submitting your application. Please try again.";
+      const errorMessage =
+        err.response?.data?.message ||
+        "There was an error submitting your application. Please try again.";
       setError(errorMessage);
     } finally {
       setIsSubmitting(false);
@@ -110,7 +142,8 @@ export default function ApplyBooth() {
                 Request a Platform Booth
               </h1>
               <p className="text-lg text-[#312A68] max-w-2xl mx-auto">
-                Apply for a standalone booth in the main student activity area by selecting a location on the map.
+                Apply for a standalone booth in the main student activity area
+                by selecting a location on the map.
               </p>
             </div>
 
@@ -122,22 +155,25 @@ export default function ApplyBooth() {
                     <p className="text-red-600 text-sm">{error}</p>
                   </div>
                 )}
-                
+
                 <div className="space-y-8">
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                     {/* Interactive Map */}
                     <div className="md:col-span-1">
-                      <InteractiveMap 
-                          locations={boothLocations}
-                          selectedLocation={formData.location}
-                          onLocationSelect={handleLocationSelect}
+                      <InteractiveMap
+                        locations={boothLocations}
+                        selectedLocation={formData.location}
+                        onLocationSelect={handleLocationSelect}
                       />
                     </div>
 
                     {/* Form Fields */}
                     <div className="space-y-6 md:col-span-1 mt-23">
-                       <div>
-                        <label htmlFor="boothname" className="block text-sm font-medium text-[#4C3BCF] mb-2">
+                      <div>
+                        <label
+                          htmlFor="boothname"
+                          className="block text-sm font-medium text-[#4C3BCF] mb-2"
+                        >
                           Booth Name *
                         </label>
                         <input
@@ -152,10 +188,19 @@ export default function ApplyBooth() {
                         />
                       </div>
                       <div>
-                        <label htmlFor="duration" className="block text-sm font-medium text-[#4C3BCF] mb-2">
+                        <label
+                          htmlFor="duration"
+                          className="block text-sm font-medium text-[#4C3BCF] mb-2"
+                        >
                           Duration (in weeks)
                         </label>
-                        <select id="duration" name="duration" value={formData.duration} onChange={handleFormChange} className="w-full rounded-lg border-2 border-gray-200 shadow-sm focus:border-[#736CED] focus:ring-[#736CED] text-[#312A68]">
+                        <select
+                          id="duration"
+                          name="duration"
+                          value={formData.duration}
+                          onChange={handleFormChange}
+                          className="w-full rounded-lg border-2 border-gray-200 shadow-sm focus:border-[#736CED] focus:ring-[#736CED] text-[#312A68]"
+                        >
                           <option value="1">1 Week</option>
                           <option value="2">2 Weeks</option>
                           <option value="3">3 Weeks</option>
@@ -164,10 +209,19 @@ export default function ApplyBooth() {
                       </div>
 
                       <div>
-                        <label htmlFor="boothSize" className="block text-sm font-medium text-[#4C3BCF] mb-2">
+                        <label
+                          htmlFor="boothSize"
+                          className="block text-sm font-medium text-[#4C3BCF] mb-2"
+                        >
                           Booth Size
                         </label>
-                        <select id="boothSize" name="boothSize" value={formData.boothSize} onChange={handleFormChange} className="w-full rounded-lg border-2 border-gray-200 shadow-sm focus:border-[#736CED] focus:ring-[#736CED] text-[#312A68]">
+                        <select
+                          id="boothSize"
+                          name="boothSize"
+                          value={formData.boothSize}
+                          onChange={handleFormChange}
+                          className="w-full rounded-lg border-2 border-gray-200 shadow-sm focus:border-[#736CED] focus:ring-[#736CED] text-[#312A68]"
+                        >
                           <option value="2x2">2x2</option>
                           <option value="4x4">4x4</option>
                         </select>
@@ -175,48 +229,84 @@ export default function ApplyBooth() {
                     </div>
                   </div>
 
-            <div>
-              <label className="block text-sm font-medium text-[#4C3BCF] mb-2">
-                Attendees (Max 5)
-              </label>
-              <div className="space-y-4">
-                {formData.attendees.map((attendee, index) => (
-                  <div key={index} className="flex items-center gap-4">
-                    <input type="text" placeholder={`Attendee ${index + 1} Name`} value={attendee.name} onChange={(e) => handleAttendeeChange(index, "name", e.target.value)} className="flex-1 rounded-lg border-2 border-gray-200 shadow-sm focus:border-[#736CED] focus:ring-[#736CED] text-[#312A68]" required />
-                    <input type="email" placeholder={`Attendee ${index + 1} Email`} value={attendee.email} onChange={(e) => handleAttendeeChange(index, "email", e.target.value)} className="flex-1 rounded-lg border-2 border-gray-200 shadow-sm focus:border-[#736CED] focus:ring-[#736CED] text-[#312A68]" required />
-                    {formData.attendees.length > 1 && (
-                       <button type="button" onClick={() => removeAttendee(index)} className="text-red-500 hover:text-red-700 font-bold p-1 rounded-full transition-colors"><X size={18}/></button>
+                  <div>
+                    <label className="block text-sm font-medium text-[#4C3BCF] mb-2">
+                      Attendees (Max 5)
+                    </label>
+                    <div className="space-y-4">
+                      {formData.attendees.map((attendee, index) => (
+                        <div key={index} className="flex items-center gap-4">
+                          <input
+                            type="text"
+                            placeholder={`Attendee ${index + 1} Name`}
+                            value={attendee.name}
+                            onChange={(e) =>
+                              handleAttendeeChange(
+                                index,
+                                "name",
+                                e.target.value
+                              )
+                            }
+                            className="flex-1 rounded-lg border-2 border-gray-200 shadow-sm focus:border-[#736CED] focus:ring-[#736CED] text-[#312A68]"
+                            required
+                          />
+                          <input
+                            type="email"
+                            placeholder={`Attendee ${index + 1} Email`}
+                            value={attendee.email}
+                            onChange={(e) =>
+                              handleAttendeeChange(
+                                index,
+                                "email",
+                                e.target.value
+                              )
+                            }
+                            className="flex-1 rounded-lg border-2 border-gray-200 shadow-sm focus:border-[#736CED] focus:ring-[#736CED] text-[#312A68]"
+                            required
+                          />
+                          {formData.attendees.length > 1 && (
+                            <button
+                              type="button"
+                              onClick={() => removeAttendee(index)}
+                              className="text-red-500 hover:text-red-700 font-bold p-1 rounded-full transition-colors"
+                            >
+                              <X size={18} />
+                            </button>
+                          )}
+                        </div>
+                      ))}
+                    </div>
+                    {formData.attendees.length < 5 && (
+                      <button
+                        type="button"
+                        onClick={addAttendee}
+                        className="mt-4 text-sm font-semibold text-[#736CED] hover:text-[#5A4BBA] transition-colors"
+                      >
+                        + Add Attendee
+                      </button>
                     )}
                   </div>
-                ))}
-              </div>
-              {formData.attendees.length < 5 && (
-                <button type="button" onClick={addAttendee} className="mt-4 text-sm font-semibold text-[#736CED] hover:text-[#5A4BBA] transition-colors">
-                  + Add Attendee
-                </button>
-              )}
-            </div>
-            
-            {error && (
-              <div className="p-4 bg-red-100 border-2 border-red-300 rounded-lg">
-                <p className="text-red-700 font-semibold flex items-center gap-2">
-                  <span className="text-red-500">⚠️</span>
-                  {error}
-                </p>
-              </div>
-            )}
-            
-            <div className="pt-6 border-t border-gray-200 flex justify-end">
-              <button
-                type="submit"
-                disabled={isSubmitting}
-                className="bg-[#736CED] text-white font-semibold py-3 px-8 rounded-lg hover:bg-[#5A4BBA] transition-all hover:shadow-[0_8px_20px_rgba(115,108,237,0.3)] disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                {isSubmitting ? "Submitting..." : "Submit Request"}
-              </button>
-            </div>
-          </div>
-        </form>
+
+                  {error && (
+                    <div className="p-4 bg-red-100 border-2 border-red-300 rounded-lg">
+                      <p className="text-red-700 font-semibold flex items-center gap-2">
+                        <span className="text-red-500">⚠️</span>
+                        {error}
+                      </p>
+                    </div>
+                  )}
+
+                  <div className="pt-6 border-t border-gray-200 flex justify-end">
+                    <button
+                      type="submit"
+                      disabled={isSubmitting}
+                      className="bg-[#736CED] text-white font-semibold py-3 px-8 rounded-lg hover:bg-[#5A4BBA] transition-all hover:shadow-[0_8px_20px_rgba(115,108,237,0.3)] disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      {isSubmitting ? "Submitting..." : "Submit Request"}
+                    </button>
+                  </div>
+                </div>
+              </form>
             </div>
           </div>
         </main>
@@ -228,14 +318,30 @@ export default function ApplyBooth() {
           <div className="bg-white rounded-2xl p-8 shadow-[0_25px_50px_rgba(115,108,237,0.4)] border border-[#D5CFE1] max-w-md mx-4 pointer-events-auto animate-fade-in">
             <div className="text-center">
               <div className="w-16 h-16 bg-gradient-to-r from-[#736CED] to-[#4C3BCF] rounded-full flex items-center justify-center mx-auto mb-4">
-                <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                <svg
+                  className="w-8 h-8 text-white"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M5 13l4 4L19 7"
+                  />
                 </svg>
               </div>
-              <h3 className="font-bold text-[#4C3BCF] text-xl mb-2">Submission Successful!</h3>
-              <p className="text-[#312A68] mb-4 leading-relaxed">{successMessage}</p>
-              <p className="text-[#736CED] text-sm">This message will close automatically in a few seconds.</p>
-              <button 
+              <h3 className="font-bold text-[#4C3BCF] text-xl mb-2">
+                Submission Successful!
+              </h3>
+              <p className="text-[#312A68] mb-4 leading-relaxed">
+                {successMessage}
+              </p>
+              <p className="text-[#736CED] text-sm">
+                This message will close automatically in a few seconds.
+              </p>
+              <button
                 onClick={() => setShowSuccess(false)}
                 className="absolute top-4 right-4 text-gray-400 hover:text-[#736CED] transition-colors"
               >

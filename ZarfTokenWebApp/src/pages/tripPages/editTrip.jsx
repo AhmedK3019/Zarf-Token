@@ -97,7 +97,7 @@ function EditTrip() {
         price: tripData.price,
         capacity: tripData.capacity,
       };
-      if (new Date(tripData.enddate) - new Date(tripData.startdate) <= 0) {
+      if (new Date(tripData.enddate) - new Date(tripData.startdate) < 0) {
         setError({
           general: "Start date should be before the end date",
         });

@@ -25,8 +25,8 @@ const workshopSchema = Joi.object({
   extrarequiredfunding: Joi.number().default(0),
   attendees: Joi.array().default([]),
   currentMessage: Joi.object({
-    awaitingResponseFrom: Joi.string().default(""),
-    message: Joi.string().default(""),
+    awaitingResponseFrom: Joi.string().allow(""),
+    message: Joi.string().allow(""),
   }),
 });
 
@@ -159,6 +159,7 @@ const updateWorkshop = async (req, res, next) => {
     }
     const { value, error } = workshopSchema.validate(normalizedBody);
     if (error) {
+      console.log(error);
       return res.status(400).json({ message: error.details[0].message });
     }
     const workshop = await WorkShop.findByIdAndUpdate(

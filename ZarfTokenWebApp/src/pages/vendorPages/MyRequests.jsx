@@ -341,9 +341,7 @@ export default function MyRequests() {
         setError(null);
 
         // Get my vendor requests by passing vendorId as query parameter
-        const response = await api.get(
-          `/vendorRequests/mine?vendorId=${user._id}`
-        );
+        const response = await api.get(`/vendorRequests/mine`);
 
         // Only filter by status (backend handles vendor filtering)
         const vendorRequests = response.data.filter(

@@ -1,4 +1,4 @@
-import {React, useState, useEffect } from "react";
+import { React, useState, useEffect } from "react";
 import api from "../../services/api";
 import { Calendar, MapPin, Clock, FileText, X } from "lucide-react";
 import { useAuthUser } from "../../context/UserContext";
@@ -11,11 +11,11 @@ const formatDateTime = (dateStr, timeStr) => {
 };
 
 const formatDate = (dateStr) => {
-    return new Date(dateStr).toLocaleDateString("en-US", {
-        month: "long",
-        day: "numeric",
-        year: "numeric"
-    });
+  return new Date(dateStr).toLocaleDateString("en-US", {
+    month: "long",
+    day: "numeric",
+    year: "numeric",
+  });
 };
 
 const initialFormState = {
@@ -24,36 +24,36 @@ const initialFormState = {
   boothname: "",
 };
 
-
 function SkeletonCard() {
-    return (
-      <div className="relative overflow-hidden rounded-2xl bg-[#FDFBFF] border border-white/40 shadow-lg animate-pulse">
-        <div className="bg-gray-300 px-6 py-5">
-          <div className="flex items-start justify-between gap-4">
-            <div className="flex-1 space-y-2">
-              <div className="h-4 bg-gray-400 rounded w-1/4"></div>
-              <div className="h-6 bg-gray-400 rounded w-3/4"></div>
-            </div>
-            <div className="h-6 bg-gray-400 rounded-full w-24"></div>
+  return (
+    <div className="relative overflow-hidden rounded-2xl bg-[#FDFBFF] border border-white/40 shadow-lg animate-pulse">
+      <div className="bg-gray-300 px-6 py-5">
+        <div className="flex items-start justify-between gap-4">
+          <div className="flex-1 space-y-2">
+            <div className="h-4 bg-gray-400 rounded w-1/4"></div>
+            <div className="h-6 bg-gray-400 rounded w-3/4"></div>
           </div>
-        </div>
-        <div className="px-6 py-6 space-y-4">
-          <div className="h-7 bg-gray-300 rounded w-5/6"></div>
-          <div className="space-y-2">
-            <div className="h-4 bg-gray-200 rounded w-full"></div>
-            <div className="h-4 bg-gray-200 rounded w-2/3"></div>
-          </div>
-          <div className="flex items-center justify-between gap-4 pt-2">
-            <div className="h-4 bg-gray-300 rounded w-1/2"></div>
-            <div className="h-10 bg-gray-300 rounded-full w-32"></div>
-          </div>
+          <div className="h-6 bg-gray-400 rounded-full w-24"></div>
         </div>
       </div>
-    );
+      <div className="px-6 py-6 space-y-4">
+        <div className="h-7 bg-gray-300 rounded w-5/6"></div>
+        <div className="space-y-2">
+          <div className="h-4 bg-gray-200 rounded w-full"></div>
+          <div className="h-4 bg-gray-200 rounded w-2/3"></div>
+        </div>
+        <div className="flex items-center justify-between gap-4 pt-2">
+          <div className="h-4 bg-gray-300 rounded w-1/2"></div>
+          <div className="h-10 bg-gray-300 rounded-full w-32"></div>
+        </div>
+      </div>
+    </div>
+  );
 }
 
 export default function UpcomingBazars() {
   const [bazaars, setBazaars] = useState([]);
+  const [myRequests, setMyRequests] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
@@ -61,17 +61,15 @@ export default function UpcomingBazars() {
   const [selectedBazaar, setSelectedBazaar] = useState(null);
   const [applicationData, setApplicationData] = useState(initialFormState);
   const [showSuccess, setShowSuccess] = useState(false);
-  const [successMessage, setSuccessMessage] = useState('');
+  const [successMessage, setSuccessMessage] = useState("");
   const { user } = useAuthUser();
-  
-  
 
   useEffect(() => {
     const fetchBazaars = async () => {
       setLoading(true);
       setError(null);
       try {
-        await new Promise(resolve => setTimeout(resolve, 800));
+        await new Promise((resolve) => setTimeout(resolve, 800));
         const response = await api.get("/bazaars/getAllBazaars");
         setBazaars(response.data.bazaar || []);
       } catch (err) {
@@ -81,8 +79,19 @@ export default function UpcomingBazars() {
         setLoading(false);
       }
     };
+    const fetchMyRequests = async () => {
+      try {
+        const response = await api.get(`/vendorRequests/mine`);
+        setMyRequests(response.data || []);
+      } catch (err) {
+        console.error("Failed to fetch my requests:", err);
+        setError("Failed to fetch your requests. Please try again later.");
+      }
+    };
     fetchBazaars();
-  }, []);
+    if (user) fetchMyRequests();
+    fetchMyRequests();
+  }, [user]);
 
   const handleOpenModal = (bazaar) => {
     setSelectedBazaar(bazaar);
@@ -111,49 +120,56 @@ export default function UpcomingBazars() {
   };
 
   const removeAttendee = (index) => {
-    const newAttendees = applicationData.attendees.filter((_, i) => i !== index);
+    const newAttendees = applicationData.attendees.filter(
+      (_, i) => i !== index
+    );
     setApplicationData({ ...applicationData, attendees: newAttendees });
   };
 
   const handleFormChange = (e) => {
     const { name, value } = e.target;
-    setApplicationData(prev => ({ ...prev, [name]: value }));
+    setApplicationData((prev) => ({ ...prev, [name]: value }));
   };
 
   const handleSubmitApplication = async (e) => {
     e.preventDefault();
-    
-    const payload = {
-        people: applicationData.attendees,
-        boothSize: applicationData.boothSize,
-        boothname: applicationData.boothname,
-        vendorId: user._id,
-    };
-    
-    try {
-        const token = localStorage.getItem('token');
-        if (!token) {
-          alert("You need to be logged in to submit an application. Please log in and try again.");
-          return;
-        }
-        
-        const url = `/vendorRequests/bazar/${selectedBazaar._id}`;
-        await api.post(url, payload);
 
-        
-        setSuccessMessage(`Application for ${selectedBazaar.bazaarname} submitted successfully!`);
-        setShowSuccess(true);
-        handleCloseModal();
-        
-        setTimeout(() => {
-          setShowSuccess(false);
-        }, 4000);
+    const payload = {
+      people: applicationData.attendees,
+      boothSize: applicationData.boothSize,
+      boothname: applicationData.boothname,
+      vendorId: user._id,
+    };
+
+    try {
+      const token = localStorage.getItem("token");
+      if (!token) {
+        alert(
+          "You need to be logged in to submit an application. Please log in and try again."
+        );
+        return;
+      }
+
+      const url = `/vendorRequests/bazar/${selectedBazaar._id}`;
+      await api.post(url, payload);
+
+      setSuccessMessage(
+        `Application for ${selectedBazaar.bazaarname} submitted successfully!`
+      );
+      setShowSuccess(true);
+      handleCloseModal();
+
+      setTimeout(() => {
+        setShowSuccess(false);
+      }, 4000);
     } catch (err) {
-        console.error("Application submission failed:", err);
-        console.error("Error details:", err.response?.data || err.message);
-        
-        const errorMessage = err.response?.data?.message || "There was an error submitting your application. Please try again.";
-        alert(`Error: ${errorMessage}`);
+      console.error("Application submission failed:", err);
+      console.error("Error details:", err.response?.data || err.message);
+
+      const errorMessage =
+        err.response?.data?.message ||
+        "There was an error submitting your application. Please try again.";
+      alert(`Error: ${errorMessage}`);
     }
   };
 
@@ -168,10 +184,11 @@ export default function UpcomingBazars() {
                 Bazaar Opportunities
               </h1>
               <p className="text-lg text-[#312A68] max-w-2xl mx-auto">
-                Explore upcoming bazaars and find the perfect opportunity for your business.
+                Explore upcoming bazaars and find the perfect opportunity for
+                your business.
               </p>
             </div>
-            
+
             {/* Bazaars Grid */}
             {loading ? (
               <div className="text-center py-12">
@@ -183,8 +200,12 @@ export default function UpcomingBazars() {
             ) : bazaars.length === 0 ? (
               <div className="text-center py-12">
                 <FileText className="w-16 h-16 text-[#736CED]/30 mx-auto mb-4" />
-                <p className="text-[#312A68] text-lg">No upcoming bazaars found.</p>
-                <p className="text-sm text-[#312A68]/70 mt-2">Please check back later for new opportunities.</p>
+                <p className="text-[#312A68] text-lg">
+                  No upcoming bazaars found.
+                </p>
+                <p className="text-sm text-[#312A68]/70 mt-2">
+                  Please check back later for new opportunities.
+                </p>
               </div>
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-12">
@@ -223,7 +244,7 @@ export default function UpcomingBazars() {
 
                       <p className="flex items-center gap-2 text-[#E53E3E]">
                         <Clock size={14} />
-                        Apply by: {formatDate(bazaar.registerdeadline)}
+                        Apply by: {formatDate(bazaar.registrationdeadline)}
                       </p>
                     </div>
 
@@ -233,15 +254,23 @@ export default function UpcomingBazars() {
                     </p>
 
                     {/* Apply Button */}
-                    <div className="mt-6">
-                      <button
-                        type="button"
-                        onClick={() => handleOpenModal(bazaar)}
-                        className="w-full px-4 py-2 bg-[#736CED] text-white rounded-lg font-semibold hover:bg-[#5A4BBA] transition-all hover:shadow-[0_8px_20px_rgba(115,108,237,0.3)]"
-                      >
-                        Apply for Booth
-                      </button>
-                    </div>
+                    {myRequests.some(
+                      (request) => request.bazarId._id === bazaar._id
+                    ) ? (
+                      <div className="mt-6">
+                        <p className="text-[#E53E3E]">You Already Applied</p>
+                      </div>
+                    ) : (
+                      <div className="mt-6">
+                        <button
+                          type="button"
+                          onClick={() => handleOpenModal(bazaar)}
+                          className="w-full px-4 py-2 bg-[#736CED] text-white rounded-lg font-semibold hover:bg-[#5A4BBA] transition-all hover:shadow-[0_8px_20px_rgba(115,108,237,0.3)]"
+                        >
+                          Apply for Booth
+                        </button>
+                      </div>
+                    )}
                   </div>
                 ))}
               </div>
@@ -260,53 +289,101 @@ export default function UpcomingBazars() {
                   <h2 className="text-2xl font-bold text-[#4C3BCF]">
                     Apply to {selectedBazaar.bazaarname}
                   </h2>
-                  <p className="text-sm text-[#312A68] mt-1">Fill in your booth details below.</p>
+                  <p className="text-sm text-[#312A68] mt-1">
+                    Fill in your booth details below.
+                  </p>
                 </div>
-                <button type="button" onClick={handleCloseModal} className="text-gray-400 hover:text-[#736CED] text-2xl transition-colors"><X size={24} /></button>
+                <button
+                  type="button"
+                  onClick={handleCloseModal}
+                  className="text-gray-400 hover:text-[#736CED] text-2xl transition-colors"
+                >
+                  <X size={24} />
+                </button>
               </div>
 
               <div className="mb-6">
-                <label htmlFor="boothname" className="block text-sm font-medium text-[#4C3BCF] mb-2">
+                <label
+                  htmlFor="boothname"
+                  className="block text-sm font-medium text-[#4C3BCF] mb-2"
+                >
                   Booth Name
                 </label>
-                <input 
-                  type="text" 
-                  id="boothname" 
-                  name="boothname" 
-                  value={applicationData.boothname} 
-                  onChange={handleFormChange} 
-                  placeholder="Enter your booth/shop name" 
-                  className="w-full rounded-lg border-2 border-gray-200 shadow-sm focus:border-[#736CED] focus:ring-[#736CED] text-[#312A68]" 
+                <input
+                  type="text"
+                  id="boothname"
+                  name="boothname"
+                  value={applicationData.boothname}
+                  onChange={handleFormChange}
+                  placeholder="Enter your booth/shop name"
+                  className="w-full rounded-lg border-2 border-gray-200 shadow-sm focus:border-[#736CED] focus:ring-[#736CED] text-[#312A68]"
                 />
               </div>
 
               <div className="mb-6">
-                <label htmlFor="boothSize" className="block text-sm font-medium text-[#4C3BCF] mb-2">
+                <label
+                  htmlFor="boothSize"
+                  className="block text-sm font-medium text-[#4C3BCF] mb-2"
+                >
                   Booth Size
                 </label>
-                <select id="boothSize" name="boothSize" value={applicationData.boothSize} onChange={handleFormChange} className="w-full rounded-lg border-2 border-gray-200 shadow-sm focus:border-[#736CED] focus:ring-[#736CED] text-[#312A68]">
+                <select
+                  id="boothSize"
+                  name="boothSize"
+                  value={applicationData.boothSize}
+                  onChange={handleFormChange}
+                  className="w-full rounded-lg border-2 border-gray-200 shadow-sm focus:border-[#736CED] focus:ring-[#736CED] text-[#312A68]"
+                >
                   <option value="2x2">2x2</option>
                   <option value="4x4">4x4</option>
                 </select>
               </div>
-              
+
               <div className="mb-6">
-                 <label className="block text-sm font-medium text-[#4C3BCF] mb-2">
+                <label className="block text-sm font-medium text-[#4C3BCF] mb-2">
                   Attendees (Max 5)
                 </label>
                 <div className="space-y-4">
                   {applicationData.attendees.map((attendee, index) => (
                     <div key={index} className="flex items-center gap-4">
-                      <input type="text" placeholder={`Attendee ${index + 1} Name`} value={attendee.name} onChange={(e) => handleAttendeeChange(index, "name", e.target.value)} className="flex-1 rounded-lg border-2 border-gray-200 shadow-sm focus:border-[#736CED] focus:ring-[#736CED] text-[#312A68]" required />
-                      <input type="email" placeholder={`Attendee ${index + 1} Email`} value={attendee.email} onChange={(e) => handleAttendeeChange(index, "email", e.target.value)} className="flex-1 rounded-lg border-2 border-gray-200 shadow-sm focus:border-[#736CED] focus:ring-[#736CED] text-[#312A68]" required />
+                      <input
+                        type="text"
+                        placeholder={`Attendee ${index + 1} Name`}
+                        value={attendee.name}
+                        onChange={(e) =>
+                          handleAttendeeChange(index, "name", e.target.value)
+                        }
+                        className="flex-1 rounded-lg border-2 border-gray-200 shadow-sm focus:border-[#736CED] focus:ring-[#736CED] text-[#312A68]"
+                        required
+                      />
+                      <input
+                        type="email"
+                        placeholder={`Attendee ${index + 1} Email`}
+                        value={attendee.email}
+                        onChange={(e) =>
+                          handleAttendeeChange(index, "email", e.target.value)
+                        }
+                        className="flex-1 rounded-lg border-2 border-gray-200 shadow-sm focus:border-[#736CED] focus:ring-[#736CED] text-[#312A68]"
+                        required
+                      />
                       {applicationData.attendees.length > 1 && (
-                         <button type="button" onClick={() => removeAttendee(index)} className="text-red-500 hover:text-red-700 font-bold p-1 rounded-full transition-colors"><X size={18}/></button>
+                        <button
+                          type="button"
+                          onClick={() => removeAttendee(index)}
+                          className="text-red-500 hover:text-red-700 font-bold p-1 rounded-full transition-colors"
+                        >
+                          <X size={18} />
+                        </button>
                       )}
                     </div>
                   ))}
                 </div>
                 {applicationData.attendees.length < 5 && (
-                  <button type="button" onClick={addAttendee} className="mt-4 text-sm font-semibold text-[#736CED] hover:text-[#5A4BBA] transition-colors">
+                  <button
+                    type="button"
+                    onClick={addAttendee}
+                    className="mt-4 text-sm font-semibold text-[#736CED] hover:text-[#5A4BBA] transition-colors"
+                  >
                     + Add Attendee
                   </button>
                 )}
@@ -338,14 +415,30 @@ export default function UpcomingBazars() {
           <div className="bg-white rounded-2xl p-8 shadow-[0_25px_50px_rgba(115,108,237,0.4)] border border-[#D5CFE1] max-w-md mx-4 pointer-events-auto animate-fade-in">
             <div className="text-center">
               <div className="w-16 h-16 bg-gradient-to-r from-[#736CED] to-[#4C3BCF] rounded-full flex items-center justify-center mx-auto mb-4">
-                <svg className="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                <svg
+                  className="w-8 h-8 text-white"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M5 13l4 4L19 7"
+                  />
                 </svg>
               </div>
-              <h3 className="font-bold text-[#4C3BCF] text-xl mb-2">Submission Successful!</h3>
-              <p className="text-[#312A68] mb-4 leading-relaxed">{successMessage}</p>
-              <p className="text-[#736CED] text-sm">This message will close automatically in a few seconds.</p>
-              <button 
+              <h3 className="font-bold text-[#4C3BCF] text-xl mb-2">
+                Submission Successful!
+              </h3>
+              <p className="text-[#312A68] mb-4 leading-relaxed">
+                {successMessage}
+              </p>
+              <p className="text-[#736CED] text-sm">
+                This message will close automatically in a few seconds.
+              </p>
+              <button
                 onClick={() => setShowSuccess(false)}
                 className="absolute top-4 right-4 text-gray-400 hover:text-[#736CED] transition-colors"
               >
