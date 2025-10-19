@@ -79,28 +79,58 @@ The project uses a carefully selected color palette to ensure visual consistency
 - **Primary Font:** Playfair Display:- Used for headings, titles, and emphasis elements
 - **Secondary Fonts:** TBD:- Used for body text, buttons, and UI components
 
-## Screenshots
+## Screenshots (Postman Tests)
 
-### Postman:
-### Create Court:
+### User Management
+
+#### Get All Users
 <div align="center">
-  <img src="docs/screenshots/createCourtB.jpg" alt="Zarf Token Landing Page" width="800"/>
-  <p><em>Postman CREATE Court Test</em></p>
+  <img src="docs/screenshots/getAllUser.png" alt="Postman Get All Users Test" width="800"/>
+  <p><em>Postman test for fetching all users (GET endpoint)</em></p>
 </div>
 
-### Delete Court:
+#### Delete User
 <div align="center">
-  <img src="docs/screenshots/deleteCourtB.jpg" alt="Feature Overview" width="800"/>
-  <p><em>Postman DELETE Court Test</em></p>
+  <img src="docs/screenshots/deleteUser.png" alt="Postman Delete User Test" width="800"/>
+  <p><em>Postman test for deleting a user (DELETE endpoint)</em></p>
 </div>
 
-### Get Court:
+---
+
+### Bazaar Management
+
+#### Create Bazaar
 <div align="center">
-  <img src="docs/screenshots/getCourtB.jpg" alt="Interface Design" width="800"/>
-  <p><em>Postman GET Court Test</em></p>
+  <img src="docs/screenshots/createBazzar.png" alt="Postman Create Bazaar Test" width="800"/>
+  <p><em>Postman test for creating a new bazaar (POST endpoint)</em></p>
 </div>
 
-> **Note:** Additional screenshots showcasing different user roles and functionalities will be added as features are completed during the development sprints.
+#### Update Bazaar
+<div align="center">
+  <img src="docs/screenshots/updateBazzar.png" alt="Postman Update Bazaar Test" width="800"/>
+  <p><em>Postman test for updating an existing bazaar (PUT endpoint)</em></p>
+</div>
+
+---
+
+### Authentication
+
+#### Signup Page
+<div align="center">
+  <img src="docs/screenshots/signupUser.png" alt="Signup Page Screenshot" width="800"/>
+  <p><em>Frontend signup allowing new user registration</em></p>
+</div>
+
+#### Login Page
+<div align="center">
+  <img src="docs/screenshots/loginUser.png" alt="Login Page Screenshot" width="800"/>
+  <p><em>Frontend login for existing users</em></p>
+</div>
+
+> **Note:**  
+> Additional screenshots will be added in upcoming sprints — including event creation, admin dashboard, and vendor workflows.
+
+
 
 ## Tech/Framework Used
 
@@ -139,27 +169,48 @@ We distinguished Zarf Token through comprehensive role-based functionality and a
 
 **Feature 5:** TBD in Sprints 2 and 3
 
+
 ## Code Examples
 
-*Code examples will be added to demonstrate key functionality patterns*
+*Code examples demonstrating key functionality patterns*
 
-**Example: User Authentication (Coming Soon)**
+**Example: Deleting a Bazaar**
 ```javascript
-// Authentication middleware example
-// Code snippet will be added here
+const deleteBazaar = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+    await Bazaar.findByIdAndDelete(id);
+    await Booth.deleteMany({ bazaarId: id });
+    return res.json({ message: "bazaar is deleted successfully" });
+  } catch (err) {
+    next(err);
+  }
+};
 ```
 
-**Example: Event Creation API (Coming Soon)**
+**Example: Getting All Courts**
 ```javascript
-// Event creation endpoint example
-// Code snippet will be added here
+export const getCourts = async (req, res) => {
+  const courts = await Court.find();
+  res.json(courts);
+};
 ```
 
-**Example: Role-Based Access Control (Coming Soon)**
+**Example: Getting All Bazaar Booths**
 ```javascript
-// RBAC implementation example
-// Code snippet will be added here
+export const getAllBazarsBooths = async (req, res) => {
+  try {
+    const booths = await Booth.find({ isBazarBooth: true })
+      .populate("vendorId")
+      .populate("bazarId");
+    res.json(booths);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};
 ```
+
+
 
 ## Installation
 
