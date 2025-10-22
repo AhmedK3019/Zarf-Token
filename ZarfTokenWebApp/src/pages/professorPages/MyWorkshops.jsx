@@ -199,7 +199,7 @@ export default function MyWorkshops() {
   useEffect(() => {
     const fetch = async () => {
       try {
-        const res = await api.get("/workshops/getAllWorkshops");
+        const res = await api.get("/workshops/getMyWorkshops");
         const items = res.data.myworkshops || res.data || [];
         const myId = user?._id || user?.id;
 
