@@ -19,6 +19,8 @@ const createBazarRequest = async (req, res, next) => {
     const duration = Math.round(
       (bazar.enddate - bazar.startdate) / (1000 * 60 * 60 * 24 * 7)
     );
+    if (duration < 1) duration = 1;
+    else if (duration > 4) duration = 4;
     if (!vendorId)
       return res.status(401).json({ message: "Authentication required" });
 
