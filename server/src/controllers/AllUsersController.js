@@ -65,11 +65,19 @@ const setNotificationRead = async (req, res, next) => {
     const userId = req.params.id;
     if (!userId)
       return res.status(401).json({ message: "Authentication required" });
-    const user = await User.findById(userId);
+    let user = await User.findById(userId);
+    if (!user) {
+      user = await Admin.findById(userId);
+    }
+    if (!user) {
+      user = await EventsOffice.findById(userId);
+    }
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
     const notificationId = req.params.notifId;
-    if (!user) return res.status(404).json({ message: "User not found" });
     user.notifications = user.notifications.map((n) =>
-      n.id.toString() === notificationId ? { ...n, isRead: true } : n
+      n._id.toString() === notificationId ? { ...n, isRead: true } : n
     );
     await user.save();
     res.json({ message: "Notification marked as read" });
@@ -84,10 +92,18 @@ const deleteNotification = async (req, res, next) => {
   try {
     if (!userId)
       return res.status(401).json({ message: "Authentication required" });
-    const user = await User.findById(userId);
-    if (!user) return res.status(404).json({ message: "User not found" });
+    let user = await User.findById(userId);
+    if (!user) {
+      user = await Admin.findById(userId);
+    }
+    if (!user) {
+      user = await EventsOffice.findById(userId);
+    }
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
     user.notifications = user.notifications.filter(
-      (n) => n.id.toString() !== notificationId
+      (n) => n._id.toString() !== notificationId
     );
     await user.save();
     res.json({ message: "Notification deleted successfully" });

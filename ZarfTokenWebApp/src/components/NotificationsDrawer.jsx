@@ -50,7 +50,7 @@ export default function NotificationsDrawer() {
     try {
       await api.put(`/allUsers/${user._id}/notifications/${id}/read`);
       setNotifications((prev) =>
-        prev.map((n) => (n.id === id ? { ...n, isRead: true } : n))
+        prev.map((n) => (n._id === id ? { ...n, isRead: true } : n))
       );
     } catch (err) {
       console.error("Error marking notification as read:", err);
@@ -61,7 +61,7 @@ export default function NotificationsDrawer() {
     if (!user?._id) return;
     try {
       await api.delete(`/allUsers/${user._id}/notifications/${id}`);
-      setNotifications((prev) => prev.filter((n) => n.id !== id));
+      setNotifications((prev) => prev.filter((n) => n._id !== id));
     } catch (err) {
       console.error("Error clearing notifications:", err);
     }
@@ -116,7 +116,7 @@ export default function NotificationsDrawer() {
               <ul className="space-y-3">
                 {notifications.map((note) => (
                   <li
-                    key={note.id}
+                    key={note._id}
                     className={`p-3 rounded-2xl border ${
                       note.isRead
                         ? "bg-gray-50 border-gray-200"
@@ -126,14 +126,14 @@ export default function NotificationsDrawer() {
                     <p className="text-sm text-[#312A68]">{note.message}</p>
                     {!note.isRead && (
                       <button
-                        onClick={() => markAsRead(note.id)}
+                        onClick={() => markAsRead(note._id)}
                         className="w-full text-left hover:underline hover:cursor-pointer rounded-md"
                       >
                         <p className="text-sm text-[#736CED]">mark as read</p>
                       </button>
                     )}
                     <button
-                      onClick={() => deleteNotification(note.id)}
+                      onClick={() => deleteNotification(note._id)}
                       className="w-full text-left hover:underline hover:cursor-pointer rounded-md"
                     >
                       <p className="text-sm text-[#FF0000]">delete message</p>
