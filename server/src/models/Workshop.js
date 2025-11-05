@@ -5,6 +5,7 @@ const registeredPeople = new mongoose.Schema({
   lastname: { type: String, required: true },
   email: { type: String, required: true },
   gucid: { type: String, required: true },
+  paid: { type: Boolean, default: false },
 });
 const workshopSchema = new mongoose.Schema({
   workshopname: { type: String, required: true },
@@ -44,6 +45,14 @@ const workshopSchema = new mongoose.Schema({
   },
   createdBy: { type: mongoose.Schema.ObjectId, ref: "User", required: true },
   createdAt: { type: Date, default: Date.now },
+  revenue: {
+    type: mongoose.Schema.Types.Decimal128,
+    default: mongoose.Types.Decimal128.fromString("0.00"),
+    // getter to return a plain number in JSON output
+    get: (v) => {
+      return v ? v.toString() : "0.00";
+    },
+  },
 });
 
 const Workshop = mongoose.model("Workshop", workshopSchema);
