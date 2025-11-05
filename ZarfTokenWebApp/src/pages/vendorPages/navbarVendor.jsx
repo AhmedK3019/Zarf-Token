@@ -6,6 +6,7 @@ import {
   ShoppingBag,
   List,
   CheckSquare,
+  SquarePlus,
   Star,
 } from "lucide-react";
 import logo from "../../assets/logo.png";
@@ -28,7 +29,7 @@ const NavbarVendor = ({ vendor }) => {
           onClick={handleLogout}
           aria-label="Logout"
           title="Logout"
-          className="-ml-2 mr-2 rounded-full p-1 text-primary hover:bg-black/5"
+          className="-ml-2 mr-2 rounded-full p-1 text-primary hover:bg-black/5 hover:cursor-pointer"
         >
           <LogOut className="h-6 w-6" />
         </button>
@@ -53,7 +54,7 @@ const NavbarVendor = ({ vendor }) => {
             }
             title="Apply for Booth"
           >
-            <ShoppingBag className="h-5 w-5" />
+            <SquarePlus className="h-5 w-5" />
           </NavLink>
           <NavLink
             to="/dashboard/vendor/my-requests"

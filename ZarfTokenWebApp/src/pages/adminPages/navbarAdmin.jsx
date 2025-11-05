@@ -30,7 +30,7 @@ const NavbarAdmin = () => {
           onClick={handleLogout}
           aria-label="Logout"
           title="Logout"
-          className="-ml-2 mr-2 rounded-full p-1 text-primary hover:bg-black/5"
+          className="-ml-2 mr-2 rounded-full p-1 text-primary hover:bg-black/5 hover:cursor-pointer"
         >
           <LogOut className="h-6 w-6" />
         </button>

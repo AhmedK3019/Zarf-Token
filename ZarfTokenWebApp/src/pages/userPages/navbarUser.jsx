@@ -6,11 +6,13 @@ import {
   Wallet,
   Heart,
   Bookmark,
+  Vote,
   CheckSquare,
   Star,
   ShoppingBag,
   Clock,
   PlusCircle,
+  Volleyball,
   List,
 } from "lucide-react";
 import logo from "../../assets/logo.png";
@@ -57,7 +59,7 @@ const NavbarUser = () => {
             onClick={handleLogout}
             aria-label="Logout"
             title="Logout"
-            className="-ml-2 mr-2 rounded-full p-1 text-primary hover:bg-black/5"
+            className="-ml-2 mr-2 rounded-full p-1 text-primary hover:bg-black/5 hover:cursor-pointer"
           >
             <LogOut className="h-6 w-6" />
           </button>
@@ -118,7 +120,7 @@ const NavbarUser = () => {
               }
               title="Vendors Poll"
             >
-              <ShoppingBag className="h-5 w-5" />
+              <Vote className="h-5 w-5" />
             </NavLink>
             <NavLink
               to="/dashboard/user/gym-schedule"
@@ -142,7 +144,7 @@ const NavbarUser = () => {
                 }
                 title="Courts"
               >
-                <Calendar className="h-5 w-5" />
+                <Volleyball className="h-5 w-5" />
               </NavLink>
             )}
 
