@@ -1,6 +1,17 @@
 import { NavLink, useNavigate } from "react-router-dom";
 import { useAuthUser } from "../../hooks/auth";
-import { LogOut } from "lucide-react";
+import {
+  LogOut,
+  Calendar,
+  PlusCircle,
+  FileText,
+  Archive,
+  QrCode,
+  Star,
+  Package,
+  BarChart,
+  Clock,
+} from "lucide-react";
 import logo from "../../assets/logo.png";
 import NotificationsDrawer from "../../components/NotificationsDrawer";
 
@@ -31,91 +42,100 @@ const NavbarEventsOffice = () => {
             to="/dashboard/eventsOffice/all-events"
             className={({ isActive }) =>
               isActive
-                ? "rounded-full bg-black/5 px-4 py-2 text-primary shadow-inner transform scale-100"
+                ? "rounded-full bg-black/5 px-3 py-2 text-primary shadow-inner transform scale-100"
                 : "transition-colors hover:text-primary transform hover:scale-105"
             }
+            title="All Events"
           >
-            All Events
+            <Calendar className="h-5 w-5" />
           </NavLink>
           <NavLink
             to="/dashboard/eventsOffice/create-event"
             className={({ isActive }) =>
               isActive
-                ? "rounded-full bg-black/5 px-4 py-2 text-primary shadow-inner transform scale-100"
+                ? "rounded-full bg-black/5 px-3 py-2 text-primary shadow-inner transform scale-100"
                 : "transition-colors hover:text-primary transform hover:scale-105"
             }
+            title="Create Event"
           >
-            Create Event
+            <PlusCircle className="h-5 w-5" />
           </NavLink>
           <NavLink
             to="/dashboard/eventsOffice/workshop-requests"
             className={({ isActive }) =>
               isActive
-                ? "rounded-full bg-black/5 px-4 py-2 text-primary shadow-inner transform scale-100"
+                ? "rounded-full bg-black/5 px-3 py-2 text-primary shadow-inner transform scale-100"
                 : "transition-colors hover:text-primary transform hover:scale-105"
             }
+            title="Workshop Requests"
           >
-            Workshop Requests
+            <FileText className="h-5 w-5" />
           </NavLink>
           <NavLink
             to="/dashboard/eventsOffice/archived-events"
             className={({ isActive }) =>
               isActive
-                ? "rounded-full bg-black/5 px-4 py-2 text-primary shadow-inner transform scale-100"
+                ? "rounded-full bg-black/5 px-3 py-2 text-primary shadow-inner transform scale-100"
                 : "transition-colors hover:text-primary transform hover:scale-105"
             }
+            title="Archived Events"
           >
-            Archived Events
+            <Archive className="h-5 w-5" />
           </NavLink>
           <NavLink
             to="/dashboard/eventsOffice/generate-qr"
             className={({ isActive }) =>
               isActive
-                ? "rounded-full bg-black/5 px-4 py-2 text-primary shadow-inner transform scale-100"
+                ? "rounded-full bg-black/5 px-3 py-2 text-primary shadow-inner transform scale-100"
                 : "transition-colors hover:text-primary transform hover:scale-105"
             }
+            title="Generate QR"
           >
-            Generate QR
+            <QrCode className="h-5 w-5" />
           </NavLink>
           <NavLink
             to="/dashboard/eventsOffice/loyalty-vendors"
             className={({ isActive }) =>
               isActive
-                ? "rounded-full bg-black/5 px-4 py-2 text-primary shadow-inner transform scale-100"
+                ? "rounded-full bg-black/5 px-3 py-2 text-primary shadow-inner transform scale-100"
                 : "transition-colors hover:text-primary transform hover:scale-105"
             }
+            title="Loyalty Vendors"
           >
-            Loyalty Vendors
+            <Star className="h-5 w-5" />
           </NavLink>
           <NavLink
             to="/dashboard/eventsOffice/vendor-requests"
             className={({ isActive }) =>
               isActive
-                ? "rounded-full bg-black/5 px-4 py-2 text-primary shadow-inner transform scale-100"
+                ? "rounded-full bg-black/5 px-3 py-2 text-primary shadow-inner transform scale-100"
                 : "transition-colors hover:text-primary transform hover:scale-105"
             }
+            title="Vendor Requests"
           >
-            Vendor Requests
+            <Package className="h-5 w-5" />
           </NavLink>
           <NavLink
             to="/dashboard/eventsOffice/vendor-poll"
             className={({ isActive }) =>
               isActive
-                ? "rounded-full bg-black/5 px-4 py-2 text-primary shadow-inner transform scale-100"
+                ? "rounded-full bg-black/5 px-3 py-2 text-primary shadow-inner transform scale-100"
                 : "transition-colors hover:text-primary transform hover:scale-105"
             }
+            title="Vendor Poll"
           >
-            Vendor Poll
+            <BarChart className="h-5 w-5" />
           </NavLink>
           <NavLink
             to="/dashboard/eventsOffice/gym-schedule"
             className={({ isActive }) =>
               isActive
-                ? "rounded-full bg-black/5 px-4 py-2 text-primary shadow-inner transform scale-100"
+                ? "rounded-full bg-black/5 px-3 py-2 text-primary shadow-inner transform scale-100"
                 : "transition-colors hover:text-primary transform hover:scale-105"
             }
+            title="Gym Schedule"
           >
-            Gym Schedule
+            <Clock className="h-5 w-5" />
           </NavLink>
         </nav>
       </header>

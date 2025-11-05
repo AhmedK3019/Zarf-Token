@@ -1,6 +1,13 @@
 import { NavLink, useNavigate } from "react-router-dom";
 import { useAuthUser } from "../../hooks/auth";
-import { LogOut } from "lucide-react";
+import {
+  LogOut,
+  Calendar,
+  ShoppingBag,
+  List,
+  CheckSquare,
+  Star,
+} from "lucide-react";
 import logo from "../../assets/logo.png";
 
 const NavbarVendor = ({ vendor }) => {
@@ -30,63 +37,69 @@ const NavbarVendor = ({ vendor }) => {
             to="/dashboard/vendor/upcoming-bazaars"
             className={({ isActive }) =>
               isActive
-                ? "rounded-full bg-black/5 px-4 py-2 text-primary shadow-inner transform scale-100"
+                ? "rounded-full bg-black/5 px-3 py-2 text-primary shadow-inner transform scale-100"
                 : "transition-colors hover:text-primary transform hover:scale-105"
             }
+            title="Upcoming Bazaars"
           >
-            Upcoming Bazaars
+            <Calendar className="h-5 w-5" />
           </NavLink>
           <NavLink
             to="/dashboard/vendor/apply-booth"
             className={({ isActive }) =>
               isActive
-                ? "rounded-full bg-black/5 px-4 py-2 text-primary shadow-inner transform scale-100"
+                ? "rounded-full bg-black/5 px-3 py-2 text-primary shadow-inner transform scale-100"
                 : "transition-colors hover:text-primary transform hover:scale-105"
             }
+            title="Apply for Booth"
           >
-            Apply for Booth
+            <ShoppingBag className="h-5 w-5" />
           </NavLink>
           <NavLink
             to="/dashboard/vendor/my-requests"
             className={({ isActive }) =>
               isActive
-                ? "rounded-full bg-black/5 px-4 py-2 text-primary shadow-inner transform scale-100"
+                ? "rounded-full bg-black/5 px-3 py-2 text-primary shadow-inner transform scale-100"
                 : "transition-colors hover:text-primary transform hover:scale-105"
             }
+            title="My Requests"
           >
-            My Requests
+            <List className="h-5 w-5" />
           </NavLink>
           <NavLink
             to="/dashboard/vendor/accepted-booths"
             className={({ isActive }) =>
               isActive
-                ? "rounded-full bg-black/5 px-4 py-2 text-primary shadow-inner transform scale-100"
+                ? "rounded-full bg-black/5 px-3 py-2 text-primary shadow-inner transform scale-100"
                 : "transition-colors hover:text-primary transform hover:scale-105"
             }
+            title="Accepted Booths"
           >
-            Accepted Booths
+            <CheckSquare className="h-5 w-5" />
           </NavLink>
           {vendor?.loyal ? (
             <NavLink
               to="/dashboard/vendor/cancel-loyalty"
               className={({ isActive }) =>
                 isActive
-                  ? "rounded-full bg-black/5 px-4 py-2 text-primary shadow-inner transform scale-100"
+                  ? "rounded-full bg-black/5 px-3 py-2 text-primary shadow-inner transform scale-100"
                   : "transition-colors hover:text-primary transform hover:scale-105"
               }
+              title="Cancel Loyalty Program"
             >
-              Cancel Loyalty Program
+              <Star className="h-5 w-5" />
             </NavLink>
           ) : (
             <NavLink
               to="/dashboard/vendor/apply-loyalty"
               className={({ isActive }) =>
                 isActive
-                  ? "rounded-full bg-black/5 px-4 py-2 text-primary shadow-inner transform scale-100"
+                  ? "rounded-full bg-black/5 px-3 py-2 text-primary shadow-inner transform scale-100"
                   : "transition-colors hover:text-primary transform hover:scale-105"
               }
+              title="Join Loyalty Program"
             >
-              Join Loyalty Program
+              <Star className="h-5 w-5" />
             </NavLink>
           )}
         </nav>

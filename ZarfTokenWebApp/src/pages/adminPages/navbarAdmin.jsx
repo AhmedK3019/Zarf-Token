@@ -1,6 +1,15 @@
 import { NavLink, useNavigate } from "react-router-dom";
 import { useAuthUser } from "../../hooks/auth";
-import { LogOut } from "lucide-react";
+import {
+  LogOut,
+  Calendar,
+  UserPlus,
+  Package,
+  Star,
+  Users,
+  ShieldUser,
+  FileUser,
+} from "lucide-react";
 import logo from "../../assets/logo.png";
 import NotificationsDrawer from "../../components/NotificationsDrawer";
 
@@ -31,71 +40,78 @@ const NavbarAdmin = () => {
             to="/dashboard/admin/all-events"
             className={({ isActive }) =>
               isActive
-                ? "rounded-full bg-black/5 px-4 py-2 text-primary shadow-inner transform scale-100"
+                ? "rounded-full bg-black/5 px-3 py-2 text-primary shadow-inner transform scale-100"
                 : "transition-colors hover:text-primary transform hover:scale-105"
             }
+            title="All Events"
           >
-            All Events
+            <Calendar className="h-5 w-5" />
           </NavLink>
           <NavLink
             to="/dashboard/admin/signup-requests"
             className={({ isActive }) =>
               isActive
-                ? "rounded-full bg-black/5 px-4 py-2 text-primary shadow-inner transform scale-100"
+                ? "rounded-full bg-black/5 px-3 py-2 text-primary shadow-inner transform scale-100"
                 : "transition-colors hover:text-primary transform hover:scale-105"
             }
+            title="SignUp Requests"
           >
-            SignUp Requests
+            <FileUser className="h-5 w-5" />
           </NavLink>
           <NavLink
             to="/dashboard/admin/vendor-requests"
             className={({ isActive }) =>
               isActive
-                ? "rounded-full bg-black/5 px-4 py-2 text-primary shadow-inner transform scale-100"
+                ? "rounded-full bg-black/5 px-3 py-2 text-primary shadow-inner transform scale-100"
                 : "transition-colors hover:text-primary transform hover:scale-105"
             }
+            title="Vendor Requests"
           >
-            Vendor Requests
+            <Package className="h-5 w-5" />
           </NavLink>
           <NavLink
             to="/dashboard/admin/loyalty-vendors"
             className={({ isActive }) =>
               isActive
-                ? "rounded-full bg-black/5 px-4 py-2 text-primary shadow-inner transform scale-100"
+                ? "rounded-full bg-black/5 px-3 py-2 text-primary shadow-inner transform scale-100"
                 : "transition-colors hover:text-primary transform hover:scale-105"
             }
+            title="Loyalty Vendors"
           >
-            Loyalty Vendors
+            <Star className="h-5 w-5" />
           </NavLink>
           <NavLink
             to="/dashboard/admin/all-users"
             className={({ isActive }) =>
               isActive
-                ? "rounded-full bg-black/5 px-4 py-2 text-primary shadow-inner transform scale-100"
+                ? "rounded-full bg-black/5 px-3 py-2 text-primary shadow-inner transform scale-100"
                 : "transition-colors hover:text-primary transform hover:scale-105"
             }
+            title="All Users"
           >
-            All Users
+            <Users className="h-5 w-5" />
           </NavLink>
           <NavLink
             to="/dashboard/admin/add-admin"
             className={({ isActive }) =>
               isActive
-                ? "rounded-full bg-black/5 px-4 py-2 text-primary shadow-inner transform scale-100"
+                ? "rounded-full bg-black/5 px-3 py-2 text-primary shadow-inner transform scale-100"
                 : "transition-colors hover:text-primary transform hover:scale-105"
             }
+            title="Add Admin | Officer"
           >
-            Add Admin | Officer
+            <UserPlus className="h-5 w-5" />
           </NavLink>
           <NavLink
             to="/dashboard/admin/all-admins"
             className={({ isActive }) =>
               isActive
-                ? "rounded-full bg-black/5 px-4 py-2 text-primary shadow-inner transform scale-100"
+                ? "rounded-full bg-black/5 px-3 py-2 text-primary shadow-inner transform scale-100"
                 : "transition-colors hover:text-primary transform hover:scale-105"
             }
+            title="All Admins & Officers"
           >
-            All Admins & Officers
+            <ShieldUser className="h-5 w-5" />
           </NavLink>
         </nav>
       </header>

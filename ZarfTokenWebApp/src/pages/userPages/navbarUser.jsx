@@ -1,6 +1,18 @@
 import { NavLink, useNavigate } from "react-router-dom";
 import { useAuthUser } from "../../hooks/auth"; // example context hook
-import { LogOut } from "lucide-react";
+import {
+  LogOut,
+  Calendar,
+  Wallet,
+  Heart,
+  Bookmark,
+  CheckSquare,
+  Star,
+  ShoppingBag,
+  Clock,
+  PlusCircle,
+  List,
+} from "lucide-react";
 import logo from "../../assets/logo.png";
 import NotificationsDrawer from "../../components/NotificationsDrawer";
 
@@ -34,71 +46,78 @@ const NavbarUser = () => {
             to="/dashboard/user/all-events"
             className={({ isActive }) =>
               isActive
-                ? "rounded-full bg-black/5 px-4 py-2 text-primary shadow-inner transform scale-100"
+                ? "rounded-full bg-black/5 px-3 py-2 text-primary shadow-inner transform scale-100"
                 : "transition-colors hover:text-primary transform hover:scale-105"
             }
+            title="All Events"
           >
-            All Events
+            <Calendar className="h-5 w-5" />
           </NavLink>
           <NavLink
             to="/dashboard/user/wallet"
             className={({ isActive }) =>
               isActive
-                ? "rounded-full bg-black/5 px-4 py-2 text-primary shadow-inner transform scale-100"
+                ? "rounded-full bg-black/5 px-3 py-2 text-primary shadow-inner transform scale-100"
                 : "transition-colors hover:text-primary transform hover:scale-105"
             }
+            title={`Wallet (${user.wallet || 0})`}
           >
-            Wallet (${user.wallet || 0})
+            <Wallet className="h-5 w-5" />
           </NavLink>
           <NavLink
             to="/dashboard/user/favourite-events"
             className={({ isActive }) =>
               isActive
-                ? "rounded-full bg-black/5 px-4 py-2 text-primary shadow-inner transform scale-100"
+                ? "rounded-full bg-black/5 px-3 py-2 text-primary shadow-inner transform scale-100"
                 : "transition-colors hover:text-primary transform hover:scale-105"
             }
+            title="Favourite Events"
           >
-            Favourite Events
+            <Heart className="h-5 w-5" />
           </NavLink>
           <NavLink
             to="/dashboard/user/registered-events"
             className={({ isActive }) =>
               isActive
-                ? "rounded-full bg-black/5 px-4 py-2 text-primary shadow-inner transform scale-100"
+                ? "rounded-full bg-black/5 px-3 py-2 text-primary shadow-inner transform scale-100"
                 : "transition-colors hover:text-primary transform hover:scale-105"
             }
+            title="Registered Events"
           >
-            Registered Events
+            <CheckSquare className="h-5 w-5" />
           </NavLink>
           <NavLink
             to="/dashboard/user/loyalty-program"
             className={({ isActive }) =>
               isActive
-                ? "rounded-full bg-black/5 px-4 py-2 text-primary shadow-inner transform scale-100"
+                ? "rounded-full bg-black/5 px-3 py-2 text-primary shadow-inner transform scale-100"
                 : "transition-colors hover:text-primary transform hover:scale-105"
             }
+            title="Loyalty Program"
           >
-            Loyalty Program
+            <Star className="h-5 w-5" />
           </NavLink>
           <NavLink
             to="/dashboard/user/vendors-poll"
             className={({ isActive }) =>
               isActive
-                ? "rounded-full bg-black/5 px-4 py-2 text-primary shadow-inner transform scale-100"
+                ? "rounded-full bg-black/5 px-3 py-2 text-primary shadow-inner transform scale-100"
                 : "transition-colors hover:text-primary transform hover:scale-105"
             }
+            title="Vendors Poll"
           >
-            Vendors Poll
+            <ShoppingBag className="h-5 w-5" />
           </NavLink>
           <NavLink
             to="/dashboard/user/gym-schedule"
             className={({ isActive }) =>
               isActive
-                ? "rounded-full bg-black/5 px-4 py-2 text-primary shadow-inner transform scale-100"
+                ? "rounded-full bg-black/5 px-3 py-2 text-primary shadow-inner transform scale-100"
                 : "transition-colors hover:text-primary transform hover:scale-105"
             }
+            title="Gym Schedule"
           >
-            Gym Schedule
+            <Clock className="h-5 w-5" />
           </NavLink>
 
           {user.role === "Student" && (
@@ -106,11 +125,12 @@ const NavbarUser = () => {
               to="/dashboard/user/courts"
               className={({ isActive }) =>
                 isActive
-                  ? "rounded-full bg-black/5 px-4 py-2 text-primary shadow-inner transform scale-100"
+                  ? "rounded-full bg-black/5 px-3 py-2 text-primary shadow-inner transform scale-100"
                   : "transition-colors hover:text-primary transform hover:scale-105"
               }
+              title="Courts"
             >
-              Courts
+              <Calendar className="h-5 w-5" />
             </NavLink>
           )}
 
@@ -120,21 +140,23 @@ const NavbarUser = () => {
                 to="/dashboard/user/create-workshop"
                 className={({ isActive }) =>
                   isActive
-                    ? "rounded-full bg-black/5 px-4 py-2 text-primary shadow-inner transform scale-100"
+                    ? "rounded-full bg-black/5 px-3 py-2 text-primary shadow-inner transform scale-100"
                     : "transition-colors hover:text-primary transform hover:scale-105"
                 }
+                title="Create Workshop"
               >
-                Create Workshop
+                <PlusCircle className="h-5 w-5" />
               </NavLink>
               <NavLink
                 to="/dashboard/user/my-workshops"
                 className={({ isActive }) =>
                   isActive
-                    ? "rounded-full bg-black/5 px-4 py-2 text-primary shadow-inner transform scale-100"
+                    ? "rounded-full bg-black/5 px-3 py-2 text-primary shadow-inner transform scale-100"
                     : "transition-colors hover:text-primary transform hover:scale-105"
                 }
+                title="My Workshops"
               >
-                My Workshops
+                <List className="h-5 w-5" />
               </NavLink>
             </>
           )}
