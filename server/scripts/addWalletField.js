@@ -21,6 +21,10 @@ dotenv.config({ path: path.resolve(__dirname, "../.env") });
 import mongoose from "mongoose";
 
 import User from "../src/models/User.js";
+import Workshop from "../src/models/Workshop.js";
+import Trip from "../src/models/Trip.js";
+import Bazaar from "../src/models/Bazaar.js";
+import Booth from "../src/models/Booth.js";
 
 async function run() {
   if (!process.env.MONGO_URI) {
@@ -69,6 +73,55 @@ async function run() {
   }
 
   console.log("Migration finished");
+  // === Add revenue to all events except Conference ===
+  // We consider the main event collections: Workshop, Trip, Bazaar, Booth, Court, GymSession, Reservation
+  const eventModels = [
+    { name: "Workshop", model: Workshop },
+    { name: "Trip", model: Trip },
+    { name: "Bazaar", model: Bazaar },
+    { name: "Booth", model: Booth },
+  ];
+
+  for (const em of eventModels) {
+    try {
+      const res = await em.model.updateMany(
+        { $or: [{ revenue: { $exists: false } }, { revenue: null }] },
+        { $set: { revenue: Decimal128.fromString("0.00") } }
+      );
+      console.log(
+        `Added revenue to ${
+          res.modifiedCount || res.nModified || 0
+        } documents in ${em.name}`
+      );
+    } catch (err) {
+      console.error(`Failed to add revenue to ${em.name}:`, err.message);
+    }
+  }
+
+  // === Ensure attendees have a boolean `paid` field (for event types with attendees) ===
+  // Workshop and Trip use an `attendees` array of subdocuments named `registeredPeople`.
+  const attendeeModels = [
+    { name: "Workshop", model: Workshop },
+    { name: "Trip", model: Trip },
+  ];
+
+  for (const am of attendeeModels) {
+    try {
+      // Update any array elements that are missing the `paid` field and set it to false.
+      const res = await am.model.updateMany(
+        { "attendees.paid": { $exists: false } },
+        { $set: { "attendees.$[elem].paid": false } },
+        { arrayFilters: [{ "elem.paid": { $exists: false } }], multi: true }
+      );
+      console.log(
+        `Set paid=false on ${
+          res.modifiedCount || res.nModified || 0
+        } attendee entries in ${am.name}`
+      );
+    } catch (err) {
+      console.error(`Failed to set paid flag for ${am.name}:`, err.message);
+    }
+  }
   await mongoose.disconnect();
 }
 
