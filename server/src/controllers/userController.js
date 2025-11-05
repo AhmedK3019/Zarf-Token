@@ -3,6 +3,7 @@ import RegisterRequest from "./registerRequestController.js";
 import Joi from "joi";
 import jwt from "jsonwebtoken";
 import { sendEmail } from "../utils/mailer.js";
+import { resolveFavourites } from "../utils/favourites.js";
 
 const JWT_SECRET = process.env.JWT_SECRET || "your-secret-key";
 const BACKEND_URL = process.env.BACKEND_URL || "http://localhost:3000";
@@ -188,12 +189,11 @@ const addFavourite = async (req, res, next) => {
 const getUserFavourites = async (req, res, next) => {
   try {
     const { id } = req.params;
-    const user = await User.findById(id, { favouriteEvents: 1 }).populate(
-      "favouriteEvents.itemId"
-    );
+    const user = await User.findById(id, { favouriteEvents: 1 });
     if (!user) return res.status(404).json({ message: "User not found" });
+    const resolved = await resolveFavourites(user.favouriteEvents || []);
 
-    return res.json({ favourites: user.favouriteEvents });
+    return res.json({ favourites: resolved });
   } catch (err) {
     next(err);
   }
