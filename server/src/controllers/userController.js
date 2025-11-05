@@ -164,6 +164,61 @@ const getUser = async (req, res, next) => {
   }
 };
 
+// Add favourite (req.params.id = userId)
+const addFavourite = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+    const { itemType, itemId } = req.body;
+    if (!itemType || !itemId)
+      return res.status(400).json({ message: "itemType and itemId required" });
+
+    const updated = await User.findByIdAndUpdate(
+      id,
+      { $addToSet: { favouriteEvents: { itemType, itemId } } },
+      { new: true }
+    ).select("-password -__v");
+
+    if (!updated) return res.status(404).json({ message: "User not found" });
+    return res.json({ message: "Added", user: updated });
+  } catch (err) {
+    next(err);
+  }
+};
+
+const getUserFavourites = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+    const user = await User.findById(id, { favouriteEvents: 1 }).populate(
+      "favouriteEvents.itemId"
+    );
+    if (!user) return res.status(404).json({ message: "User not found" });
+
+    return res.json({ favourites: user.favouriteEvents });
+  } catch (err) {
+    next(err);
+  }
+};
+
+const removeFavourite = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+    const { itemType, itemId } = req.body;
+    if (!itemType || !itemId)
+      return res.status(400).json({ message: "itemType and itemId required" });
+
+    const updated = await User.findByIdAndUpdate(
+      id,
+      { $pull: { favouriteEvents: { itemType, itemId } } },
+      { new: true }
+    ).select("-password -__v");
+
+    if (!updated) return res.status(404).json({ message: "User not found" });
+    return res.json({ message: "Removed", user: updated });
+  } catch (err) {
+    next(err);
+  }
+};
+
 const deleteUser = async (req, res, next) => {
   try {
     const { id } = req.params;
@@ -189,6 +244,9 @@ export default {
   signup,
   loginUser,
   getUsers,
+  addFavourite,
+  removeFavourite,
+  getUserFavourites,
   deleteUser,
   getProfessors,
   getUser,

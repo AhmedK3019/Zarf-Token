@@ -22,6 +22,16 @@ const userSchema = new mongoose.Schema({
     default: [],
   },
   createdAt: { type: Date, default: Date.now },
+  favouriteEvents: {
+    type: [
+      {
+        itemType: { type: String, required: true }, // model name you will use to resolve, e.g. 'Conference'
+        itemId: { type: mongoose.Schema.Types.ObjectId, required: true }, // plain ObjectId, no ref
+        addedAt: { type: Date, default: Date.now },
+      },
+    ],
+    default: [],
+  },
 });
 
 // Hash password before saving
