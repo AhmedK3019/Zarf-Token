@@ -3,7 +3,6 @@ import NavbarUser from "./navbarUser";
 import { useAuthUser } from "../../hooks/auth";
 
 import AllEvents from "../AllEvents";
-import Wallet from "../Wallet";
 import FavouriteEvents from "./FavouriteEvents";
 import RegisteredEvents from "./RegisteredEvents";
 import LoyaltyProgram from "./LoyaltyProgram";
@@ -24,7 +23,6 @@ const mainDashboardUser = () => {
         <Routes>
           <Route index element={<AllEvents />} />
           <Route path="/all-events" element={<AllEvents />} />
-          <Route path="/wallet" element={<Wallet />} />
           <Route path="/favourite-events" element={<FavouriteEvents />} />
           <Route path="/registered-events" element={<RegisteredEvents />} />
           <Route path="/loyalty-program" element={<LoyaltyProgram />} />

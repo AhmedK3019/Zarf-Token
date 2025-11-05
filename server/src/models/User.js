@@ -32,7 +32,20 @@ const userSchema = new mongoose.Schema({
     ],
     default: [],
   },
+  wallet: {
+    type: mongoose.Schema.Types.Decimal128,
+    default: mongoose.Types.Decimal128.fromString("0.00"),
+    // getter to return a plain number in JSON output
+    get: (v) => {
+      if (v == null) return 0;
+      // Decimal128 -> string, then parse to float
+      return parseFloat(v.toString());
+    },
+  },
 });
+
+// Ensure getters are applied when converting documents to JSON
+userSchema.set("toJSON", { getters: true });
 
 // Hash password before saving
 userSchema.pre("save", async function (next) {

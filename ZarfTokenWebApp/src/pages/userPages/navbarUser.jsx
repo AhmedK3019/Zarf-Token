@@ -21,6 +21,22 @@ const NavbarUser = () => {
   const { user, logout } = useAuthUser(); // { role, wallet, logout }
 
   if (!user) return null; // or a loading state
+  // Format wallet value for display. Keep two decimal places (e.g. 0.00).
+  const formatWallet = (w) => {
+    if (w === undefined || w === null) return "0.00";
+    try {
+      // Mongoose Decimal128 may come as an object whose toString yields the numeric string.
+      const raw =
+        typeof w === "object" && typeof w.toString === "function"
+          ? w.toString()
+          : w;
+      const num = Number(raw);
+      if (Number.isNaN(num)) return "0.00";
+      return num.toFixed(2);
+    } catch (e) {
+      return "0.00";
+    }
+  };
 
   const handleLogout = () => {
     logout();
@@ -29,141 +45,140 @@ const NavbarUser = () => {
 
   return (
     <div className="flex w-full justify-center pt-9 pb-4">
-      <header className="flex w-[86%] max-w-5xl min-w-[820px] items-center justify-center gap-8 rounded-full bg-white/95 px-5 py-2.5 shadow-[0_14px_32px_rgba(115,108,237,0.2)] backdrop-blur md:px-7">
-        <button
-          onClick={handleLogout}
-          aria-label="Logout"
-          title="Logout"
-          className="-ml-2 mr-2 rounded-full p-1 text-primary hover:bg-black/5"
-        >
-          <LogOut className="h-6 w-6" />
-        </button>
+      <div className="flex w-[86%] max-w-5xl min-w-[820px] items-center justify-between gap-4">
+        {/* Left: wallet display (not clickable) */}
+        <div className="flex items-center gap-2 text-sm font-medium text-primary/90">
+          <Wallet className="h-5 w-5 text-primary" />
+          <span className="font-semibold">{formatWallet(user.wallet)} EGP</span>
+        </div>
 
-        <nav className="hidden md:flex items-center gap-5 text-sm font-medium text-primary/80">
-          {/* map commonLinks into NavLinks for active styling */}
-          {/* Notifications removed from main nav; use the logo button on the right to open the drawer */}
-          <NavLink
-            to="/dashboard/user/all-events"
-            className={({ isActive }) =>
-              isActive
-                ? "rounded-full bg-black/5 px-3 py-2 text-primary shadow-inner transform scale-100"
-                : "transition-colors hover:text-primary transform hover:scale-105"
-            }
-            title="All Events"
+        <header className="flex flex-1 items-center justify-center gap-8 rounded-full bg-white/95 px-5 py-2.5 shadow-[0_14px_32px_rgba(115,108,237,0.2)] backdrop-blur md:px-7">
+          <button
+            onClick={handleLogout}
+            aria-label="Logout"
+            title="Logout"
+            className="-ml-2 mr-2 rounded-full p-1 text-primary hover:bg-black/5"
           >
-            <Calendar className="h-5 w-5" />
-          </NavLink>
-          <NavLink
-            to="/dashboard/user/wallet"
-            className={({ isActive }) =>
-              isActive
-                ? "rounded-full bg-black/5 px-3 py-2 text-primary shadow-inner transform scale-100"
-                : "transition-colors hover:text-primary transform hover:scale-105"
-            }
-            title={`Wallet (${user.wallet || 0})`}
-          >
-            <Wallet className="h-5 w-5" />
-          </NavLink>
-          <NavLink
-            to="/dashboard/user/favourite-events"
-            className={({ isActive }) =>
-              isActive
-                ? "rounded-full bg-black/5 px-3 py-2 text-primary shadow-inner transform scale-100"
-                : "transition-colors hover:text-primary transform hover:scale-105"
-            }
-            title="Favourite Events"
-          >
-            <Heart className="h-5 w-5" />
-          </NavLink>
-          <NavLink
-            to="/dashboard/user/registered-events"
-            className={({ isActive }) =>
-              isActive
-                ? "rounded-full bg-black/5 px-3 py-2 text-primary shadow-inner transform scale-100"
-                : "transition-colors hover:text-primary transform hover:scale-105"
-            }
-            title="Registered Events"
-          >
-            <CheckSquare className="h-5 w-5" />
-          </NavLink>
-          <NavLink
-            to="/dashboard/user/loyalty-program"
-            className={({ isActive }) =>
-              isActive
-                ? "rounded-full bg-black/5 px-3 py-2 text-primary shadow-inner transform scale-100"
-                : "transition-colors hover:text-primary transform hover:scale-105"
-            }
-            title="Loyalty Program"
-          >
-            <Star className="h-5 w-5" />
-          </NavLink>
-          <NavLink
-            to="/dashboard/user/vendors-poll"
-            className={({ isActive }) =>
-              isActive
-                ? "rounded-full bg-black/5 px-3 py-2 text-primary shadow-inner transform scale-100"
-                : "transition-colors hover:text-primary transform hover:scale-105"
-            }
-            title="Vendors Poll"
-          >
-            <ShoppingBag className="h-5 w-5" />
-          </NavLink>
-          <NavLink
-            to="/dashboard/user/gym-schedule"
-            className={({ isActive }) =>
-              isActive
-                ? "rounded-full bg-black/5 px-3 py-2 text-primary shadow-inner transform scale-100"
-                : "transition-colors hover:text-primary transform hover:scale-105"
-            }
-            title="Gym Schedule"
-          >
-            <Clock className="h-5 w-5" />
-          </NavLink>
+            <LogOut className="h-6 w-6" />
+          </button>
 
-          {user.role === "Student" && (
+          <nav className="hidden md:flex items-center gap-5 text-sm font-medium text-primary/80">
+            {/* map commonLinks into NavLinks for active styling */}
+            {/* Notifications removed from main nav; use the logo button on the right to open the drawer */}
             <NavLink
-              to="/dashboard/user/courts"
+              to="/dashboard/user/all-events"
               className={({ isActive }) =>
                 isActive
                   ? "rounded-full bg-black/5 px-3 py-2 text-primary shadow-inner transform scale-100"
                   : "transition-colors hover:text-primary transform hover:scale-105"
               }
-              title="Courts"
+              title="All Events"
             >
               <Calendar className="h-5 w-5" />
             </NavLink>
-          )}
+            <NavLink
+              to="/dashboard/user/favourite-events"
+              className={({ isActive }) =>
+                isActive
+                  ? "rounded-full bg-black/5 px-3 py-2 text-primary shadow-inner transform scale-100"
+                  : "transition-colors hover:text-primary transform hover:scale-105"
+              }
+              title="Favourite Events"
+            >
+              <Heart className="h-5 w-5" />
+            </NavLink>
+            <NavLink
+              to="/dashboard/user/registered-events"
+              className={({ isActive }) =>
+                isActive
+                  ? "rounded-full bg-black/5 px-3 py-2 text-primary shadow-inner transform scale-100"
+                  : "transition-colors hover:text-primary transform hover:scale-105"
+              }
+              title="Registered Events"
+            >
+              <CheckSquare className="h-5 w-5" />
+            </NavLink>
+            <NavLink
+              to="/dashboard/user/loyalty-program"
+              className={({ isActive }) =>
+                isActive
+                  ? "rounded-full bg-black/5 px-3 py-2 text-primary shadow-inner transform scale-100"
+                  : "transition-colors hover:text-primary transform hover:scale-105"
+              }
+              title="Loyalty Program"
+            >
+              <Star className="h-5 w-5" />
+            </NavLink>
+            <NavLink
+              to="/dashboard/user/vendors-poll"
+              className={({ isActive }) =>
+                isActive
+                  ? "rounded-full bg-black/5 px-3 py-2 text-primary shadow-inner transform scale-100"
+                  : "transition-colors hover:text-primary transform hover:scale-105"
+              }
+              title="Vendors Poll"
+            >
+              <ShoppingBag className="h-5 w-5" />
+            </NavLink>
+            <NavLink
+              to="/dashboard/user/gym-schedule"
+              className={({ isActive }) =>
+                isActive
+                  ? "rounded-full bg-black/5 px-3 py-2 text-primary shadow-inner transform scale-100"
+                  : "transition-colors hover:text-primary transform hover:scale-105"
+              }
+              title="Gym Schedule"
+            >
+              <Clock className="h-5 w-5" />
+            </NavLink>
 
-          {user.role === "Professor" && (
-            <>
+            {user.role === "Student" && (
               <NavLink
-                to="/dashboard/user/create-workshop"
+                to="/dashboard/user/courts"
                 className={({ isActive }) =>
                   isActive
                     ? "rounded-full bg-black/5 px-3 py-2 text-primary shadow-inner transform scale-100"
                     : "transition-colors hover:text-primary transform hover:scale-105"
                 }
-                title="Create Workshop"
+                title="Courts"
               >
-                <PlusCircle className="h-5 w-5" />
+                <Calendar className="h-5 w-5" />
               </NavLink>
-              <NavLink
-                to="/dashboard/user/my-workshops"
-                className={({ isActive }) =>
-                  isActive
-                    ? "rounded-full bg-black/5 px-3 py-2 text-primary shadow-inner transform scale-100"
-                    : "transition-colors hover:text-primary transform hover:scale-105"
-                }
-                title="My Workshops"
-              >
-                <List className="h-5 w-5" />
-              </NavLink>
-            </>
-          )}
-        </nav>
-      </header>
-      <div className="flex px-4 items-center gap-2 text-sm font-medium">
-        <NotificationsDrawer />
+            )}
+
+            {user.role === "Professor" && (
+              <>
+                <NavLink
+                  to="/dashboard/user/create-workshop"
+                  className={({ isActive }) =>
+                    isActive
+                      ? "rounded-full bg-black/5 px-3 py-2 text-primary shadow-inner transform scale-100"
+                      : "transition-colors hover:text-primary transform hover:scale-105"
+                  }
+                  title="Create Workshop"
+                >
+                  <PlusCircle className="h-5 w-5" />
+                </NavLink>
+                <NavLink
+                  to="/dashboard/user/my-workshops"
+                  className={({ isActive }) =>
+                    isActive
+                      ? "rounded-full bg-black/5 px-3 py-2 text-primary shadow-inner transform scale-100"
+                      : "transition-colors hover:text-primary transform hover:scale-105"
+                  }
+                  title="My Workshops"
+                >
+                  <List className="h-5 w-5" />
+                </NavLink>
+              </>
+            )}
+          </nav>
+        </header>
+
+        {/* Right: notifications drawer */}
+        <div className="flex px-4 items-center gap-2 text-sm font-medium">
+          <NotificationsDrawer />
+        </div>
       </div>
     </div>
   );
