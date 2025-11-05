@@ -62,14 +62,35 @@ const deleteUserById = async (req, res, next) => {
 
 const setNotificationRead = async (req, res, next) => {
   try {
-    const userId = req.user?._id || req.user?.id;
+    const userId = req.params.id;
+    if (!userId)
+      return res.status(401).json({ message: "Authentication required" });
+    const user = await User.findById(userId);
+    const notificationId = req.params.notifId;
+    if (!user) return res.status(404).json({ message: "User not found" });
+    user.notifications = user.notifications.map((n) =>
+      n.id.toString() === notificationId ? { ...n, isRead: true } : n
+    );
+    await user.save();
+    res.json({ message: "Notification marked as read" });
+  } catch (error) {
+    next(error);
+  }
+};
+
+const deleteNotification = async (req, res, next) => {
+  const userId = req.params.id;
+  const notificationId = req.params.notificationId;
+  try {
     if (!userId)
       return res.status(401).json({ message: "Authentication required" });
     const user = await User.findById(userId);
     if (!user) return res.status(404).json({ message: "User not found" });
-    user.notifications = user.notifications.map((n) => ({ ...n, read: true }));
+    user.notifications = user.notifications.filter(
+      (n) => n.id.toString() !== notificationId
+    );
     await user.save();
-    res.json({ message: "Notifications marked as read" });
+    res.json({ message: "Notification deleted successfully" });
   } catch (error) {
     next(error);
   }
@@ -136,6 +157,7 @@ export default {
   getUserById,
   deleteUserById,
   setNotificationRead,
+  deleteNotification,
   getAllAdminsAndOfficers,
   loginUser,
 };

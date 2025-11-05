@@ -1,6 +1,7 @@
 import { NavLink, useNavigate } from "react-router-dom";
 import { useAuthUser } from "../../hooks/auth";
 import logo from "../../assets/logo.png";
+import NotificationsDrawer from "../../components/NotificationsDrawer";
 
 const NavbarEventsOffice = () => {
   const { user } = useAuthUser();
@@ -15,16 +16,7 @@ const NavbarEventsOffice = () => {
           className="h-8 w-8 rounded-full bg-primary/10 p-1"
         />
         <nav className="hidden md:flex items-center gap-5 text-sm font-medium text-primary/80">
-          <NavLink
-            to="/dashboard/eventsOffice/notifications"
-            className={({ isActive }) =>
-              isActive
-                ? "rounded-full bg-black/5 px-4 py-2 text-primary shadow-inner transform scale-100"
-                : "transition-colors hover:text-primary transform hover:scale-105"
-            }
-          >
-            Notifications
-          </NavLink>
+          {/* Notifications removed from main nav; use the logo button on the right to open the drawer */}
           <NavLink
             to="/dashboard/eventsOffice/all-events"
             className={({ isActive }) =>
@@ -118,6 +110,7 @@ const NavbarEventsOffice = () => {
         </nav>
       </header>
       <div className="flex px-4 items-center gap-2 text-sm font-medium">
+        <NotificationsDrawer />
         <LogoutButton />
       </div>
     </div>

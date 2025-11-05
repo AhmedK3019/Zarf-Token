@@ -1,64 +1,12 @@
 import { NavLink, useNavigate } from "react-router-dom";
 import { useAuthUser } from "../../hooks/auth"; // example context hook
 import logo from "../../assets/logo.png";
+import NotificationsDrawer from "../../components/NotificationsDrawer";
 
 const NavbarUser = () => {
   const { user } = useAuthUser(); // { role, wallet }
 
   if (!user) return null; // or a loading state
-
-  const commonLinks = (
-    <>
-      <NavLink
-        to="/dashboard/user/notifications"
-        className="rounded-full bg-primary/10 px-4 py-2 text-primary shadow-inner"
-      >
-        Notifications
-      </NavLink>
-      <NavLink
-        to="/dashboard/user/all-events"
-        className="transition-colors hover:text-primary"
-      >
-        All Events
-      </NavLink>
-      <NavLink
-        to="/dashboard/user/wallet"
-        className="transition-colors hover:text-primary"
-      >
-        Wallet (${user.wallet || 0})
-      </NavLink>
-      <NavLink
-        to="/dashboard/user/favourite-events"
-        className="transition-colors hover:text-primary"
-      >
-        Favourite Events
-      </NavLink>
-      <NavLink
-        to="/dashboard/user/registered-events"
-        className="transition-colors hover:text-primary"
-      >
-        Registered Events
-      </NavLink>
-      <NavLink
-        to="/dashboard/user/loyalty-program"
-        className="transition-colors hover:text-primary"
-      >
-        Loyalty Program
-      </NavLink>
-      <NavLink
-        to="/dashboard/user/vendors-poll"
-        className="transition-colors hover:text-primary"
-      >
-        Vendors Poll
-      </NavLink>
-      <NavLink
-        to="/dashboard/user/gym-schedule"
-        className="transition-colors hover:text-primary"
-      >
-        Gym Schedule
-      </NavLink>
-    </>
-  );
 
   return (
     <div className="flex w-full justify-center pt-9 pb-4">
@@ -71,16 +19,7 @@ const NavbarUser = () => {
 
         <nav className="hidden md:flex items-center gap-5 text-sm font-medium text-primary/80">
           {/* map commonLinks into NavLinks for active styling */}
-          <NavLink
-            to="/dashboard/user/notifications"
-            className={({ isActive }) =>
-              isActive
-                ? "rounded-full bg-black/5 px-4 py-2 text-primary shadow-inner transform scale-100"
-                : "transition-colors hover:text-primary transform hover:scale-105"
-            }
-          >
-            Notifications
-          </NavLink>
+          {/* Notifications removed from main nav; use the logo button on the right to open the drawer */}
           <NavLink
             to="/dashboard/user/all-events"
             className={({ isActive }) =>
@@ -192,6 +131,7 @@ const NavbarUser = () => {
         </nav>
       </header>
       <div className="flex px-4 items-center gap-2 text-sm font-medium">
+        <NotificationsDrawer />
         <LogoutButton />
       </div>
     </div>
