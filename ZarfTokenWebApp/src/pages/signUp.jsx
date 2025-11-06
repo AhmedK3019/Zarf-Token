@@ -416,7 +416,7 @@ export default function SignUp() {
   ];
 
   return (
-    <div className="relative min-h-screen w-full overflow-hidden bg-muted text-primary">
+    <div className="relative min-h-screen w-full overflow-hidden bg-[#D5CFE1] text-primary">
       <div className="pointer-events-none absolute left-1/2 top-[-20%] h-[420px] w-[120%] -translate-x-1/2 rounded-[50%] bg-gradient-to-r from-primary via-info to-secondary opacity-40 blur-3xl" />
       <div className="pointer-events-none absolute bottom-[-18%] left-1/2 h-[360px] w-[110%] -translate-x-1/2 rounded-[50%] bg-gradient-to-r from-secondary via-primary to-info opacity-40 blur-3xl" />
 

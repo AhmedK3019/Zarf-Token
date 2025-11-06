@@ -64,7 +64,7 @@ const LandingPage = () => {
   ];
 
   return (
-    <div className="min-h-screen w-full overflow-hidden bg-info/20 text-primary">
+    <div className="min-h-screen w-full overflow-hidden bg-[#D5CFE1] text-primary">
       <div className="relative flex min-h-screen w-full flex-col items-center">
         <div className="pointer-events-none absolute inset-0 -z-10">
           <div className="absolute left-1/2 top-[-30%] h-[420px] w-[120%] -translate-x-1/2 rounded-[55%] bg-gradient-to-r from-info/40 via-info/20 to-info/35 blur-3xl" />
