@@ -11,9 +11,9 @@ import NotFound from "../NotFoundPage";
 
 const mainDashboardAdmin = () => {
   return (
-    <div>
+    <div className="min-h-screen bg-[#f5f5f7]">
       <NavbarAdmin />
-      <main className="max-w-5xl mx-auto mt-6 px-4">
+      <main>
         <Routes>
           <Route index element={<AllEvents />} />
           <Route path="/all-events" element={<AllEvents />} />

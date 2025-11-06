@@ -2,15 +2,7 @@ import { NavLink, useNavigate } from "react-router-dom";
 import { useAuthUser } from "../../hooks/auth";
 import {
   LogOut,
-  Calendar,
-  UserPlus,
-  Package,
-  Star,
-  Users,
-  ShieldUser,
-  FileUser,
 } from "lucide-react";
-import logo from "../../assets/logo.png";
 import NotificationsDrawer from "../../components/NotificationsDrawer";
 
 const NavbarAdmin = () => {
@@ -24,100 +16,115 @@ const NavbarAdmin = () => {
   };
 
   return (
-    <div className="flex w-full justify-center pt-9 pb-4">
-      <header className="flex w-[86%] max-w-5xl min-w-[820px] items-center justify-center gap-8 rounded-full bg-white/95 px-5 py-2.5 shadow-[0_14px_32px_rgba(115,108,237,0.2)] backdrop-blur md:px-7">
-        <button
-          onClick={handleLogout}
-          aria-label="Logout"
-          title="Logout"
-          className="-ml-2 mr-2 rounded-full p-1 text-primary hover:bg-black/5 hover:cursor-pointer"
-        >
-          <LogOut className="h-6 w-6" />
-        </button>
-        <nav className="hidden md:flex items-center gap-5 text-sm font-medium text-primary/80 whitespace-nowrap">
-          {/* Notifications removed from main nav; use the logo button on the right to open the drawer */}
-          <NavLink
-            to="/dashboard/admin/all-events"
-            className={({ isActive }) =>
-              isActive
-                ? "rounded-full bg-black/5 px-3 py-2 text-primary shadow-inner transform scale-100"
-                : "transition-colors hover:text-primary transform hover:scale-105"
-            }
-            title="All Events"
-          >
-            <Calendar className="h-5 w-5" />
-          </NavLink>
-          <NavLink
-            to="/dashboard/admin/signup-requests"
-            className={({ isActive }) =>
-              isActive
-                ? "rounded-full bg-black/5 px-3 py-2 text-primary shadow-inner transform scale-100"
-                : "transition-colors hover:text-primary transform hover:scale-105"
-            }
-            title="SignUp Requests"
-          >
-            <FileUser className="h-5 w-5" />
-          </NavLink>
-          <NavLink
-            to="/dashboard/admin/vendor-requests"
-            className={({ isActive }) =>
-              isActive
-                ? "rounded-full bg-black/5 px-3 py-2 text-primary shadow-inner transform scale-100"
-                : "transition-colors hover:text-primary transform hover:scale-105"
-            }
-            title="Vendor Requests"
-          >
-            <Package className="h-5 w-5" />
-          </NavLink>
-          <NavLink
-            to="/dashboard/admin/loyalty-vendors"
-            className={({ isActive }) =>
-              isActive
-                ? "rounded-full bg-black/5 px-3 py-2 text-primary shadow-inner transform scale-100"
-                : "transition-colors hover:text-primary transform hover:scale-105"
-            }
-            title="Loyalty Vendors"
-          >
-            <Star className="h-5 w-5" />
-          </NavLink>
-          <NavLink
-            to="/dashboard/admin/all-users"
-            className={({ isActive }) =>
-              isActive
-                ? "rounded-full bg-black/5 px-3 py-2 text-primary shadow-inner transform scale-100"
-                : "transition-colors hover:text-primary transform hover:scale-105"
-            }
-            title="All Users"
-          >
-            <Users className="h-5 w-5" />
-          </NavLink>
-          <NavLink
-            to="/dashboard/admin/add-admin"
-            className={({ isActive }) =>
-              isActive
-                ? "rounded-full bg-black/5 px-3 py-2 text-primary shadow-inner transform scale-100"
-                : "transition-colors hover:text-primary transform hover:scale-105"
-            }
-            title="Add Admin | Officer"
-          >
-            <UserPlus className="h-5 w-5" />
-          </NavLink>
-          <NavLink
-            to="/dashboard/admin/all-admins"
-            className={({ isActive }) =>
-              isActive
-                ? "rounded-full bg-black/5 px-3 py-2 text-primary shadow-inner transform scale-100"
-                : "transition-colors hover:text-primary transform hover:scale-105"
-            }
-            title="All Admins & Officers"
-          >
-            <ShieldUser className="h-5 w-5" />
-          </NavLink>
+    <div className="w-full">
+      {/* Dark Navy Header */}
+      <header className="w-full bg-[#001233] shadow-lg">
+        {/* Navigation Bar */}
+        <nav className="max-w-7xl mx-auto px-6 py-4">
+          <div className="flex items-center justify-between">
+            {/* Left side - Notifications */}
+            <div className="flex items-center gap-4">
+              <NotificationsDrawer />
+            </div>
+
+            {/* Center - Navigation Links */}
+            <div className="hidden lg:flex items-center gap-6 text-sm font-medium text-white">
+              <NavLink
+                to="/dashboard/admin/all-events"
+                className={({ isActive }) =>
+                  isActive
+                    ? "px-4 py-2 rounded-lg bg-white/10 text-white font-semibold transition-all"
+                    : "px-4 py-2 rounded-lg text-white/90 hover:text-white hover:bg-white/5 transition-all"
+                }
+              >
+                All Events
+              </NavLink>
+              <NavLink
+                to="/dashboard/admin/signup-requests"
+                className={({ isActive }) =>
+                  isActive
+                    ? "px-4 py-2 rounded-lg bg-white/10 text-white font-semibold transition-all"
+                    : "px-4 py-2 rounded-lg text-white/90 hover:text-white hover:bg-white/5 transition-all"
+                }
+              >
+                Signup Requests
+              </NavLink>
+              <NavLink
+                to="/dashboard/admin/vendor-requests"
+                className={({ isActive }) =>
+                  isActive
+                    ? "px-4 py-2 rounded-lg bg-white/10 text-white font-semibold transition-all"
+                    : "px-4 py-2 rounded-lg text-white/90 hover:text-white hover:bg-white/5 transition-all"
+                }
+              >
+                Vendor Requests
+              </NavLink>
+              <NavLink
+                to="/dashboard/admin/loyalty-vendors"
+                className={({ isActive }) =>
+                  isActive
+                    ? "px-4 py-2 rounded-lg bg-white/10 text-white font-semibold transition-all"
+                    : "px-4 py-2 rounded-lg text-white/90 hover:text-white hover:bg-white/5 transition-all"
+                }
+              >
+                Loyalty Vendors
+              </NavLink>
+              <NavLink
+                to="/dashboard/admin/all-users"
+                className={({ isActive }) =>
+                  isActive
+                    ? "px-4 py-2 rounded-lg bg-white/10 text-white font-semibold transition-all"
+                    : "px-4 py-2 rounded-lg text-white/90 hover:text-white hover:bg-white/5 transition-all"
+                }
+              >
+                All Users
+              </NavLink>
+              <NavLink
+                to="/dashboard/admin/add-admin"
+                className={({ isActive }) =>
+                  isActive
+                    ? "px-4 py-2 rounded-lg bg-white/10 text-white font-semibold transition-all"
+                    : "px-4 py-2 rounded-lg text-white/90 hover:text-white hover:bg-white/5 transition-all"
+                }
+              >
+                Add Admin | Officer
+              </NavLink>
+              <NavLink
+                to="/dashboard/admin/all-admins"
+                className={({ isActive }) =>
+                  isActive
+                    ? "px-4 py-2 rounded-lg bg-white/10 text-white font-semibold transition-all"
+                    : "px-4 py-2 rounded-lg text-white/90 hover:text-white hover:bg-white/5 transition-all"
+                }
+              >
+                All Admins & Officers
+              </NavLink>
+            </div>
+
+            {/* Right side - Logout */}
+            <button
+              onClick={handleLogout}
+              aria-label="Logout"
+              title="Logout"
+              className="px-4 py-2 rounded-lg text-white/90 hover:text-white hover:bg-white/10 transition-all flex items-center gap-2"
+            >
+              <LogOut className="h-5 w-5" />
+              <span className="hidden sm:inline">Logout</span>
+            </button>
+          </div>
         </nav>
+
+        {/* Main Heading and Subtitle */}
+        <div className="max-w-7xl mx-auto px-6 pb-8 text-center">
+          <h1 className="text-4xl md:text-5xl font-bold text-white mb-3">
+            Campus Events & Booths
+          </h1>
+          <p className="text-lg text-white/80 max-w-3xl mx-auto">
+            Discover amazing events and platform booths across campus. Filter by
+            category to find exactly what you're looking for.
+          </p>
+        </div>
       </header>
-      <div className="flex px-4 items-center gap-2 text-sm font-medium">
-        <NotificationsDrawer />
-      </div>
     </div>
   );
 };

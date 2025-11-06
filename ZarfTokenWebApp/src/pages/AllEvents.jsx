@@ -283,7 +283,10 @@ const AllEvents = () => {
             .includes(lowercasedSearch)
         ) ||
         event.type?.toLowerCase().includes(lowercasedSearch) ||
-        searchtype.toLowerCase().includes(lowercasedSearch)
+        searchtype.toLowerCase().includes(lowercasedSearch) ||
+        event.location?.toLowerCase().includes(lowercasedSearch) ||
+        event.vendor?.toLowerCase().includes(lowercasedSearch) ||
+        (event.original?.vendorId?.companyname?.toLowerCase().includes(lowercasedSearch))
       );
     });
     setFilteredEvents(filtered);
@@ -428,76 +431,82 @@ const AllEvents = () => {
 
   // ===== MAIN RENDER =====
   return (
-    <div className="min-h-screen w-full overflow-hidden bg-[#D5CFE1] text-[#1F1B3B]">
-      <main className="relative z-10 flex w-full flex-1 flex-col items-center px-6 py-8">
-        <div className="w-full max-w-6xl">
-          {/* Header */}
-          <div className="mb-12 text-center">
-            <h1 className="text-4xl font-bold text-[#736CED] sm:text-5xl mb-4">
-              Campus Events & Booths
-            </h1>
-            <p className="text-lg text-[#312A68] max-w-2xl mx-auto">
-              Discover amazing events and platform booths across campus.
-            </p>
-          </div>
+    <div className="min-h-screen w-full bg-[#f5f5f7] text-gray-800">
+      <main className="w-full max-w-7xl mx-auto px-6 py-8">
+        {/* Category Filters - Pill-shaped buttons */}
+        <div className="flex flex-wrap justify-center gap-3 mb-8">
+          {eventCategories.map((cat) => (
+            <button
+              key={cat.id}
+              onClick={() => setSelectedCategory(cat.id)}
+              className={`px-6 py-2.5 rounded-full font-medium text-sm transition-all ${
+                selectedCategory === cat.id
+                  ? "bg-[#4a4ae6] text-white shadow-md hover:bg-[#3d3dd4]"
+                  : "bg-white text-gray-700 border-2 border-[#4a4ae6] hover:bg-gray-50"
+              }`}
+            >
+              {cat.name}
+            </button>
+          ))}
+        </div>
 
-          {/* Category Filters */}
-          <div className="flex flex-wrap justify-center gap-4 mb-8">
-            {eventCategories.map((cat) => (
-              <button
-                key={cat.id}
-                onClick={() => setSelectedCategory(cat.id)}
-                className={`px-6 py-3 rounded-full font-semibold transition-all ${
-                  selectedCategory === cat.id
-                    ? "bg-[#736CED] text-white shadow-[0_10px_25px_rgba(115,108,237,0.3)]"
-                    : "bg-white/70 text-[#736CED] border border-[#736CED] hover:bg-[#E7E1FF]"
-                }`}
-              >
-                {cat.name}
-              </button>
+        {/* Search Bar */}
+        <div className="mb-8">
+          <div className="relative max-w-3xl mx-auto">
+            <input
+              type="text"
+              placeholder="Search by event name, professor name, vendor, or location..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="w-full px-6 py-4 pr-14 rounded-lg border border-gray-300 bg-white focus:outline-none focus:ring-2 focus:ring-[#4a4ae6] focus:border-transparent shadow-sm"
+            />
+            <svg
+              className="absolute right-4 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+              />
+            </svg>
+          </div>
+        </div>
+
+        {/* Events Grid */}
+        {loading ? (
+          <div className="text-center py-12">
+            <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-[#4a4ae6]"></div>
+            <p className="mt-4 text-gray-600">Loading events...</p>
+          </div>
+        ) : error ? (
+          <p className="text-center py-12 text-red-500">{error}</p>
+        ) : filteredEvents.length > 0 ? (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {filteredEvents.map((event) => (
+              <EventCard
+                key={`${event.type}-${event._id}`}
+                event={event}
+                user={user}
+                userIsPrivileged={userIsPrivileged}
+                userIsEligible={userIsEligible}
+                onDelete={handleDeleteEvent}
+                onRegister={handleRegisterEvent}
+                onViewBooths={handleViewBooths}
+                onViewDetails={handleViewDetails}
+              />
             ))}
           </div>
-
-          {/* Search */}
-          <div className="mb-12">
-            <div className="relative max-w-2xl mx-auto">
-              <input
-                type="text"
-                placeholder="Search by event name, professor name, or event type..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full px-6 py-4 pr-12 rounded-full border border-[#736CED] bg-white/70 focus:outline-none focus:ring-2 focus:ring-[#736CED]"
-              />
-            </div>
-          </div>
-
-          {/* Events Grid */}
-          {loading ? (
-            <p className="text-center py-12">Loading events...</p>
-          ) : error ? (
-            <p className="text-center py-12 text-red-500">{error}</p>
-          ) : filteredEvents.length > 0 ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-12">
-              {filteredEvents.map((event) => (
-                <EventCard
-                  key={`${event.type}-${event._id}`}
-                  event={event}
-                  user={user}
-                  userIsPrivileged={userIsPrivileged}
-                  userIsEligible={userIsEligible}
-                  onDelete={handleDeleteEvent}
-                  onRegister={handleRegisterEvent}
-                  onViewBooths={handleViewBooths}
-                  onViewDetails={handleViewDetails}
-                />
-              ))}
-            </div>
-          ) : (
-            <p className="text-center py-12">
+        ) : (
+          <div className="text-center py-12">
+            <p className="text-gray-600 text-lg">
               No events found for this category.
             </p>
-          )}
-        </div>
+          </div>
+        )}
       </main>
 
       {/* Modals */}

@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import api from "../services/api";
 import { useAuthUser } from "../hooks/auth";
-import logo from "../assets/logo.png";
+import { Bell } from "lucide-react";
 
 export default function NotificationsDrawer() {
   const { user } = useAuthUser();
@@ -74,10 +74,11 @@ export default function NotificationsDrawer() {
       <button
         onClick={() => setOpen((s) => !s)}
         aria-label="Notifications"
-        className="relative rounded-full p-1 hover:brightness-95"
+        className="relative px-4 py-2 rounded-lg text-white/90 hover:text-white hover:bg-white/10 transition-all flex items-center gap-2"
         title="Notifications"
       >
-        <img src={logo} alt="Notifications" className="h-8 w-8 rounded-full" />
+        <Bell className="h-5 w-5" />
+        <span className="hidden sm:inline">Notifications</span>
         {unreadCount > 0 && (
           <span className="absolute -top-1 -right-1 inline-flex items-center justify-center px-2 py-0.5 text-xs font-bold leading-none text-white bg-red-600 rounded-full">
             {unreadCount}
