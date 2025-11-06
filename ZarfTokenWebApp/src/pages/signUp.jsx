@@ -2,6 +2,7 @@ import React, { useEffect, useRef, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import EyeIcon from "../components/EyeIcon";
 import api from "../services/api";
+import DecorativeIcons from "../components/DecorativeIcons";
 
 const createInitialFormState = () => ({
   gucian: {
@@ -376,10 +377,51 @@ export default function SignUp() {
   const inactiveToggleClasses =
     "bg-transparent text-primary/90 shadow-none hover:-translate-y-1 hover:shadow-[0_12px_24px_rgba(115,108,237,0.18)]";
 
+  // Decorative icons configuration for signup page
+  // More icons on left side, fewer on right to balance the form
+  // Icons positioned away from: back button (top-left), center form area (40-65%), and input boxes
+  const signupIcons = [
+    // Left side - more concentrated, avoiding top-left corner (back button area)
+    { type: "palmTree", left: "5%", top: "25%", size: 75, rotate: -12 },
+    { type: "sunglasses", left: "3%", top: "55%", size: 55, rotate: -18 },
+    { type: "waves", left: "19%", top: "65%", size: 85, rotate: 0 },
+    { type: "star", left: "6%", top: "78%", size: 45, rotate: 30 },
+    { type: "trophy", left: "15%", top: "18%", size: 55, rotate: 10 },
+    { type: "calendar", left: "9%", top: "68%", size: 42, rotate: -8 },
+    { type: "locationPin", left: "16%", top: "82%", size: 47, rotate: 12 },
+    { type: "balloon", left: "11%", top: "60%", size: 53, rotate: -28 },
+    { type: "confetti", left: "20%", top: "22%", size: 58, rotate: 22 },
+    { type: "star", left: "2%", top: "35%", size: 38, rotate: 35 },
+    { type: "sun", left: "7%", top: "15%", size: 60, rotate: 20 },
+    { type: "palmTree", left: "10%", top: "30%", size: 65, rotate: 15 },
+    { type: "sunglasses", left: "1%", top: "70%", size: 52, rotate: 25 },
+    { type: "waves", left: "29%", top: "75%", size: 75, rotate: -5 },
+    { type: "microphone", left: "5%", top: "50%", size: 48, rotate: -10 },
+    { type: "trophy", left: "22%", top: "28%", size: 50, rotate: 8 },
+    { type: "camera", left: "21%", top: "58%", size: 45, rotate: -18 },
+    // Right side - fewer icons, avoiding form area (center-right 50-70%)
+    { type: "star", left: "88%", top: "12%", size: 40, rotate: -20 },
+    { type: "microphone", left: "92%", top: "28%", size: 50, rotate: 15 },
+    { type: "camera", left: "90%", top: "60%", size: 45, rotate: 25 },
+    { type: "musicNote", left: "87%", top: "75%", size: 50, rotate: -18 },
+    { type: "sun", left: "90%", top: "20%", size: 55, rotate: -25 },
+    { type: "waves", left: "89%", top: "82%", size: 70, rotate: 0 },
+    { type: "beachBall", left: "91%", top: "50%", size: 48, rotate: -15 },
+    { type: "star", left: "94%", top: "65%", size: 42, rotate: 22 },
+    { type: "calendar", left: "88%", top: "38%", size: 44, rotate: -8 },
+    // Top and bottom edges - avoiding center
+    { type: "confetti", left: "30%", top: "3%", size: 50, rotate: 15 },
+    { type: "ticket", left: "70%", top: "5%", size: 45, rotate: -20 },
+    { type: "locationPin", left: "25%", top: "86%", size: 48, rotate: 8 },
+  ];
+
   return (
     <div className="relative min-h-screen w-full overflow-hidden bg-muted text-primary">
       <div className="pointer-events-none absolute left-1/2 top-[-20%] h-[420px] w-[120%] -translate-x-1/2 rounded-[50%] bg-gradient-to-r from-primary via-info to-secondary opacity-40 blur-3xl" />
       <div className="pointer-events-none absolute bottom-[-18%] left-1/2 h-[360px] w-[110%] -translate-x-1/2 rounded-[50%] bg-gradient-to-r from-secondary via-primary to-info opacity-40 blur-3xl" />
+
+      {/* Decorative Icons */}
+      <DecorativeIcons icons={signupIcons} iconColor="text-primary/15" />
 
       <main className="relative z-10 flex min-h-screen items-center justify-center px-6 py-16">
         <button
