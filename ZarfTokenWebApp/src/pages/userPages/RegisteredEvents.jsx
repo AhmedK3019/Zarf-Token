@@ -131,14 +131,14 @@ export default function RegisteredEvents() {
 
   if (loading) {
     return (
-      <div className="min-h-screen w-full bg-[#D5CFE1] flex items-center justify-center text-[#736CED]">
+      <div className="min-h-screen w-full bg-muted flex items-center justify-center text-[#736CED]">
         Loading your registered events...
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen w-full overflow-hidden bg-[#D5CFE1] text-[#1F1B3B]">
+    <div className="min-h-screen w-full overflow-hidden bg-muted text-[#1F1B3B]">
       <div className="relative flex min-h-screen w-full flex-col items-center">
         <main className="relative z-10 flex w-full flex-1 flex-col items-center px-6 py-8">
           <div className="w-full max-w-6xl">

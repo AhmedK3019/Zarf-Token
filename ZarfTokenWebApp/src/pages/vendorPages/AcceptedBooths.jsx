@@ -301,7 +301,7 @@ export default function AcceptedBooths() {
         @keyframes fade-in { from { opacity: 0; } to { opacity: 1; } } .animate-fade-in { animation: fade-in 0.3s ease-out forwards; }
         @keyframes slide-up { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } } .animate-slide-up { animation: slide-up 0.4s ease-out forwards; }
       `}</style>
-      <div className="min-h-screen w-full bg-[#D5CFE1] text-[#1F1B3B] font-sans">
+      <div className="min-h-screen w-full bg-muted text-[#1F1B3B] font-sans">
         <main className="flex w-full flex-1 flex-col items-center px-4 sm:px-6 py-8">
           <div className="w-full max-w-6xl">
             <div className="mb-8 text-center">

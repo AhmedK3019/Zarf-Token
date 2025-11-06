@@ -11,7 +11,7 @@ import NotFound from "../NotFoundPage";
 
 const mainDashboardAdmin = () => {
   return (
-    <div className="min-h-screen bg-[#f5f5f7]">
+    <div className="min-h-screen bg-muted">
       <NavbarAdmin />
       <main>
         <Routes>

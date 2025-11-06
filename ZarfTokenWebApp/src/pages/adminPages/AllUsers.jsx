@@ -121,7 +121,7 @@ export default function AllUsers() {
   });
 
   return (
-    <div className="min-h-screen w-full overflow-x-hidden overflow-y-auto bg-[#D5CFE1] text-[#1F1B3B]">
+    <div className="min-h-screen w-full overflow-x-hidden overflow-y-auto bg-muted text-[#1F1B3B]">
       <div className="relative flex min-h-screen w-full flex-col items-center px-6 py-8">
         <div className="w-full max-w-6xl">
           <div className="mb-10 text-center">

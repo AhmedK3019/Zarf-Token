@@ -19,7 +19,7 @@ const COLORS = {
   primary: "#736CED",
   secondary: "#6DD3CE",
   accent: "#C14953",
-  muted: "#D5CFE1",
+  muted: "#f5f5f7",
   info: "#54C6EB",
 };
 

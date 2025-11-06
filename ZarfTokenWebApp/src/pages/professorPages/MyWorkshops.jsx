@@ -19,7 +19,7 @@ const COLORS = {
   primary: "#736CED",
   secondary: "#6DD3CE",
   accent: "#C14953",
-  muted: "#D5CFE1",
+  muted: "#f5f5f7",
   info: "#54C6EB",
 };
 
@@ -119,7 +119,7 @@ export default function MyWorkshops() {
     primary: "#736CED",
     secondary: "#6DD3CE",
     accent: "#C14953",
-    muted: "#D5CFE1",
+    muted: "#f5f5f7",
     info: "#54C6EB",
   };
   const categoryChipStyles = {
@@ -300,7 +300,7 @@ export default function MyWorkshops() {
 
   if (loading)
     return (
-      <div className="min-h-screen w-full overflow-hidden bg-[#D5CFE1] text-[#1F1B3B] p-6">
+      <div className="min-h-screen w-full overflow-hidden bg-muted text-[#1F1B3B] p-6">
         <div className="max-w-6xl mx-auto grid grid-cols-1 gap-4">
           <SkeletonCard />
           <SkeletonCard />
@@ -311,7 +311,7 @@ export default function MyWorkshops() {
   if (error) return <div className="p-6 text-red-600">{error}</div>;
 
   return (
-    <div className="min-h-screen w-full overflow-hidden bg-[#D5CFE1] text-[#1F1B3B]">
+    <div className="min-h-screen w-full overflow-hidden bg-muted text-[#1F1B3B]">
       <div className="relative flex min-h-screen w-full flex-col items-center">
         <main className="relative z-10 flex w-full flex-1 flex-col items-center px-6 py-8">
           <div className="w-full max-w-6xl">

@@ -360,7 +360,7 @@ export default function GymSchedule() {
   };
 
   return (
-    <div className="min-h-screen bg-[#D5CFE1] p-4">
+    <div className="min-h-screen bg-muted p-4">
       <div className="max-w-6xl mx-auto">
         {/* Header */}
         <div className="bg-white rounded-2xl shadow-lg p-6 mb-6">

@@ -116,7 +116,7 @@ const Courts = () => {
   };
 
   return (
-    <div className="min-h-screen w-full overflow-hidden bg-[#D5CFE1] text-[#1F1B3B]">
+    <div className="min-h-screen w-full overflow-hidden bg-muted text-[#1F1B3B]">
       <div className="relative flex min-h-screen w-full flex-col items-center">
         <main className="relative z-10 flex w-full flex-1 flex-col items-center px-6 py-8">
           <div className="w-full max-w-6xl">
@@ -231,7 +231,7 @@ const Courts = () => {
                   </div>
                 ) : (
                   <div>
-                    <div className="w-24 h-24 bg-[#D5CFE1]/30 rounded-full flex items-center justify-center mx-auto mb-6">
+                    <div className="w-24 h-24 bg-muted/30 rounded-full flex items-center justify-center mx-auto mb-6">
                       <span className="text-[#736CED] text-4xl">🏟️</span>
                     </div>
                     <p className="text-[#312A68] text-lg mb-2">
@@ -297,7 +297,7 @@ const Courts = () => {
                           </div>
                         ) : (
                           <div className="text-center py-4">
-                            <div className="w-12 h-12 bg-[#D5CFE1]/30 rounded-full flex items-center justify-center mx-auto mb-2">
+                            <div className="w-12 h-12 bg-muted/30 rounded-full flex items-center justify-center mx-auto mb-2">
                               <span className="text-[#736CED] text-lg">📅</span>
                             </div>
                             <p className="text-[#312A68]/70 text-xs">
@@ -387,7 +387,7 @@ const Courts = () => {
                 </div>
               ) : (
                 <div className="text-center py-12">
-                  <div className="w-16 h-16 bg-[#D5CFE1]/30 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <div className="w-16 h-16 bg-muted/30 rounded-full flex items-center justify-center mx-auto mb-4">
                     <span className="text-[#736CED] text-2xl">📅</span>
                   </div>
                   <p className="text-[#312A68] text-lg mb-2">No Available Slots</p>

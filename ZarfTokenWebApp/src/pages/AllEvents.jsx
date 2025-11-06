@@ -431,7 +431,7 @@ const AllEvents = () => {
 
   // ===== MAIN RENDER =====
   return (
-    <div className="min-h-screen w-full bg-[#f5f5f7] text-gray-800">
+    <div className="min-h-screen w-full bg-muted text-gray-800">
       <main className="w-full max-w-7xl mx-auto px-6 py-8">
         {/* Category Filters - Pill-shaped buttons */}
         <div className="flex flex-wrap justify-center gap-3 mb-8">
