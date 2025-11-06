@@ -2,6 +2,8 @@ import VendorRequest from "../models/VendorRequest.js";
 import Vendor from "../models/Vendor.js";
 import Booth from "../models/Booth.js";
 import Bazaar from "../models/Bazaar.js";
+import Admin from "../models/Admin.js";
+import EventsOffice from "../models/EventsOffice.js";
 import {
   sendBoothApprovalEmail,
   sendBoothRejectionEmail,
@@ -23,7 +25,7 @@ const createBazarRequest = async (req, res, next) => {
     else if (duration > 4) duration = 4;
     if (!vendorId)
       return res.status(401).json({ message: "Authentication required" });
-
+    const vendor = await Vendor.findById(vendorId);
     const { people, boothSize, boothname } = req.body;
     if (!people || !Array.isArray(people) || people.length < 1)
       return res
@@ -41,6 +43,18 @@ const createBazarRequest = async (req, res, next) => {
       duration,
       bazarId: req.params.bazarId,
     });
+
+    const notification = {
+      message: `A new vendor request by ${vendor.companyname} for a bazaar booth is pending your approval`,
+      isRead: false,
+    };
+
+    // Push the notification to all admins in a single DB operation instead of saving each user
+    await Admin.updateMany({}, { $push: { notifications: notification } });
+    await EventsOffice.updateMany(
+      {},
+      { $push: { notifications: notification } }
+    );
     res.status(201).json(doc);
   } catch (err) {
     next(err);
@@ -53,7 +67,7 @@ const createPlatformRequest = async (req, res, next) => {
     const vendorId = req.user?._id || req.user?.id;
     if (!vendorId)
       return res.status(401).json({ message: "Authentication required" });
-
+    const vendor = await Vendor.findById(vendorId);
     const { people, duration, location, boothSize, boothname } = req.body;
     if (!people || !Array.isArray(people) || people.length < 1)
       return res
@@ -75,6 +89,17 @@ const createPlatformRequest = async (req, res, next) => {
       boothname,
       isBazarBooth: false,
     });
+    const notification = {
+      message: `A new vendor request by ${vendor.companyname} for a platform booth is pending your approval`,
+      isRead: false,
+    };
+
+    // Push the notification to all admins in a single DB operation instead of saving each user
+    await Admin.updateMany({}, { $push: { notifications: notification } });
+    await EventsOffice.updateMany(
+      {},
+      { $push: { notifications: notification } }
+    );
     res.status(201).json(doc);
   } catch (err) {
     next(err);
