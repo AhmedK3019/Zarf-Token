@@ -8,6 +8,7 @@ export default function AllUsers() {
   const [error, setError] = useState(null);
   const [message, setMessage] = useState(null);
   const [search, setSearch] = useState("");
+  const [statusFilter, setStatusFilter] = useState("all"); // "all", "active", "blocked"
   // useAuthUser returns { user, login, logout }
   // previously destructured as `u` which is undefined here -> auth becomes null
   const { user: authUser } = useAuthUser();
@@ -41,7 +42,37 @@ export default function AllUsers() {
       setTimeout(() => setMessage(null), 2000);
     } catch (err) {
       console.error(err);
-      setError("Failed to delete user");
+      setError(err.response?.data?.message || "Failed to delete user");
+      setTimeout(() => setError(null), 2000);
+    }
+  };
+
+  const handleBlock = async (id) => {
+    if (!window.confirm("Are you sure you want to block this user?")) return;
+    try {
+      const res = await api.put(`/admin/blockUser/${id}`);
+      setMessage(res.data.message || "User blocked successfully");
+      setTimeout(() => setMessage(null), 2000);
+      // Refresh users list
+      fetchUsers();
+    } catch (err) {
+      console.error(err);
+      setError(err.response?.data?.message || "Failed to block user");
+      setTimeout(() => setError(null), 2000);
+    }
+  };
+
+  const handleUnblock = async (id) => {
+    if (!window.confirm("Are you sure you want to unblock this user?")) return;
+    try {
+      const res = await api.put(`/admin/unblockUser/${id}`);
+      setMessage(res.data.message || "User unblocked successfully");
+      setTimeout(() => setMessage(null), 2000);
+      // Refresh users list
+      fetchUsers();
+    } catch (err) {
+      console.error(err);
+      setError(err.response?.data?.message || "Failed to unblock user");
       setTimeout(() => setError(null), 2000);
     }
   };
@@ -74,13 +105,19 @@ export default function AllUsers() {
 
   const filteredUsers = users.filter((u) => {
     const term = search.toLowerCase();
-    return (
+    const matchesSearch =
       (u.firstName && u.firstName.toLowerCase().includes(term)) ||
       (u.lastName && u.lastName.toLowerCase().includes(term)) ||
       (u.companyname && u.companyname.toLowerCase().includes(term)) ||
       (u.email && u.email.toLowerCase().includes(term)) ||
-      (u.role && u.role.toLowerCase().includes(term))
-    );
+      (u.role && u.role.toLowerCase().includes(term));
+    
+    const matchesStatus =
+      statusFilter === "all" ||
+      (statusFilter === "active" && u.status?.toLowerCase() === "active") ||
+      (statusFilter === "blocked" && u.status?.toLowerCase() === "blocked");
+    
+    return matchesSearch && matchesStatus;
   });
 
   return (
@@ -92,8 +129,8 @@ export default function AllUsers() {
               All Users
             </h1>
             <p className="text-lg text-[#312A68] max-w-2xl mx-auto">
-              Manage all registered users below. You can search, view, or delete
-              users.
+              Manage all registered users below. You can search, view, block/unblock,
+              or delete users. Admins cannot be blocked.
             </p>
           </div>
 
@@ -108,7 +145,7 @@ export default function AllUsers() {
             </div>
           )}
 
-          <div className="mb-6 text-center">
+          <div className="mb-6 flex flex-col md:flex-row gap-4 justify-center items-center">
             <input
               type="text"
               placeholder="Search by name, email, or role..."
@@ -116,6 +153,15 @@ export default function AllUsers() {
               onChange={(e) => setSearch(e.target.value)}
               className="w-full max-w-md border border-white/50 bg-white/70 text-[#1F1B3B] placeholder-[#312A68] rounded-full px-5 py-2 focus:outline-none focus:ring-2 focus:ring-[#736CED] shadow-sm"
             />
+            <select
+              value={statusFilter}
+              onChange={(e) => setStatusFilter(e.target.value)}
+              className="border border-white/50 bg-white/70 text-[#1F1B3B] rounded-full px-5 py-2 focus:outline-none focus:ring-2 focus:ring-[#736CED] shadow-sm"
+            >
+              <option value="all">All Users</option>
+              <option value="active">Active Only</option>
+              <option value="blocked">Blocked Only</option>
+            </select>
           </div>
 
           {loading ? (
@@ -156,7 +202,7 @@ export default function AllUsers() {
                   </p>
 
                   <p
-                    className={`text-sm mb-4 ${
+                    className={`text-sm mb-4 font-semibold ${
                       user.status?.toLowerCase() === "active"
                         ? "text-green-700"
                         : "text-red-700"
@@ -165,7 +211,28 @@ export default function AllUsers() {
                     Status: {user.status || "Unknown"}
                   </p>
 
-                  <div className="flex justify-end">
+                  <div className="flex justify-end gap-2 flex-wrap">
+                    {/* Only show block/unblock for non-admin users */}
+                    {user.role?.toLowerCase() !== "admin" &&
+                      user.role !== "Admin" && (
+                        <>
+                          {user.status?.toLowerCase() === "active" ? (
+                            <button
+                              onClick={() => handleBlock(user._id)}
+                              className="bg-orange-500 text-white font-medium px-4 py-2 rounded-full hover:bg-orange-600 transition-colors"
+                            >
+                              Block
+                            </button>
+                          ) : (
+                            <button
+                              onClick={() => handleUnblock(user._id)}
+                              className="bg-green-500 text-white font-medium px-4 py-2 rounded-full hover:bg-green-600 transition-colors"
+                            >
+                              Unblock
+                            </button>
+                          )}
+                        </>
+                      )}
                     <button
                       onClick={() => handleDelete(user._id)}
                       className="bg-[#C14953] text-white font-medium px-4 py-2 rounded-full hover:bg-red-600 transition-colors"
