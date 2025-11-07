@@ -19,7 +19,7 @@ const mainDashboardUser = () => {
   return (
     <div>
       <NavbarUser />
-      <main className="max-w-5xl mx-auto mt-6 px-4">
+      <main className="w-full mt-6 px-4">
         <Routes>
           <Route index element={<AllEvents />} />
           <Route path="/all-events" element={<AllEvents />} />

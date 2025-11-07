@@ -176,7 +176,7 @@ export default function UpcomingBazars() {
     <div className="min-h-screen w-full overflow-hidden bg-muted text-[#1F1B3B]">
       <div className="relative flex min-h-screen w-full flex-col items-center">
         <main className="relative z-10 flex w-full flex-1 flex-col items-center px-6 py-8">
-          <div className="w-full max-w-6xl">
+          <div className="w-full">
             {/* Header */}
             <div className="mb-12 text-center">
               <h1 className="text-4xl font-bold text-[#736CED] sm:text-5xl mb-4">
@@ -207,7 +207,7 @@ export default function UpcomingBazars() {
                 </p>
               </div>
             ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-12">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
                 {bazaars.map((bazaar) => (
                   <div
                     key={bazaar._id}
