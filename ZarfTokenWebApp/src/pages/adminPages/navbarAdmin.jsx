@@ -24,13 +24,6 @@ const NavbarAdmin = () => {
   const usersDropdownRef = useRef(null);
   const requestsDropdownRef = useRef(null);
 
-  if (!user || user.role !== "Admin") return null;
-
-  const handleLogout = () => {
-    logout();
-    navigate("/", { replace: true });
-  };
-
   // Close dropdowns when clicking outside
   useEffect(() => {
     const handleClickOutside = (event) => {
@@ -59,6 +52,13 @@ const NavbarAdmin = () => {
     setUsersDropdownOpen(false);
     setRequestsDropdownOpen(false);
   }, [location.pathname]);
+
+  if (!user || user.role !== "Admin") return null;
+
+  const handleLogout = () => {
+    logout();
+    navigate("/", { replace: true });
+  };
 
   // Check if any user-related route is active
   const isUsersActive =

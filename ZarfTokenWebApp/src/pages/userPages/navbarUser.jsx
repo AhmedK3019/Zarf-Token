@@ -24,30 +24,7 @@ import NotificationsDrawer from "../../components/NotificationsDrawer";
 const NavbarUser = () => {
   const navigate = useNavigate();
   const { user, logout } = useAuthUser(); // { role, wallet, logout }
-
-  if (!user) return null; // or a loading state
-  // Format wallet value for display. Keep two decimal places (e.g. 0.00).
-  const formatWallet = (w) => {
-    if (w === undefined || w === null) return "0.00";
-    try {
-      // Mongoose Decimal128 may come as an object whose toString yields the numeric string.
-      const raw =
-        typeof w === "object" && typeof w.toString === "function"
-          ? w.toString()
-          : w;
-      const num = Number(raw);
-      if (Number.isNaN(num)) return "0.00";
-      return num.toFixed(2);
-    } catch (e) {
-      return "0.00";
-    }
-  };
-
-  const handleLogout = () => {
-    logout();
-    navigate("/", { replace: true });
-  };
-
+  // Hooks must be called on every render — declare them before any early return.
   const location = useLocation();
   const [eventsDropdownOpen, setEventsDropdownOpen] = useState(false);
   const [gymDropdownOpen, setGymDropdownOpen] = useState(false);
@@ -55,7 +32,6 @@ const NavbarUser = () => {
   const eventsRef = useRef(null);
   const gymRef = useRef(null);
   const workshopsRef = useRef(null);
-
   // Close dropdowns when clicking outside
   useEffect(() => {
     const handleClickOutside = (event) => {
@@ -82,6 +58,30 @@ const NavbarUser = () => {
     setGymDropdownOpen(false);
     setWorkshopsDropdownOpen(false);
   }, [location.pathname]);
+
+  if (!user) return null; // or a loading state
+
+  // Format wallet value for display. Keep two decimal places (e.g. 0.00).
+  const formatWallet = (w) => {
+    if (w === undefined || w === null) return "0.00";
+    try {
+      // Mongoose Decimal128 may come as an object whose toString yields the numeric string.
+      const raw =
+        typeof w === "object" && typeof w.toString === "function"
+          ? w.toString()
+          : w;
+      const num = Number(raw);
+      if (Number.isNaN(num)) return "0.00";
+      return num.toFixed(2);
+    } catch (e) {
+      return "0.00";
+    }
+  };
+
+  const handleLogout = () => {
+    logout();
+    navigate("/", { replace: true });
+  };
 
   return (
     <div className="w-full">

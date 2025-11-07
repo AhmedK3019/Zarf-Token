@@ -18,6 +18,11 @@ import NotificationsDrawer from "../../components/NotificationsDrawer";
 const NavbarVendor = ({ vendor }) => {
   const navigate = useNavigate();
   const { user, logout } = useAuthUser();
+  // Hooks first so call order is stable even if we return early
+  const location = useLocation();
+  const [menuOpen, setMenuOpen] = useState(false);
+  const menuRef = useRef(null);
+
   // if not authenticated or not a vendor, don't render nav
   if (!user || user.role !== "Vendor") return null;
 

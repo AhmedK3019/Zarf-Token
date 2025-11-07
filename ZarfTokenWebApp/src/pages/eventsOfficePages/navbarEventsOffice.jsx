@@ -20,18 +20,11 @@ import NotificationsDrawer from "../../components/NotificationsDrawer";
 const NavbarEventsOffice = () => {
   const navigate = useNavigate();
   const { user, logout } = useAuthUser();
-  if (!user || user.role !== "Event office") return null;
-
   const [eventsOpen, setEventsOpen] = useState(false);
   const [requestsOpen, setRequestsOpen] = useState(false);
   const eventsRef = useRef(null);
   const requestsRef = useRef(null);
   const location = useLocation();
-
-  const handleLogout = () => {
-    logout();
-    navigate("/", { replace: true });
-  };
 
   // close dropdowns when clicking outside
   useEffect(() => {
@@ -52,6 +45,13 @@ const NavbarEventsOffice = () => {
     setEventsOpen(false);
     setRequestsOpen(false);
   }, [location.pathname]);
+
+  if (!user || user.role !== "Event office") return null;
+
+  const handleLogout = () => {
+    logout();
+    navigate("/", { replace: true });
+  };
 
   return (
     <div className="w-full">
