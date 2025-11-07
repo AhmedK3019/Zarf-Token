@@ -175,7 +175,7 @@ const NavbarAdmin = () => {
                 }
               >
                 <Store className="h-4 w-4" />
-                Loyalties
+                Loyals
               </NavLink>
 
               {/* Users Dropdown */}
