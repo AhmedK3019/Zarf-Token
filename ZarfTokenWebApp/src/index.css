@@ -5,26 +5,28 @@
   line-height: 1.5;
   font-weight: 400;
   color: #1F1B3B;
-  background-color: #D5CFE1;
+  background-color: #f5f5f7;
   font-synthesis: none;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
 
-a {
-  text-decoration: none;
-  color: inherit;
-}
+@layer base {
+  a {
+    text-decoration: none;
+    color: inherit;
+  }
 
-a:hover {
-  text-decoration: underline;
+  a:hover {
+    text-decoration: underline;
+  }
 }
 
 body {
   margin: 0;
   min-height: 100vh;
-  background-color: #D5CFE1;
+  background-color: #f5f5f7;
   color: #1F1B3B;
 }
 

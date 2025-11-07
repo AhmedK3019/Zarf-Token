@@ -13,10 +13,6 @@ const adminSchema = new mongoose.Schema({
   notifications: {
     type: [
       {
-        id: {
-          type: mongoose.Schema.Types.ObjectId,
-          default: () => new mongoose.Types.ObjectId(),
-        },
         message: { type: String, required: true },
         isRead: { type: Boolean, default: false },
       },

@@ -1,0 +1,116 @@
+.not-found-container {
+  min-height: 100vh;
+  background-color: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2.5rem 1.5rem;
+  overflow: hidden; /* Prevent scrolling */
+  position: relative;
+}
+
+.not-found-card {
+  width: min(480px, 100%);
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between; /* Push content to top and bottom */
+  gap: 0.9rem;
+  color: #1f2933;
+  transform: translateY(-5vh);
+  min-height: 80vh; /* Ensure card takes most of the viewport */
+}
+
+@media (max-width: 640px) {
+  .not-found-card {
+    transform: translateY(-2vh);
+    min-height: 85vh;
+  }
+}
+
+.not-found-hero {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.05rem;
+  margin-bottom: -1.5rem;
+}
+
+.not-found-content {
+  margin-top: clamp(-2rem, -3vw, -0.8rem);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.65rem;
+  text-align: center;
+  flex-grow: 1; /* Allow content to take available space */
+}
+
+.not-found-logo {
+  align-self: center;
+  width: clamp(150px, 28vw, 260px);
+  height: auto;
+}
+
+.not-found-heading {
+  transform: translateY(-0.4rem);
+  font-size: clamp(3.5rem, 12vw, 6rem); /* Smaller 404 */
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  margin: 0 0 -0.8rem 0;
+}
+
+.not-found-subtitle {
+  font-size: clamp(1.5rem, 4vw, 2rem);
+  font-weight: 600;
+  margin: 0;
+}
+
+.not-found-description {
+  font-size: 1rem;
+  line-height: 1.6;
+  margin: -0.1rem 0 0;
+  color: #3d4a57;
+}
+
+.not-found-button {
+  border: none;
+  cursor: pointer;
+  padding: 0.9rem 2rem;
+  border-radius: 999px;
+  background-color: #111827;
+  color: #ffffff;
+  font-size: 1rem;
+  font-weight: 600;
+  transition: transform 150ms ease, box-shadow 150ms ease,
+    background-color 150ms ease;
+  margin-top: auto; /* Push button down */
+  width: 80%; /* Wider button */
+  max-width: 300px; /* Maximum width */
+}
+
+.not-found-button:hover {
+  background-color: #1f2937;
+  box-shadow: 0 10px 25px rgba(31, 41, 55, 0.2);
+  transform: translateY(-1px);
+}
+
+.not-found-button:focus-visible {
+  outline: 2px solid #111827;
+  outline-offset: 4px;
+}
+
+.not-found-contact {
+  font-size: 1rem;
+  line-height: 1.6;
+  margin: 0;
+  color: #3d4a57;
+  margin-top: auto; /* Push contact to very bottom */
+  padding-bottom: 1rem; /* Add some bottom spacing */
+}
+
+.not-found-contact a {
+  color: inherit;
+  font-weight: 600;
+  text-decoration: underline;
+}

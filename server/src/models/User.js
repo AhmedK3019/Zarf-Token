@@ -15,10 +15,6 @@ const userSchema = new mongoose.Schema({
   notifications: {
     type: [
       {
-        id: {
-          type: mongoose.Schema.Types.ObjectId,
-          default: () => new mongoose.Types.ObjectId(),
-        },
         message: { type: String, required: true },
         isRead: { type: Boolean, default: false },
       },
@@ -36,7 +32,30 @@ const userSchema = new mongoose.Schema({
   },
 
   createdAt: { type: Date, default: Date.now },
+  favouriteEvents: {
+    type: [
+      {
+        itemType: { type: String, required: true }, // model name you will use to resolve, e.g. 'Conference'
+        itemId: { type: mongoose.Schema.Types.ObjectId, required: true }, // plain ObjectId, no ref
+        addedAt: { type: Date, default: Date.now },
+      },
+    ],
+    default: [],
+  },
+  wallet: {
+    type: mongoose.Schema.Types.Decimal128,
+    default: mongoose.Types.Decimal128.fromString("0.00"),
+    // getter to return a plain number in JSON output
+    get: (v) => {
+      if (v == null) return 0;
+      // Decimal128 -> string, then parse to float
+      return parseFloat(v.toString());
+    },
+  },
 });
+
+// Ensure getters are applied when converting documents to JSON
+userSchema.set("toJSON", { getters: true });
 
 // Hash password before saving
 userSchema.pre("save", async function (next) {

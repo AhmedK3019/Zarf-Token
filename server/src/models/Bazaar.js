@@ -30,6 +30,14 @@ const bazaarSchema = new mongoose.Schema({
     default: [],
   },
   type: { type: String, default: "bazaar" },
+  revenue: {
+    type: mongoose.Schema.Types.Decimal128,
+    default: mongoose.Types.Decimal128.fromString("0.00"),
+    // getter to return a plain number in JSON output
+    get: (v) => {
+      return v ? v.toString() : "0.00";
+    },
+  },
 });
 
 const Bazaar = mongoose.model("Bazaar", bazaarSchema);

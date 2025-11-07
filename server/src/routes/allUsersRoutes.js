@@ -6,6 +6,10 @@ router.put(
   "/:id/notifications/:notifId/read",
   AllUsersController.setNotificationRead
 );
+router.delete(
+  "/:id/notifications/:notificationId",
+  AllUsersController.deleteNotification
+);
 router.delete("/:id", AllUsersController.deleteUserById);
 router.get("/allAdminsAndOfficers", AllUsersController.getAllAdminsAndOfficers);
 router.get("/:id", AllUsersController.getUserById);

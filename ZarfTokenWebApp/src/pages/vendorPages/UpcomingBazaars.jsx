@@ -89,7 +89,6 @@ export default function UpcomingBazars() {
       }
     };
     fetchBazaars();
-    if (user) fetchMyRequests();
     fetchMyRequests();
   }, [user]);
 
@@ -174,10 +173,10 @@ export default function UpcomingBazars() {
   };
 
   return (
-    <div className="min-h-screen w-full overflow-hidden bg-[#D5CFE1] text-[#1F1B3B]">
+    <div className="min-h-screen w-full overflow-hidden bg-muted text-[#1F1B3B]">
       <div className="relative flex min-h-screen w-full flex-col items-center">
         <main className="relative z-10 flex w-full flex-1 flex-col items-center px-6 py-8">
-          <div className="w-full max-w-6xl">
+          <div className="w-full">
             {/* Header */}
             <div className="mb-12 text-center">
               <h1 className="text-4xl font-bold text-[#736CED] sm:text-5xl mb-4">
@@ -208,7 +207,7 @@ export default function UpcomingBazars() {
                 </p>
               </div>
             ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-12">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
                 {bazaars.map((bazaar) => (
                   <div
                     key={bazaar._id}
@@ -412,7 +411,7 @@ export default function UpcomingBazars() {
       {/* Success Notification */}
       {showSuccess && (
         <div className="fixed inset-0 flex items-center justify-center z-50 pointer-events-none">
-          <div className="bg-white rounded-2xl p-8 shadow-[0_25px_50px_rgba(115,108,237,0.4)] border border-[#D5CFE1] max-w-md mx-4 pointer-events-auto animate-fade-in">
+          <div className="bg-white rounded-2xl p-8 shadow-[0_25px_50px_rgba(115,108,237,0.4)] border border-muted max-w-md mx-4 pointer-events-auto animate-fade-in">
             <div className="text-center">
               <div className="w-16 h-16 bg-gradient-to-r from-[#736CED] to-[#4C3BCF] rounded-full flex items-center justify-center mx-auto mb-4">
                 <svg

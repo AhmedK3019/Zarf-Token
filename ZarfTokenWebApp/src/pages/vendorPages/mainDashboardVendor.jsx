@@ -12,7 +12,7 @@ const mainDashboardVendor = ({ vendor }) => {
   return (
     <div>
       <NavbarVendor vendor={vendor} />
-      <main className="max-w-5xl mx-auto mt-6 px-4">
+      <main className="w-full mt-6 px-4">
         <Routes>
           <Route index element={<UpcomingBazaars />} />
           <Route path="/upcoming-bazaars" element={<UpcomingBazaars />} />

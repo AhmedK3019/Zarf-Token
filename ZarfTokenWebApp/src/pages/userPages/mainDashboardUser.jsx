@@ -1,9 +1,8 @@
 import { Routes, Route } from "react-router-dom";
 import NavbarUser from "./navbarUser";
 import { useAuthUser } from "../../hooks/auth";
-import Notifications from "../Notifications";
+
 import AllEvents from "../AllEvents";
-import Wallet from "../Wallet";
 import FavouriteEvents from "./FavouriteEvents";
 import RegisteredEvents from "./RegisteredEvents";
 import LoyaltyProgram from "./LoyaltyProgram";
@@ -20,12 +19,10 @@ const mainDashboardUser = () => {
   return (
     <div>
       <NavbarUser />
-      <main className="max-w-5xl mx-auto mt-6 px-4">
+      <main className="w-full mt-6 px-4">
         <Routes>
-          <Route index element={<Notifications />} />
-          <Route path="/notifications" element={<Notifications />} />
+          <Route index element={<AllEvents />} />
           <Route path="/all-events" element={<AllEvents />} />
-          <Route path="/wallet" element={<Wallet />} />
           <Route path="/favourite-events" element={<FavouriteEvents />} />
           <Route path="/registered-events" element={<RegisteredEvents />} />
           <Route path="/loyalty-program" element={<LoyaltyProgram />} />

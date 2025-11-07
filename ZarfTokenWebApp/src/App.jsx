@@ -9,6 +9,7 @@ import MainDashboardVendor from "./pages/vendorPages/mainDashboardVendor";
 import MainDashboardAdmin from "./pages/adminPages/mainDashboardAdmin";
 import ProtectedRoute from "./components/ProtectedRoute";
 import SignUp from "./pages/signUp";
+import NotFound from "./pages/notFound";
 import "./App.css";
 import { useAuthUser } from "./hooks/auth";
 // import EditBazaar from "./pages/bazaarPages/EditBazaar";
@@ -60,9 +61,8 @@ function App() {
             </ProtectedRoute>
           }
         />
-        {/* <Route path="/editConference/:id" element={<EditConference />} />
-        <Route path="/editBazaar/:id" element={<EditBazaar />} />
-        <Route path="/editTrip/:id" element={<EditTrip />} /> */}
+        <Route path="/404" element={<NotFound />} />
+        <Route path="*" element={<NotFound />} />
       </Routes>
     </Router>
   );

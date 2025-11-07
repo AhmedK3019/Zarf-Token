@@ -160,6 +160,11 @@ const AllEvents = () => {
   const { category } = useParams();
   const { user } = useAuthUser();
 
+  // Favourites state for heart toggle
+  const [favKeys, setFavKeys] = useState(new Set());
+  const [toastMsg, setToastMsg] = useState(null);
+  const [toastType, setToastType] = useState("info");
+
   // ===== STATE GROUPS =====
 
   // Event Data State
@@ -167,10 +172,16 @@ const AllEvents = () => {
   const [events, setEvents] = useState([]);
   const [filteredEvents, setFilteredEvents] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
-
+  const [filterLocation, setFilterLocation] = useState("");
+  const [filterProfessor, setFilterProfessor] = useState("");
+  const [filterDate, setFilterDate] = useState("");
+  const [startDateFilter, setStartDateFilter] = useState("");
+  const [endDateFilter, setEndDateFilter] = useState("");
+  const [dateSort, setDateSort] = useState(""); // "newest", "oldest"
   // UI State
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  const [showFilters, setShowFilters] = useState(false);
 
   // Modal State
   const [selectedBazaar, setSelectedBazaar] = useState(null);
@@ -204,6 +215,20 @@ const AllEvents = () => {
     { id: "booths", name: "Platform Booths" },
   ];
 
+  const filterableLocations = [
+    "Cairo",
+    "Alexandria",
+    "Gouna",
+    "Berlin",
+    "Online",
+  ];
+
+  const filterableProfessors = [
+    "Dr Mo salah",
+    "Dr Marck",
+    "Catherine",
+  ];
+
   const userIsPrivileged =
     user?.role?.toLowerCase().includes("admin") ||
     user?.role?.toLowerCase().includes("event");
@@ -212,6 +237,20 @@ const AllEvents = () => {
   );
 
   // ===== EFFECTS =====
+
+  // Fetch favourites for heart status
+  useEffect(() => {
+    (async () => {
+      if (!user?._id) { setFavKeys(new Set()); return; }
+      try {
+        const res = await api.get(`/user/getFavourites/${user._id}`);
+        const setKeys = new Set((res?.data?.favourites||[]).map(f => `${f.itemType}:${f.itemId}`));
+        setFavKeys(setKeys);
+      } catch (e) {
+        // non-fatal
+      }
+    })();
+  }, [user?._id]);
 
   // Fetch events based on category
   useEffect(() => {
@@ -259,20 +298,34 @@ const AllEvents = () => {
     setSearchTerm("");
   }, [selectedCategory]);
 
-  // Search logic
-  useEffect(() => {
-    if (!searchTerm.trim()) {
-      setFilteredEvents(events);
-      return;
-    }
-    const lowercasedSearch = searchTerm.toLowerCase().trim();
-    const filtered = events.filter((rawEvent) => {
-      const event = getEventDetails(rawEvent);
+// Search, Filtering and Sorting logic
+useEffect(() => {
+  // 1. Get all filter values
+  const lowercasedSearch = searchTerm.toLowerCase().trim();
+  const hasSearch = lowercasedSearch !== "";
+
+  const lowercasedLocation = filterLocation.toLowerCase();
+  const hasLocationFilter = lowercasedLocation !== "";
+
+  const hasProfessorFilter = filterProfessor.toLowerCase() !== "";
+  const lowercasedProfessor = filterProfessor.toLowerCase();
+  
+  const hasDateFilter = filterDate.trim() !== "";
+  const hasStartDateFilter = startDateFilter.trim() !== "";
+  const hasEndDateFilter = endDateFilter.trim() !== "";
+
+  // 2. Apply all filters
+  let filtered = events.filter((rawEvent) => {
+    const event = getEventDetails(rawEvent);
+
+    // Filter 1: Main Search Bar (Name, general text, etc.)
+    let matchesSearch = true;
+    if (hasSearch) {
       let searchtype = "";
       if (event.type === "booth") {
         searchtype = "platform booth";
       }
-      return (
+      matchesSearch =
         event.name?.toLowerCase().includes(lowercasedSearch) ||
         `${event.createdBy?.firstname} ${event.createdBy?.lastname}`
           .toLowerCase()
@@ -283,13 +336,121 @@ const AllEvents = () => {
             .includes(lowercasedSearch)
         ) ||
         event.type?.toLowerCase().includes(lowercasedSearch) ||
-        searchtype.toLowerCase().includes(lowercasedSearch)
-      );
-    });
-    setFilteredEvents(filtered);
-  }, [searchTerm, events]);
+        searchtype.toLowerCase().includes(lowercasedSearch) ||
+        event.location?.toLowerCase().includes(lowercasedSearch) ||
+        event.vendor?.toLowerCase().includes(lowercasedSearch) ||
+        (event.original?.vendorId?.companyname
+          ?.toLowerCase()
+          .includes(lowercasedSearch));
+    }
 
+    // Filter 2: Dedicated Location Filter
+    const matchesLocation =
+      !hasLocationFilter ||
+      event.location?.toLowerCase().includes(lowercasedLocation);
+
+    // Filter 3: Professor Filter
+    let matchesProfessor = true;
+    if (hasProfessorFilter) {
+      if (event.type === "workshop" || event.type === "conference") {
+        const conferenceProfMatch =
+          event.type === "conference" &&
+          event.professorname?.toLowerCase().includes(lowercasedProfessor);
+
+        const workshopProfMatch =
+          event.type === "workshop" &&
+          event.professors?.some((prof) =>
+            `${prof.firstname} ${prof.lastname}`
+              .toLowerCase()
+              .includes(lowercasedProfessor)
+          );
+        
+        matchesProfessor = conferenceProfMatch || workshopProfMatch;
+      } else {
+        matchesProfessor = false; 
+      }
+    }
+
+    // Filter 4: Specific Date Filter (exact match)
+    let matchesDate = true;
+    if (hasDateFilter && event.startDate) {
+      const filterParts = filterDate.split("-").map(Number);
+      const filterYear = filterParts[0];
+      const filterMonth = filterParts[1] - 1;
+      const filterDay = filterParts[2];
+
+      const eventStartDate = new Date(event.startDate);
+      const eventYear = eventStartDate.getFullYear();
+      const eventMonth = eventStartDate.getMonth();
+      const eventDay = eventStartDate.getDate();
+      
+      matchesDate = (eventYear === filterYear) && (eventMonth === filterMonth) && (eventDay === filterDay);
+    }
+
+    // Filter 5: Start Date Range Filter (INCLUSIVE - events on or after start date)
+    let matchesStartDate = true;
+    if (hasStartDateFilter && event.startDate) {
+      const filterStartDate = new Date(startDateFilter);
+      const eventStartDate = new Date(event.startDate);
+      // Set both dates to midnight for proper inclusive comparison
+      filterStartDate.setHours(0, 0, 0, 0);
+      eventStartDate.setHours(0, 0, 0, 0);
+      matchesStartDate = eventStartDate >= filterStartDate;
+    }
+
+    // Filter 6: End Date Range Filter (INCLUSIVE - events on or before end date)  
+    let matchesEndDate = true;
+    if (hasEndDateFilter && event.startDate) {
+      const filterEndDate = new Date(endDateFilter);
+      const eventStartDate = new Date(event.startDate);
+      // Set both dates to midnight for proper inclusive comparison
+      filterEndDate.setHours(0, 0, 0, 0);
+      eventStartDate.setHours(0, 0, 0, 0);
+      matchesEndDate = eventStartDate <= filterEndDate;
+    }
+    // Must match ALL active filters
+    return matchesSearch && matchesLocation && matchesProfessor && matchesDate && matchesStartDate && matchesEndDate;
+  });
+
+  // 3. Apply Date Sorting
+  if (dateSort) {
+    filtered = filtered.sort((a, b) => {
+      const eventA = getEventDetails(a);
+      const eventB = getEventDetails(b);
+      
+      const dateA = eventA.startDate ? new Date(eventA.startDate) : new Date(0);
+      const dateB = eventB.startDate ? new Date(eventB.startDate) : new Date(0);
+      
+      if (dateSort === "newest") {
+        return dateB - dateA; // Most recent first
+      } else if (dateSort === "oldest") {
+        return dateA - dateB; // Oldest first
+      }
+      return 0;
+    });
+  }
+
+  setFilteredEvents(filtered);
+}, [searchTerm, events, filterLocation, filterProfessor, filterDate, startDateFilter, endDateFilter, dateSort]);
   // ===== EVENT HANDLERS =====
+
+  const handleToggleFavourite = async (raw) => {
+    try {
+      const key = `${raw.type}:${raw._id}`;
+      const isFav = favKeys.has(key);
+      if (isFav) {
+        await api.post(`/user/removeFavourite/${user._id}`, { itemType: raw.type, itemId: raw._id });
+        const next = new Set(favKeys); next.delete(key); setFavKeys(next);
+        setToastMsg('Removed from favorites'); setToastType('success'); setTimeout(()=>setToastMsg(null),1500);
+      } else {
+        await api.post(`/user/addFavourite/${user._id}`, { itemType: raw.type, itemId: raw._id });
+        const next = new Set(favKeys); next.add(key); setFavKeys(next);
+        setToastMsg('Added to favorites'); setToastType('success'); setTimeout(()=>setToastMsg(null),1500);
+      }
+    } catch (e) {
+      setToastMsg(e?.response?.data?.message || 'Action failed'); setToastType('error'); setTimeout(()=>setToastMsg(null),2000);
+    }
+  };
 
   const handleDeleteEvent = async (event) => {
     if (
@@ -428,76 +589,261 @@ const AllEvents = () => {
 
   // ===== MAIN RENDER =====
   return (
-    <div className="min-h-screen w-full overflow-hidden bg-[#D5CFE1] text-[#1F1B3B]">
-      <main className="relative z-10 flex w-full flex-1 flex-col items-center px-6 py-8">
-        <div className="w-full max-w-6xl">
-          {/* Header */}
-          <div className="mb-12 text-center">
-            <h1 className="text-4xl font-bold text-[#736CED] sm:text-5xl mb-4">
-              Campus Events & Booths
-            </h1>
-            <p className="text-lg text-[#312A68] max-w-2xl mx-auto">
-              Discover amazing events and platform booths across campus.
-            </p>
-          </div>
+    <div className="min-h-screen w-full bg-muted text-gray-800">
+      <main className="w-full px-6 py-8">
+        {/* Category Filters - Pill-shaped buttons */}
+        <div className="flex flex-wrap justify-center gap-3 mb-8">
+          {eventCategories.map((cat) => (
+            <button
+              key={cat.id}
+              onClick={() => setSelectedCategory(cat.id)}
+              className={`px-6 py-2.5 rounded-full font-medium text-sm transition-all ${
+                selectedCategory === cat.id
+                  ? "bg-[#4a4ae6] text-white shadow-md hover:bg-[#3d3dd4]"
+                  : "bg-white text-gray-700 border-2 border-[#4a4ae6] hover:bg-gray-50"
+              }`}
+            >
+              {cat.name}
+            </button>
+          ))}
+        </div>
 
-          {/* Category Filters */}
-          <div className="flex flex-wrap justify-center gap-4 mb-8">
-            {eventCategories.map((cat) => (
-              <button
-                key={cat.id}
-                onClick={() => setSelectedCategory(cat.id)}
-                className={`px-6 py-3 rounded-full font-semibold transition-all ${
-                  selectedCategory === cat.id
-                    ? "bg-[#736CED] text-white shadow-[0_10px_25px_rgba(115,108,237,0.3)]"
-                    : "bg-white/70 text-[#736CED] border border-[#736CED] hover:bg-[#E7E1FF]"
-                }`}
-              >
-                {cat.name}
-              </button>
-            ))}
-          </div>
-
-          {/* Search */}
-          <div className="mb-12">
-            <div className="relative max-w-2xl mx-auto">
-              <input
-                type="text"
-                placeholder="Search by event name, professor name, or event type..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full px-6 py-4 pr-12 rounded-full border border-[#736CED] bg-white/70 focus:outline-none focus:ring-2 focus:ring-[#736CED]"
+       {/* Search Bar with Filter Button */}
+      <div className="mb-8">
+        <div className="relative max-w-3xl mx-auto flex gap-2">
+          <div className="relative flex-1">
+            <input
+              type="text"
+              placeholder="Search by event name, professor name, vendor, or location..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="w-full px-6 py-4 pr-14 rounded-lg border border-gray-300 bg-white focus:outline-none focus:ring-2 focus:ring-[#4a4ae6] focus:border-transparent shadow-sm"
+            />
+            <svg
+              className="absolute right-4 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
               />
+            </svg>
+          </div>
+          
+          {/* Filter Button */}
+          <button
+            onClick={() => setShowFilters(!showFilters)}
+            className="px-4 py-4 rounded-lg border border-gray-300 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-[#4a4ae6] focus:border-transparent shadow-sm flex items-center gap-2"
+          >
+            <svg className="h-5 w-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
+            </svg>
+            <span className="hidden sm:inline">Filters</span>
+          </button>
+        </div>
+
+        {/* Filters Dropdown */}
+      {showFilters && (
+        <div className="max-w-3xl mx-auto mt-4 p-6 bg-white rounded-lg shadow-lg border border-gray-200">
+          <div className="flex justify-between items-center mb-4">
+            <h3 className="text-lg font-semibold text-gray-800">Filter & Sort Events</h3>
+            <button
+              onClick={() => setShowFilters(false)}
+              className="text-gray-500 hover:text-gray-700"
+            >
+              <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+          </div>
+          
+          {/* Basic Filters */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+            {/* Location Filter */}
+            <div>
+              <label htmlFor="filter-location" className="block text-sm font-medium text-gray-700 mb-1">
+                Location
+              </label>
+              <select
+                id="filter-location"
+                value={filterLocation}
+                onChange={(e) => setFilterLocation(e.target.value)}
+                className="w-full px-4 py-2 rounded-lg border border-gray-300 bg-white focus:outline-none focus:ring-2 focus:ring-[#4a4ae6] focus:border-transparent"
+              >
+                <option value="">All Locations</option>
+                {filterableLocations.map((loc) => (
+                  <option key={loc} value={loc}>
+                    {loc}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            {/* Professor Filter */}
+            <div>
+              <label htmlFor="filter-professor" className="block text-sm font-medium text-gray-700 mb-1">
+                Professor
+              </label>
+              <select
+                id="filter-professor"
+                value={filterProfessor}
+                onChange={(e) => setFilterProfessor(e.target.value)}
+                className="w-full px-4 py-2 rounded-lg border border-gray-300 bg-white focus:outline-none focus:ring-2 focus:ring-[#4a4ae6] focus:border-transparent"
+              >
+                <option value="">All Professors</option>
+                {filterableProfessors.map((prof) => (
+                  <option key={prof} value={prof}>
+                    {prof}
+                  </option>
+                ))}
+              </select>
             </div>
           </div>
 
-          {/* Events Grid */}
-          {loading ? (
-            <p className="text-center py-12">Loading events...</p>
-          ) : error ? (
-            <p className="text-center py-12 text-red-500">{error}</p>
-          ) : filteredEvents.length > 0 ? (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-12">
-              {filteredEvents.map((event) => (
-                <EventCard
-                  key={`${event.type}-${event._id}`}
-                  event={event}
-                  user={user}
-                  userIsPrivileged={userIsPrivileged}
-                  userIsEligible={userIsEligible}
-                  onDelete={handleDeleteEvent}
-                  onRegister={handleRegisterEvent}
-                  onViewBooths={handleViewBooths}
-                  onViewDetails={handleViewDetails}
-                />
-              ))}
-            </div>
-          ) : (
-            <p className="text-center py-12">
-              No events found for this category.
-            </p>
+        {/* Date Filtering & Sorting Section */}
+  <div className="border-t pt-4">
+  <h4 className="text-md font-medium text-gray-800 mb-4">Date Options</h4>
+  
+  <div className="space-y-4">
+    {/* Row 1: Filter Options */}
+    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      {/* Specific Date Filter */}
+      <div>
+        <label htmlFor="filter-date" className="block text-sm font-medium text-gray-700 mb-2">
+          Filter by Specific Date
+        </label>
+        <div className="relative max-w-xs">
+          <input
+            type="date"
+            id="filter-date"
+            value={filterDate}
+            onChange={(e) => setFilterDate(e.target.value)}
+            className="w-full px-4 py-2.5 rounded-lg border border-gray-300 bg-white focus:outline-none focus:ring-2 focus:ring-[#4a4ae6] focus:border-transparent"
+          />
+          {filterDate && (
+            <button
+              onClick={() => setFilterDate("")}
+              className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
+              title="Clear specific date"
+            >
+              <span className="text-xl">×</span>
+            </button>
           )}
         </div>
+      </div>
+
+      {/* Date Sorting */}
+      <div>
+        <label htmlFor="date-sort" className="block text-sm font-medium text-gray-700 mb-2">
+          Sort Events by Date
+        </label>
+        <div className="max-w-xs">
+          <select
+            id="date-sort"
+            value={dateSort}
+            onChange={(e) => setDateSort(e.target.value)}
+            className="w-full px-4 py-2.5 rounded-lg border border-gray-300 bg-white focus:outline-none focus:ring-2 focus:ring-[#4a4ae6] focus:border-transparent"
+          >
+            <option value="">No Date Sorting</option>
+            <option value="newest">Newest First</option>
+            <option value="oldest">Oldest First</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    {/* Row 2: Date Range Filter */}
+    <div>
+      <label className="block text-sm font-medium text-gray-700 mb-2">
+        Filter by Date Range
+      </label>
+      <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 max-w-md">
+        <div className="relative flex-1 min-w-[150px]">
+          <input
+            type="date"
+            value={startDateFilter}
+            onChange={(e) => setStartDateFilter(e.target.value)}
+            className="w-full px-4 py-2.5 rounded-lg border border-gray-300 bg-white focus:outline-none focus:ring-2 focus:ring-[#4a4ae6] focus:border-transparent"
+            placeholder="Start date"
+          />
+        </div>
+        
+        <div className="hidden sm:block text-gray-500 font-medium">to</div>
+        
+        <div className="relative flex-1 min-w-[150px]">
+          <input
+            type="date"
+            value={endDateFilter}
+            onChange={(e) => setEndDateFilter(e.target.value)}
+            className="w-full px-4 py-2.5 rounded-lg border border-gray-300 bg-white focus:outline-none focus:ring-2 focus:ring-[#4a4ae6] focus:border-transparent"
+            placeholder="End date"
+          />
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+          {/* Clear Filters Button */}
+          <div className="mt-6 flex justify-between items-center">
+            <div className="text-sm text-gray-600">
+              {filteredEvents.length} event{filteredEvents.length !== 1 ? 's' : ''} found
+            </div>
+            <button
+              onClick={() => {
+                setFilterLocation("");
+                setFilterProfessor("");
+                setFilterDate("");
+                setStartDateFilter("");
+                setEndDateFilter("");
+                setDateSort("");
+              }}
+              className="px-4 py-2 text-sm text-gray-600 hover:text-gray-800 underline"
+            >
+              Clear all filters
+            </button>
+          </div>
+        </div>
+      )}
+      </div>
+        
+        {/* Events Grid */}
+        {loading ? (
+          <div className="text-center py-12">
+            <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-[#4a4ae6]"></div>
+            <p className="mt-4 text-gray-600">Loading events...</p>
+          </div>
+        ) : error ? (
+          <p className="text-center py-12 text-red-500">{error}</p>
+        ) : filteredEvents.length > 0 ? (
+          <div className="grid  lg:grid-cols-4 gap-6">
+            {filteredEvents.map((event) => (
+              <EventCard
+                key={`${event.type}-${event._id}`}
+                event={event}
+                user={user}
+                userIsPrivileged={userIsPrivileged}
+                userIsEligible={userIsEligible}
+                onDelete={handleDeleteEvent}
+                onRegister={handleRegisterEvent}
+                onViewBooths={handleViewBooths}
+                onViewDetails={handleViewDetails}
+                isFavourite={favKeys.has(`${event.type}-${event._id}`) || favKeys.has(`${event.type}:${event._id}`)}
+                onToggleFavourite={handleToggleFavourite}
+              />
+            ))}
+          </div>
+        ) : (
+          <div className="text-center py-12">
+            <p className="text-gray-600 text-lg">
+              No events found for this category.
+            </p>
+          </div>
+        )}
+      {toastMsg && (<div className={`fixed top-4 right-4 z-50 px-4 py-2 rounded-md text-white ${toastType==='error'?'bg-red-600':'bg-emerald-600'}`}>{toastMsg}</div>)}
       </main>
 
       {/* Modals */}

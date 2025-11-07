@@ -1,98 +1,30 @@
-import { NavLink, useNavigate } from "react-router-dom";
+import { NavLink, useNavigate, useLocation } from "react-router-dom";
 import { useAuthUser } from "../../hooks/auth";
+import { useState, useRef, useEffect } from "react";
+import {
+  LogOut,
+  Calendar,
+  ShoppingBag,
+  List,
+  CheckSquare,
+  SquarePlus,
+  Star,
+  Bell,
+  ChevronDown,
+} from "lucide-react";
 import logo from "../../assets/logo.png";
+import NotificationsDrawer from "../../components/NotificationsDrawer";
 
 const NavbarVendor = ({ vendor }) => {
-  const { user } = useAuthUser();
+  const navigate = useNavigate();
+  const { user, logout } = useAuthUser();
+  // Hooks first so call order is stable even if we return early
+  const location = useLocation();
+  const [menuOpen, setMenuOpen] = useState(false);
+  const menuRef = useRef(null);
+
   // if not authenticated or not a vendor, don't render nav
   if (!user || user.role !== "Vendor") return null;
-
-  return (
-    <div className="flex w-full justify-center pt-9 pb-4">
-      <header className="flex w-[86%] max-w-3xl min-w-[820px] items-center justify-center gap-8 rounded-full bg-white/95 px-5 py-2.5 shadow-[0_14px_32px_rgba(115,108,237,0.2)] backdrop-blur md:px-7">
-        <img
-          src={logo}
-          alt="Logo"
-          className="h-8 w-8 rounded-full bg-primary/10 p-1"
-        />
-        <nav className="hidden md:flex items-center gap-5 text-sm font-medium text-primary/80 whitespace-nowrap">
-          <NavLink
-            to="/dashboard/vendor/upcoming-bazaars"
-            className={({ isActive }) =>
-              isActive
-                ? "rounded-full bg-black/5 px-4 py-2 text-primary shadow-inner transform scale-100"
-                : "transition-colors hover:text-primary transform hover:scale-105"
-            }
-          >
-            Upcoming Bazaars
-          </NavLink>
-          <NavLink
-            to="/dashboard/vendor/apply-booth"
-            className={({ isActive }) =>
-              isActive
-                ? "rounded-full bg-black/5 px-4 py-2 text-primary shadow-inner transform scale-100"
-                : "transition-colors hover:text-primary transform hover:scale-105"
-            }
-          >
-            Apply for Booth
-          </NavLink>
-          <NavLink
-            to="/dashboard/vendor/my-requests"
-            className={({ isActive }) =>
-              isActive
-                ? "rounded-full bg-black/5 px-4 py-2 text-primary shadow-inner transform scale-100"
-                : "transition-colors hover:text-primary transform hover:scale-105"
-            }
-          >
-            My Requests
-          </NavLink>
-          <NavLink
-            to="/dashboard/vendor/accepted-booths"
-            className={({ isActive }) =>
-              isActive
-                ? "rounded-full bg-black/5 px-4 py-2 text-primary shadow-inner transform scale-100"
-                : "transition-colors hover:text-primary transform hover:scale-105"
-            }
-          >
-            Accepted Booths
-          </NavLink>
-          {vendor?.loyal ? (
-            <NavLink
-              to="/dashboard/vendor/cancel-loyalty"
-              className={({ isActive }) =>
-                isActive
-                  ? "rounded-full bg-black/5 px-4 py-2 text-primary shadow-inner transform scale-100"
-                  : "transition-colors hover:text-primary transform hover:scale-105"
-              }
-            >
-              Cancel Loyalty Program
-            </NavLink>
-          ) : (
-            <NavLink
-              to="/dashboard/vendor/apply-loyalty"
-              className={({ isActive }) =>
-                isActive
-                  ? "rounded-full bg-black/5 px-4 py-2 text-primary shadow-inner transform scale-100"
-                  : "transition-colors hover:text-primary transform hover:scale-105"
-              }
-            >
-              Join Loyalty Program
-            </NavLink>
-          )}
-        </nav>
-      </header>
-      <div className="flex px-4 items-center gap-2 text-sm font-medium">
-        <LogoutButton />
-      </div>
-    </div>
-  );
-};
-
-export default NavbarVendor;
-
-function LogoutButton() {
-  const navigate = useNavigate();
-  const { logout } = useAuthUser();
 
   const handleLogout = () => {
     logout();
@@ -100,11 +32,93 @@ function LogoutButton() {
   };
 
   return (
-    <button
-      onClick={handleLogout}
-      className="rounded-full border border-primary bg-white px-4 py-2 text-primary transition-colors hover:bg-black/10"
-    >
-      Logout
-    </button>
+    <div className="w-full">
+      <header className="w-full bg-[#001233] shadow-lg">
+        <nav className="max-w-7xl mx-auto px-6 py-4">
+          <div className="flex items-center justify-between">
+            {/* Left - Notifications */}
+            <div className="flex items-center gap-4">
+              <NotificationsDrawer />
+            </div>
+
+            {/* Center - Links */}
+            <div className="hidden lg:flex items-center gap-4 text-sm font-medium text-white">
+              <NavLink
+                to="/dashboard/vendor/upcoming-bazaars"
+                className={({ isActive }) =>
+                  isActive
+                    ? "px-4 py-2 rounded-lg bg-white/15 text-white font-semibold transition-all flex items-center gap-2"
+                    : "px-4 py-2 rounded-lg text-white/90 hover:text-white hover:bg-white/8 transition-all flex items-center gap-2"
+                }
+              >
+                <Calendar className="h-4 w-4" />
+                Bazaars
+              </NavLink>
+              <NavLink
+                to="/dashboard/vendor/apply-booth"
+                className={({ isActive }) =>
+                  isActive
+                    ? "px-4 py-2 rounded-lg bg-white/15 text-white font-semibold transition-all flex items-center gap-2"
+                    : "px-4 py-2 rounded-lg text-white/90 hover:text-white hover:bg-white/8 transition-all flex items-center gap-2"
+                }
+              >
+                <SquarePlus className="h-4 w-4" />
+                Apply Booth
+              </NavLink>
+              <NavLink
+                to="/dashboard/vendor/my-requests"
+                className={({ isActive }) =>
+                  isActive
+                    ? "px-4 py-2 rounded-lg bg-white/15 text-white font-semibold transition-all flex items-center gap-2"
+                    : "px-4 py-2 rounded-lg text-white/90 hover:text-white hover:bg-white/8 transition-all flex items-center gap-2"
+                }
+              >
+                <List className="h-4 w-4" />
+                Requests
+              </NavLink>
+              <NavLink
+                to="/dashboard/vendor/accepted-booths"
+                className={({ isActive }) =>
+                  isActive
+                    ? "px-4 py-2 rounded-lg bg-white/15 text-white font-semibold transition-all flex items-center gap-2"
+                    : "px-4 py-2 rounded-lg text-white/90 hover:text-white hover:bg-white/8 transition-all flex items-center gap-2"
+                }
+              >
+                <CheckSquare className="h-4 w-4" />
+                Accepted
+              </NavLink>
+              <NavLink
+                to={
+                  vendor?.loyal
+                    ? "/dashboard/vendor/cancel-loyalty"
+                    : "/dashboard/vendor/apply-loyalty"
+                }
+                className={({ isActive }) =>
+                  isActive
+                    ? "px-4 py-2 rounded-lg bg-white/15 text-white font-semibold transition-all flex items-center gap-2"
+                    : "px-4 py-2 rounded-lg text-white/90 hover:text-white hover:bg-white/8 transition-all flex items-center gap-2"
+                }
+              >
+                <Star className="h-4 w-4" />
+                Loyalty
+              </NavLink>
+            </div>
+
+            {/* Right - Logout */}
+            <button
+              onClick={handleLogout}
+              aria-label="Logout"
+              title="Logout"
+              className="px-3 py-2 rounded-lg text-white/80 hover:text-white hover:bg-white/10 transition-all flex items-center gap-2 text-sm"
+            >
+              <LogOut className="h-4 w-4" />
+              <span className="hidden sm:inline">Logout</span>
+            </button>
+          </div>
+        </nav>
+      </header>
+    </div>
   );
-}
+};
+
+export default NavbarVendor;

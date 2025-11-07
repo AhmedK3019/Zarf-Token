@@ -1,6 +1,6 @@
 import { Routes, Route } from "react-router-dom";
 import NavbarEventsOffice from "./navbarEventsOffice";
-import Notifications from "../Notifications";
+
 import AllEvents from "../AllEvents";
 import CreateEvent from "./CreateEvent";
 import WorkshopRequests from "./WorkshopRequests";
@@ -16,10 +16,9 @@ const mainDashboardEventsOffice = () => {
   return (
     <div>
       <NavbarEventsOffice />
-      <main className="max-w-5xl mx-auto mt-6 px-4">
+      <main className="w-full mt-6 px-4">
         <Routes>
-          <Route index element={<Notifications />} />
-          <Route path="notifications" element={<Notifications />} />
+          <Route index element={<AllEvents />} />
           <Route path="all-events" element={<AllEvents />} />
           <Route path="create-event" element={<CreateEvent />} />
           <Route path="workshop-requests" element={<WorkshopRequests />} />

@@ -1,5 +1,6 @@
 import LoyaltyProgramForm from "../models/LoyaltyProgramForm.js";
 import User from "../models/User.js";
+import Vendor from "../models/Vendor.js";
 
 // Create Form
 export const createForm = async (req, res) => {
@@ -14,21 +15,17 @@ export const createForm = async (req, res) => {
     const form = new LoyaltyProgramForm(req.body);
     await form.save();
 
-    // send notification to students/staff/TAs/professors
-    const users = await User.find({
-      role: { $in: ["Student", "Staff", "TA", "Professor"] },
-    });
+    // send notification to all users
+    const users = await User.find();
     const notification = {
-      message: `A new partner has joined our loyalty program. Welcome ${form.vendorId}`,
+      message: `A new partner has joined our loyalty program. Welcome ${vendor.companyname}`,
       isRead: false,
-      date: new Date(),
     };
 
-    await Promise.all(
-      users.map((user) => {
-        user.notifications.push(notification);
-        return user.save();
-      })
+    // Push the notification to all users in a single DB operation instead of saving each user
+    const res = await User.updateMany(
+      {},
+      { $push: { notifications: notification } }
     );
 
     res.status(201).json(form);

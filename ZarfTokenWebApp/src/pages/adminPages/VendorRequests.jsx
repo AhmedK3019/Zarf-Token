@@ -75,18 +75,9 @@ export default function VendorRequests() {
   }, []);
 
   return (
-    <div className="min-h-screen w-full overflow-hidden bg-[#D5CFE1] text-[#1F1B3B]">
+    <div className="min-h-screen w-full overflow-hidden bg-muted text-[#1F1B3B]">
       <div className="relative flex min-h-screen w-full flex-col items-center px-6 py-8">
-        <div className="w-full max-w-6xl">
-          {/* Header */}
-          <div className="mb-10 text-center">
-            <h1 className="text-4xl font-bold text-[#736CED] sm:text-5xl mb-4">
-              Vendor Participation Requests
-            </h1>
-            <p className="text-lg text-[#312A68] max-w-2xl mx-auto">
-              Review all pending vendor participation requests below.
-            </p>
-          </div>
+        <div className="w-full">
 
           {message && (
             <div className="mb-4 text-center bg-green-100 text-green-800 py-2 rounded">
@@ -110,7 +101,7 @@ export default function VendorRequests() {
               No vendor requests available.
             </div>
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-12">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
               {requests.map((req) => (
                 <div
                   key={req._id}

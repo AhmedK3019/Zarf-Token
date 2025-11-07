@@ -1,5 +1,8 @@
 import WorkShop from "../models/Workshop.js";
+import EventsOffice from "../models/EventsOffice.js";
+import mongoose from "mongoose";
 import Joi from "joi";
+import jwt from "jsonwebtoken";
 
 const workshopSchema = Joi.object({
   workshopname: Joi.string().required(),
@@ -100,6 +103,19 @@ const createWorkshop = async (req, res, next) => {
       currentMessage: value.currentMessage,
     };
     const workshop = await WorkShop.create(body);
+    // add a notification for all events office
+    const notification = {
+      message: `A new workshop "${workshop.workshopname}" has been created and is pending your approval.`,
+      isRead: false,
+    };
+    // Persist the notification to all EventsOffice documents.
+    // Previously the code pushed into the in-memory array but did not save the documents,
+    // so notifications were never persisted. Use updateMany to atomically push the
+    // notification into every EventsOffice.notifications array.
+    await EventsOffice.updateMany(
+      {},
+      { $push: { notifications: notification } }
+    );
     return res.status(201).json(workshop);
   } catch (error) {
     next(error);

@@ -35,6 +35,14 @@ const boothSchema = new mongoose.Schema(
     },
     bazarId: { type: mongoose.Schema.Types.ObjectId, ref: "Bazaar" },
     type: { type: String, default: "booth" },
+    revenue: {
+      type: mongoose.Schema.Types.Decimal128,
+      default: mongoose.Types.Decimal128.fromString("0.00"),
+      // getter to return a plain number in JSON output
+      get: (v) => {
+        return v ? v.toString() : "0.00";
+      },
+    },
   },
   { timestamps: true }
 );
