@@ -30,6 +30,7 @@ const userSchema = Joi.object({
   status: Joi.string().valid("Active", "Blocked").default("Blocked"),
   notifications: Joi.array().default([]),
   password: Joi.string().min(6).required(),
+  addAttendedEvent: Joi.array().default([]),
 });
 
 // createUser
@@ -185,6 +186,28 @@ const getProfessors = async (_req, res, next) => {
     next(error);
   }
 };
+
+const addAttendedEvent = async (req, res, next) => {
+  try {
+    const userId = req.userId;
+    if (!userId) {
+      return res.status(401).json({ message: "You are not authorized" });
+    }
+    const { id, type } = req.params;
+    const body = { eventid: id, eventtype: type };
+    const result = await User.findByIdAndUpdate(
+      { _id: userId },
+      { $addToSet: { attendedevents: body } },
+      { new: true }
+    );
+    return res
+      .status(200)
+      .json({ message: "Attended successfully", addedEvent: result });
+  } catch (error) {
+    next(error);
+  }
+};
+
 export default {
   signup,
   loginUser,
@@ -192,4 +215,5 @@ export default {
   deleteUser,
   getProfessors,
   getUser,
+  addAttendedEvent,
 };

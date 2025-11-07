@@ -22,6 +22,26 @@ const tripSchema = new mongoose.Schema({
     default: [],
   },
   type: { type: String, default: "trip" },
+  ratings: {
+    type: [
+      {
+        rating: { type: Number, enum: [0, 1, 2, 3, 4, 5], default: 0 },
+
+        userId: { type: mongoose.Schema.ObjectId, ref: "User" },
+      },
+    ],
+    default: [],
+  },
+  comments: {
+    type: [
+      {
+        rating: { type: Number, enum: [0, 1, 2, 3, 4, 5], default: 0 },
+
+        userId: { type: mongoose.Schema.ObjectId, ref: "User" },
+      },
+    ],
+    default: [],
+  },
 });
 
 const Trip = mongoose.model("Trip", tripSchema);

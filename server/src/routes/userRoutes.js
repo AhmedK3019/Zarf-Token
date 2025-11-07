@@ -14,4 +14,6 @@ router.delete("/deleteUser/:id", userController.deleteUser);
 
 router.get("/getProfessors", userController.getProfessors);
 
+router.patch("/attendedEvent/:id", userController.addAttendedEvent);
+
 export default router;

@@ -14,6 +14,26 @@ const conferenceSchema = new mongoose.Schema({
   requiredbudget: { type: Number, required: true },
   sourceoffunding: { type: String, enum: ["External", "GUC"], required: true },
   extrarequiredresources: { type: String },
+  ratings: {
+    type: [
+      {
+        rating: { type: Number, enum: [0, 1, 2, 3, 4, 5], default: 0 },
+
+        userId: { type: mongoose.Schema.ObjectId, ref: "User" },
+      },
+    ],
+    default: [],
+  },
+  comments: {
+    type: [
+      {
+        rating: { type: Number, enum: [0, 1, 2, 3, 4, 5], default: 0 },
+
+        userId: { type: mongoose.Schema.ObjectId, ref: "User" },
+      },
+    ],
+    default: [],
+  },
   createdAt: { type: Date, default: Date.now },
   type: { type: String, default: "conference" },
 });

@@ -42,6 +42,27 @@ const workshopSchema = new mongoose.Schema({
     awaitingResponseFrom: { type: String, default: "" },
     message: { type: String, default: "" },
   },
+  ratings: {
+    type: [
+      {
+        rating: { type: Number, enum: [0, 1, 2, 3, 4, 5], default: 0 },
+
+        userId: { type: mongoose.Schema.ObjectId, ref: "User" },
+      },
+    ],
+    default: [],
+  },
+  comments: {
+    type: [
+      {
+        rating: { type: Number, enum: [0, 1, 2, 3, 4, 5], default: 0 },
+
+        userId: { type: mongoose.Schema.ObjectId, ref: "User" },
+      },
+    ],
+    default: [],
+  },
+
   createdBy: { type: mongoose.Schema.ObjectId, ref: "User", required: true },
   createdAt: { type: Date, default: Date.now },
 });

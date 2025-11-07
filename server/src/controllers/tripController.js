@@ -13,6 +13,8 @@ const TripSchema = Joi.object({
   price: Joi.number().required(),
   capacity: Joi.number().required(),
   attendees: Joi.array().default([]),
+  ratings: Joi.array().default([]),
+  comments: Joi.array().default([]),
 });
 
 const attendeesSchema = Joi.object({
@@ -125,6 +127,7 @@ const registerForTrip = async (req, res, next) => {
     next(error);
   }
 };
+
 export default {
   createTrip,
   updateTrip,

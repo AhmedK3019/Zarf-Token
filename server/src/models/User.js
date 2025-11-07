@@ -25,6 +25,16 @@ const userSchema = new mongoose.Schema({
     ],
     default: [],
   },
+  attendedevents: {
+    type: [
+      {
+        eventid: { type: mongoose.Schema.Types.ObjectId },
+        eventtype: { type: String },
+      },
+    ],
+    default: [],
+  },
+
   createdAt: { type: Date, default: Date.now },
 });
 

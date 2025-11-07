@@ -8,5 +8,10 @@ router.get(
   "/getEventsRegisteredByMe/:userId",
   AllEventsController.getEventsRegisteredByUser
 );
+router.patch("/addComment/:id/:type", AllEventsController.addComment);
+router.patch("/rateEvent/:id/:type", AllEventsController.rateEvent);
 
+router.get("/viewAllComments/:id/:type", AllEventsController.viewAllComments);
+
+router.get("/viewAllRatings/:id/:type", AllEventsController.viewAllRatings);
 export default router;
