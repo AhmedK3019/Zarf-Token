@@ -89,7 +89,6 @@ export default function UpcomingBazars() {
       }
     };
     fetchBazaars();
-    if (user) fetchMyRequests();
     fetchMyRequests();
   }, [user]);
 
