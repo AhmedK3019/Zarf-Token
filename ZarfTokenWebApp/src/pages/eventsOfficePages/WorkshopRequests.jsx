@@ -515,7 +515,7 @@ function WorkshopModal({
 
             {/* Info Grid */}
             <div
-              className="grid gap-4 sm:grid-cols-2 animate-fade-in"
+              className="grid gap-4 sm:grid-cols-3 animate-fade-in"
               style={{ animationDelay: "300ms" }}
             >
               <div className="rounded-2xl border border-[#736CED]/20 bg-gradient-to-br from-[#736CED]/5 to-[#6DD3CE]/5 backdrop-blur-sm px-6 py-4">
@@ -584,7 +584,7 @@ function WorkshopModal({
                 </h3>
               </div>
               {workshop.status === "Pending" && (
-                <div className="grid gap-3 sm:grid-cols-2">
+                <div className="grid gap-3 sm:grid-cols-3">
                   {statusButtonConfig.map((config) => {
                     const Icon = config.icon;
                     return (
@@ -843,7 +843,7 @@ export default function WorkshopRequests() {
       className="min-h-screen w-full px-6 py-10"
       style={{ backgroundColor: COLORS.muted }}
     >
-      <div className="mx-auto w-full max-w-7xl">
+      <div className="w-full">
         {/* Hero Header */}
         <header className="text-center space-y-3 mb-12 animate-fade-in">
           <h1 className="text-5xl sm:text-6xl font-black leading-tight">
@@ -902,7 +902,7 @@ export default function WorkshopRequests() {
         </section>
 
         {/* Workshop Cards */}
-        <section className="grid gap-6 lg:grid-cols-2">
+        <section className="grid gap-6 lg:grid-cols-3">
           {isLoading ? (
             <>
               <SkeletonCard />

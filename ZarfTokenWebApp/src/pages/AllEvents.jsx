@@ -590,7 +590,7 @@ useEffect(() => {
   // ===== MAIN RENDER =====
   return (
     <div className="min-h-screen w-full bg-muted text-gray-800">
-      <main className="w-full max-w-7xl mx-auto px-6 py-8">
+      <main className="w-full px-6 py-8">
         {/* Category Filters - Pill-shaped buttons */}
         <div className="flex flex-wrap justify-center gap-3 mb-8">
           {eventCategories.map((cat) => (
@@ -819,7 +819,7 @@ useEffect(() => {
         ) : error ? (
           <p className="text-center py-12 text-red-500">{error}</p>
         ) : filteredEvents.length > 0 ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="grid  lg:grid-cols-4 gap-6">
             {filteredEvents.map((event) => (
               <EventCard
                 key={`${event.type}-${event._id}`}

@@ -303,7 +303,7 @@ export default function AcceptedBooths() {
       `}</style>
       <div className="min-h-screen w-full bg-muted text-[#1F1B3B] font-sans">
         <main className="flex w-full flex-1 flex-col items-center px-4 sm:px-6 py-8">
-          <div className="w-full max-w-6xl">
+          <div className="w-full">
             <div className="mb-8 text-center">
               <h1 className="text-4xl font-bold text-[#736CED]">My Booths</h1>
               <p className="text-md text-[#312A68] mt-2">
@@ -353,7 +353,7 @@ export default function AcceptedBooths() {
                 </p>
               </div>
             ) : (
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
                 {filteredItems.map((booth) => (
                   <div
                     key={booth._id}

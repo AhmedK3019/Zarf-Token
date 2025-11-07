@@ -141,7 +141,7 @@ export default function RegisteredEvents() {
     <div className="min-h-screen w-full overflow-hidden bg-muted text-[#1F1B3B]">
       <div className="relative flex min-h-screen w-full flex-col items-center">
         <main className="relative z-10 flex w-full flex-1 flex-col items-center px-6 py-8">
-          <div className="w-full max-w-6xl">
+          <div className="w-full">
             <div className="mb-8 text-center">
               <h2 className="text-3xl font-bold text-[#736CED] sm:text-4xl mb-2">
                 My Registered Events
@@ -162,7 +162,7 @@ export default function RegisteredEvents() {
                 You haven’t registered for any events yet.
               </div>
             ) : (
-              <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+              <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
                 {events.map((event) => (
                   <EventCard key={event._id} event={event} />
                 ))}
