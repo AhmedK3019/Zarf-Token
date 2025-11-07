@@ -160,6 +160,11 @@ const AllEvents = () => {
   const { category } = useParams();
   const { user } = useAuthUser();
 
+  // Favourites state for heart toggle
+  const [favKeys, setFavKeys] = useState(new Set());
+  const [toastMsg, setToastMsg] = useState(null);
+  const [toastType, setToastType] = useState("info");
+
   // ===== STATE GROUPS =====
 
   // Event Data State
@@ -212,6 +217,20 @@ const AllEvents = () => {
   );
 
   // ===== EFFECTS =====
+
+  // Fetch favourites for heart status
+  useEffect(() => {
+    (async () => {
+      if (!user?._id) { setFavKeys(new Set()); return; }
+      try {
+        const res = await api.get(`/user/getFavourites/${user._id}`);
+        const setKeys = new Set((res?.data?.favourites||[]).map(f => `${f.itemType}:${f.itemId}`));
+        setFavKeys(setKeys);
+      } catch (e) {
+        // non-fatal
+      }
+    })();
+  }, [user?._id]);
 
   // Fetch events based on category
   useEffect(() => {
@@ -293,6 +312,24 @@ const AllEvents = () => {
   }, [searchTerm, events]);
 
   // ===== EVENT HANDLERS =====
+
+  const handleToggleFavourite = async (raw) => {
+    try {
+      const key = `${raw.type}:${raw._id}`;
+      const isFav = favKeys.has(key);
+      if (isFav) {
+        await api.post(`/user/removeFavourite/${user._id}`, { itemType: raw.type, itemId: raw._id });
+        const next = new Set(favKeys); next.delete(key); setFavKeys(next);
+        setToastMsg('Removed from favorites'); setToastType('success'); setTimeout(()=>setToastMsg(null),1500);
+      } else {
+        await api.post(`/user/addFavourite/${user._id}`, { itemType: raw.type, itemId: raw._id });
+        const next = new Set(favKeys); next.add(key); setFavKeys(next);
+        setToastMsg('Added to favorites'); setToastType('success'); setTimeout(()=>setToastMsg(null),1500);
+      }
+    } catch (e) {
+      setToastMsg(e?.response?.data?.message || 'Action failed'); setToastType('error'); setTimeout(()=>setToastMsg(null),2000);
+    }
+  };
 
   const handleDeleteEvent = async (event) => {
     if (
@@ -497,6 +534,8 @@ const AllEvents = () => {
                 onRegister={handleRegisterEvent}
                 onViewBooths={handleViewBooths}
                 onViewDetails={handleViewDetails}
+                isFavourite={favKeys.has(`${event.type}-${event._id}`) || favKeys.has(`${event.type}:${event._id}`)}
+                onToggleFavourite={handleToggleFavourite}
               />
             ))}
           </div>
@@ -507,6 +546,7 @@ const AllEvents = () => {
             </p>
           </div>
         )}
+      {toastMsg && (<div className={`fixed top-4 right-4 z-50 px-4 py-2 rounded-md text-white ${toastType==='error'?'bg-red-600':'bg-emerald-600'}`}>{toastMsg}</div>)}
       </main>
 
       {/* Modals */}
