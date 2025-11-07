@@ -77,14 +77,14 @@ const NavbarAdmin = () => {
       <header className="w-full bg-[#001233] shadow-lg">
         {/* Navigation Bar */}
         <nav className="max-w-7xl mx-auto px-6 py-4">
-          <div className="flex items-center justify-between">
+          <div className="grid grid-cols-3 items-center">
             {/* Left side - Notifications */}
-            <div className="flex items-center gap-4">
+            <div className="flex items-center gap-4 justify-self-start">
               <NotificationsDrawer />
             </div>
 
             {/* Center - Navigation Links */}
-            <div className="hidden lg:flex items-center gap-4 text-sm font-medium text-white">
+            <div className="hidden lg:flex items-center gap-4 text-sm font-medium text-white justify-self-center">
               {/* Events - Prominent button */}
               <NavLink
                 to="/dashboard/admin/all-events"
@@ -175,7 +175,7 @@ const NavbarAdmin = () => {
                 }
               >
                 <Store className="h-4 w-4" />
-                Loyalty Program
+                Loyalties
               </NavLink>
 
               {/* Users Dropdown */}
@@ -271,7 +271,7 @@ const NavbarAdmin = () => {
               onClick={handleLogout}
               aria-label="Logout"
               title="Logout"
-              className="px-3 py-2 rounded-lg text-white/80 hover:text-white hover:bg-white/10 transition-all flex items-center gap-2 text-sm"
+              className="px-3 py-2 rounded-lg text-white/80 hover:text-white hover:bg-white/10 transition-all flex items-center gap-2 text-sm justify-self-end"
             >
               <LogOut className="h-4 w-4" />
               <span className="hidden sm:inline">Logout</span>

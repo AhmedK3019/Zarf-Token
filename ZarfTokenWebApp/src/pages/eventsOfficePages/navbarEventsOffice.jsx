@@ -206,7 +206,7 @@ const NavbarEventsOffice = () => {
                 }
               >
                 <Star className="h-4 w-4" />
-                Loyalty Program
+                Loyalties
               </NavLink>
               <NavLink
                 to="/dashboard/eventsOffice/vendor-poll"
