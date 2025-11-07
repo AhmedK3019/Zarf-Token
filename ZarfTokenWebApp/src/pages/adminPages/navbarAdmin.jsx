@@ -6,7 +6,7 @@ import {
   Calendar,
   Users,
   UserPlus,
-  UserCheck,
+  ShieldUser,
   Bell,
   Store,
   FileText,
@@ -34,10 +34,16 @@ const NavbarAdmin = () => {
   // Close dropdowns when clicking outside
   useEffect(() => {
     const handleClickOutside = (event) => {
-      if (usersDropdownRef.current && !usersDropdownRef.current.contains(event.target)) {
+      if (
+        usersDropdownRef.current &&
+        !usersDropdownRef.current.contains(event.target)
+      ) {
         setUsersDropdownOpen(false);
       }
-      if (requestsDropdownRef.current && !requestsDropdownRef.current.contains(event.target)) {
+      if (
+        requestsDropdownRef.current &&
+        !requestsDropdownRef.current.contains(event.target)
+      ) {
         setRequestsDropdownOpen(false);
       }
     };
@@ -55,13 +61,13 @@ const NavbarAdmin = () => {
   }, [location.pathname]);
 
   // Check if any user-related route is active
-  const isUsersActive = 
+  const isUsersActive =
     location.pathname.includes("/all-users") ||
     location.pathname.includes("/all-admins") ||
     location.pathname.includes("/add-admin");
 
   // Check if any request-related route is active
-  const isRequestsActive = 
+  const isRequestsActive =
     location.pathname.includes("/signup-requests") ||
     location.pathname.includes("/vendor-requests");
 
@@ -107,8 +113,10 @@ const NavbarAdmin = () => {
                 >
                   <FileText className="h-4 w-4" />
                   Requests
-                  <ChevronDown 
-                    className={`h-4 w-4 transition-transform ${requestsDropdownOpen ? "rotate-180" : ""}`} 
+                  <ChevronDown
+                    className={`h-4 w-4 transition-transform ${
+                      requestsDropdownOpen ? "rotate-180" : ""
+                    }`}
                   />
                 </button>
                 {requestsDropdownOpen && (
@@ -118,23 +126,39 @@ const NavbarAdmin = () => {
                       onClick={() => setRequestsDropdownOpen(false)}
                       className={({ isActive }) =>
                         `flex items-center gap-3 px-4 py-3 text-gray-800 hover:bg-primary/5 hover:text-primary transition-colors ${
-                          isActive ? "bg-primary/10 text-primary font-semibold" : ""
+                          isActive
+                            ? "bg-primary/10 text-primary font-semibold"
+                            : ""
                         }`
                       }
                     >
-                      <Bell className={`h-4 w-4 ${location.pathname.includes("/signup-requests") ? "text-primary" : "text-gray-600"}`} />
-                      <span className="font-medium">Event Signups</span>
+                      <Bell
+                        className={`h-4 w-4 ${
+                          location.pathname.includes("/signup-requests")
+                            ? "text-primary"
+                            : "text-gray-600"
+                        }`}
+                      />
+                      <span className="font-medium">Sign-Up Requests</span>
                     </NavLink>
                     <NavLink
                       to="/dashboard/admin/vendor-requests"
                       onClick={() => setRequestsDropdownOpen(false)}
                       className={({ isActive }) =>
                         `flex items-center gap-3 px-4 py-3 text-gray-800 hover:bg-primary/5 hover:text-primary transition-colors border-t border-gray-200 ${
-                          isActive ? "bg-primary/10 text-primary font-semibold" : ""
+                          isActive
+                            ? "bg-primary/10 text-primary font-semibold"
+                            : ""
                         }`
                       }
                     >
-                      <PackageCheck className={`h-4 w-4 ${location.pathname.includes("/vendor-requests") ? "text-primary" : "text-gray-600"}`} />
+                      <PackageCheck
+                        className={`h-4 w-4 ${
+                          location.pathname.includes("/vendor-requests")
+                            ? "text-primary"
+                            : "text-gray-600"
+                        }`}
+                      />
                       <span className="font-medium">Vendor Applications</span>
                     </NavLink>
                   </div>
@@ -151,7 +175,7 @@ const NavbarAdmin = () => {
                 }
               >
                 <Store className="h-4 w-4" />
-                Manage Vendors
+                Loyalty Program
               </NavLink>
 
               {/* Users Dropdown */}
@@ -169,8 +193,10 @@ const NavbarAdmin = () => {
                 >
                   <Users className="h-4 w-4" />
                   Users
-                  <ChevronDown 
-                    className={`h-4 w-4 transition-transform ${usersDropdownOpen ? "rotate-180" : ""}`} 
+                  <ChevronDown
+                    className={`h-4 w-4 transition-transform ${
+                      usersDropdownOpen ? "rotate-180" : ""
+                    }`}
                   />
                 </button>
                 {usersDropdownOpen && (
@@ -180,11 +206,19 @@ const NavbarAdmin = () => {
                       onClick={() => setUsersDropdownOpen(false)}
                       className={({ isActive }) =>
                         `flex items-center gap-3 px-4 py-3 text-gray-800 hover:bg-primary/5 hover:text-primary transition-colors ${
-                          isActive ? "bg-primary/10 text-primary font-semibold" : ""
+                          isActive
+                            ? "bg-primary/10 text-primary font-semibold"
+                            : ""
                         }`
                       }
                     >
-                      <Users className={`h-4 w-4 ${location.pathname.includes("/all-users") ? "text-primary" : "text-gray-600"}`} />
+                      <Users
+                        className={`h-4 w-4 ${
+                          location.pathname.includes("/all-users")
+                            ? "text-primary"
+                            : "text-gray-600"
+                        }`}
+                      />
                       <span className="font-medium">All Users</span>
                     </NavLink>
                     <NavLink
@@ -192,11 +226,19 @@ const NavbarAdmin = () => {
                       onClick={() => setUsersDropdownOpen(false)}
                       className={({ isActive }) =>
                         `flex items-center gap-3 px-4 py-3 text-gray-800 hover:bg-primary/5 hover:text-primary transition-colors border-t border-gray-200 ${
-                          isActive ? "bg-primary/10 text-primary font-semibold" : ""
+                          isActive
+                            ? "bg-primary/10 text-primary font-semibold"
+                            : ""
                         }`
                       }
                     >
-                      <UserCheck className={`h-4 w-4 ${location.pathname.includes("/all-admins") ? "text-primary" : "text-gray-600"}`} />
+                      <ShieldUser
+                        className={`h-4 w-4 ${
+                          location.pathname.includes("/all-admins")
+                            ? "text-primary"
+                            : "text-gray-600"
+                        }`}
+                      />
                       <span className="font-medium">Admins & Officers</span>
                     </NavLink>
                     <NavLink
@@ -204,11 +246,19 @@ const NavbarAdmin = () => {
                       onClick={() => setUsersDropdownOpen(false)}
                       className={({ isActive }) =>
                         `flex items-center gap-3 px-4 py-3 text-gray-800 hover:bg-primary/5 hover:text-primary transition-colors border-t border-gray-200 ${
-                          isActive ? "bg-primary/10 text-primary font-semibold" : ""
+                          isActive
+                            ? "bg-primary/10 text-primary font-semibold"
+                            : ""
                         }`
                       }
                     >
-                      <UserPlus className={`h-4 w-4 ${location.pathname.includes("/add-admin") ? "text-primary" : "text-gray-600"}`} />
+                      <UserPlus
+                        className={`h-4 w-4 ${
+                          location.pathname.includes("/add-admin")
+                            ? "text-primary"
+                            : "text-gray-600"
+                        }`}
+                      />
                       <span className="font-medium">Add Admin/Officer</span>
                     </NavLink>
                   </div>
