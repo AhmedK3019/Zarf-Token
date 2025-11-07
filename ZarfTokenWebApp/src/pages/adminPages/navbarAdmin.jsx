@@ -280,15 +280,41 @@ const NavbarAdmin = () => {
         </nav>
 
         {/* Main Heading and Subtitle */}
-        <div className="max-w-7xl mx-auto px-6 pb-8 text-center">
-          <h1 className="text-4xl md:text-5xl font-bold text-white mb-3">
-            Campus Events & Booths
-          </h1>
-          <p className="text-lg text-white/80 max-w-3xl mx-auto">
-            Discover amazing events and platform booths across campus. Filter by
-            category to find exactly what you're looking for.
-          </p>
-        </div>
+        {(() => {
+          const path = location.pathname || "";
+          let headerTitle = "Campus Events & Booths";
+          let headerSubtitle =
+            "Discover amazing events and platform booths across campus. Filter by category to find exactly what you're looking for.";
+
+          if (path.includes("/signup-requests")) {
+            headerTitle = "Sign-Up Requests";
+            headerSubtitle =
+              "Review pending registration requests and assign the correct role before approval.";
+          } else if (path.includes("/vendor-requests")) {
+            headerTitle = "Vendor Participation Requests";
+            headerSubtitle =
+              "Review all pending vendor participation requests below.";
+          } else if (path.includes("/all-users")) {
+            headerTitle = "All Users";
+            headerSubtitle =
+              "Manage all registered users below. You can search, view, block/unblock, or delete users. Admins cannot be blocked.";
+          } else if (path.includes("/all-admins")) {
+            headerTitle = "Admins & Officers";
+            headerSubtitle =
+              "View and manage admin and events office users. Use the delete action to remove an account.";
+          }
+
+          return (
+            <div className="max-w-7xl mx-auto px-6 pb-8 text-center">
+              <h1 className="text-4xl md:text-5xl font-bold text-white mb-3">
+                {headerTitle}
+              </h1>
+              <p className="text-lg text-white/80 max-w-3xl mx-auto">
+                {headerSubtitle}
+              </p>
+            </div>
+          );
+        })()}
       </header>
     </div>
   );

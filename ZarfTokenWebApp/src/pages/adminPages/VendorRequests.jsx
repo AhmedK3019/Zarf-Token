@@ -78,15 +78,6 @@ export default function VendorRequests() {
     <div className="min-h-screen w-full overflow-hidden bg-muted text-[#1F1B3B]">
       <div className="relative flex min-h-screen w-full flex-col items-center px-6 py-8">
         <div className="w-full max-w-6xl">
-          {/* Header */}
-          <div className="mb-10 text-center">
-            <h1 className="text-4xl font-bold text-[#736CED] sm:text-5xl mb-4">
-              Vendor Participation Requests
-            </h1>
-            <p className="text-lg text-[#312A68] max-w-2xl mx-auto">
-              Review all pending vendor participation requests below.
-            </p>
-          </div>
 
           {message && (
             <div className="mb-4 text-center bg-green-100 text-green-800 py-2 rounded">

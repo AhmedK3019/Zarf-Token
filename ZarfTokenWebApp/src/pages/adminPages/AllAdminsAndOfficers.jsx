@@ -82,15 +82,6 @@ export default function AllAdminsAndOfficers() {
     <div className="relative flex min-h-screen w-full flex-col items-center">
       <main className="relative z-10 flex w-full flex-1 flex-col items-center px-6 py-8">
         <div className="w-full max-w-6xl">
-          <div className="mb-8 text-center">
-            <h1 className="text-4xl font-bold text-[#736CED] mb-2">
-              Admins & Events Office
-            </h1>
-            <p className="text-lg text-[#312A68] max-w-2xl mx-auto">
-              View and manage admin and events office users. Use the delete
-              action to remove an account.
-            </p>
-          </div>
 
           {loading ? (
             <div className="text-center py-12">

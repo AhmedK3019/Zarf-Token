@@ -124,15 +124,6 @@ export default function AllUsers() {
     <div className="min-h-screen w-full overflow-x-hidden overflow-y-auto bg-muted text-[#1F1B3B]">
       <div className="relative flex min-h-screen w-full flex-col items-center px-6 py-8">
         <div className="w-full max-w-6xl">
-          <div className="mb-10 text-center">
-            <h1 className="text-4xl font-bold text-[#736CED] sm:text-5xl mb-4">
-              All Users
-            </h1>
-            <p className="text-lg text-[#312A68] max-w-2xl mx-auto">
-              Manage all registered users below. You can search, view, block/unblock,
-              or delete users. Admins cannot be blocked.
-            </p>
-          </div>
 
           {message && (
             <div className="mb-4 text-center bg-green-100 text-green-800 py-2 rounded">
