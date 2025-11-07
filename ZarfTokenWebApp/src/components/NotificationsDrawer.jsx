@@ -89,10 +89,10 @@ export default function NotificationsDrawer() {
       {/* Drawer */}
       {open && (
         <div className="fixed inset-0 z-50 flex">
-          <div className="flex-1" onClick={() => setOpen(false)} aria-hidden />
-          <aside className="w-full max-w-sm bg-white shadow-2xl p-4 overflow-y-auto">
+          {/* Left drawer */}
+          <aside className="w-full max-w-sm bg-white shadow-2xl p-4 overflow-y-auto rounded-r-2xl">
             <div className="flex items-center justify-between mb-4">
-              <h3 className="text-lg font-semibold text-[#4C3BCF]">
+              <h3 className="text-lg font-semibold text-[#001233]">
                 Notifications
               </h3>
               <div className="flex items-center gap-2">
@@ -144,6 +144,9 @@ export default function NotificationsDrawer() {
               </ul>
             )}
           </aside>
+
+          {/* Clickable overlay: clicking anywhere here closes the drawer */}
+          <div className="flex-1" onClick={() => setOpen(false)} aria-hidden />
         </div>
       )}
     </div>
