@@ -54,7 +54,7 @@
 
 .not-found-heading {
   transform: translateY(-0.4rem);
-  font-size: clamp(4.5rem, 14vw, 7rem);
+  font-size: clamp(3.5rem, 12vw, 6rem); /* Smaller 404 */
   font-weight: 700;
   letter-spacing: 0.1em;
   margin: 0 0 -0.8rem 0;
@@ -85,6 +85,8 @@
   transition: transform 150ms ease, box-shadow 150ms ease,
     background-color 150ms ease;
   margin-top: auto; /* Push button down */
+  width: 80%; /* Wider button */
+  max-width: 300px; /* Maximum width */
 }
 
 .not-found-button:hover {
