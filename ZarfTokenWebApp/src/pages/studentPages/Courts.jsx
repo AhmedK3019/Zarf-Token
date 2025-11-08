@@ -10,6 +10,9 @@ const Courts = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCourt, setSelectedCourt] = useState(null);
   const [showSlotsModal, setShowSlotsModal] = useState(false);
+  const [selectedSlot, setSelectedSlot] = useState(null);
+  const [bookingLoading, setBookingLoading] = useState(false);
+  const [bookingMessage, setBookingMessage] = useState('');
 
   const courtCategories = [
     { id: "all", name: "All Courts" },
@@ -29,13 +32,26 @@ const Courts = () => {
       hour: '2-digit',
       minute: '2-digit',
     };
-    return date.toLocaleDateString('en-US', options); 
+    return date.toLocaleDateString('en-US', options);
+  };
+
+  const formatFullDateTime = (isoString) => {
+    const date = new Date(isoString);
+    const options = {
+      weekday: 'long',
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+    };
+    return date.toLocaleDateString('en-US', options);
   };
 
   const fetchCourts = async () => {
     setLoading(true);
     setError(null);
-    
+
     try {
       const response = await api.get('/courts');
       setCourts(response.data);
@@ -52,25 +68,21 @@ const Courts = () => {
     fetchCourts();
   }, []);
 
-  // Filter courts by category
+  // Filter courts by category and search
   useEffect(() => {
     let filtered = courts;
-    
     if (selectedCategory !== "all") {
-      filtered = courts.filter(court => 
+      filtered = courts.filter(court =>
         court.type?.toLowerCase() === selectedCategory.toLowerCase()
       );
     }
-    
-    // Apply search filter
     if (searchTerm.trim()) {
       const searchLower = searchTerm.toLowerCase();
-      filtered = filtered.filter(court => 
+      filtered = filtered.filter(court =>
         court.name?.toLowerCase().includes(searchLower) ||
         court.type?.toLowerCase().includes(searchLower)
       );
     }
-    
     setFilteredCourts(filtered);
   }, [courts, selectedCategory, searchTerm]);
 
@@ -87,33 +99,78 @@ const Courts = () => {
   };
 
   const getAvailableSlots = (court) => {
-    return court.freeSlots?.filter(slot => 
+    return court.freeSlots?.filter(slot =>
       !slot.isReserved && new Date(slot.dateTime) > new Date()
     ) || [];
   };
 
   const handleViewAllSlots = (court) => {
     setSelectedCourt(court);
+    setSelectedSlot(null);
+    setBookingMessage('');
     setShowSlotsModal(true);
   };
 
   const closeSlotsModal = () => {
     setShowSlotsModal(false);
     setSelectedCourt(null);
+    setSelectedSlot(null);
+    setBookingMessage('');
   };
 
-  const formatFullDateTime = (isoString) => {
-    const date = new Date(isoString);
-    const options = {
-      weekday: 'long',
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit',
-    };
-    return date.toLocaleDateString('en-US', options);
+  const handleSlotSelect = (slot) => {
+    if (slot.isReserved) return;
+    setSelectedSlot(slot);
+    setBookingMessage('');
   };
+
+  const handleBookSlot = async () => {
+  if (!selectedSlot || !selectedCourt) return;
+  setBookingLoading(true);
+  setBookingMessage('');
+
+  try {
+    const studentData = {
+      studentId: "123456",
+      studentName: "John Doe",
+      studentGucId: "GUC2025",
+    };
+
+    const dateTime = new Date(selectedSlot.dateTime).toISOString();
+
+    const response = await api.post(`/courts/${selectedCourt._id}/reserve`, {
+      courtId: selectedCourt._id,
+      dateTime,
+      ...studentData
+    });
+
+    // Mark slot as reserved locally
+    const updatedSlots = selectedCourt.freeSlots.map(slot =>
+      slot._id === selectedSlot._id ? { ...slot, isReserved: true } : slot
+    );
+
+    const updatedCourt = { ...selectedCourt, freeSlots: updatedSlots };
+
+    // Update courts array and modal data
+    setCourts(prev =>
+      prev.map(court =>
+        court._id === updatedCourt._id ? updatedCourt : court
+      )
+    );
+    setSelectedCourt(updatedCourt);
+
+    setSelectedSlot(null);
+    setBookingMessage('✅ Slot successfully booked!');
+  } catch (err) {
+    console.error(err);
+    setBookingMessage(
+      err.response?.data?.error || '❌ Failed to book slot. Please try again.'
+    );
+  } finally {
+    setBookingLoading(false);
+  }
+};
+
 
   return (
     <div className="min-h-screen w-full overflow-hidden bg-muted text-[#1F1B3B]">
@@ -151,55 +208,16 @@ const Courts = () => {
             {/* Search Bar */}
             <div className="mb-12">
               <div className="relative max-w-2xl mx-auto">
-                <div className="relative">
-                  <input
-                    type="text"
-                    placeholder="Search by court name or type..."
-                    value={searchTerm}
-                    onChange={(e) => handleSearch(e.target.value)}
-                    className="w-full px-6 py-4 pr-12 rounded-full border border-[#736CED] bg-white/70 text-[#312A68] placeholder-[#312A68]/60 focus:outline-none focus:ring-2 focus:ring-[#736CED] focus:border-transparent shadow-sm"
-                  />
-                  <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
-                    {searchTerm ? (
-                      <button
-                        onClick={clearSearch}
-                        className="text-[#736CED] hover:text-[#5A4BBA] transition-colors"
-                      >
-                        <svg
-                          className="w-5 h-5"
-                          fill="none"
-                          stroke="currentColor"
-                          viewBox="0 0 24 24"
-                        >
-                          <path
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                            strokeWidth={2}
-                            d="M6 18L18 6M6 6l12 12"
-                          />
-                        </svg>
-                      </button>
-                    ) : (
-                      <svg
-                        className="w-5 h-5 text-[#736CED]"
-                        fill="none"
-                        stroke="currentColor"
-                        viewBox="0 0 24 24"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={2}
-                          d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
-                        />
-                      </svg>
-                    )}
-                  </div>
-                </div>
+                <input
+                  type="text"
+                  placeholder="Search by court name or type..."
+                  value={searchTerm}
+                  onChange={(e) => handleSearch(e.target.value)}
+                  className="w-full px-6 py-4 pr-12 rounded-full border border-[#736CED] bg-white/70 text-[#312A68] placeholder-[#312A68]/60 focus:outline-none focus:ring-2 focus:ring-[#736CED] focus:border-transparent shadow-sm"
+                />
                 {searchTerm && (
                   <p className="text-sm text-[#312A68]/70 mt-2 text-center">
-                    Found {filteredCourts.length} result
-                    {filteredCourts.length !== 1 ? "s" : ""} for "{searchTerm}"
+                    Found {filteredCourts.length} result{filteredCourts.length !== 1 ? "s" : ""} for "{searchTerm}"
                   </p>
                 )}
               </div>
@@ -209,9 +227,7 @@ const Courts = () => {
             {loading ? (
               <div className="text-center py-12">
                 <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-[#736CED]"></div>
-                <p className="mt-4 text-[#312A68]">
-                  Loading courts...
-                </p>
+                <p className="mt-4 text-[#312A68]">Loading courts...</p>
               </div>
             ) : error ? (
               <div className="text-center py-12 text-red-500">{error}</div>
@@ -252,41 +268,24 @@ const Courts = () => {
                       key={court._id}
                       className="bg-white rounded-2xl p-6 shadow-[0_10px_25px_rgba(165,148,249,0.2)] border border-white/50 hover:shadow-[0_15px_35px_rgba(165,148,249,0.3)] transition-all hover:-translate-y-1"
                     >
-                      {/* Court Type Badge */}
                       <div className="inline-flex items-center gap-2 rounded-full bg-[#EEE9FF] px-3 py-1 text-xs font-medium text-[#5A4BBA] mb-4">
                         <span className="h-2 w-2 rounded-full bg-[#6DD3CE]" />
                         <span className="capitalize">{court.type || 'Court'}</span>
                       </div>
-
-                      {/* Court Name */}
-                      <h3 className="text-xl font-bold text-[#4C3BCF] mb-3">
-                        {court.name}
-                      </h3>
-
-                      {/* Available Slots Count */}
+                      <h3 className="text-xl font-bold text-[#4C3BCF] mb-3">{court.name}</h3>
                       <div className="mb-4">
                         <p className="flex items-center gap-2 text-sm text-[#312A68]">
                           <span>📅</span>
                           {availableSlots.length} available slot{availableSlots.length !== 1 ? 's' : ''}
                         </p>
                       </div>
-
-                      {/* Available Slots */}
                       <div className="space-y-2">
-                        <h4 className="text-sm font-semibold text-[#312A68] mb-3">
-                          Upcoming Available Times:
-                        </h4>
-                        
+                        <h4 className="text-sm font-semibold text-[#312A68] mb-3">Upcoming Available Times:</h4>
                         {availableSlots.length > 0 ? (
                           <div className="max-h-48 overflow-y-auto space-y-2">
                             {availableSlots.slice(0, 5).map((slot) => (
-                              <div
-                                key={slot._id}
-                                className="bg-[#F8F6FF] p-3 rounded-lg text-xs text-[#312A68] border border-[#E7E1FF] hover:bg-[#EEE9FF] transition-colors"
-                              >
-                                <span className="font-medium">
-                                  {formatDateTime(slot.dateTime)}
-                                </span>
+                              <div key={slot._id} className="bg-[#F8F6FF] p-3 rounded-lg text-xs text-[#312A68] border border-[#E7E1FF] hover:bg-[#EEE9FF] transition-colors">
+                                <span className="font-medium">{formatDateTime(slot.dateTime)}</span>
                               </div>
                             ))}
                             {availableSlots.length > 5 && (
@@ -300,14 +299,10 @@ const Courts = () => {
                             <div className="w-12 h-12 bg-muted/30 rounded-full flex items-center justify-center mx-auto mb-2">
                               <span className="text-[#736CED] text-lg">📅</span>
                             </div>
-                            <p className="text-[#312A68]/70 text-xs">
-                              No available slots at the moment
-                            </p>
+                            <p className="text-[#312A68]/70 text-xs">No available slots at the moment</p>
                           </div>
                         )}
                       </div>
-
-                      {/* Action Button */}
                       {availableSlots.length > 0 && (
                         <div className="mt-4 pt-4 border-t border-gray-100">
                           <button 
@@ -335,20 +330,13 @@ const Courts = () => {
             <div className="p-6 border-b border-gray-200 flex-shrink-0">
               <div className="flex items-center justify-between">
                 <div>
-                  <h2 className="text-2xl font-bold text-[#4C3BCF]">
-                    {selectedCourt.name}
-                  </h2>
+                  <h2 className="text-2xl font-bold text-[#4C3BCF]">{selectedCourt.name}</h2>
                   <div className="inline-flex items-center gap-2 mt-2">
                     <span className="h-2 w-2 rounded-full bg-[#6DD3CE]" />
-                    <span className="text-sm text-[#5A4BBA] capitalize font-medium">
-                      {selectedCourt.type || 'Court'}
-                    </span>
+                    <span className="text-sm text-[#5A4BBA] capitalize font-medium">{selectedCourt.type || 'Court'}</span>
                   </div>
                 </div>
-                <button
-                  onClick={closeSlotsModal}
-                  className="text-gray-400 hover:text-gray-600 transition-colors"
-                >
+                <button onClick={closeSlotsModal} className="text-gray-400 hover:text-gray-600 transition-colors">
                   <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                   </svg>
@@ -359,31 +347,33 @@ const Courts = () => {
             {/* Modal Body */}
             <div className="p-6 overflow-y-auto flex-1 min-h-0">
               <div className="mb-4">
-                <h3 className="text-lg font-semibold text-[#312A68] mb-4">
-                  All Available Time Slots
-                </h3>
-                <p className="text-sm text-[#312A68]/70 mb-6">
-                  {getAvailableSlots(selectedCourt).length} available slots
-                </p>
+                <h3 className="text-lg font-semibold text-[#312A68] mb-4">All Available Time Slots</h3>
+                <p className="text-sm text-[#312A68]/70 mb-6">{getAvailableSlots(selectedCourt).length} available slots</p>
               </div>
 
               {getAvailableSlots(selectedCourt).length > 0 ? (
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                  {getAvailableSlots(selectedCourt).map((slot) => (
-                    <div
-                      key={slot._id}
-                      className="bg-[#F8F6FF] p-4 rounded-xl border border-[#E7E1FF] hover:bg-[#EEE9FF] hover:border-[#736CED] transition-all cursor-pointer group"
-                    >
-                      <div className="flex items-center gap-3">
-                        <div className="w-3 h-3 bg-[#6DD3CE] rounded-full flex-shrink-0"></div>
-                        <div>
-                          <p className="font-medium text-[#312A68] group-hover:text-[#4C3BCF]">
-                            {formatFullDateTime(slot.dateTime)}
-                          </p>
+                  {getAvailableSlots(selectedCourt).map((slot) => {
+                    const isSelected = selectedSlot?._id === slot._id;
+                    return (
+                      <div
+                        key={slot._id}
+                        onClick={() => handleSlotSelect(slot)}
+                        className={`bg-[#F8F6FF] p-4 rounded-xl border transition-all cursor-pointer group ${
+                          isSelected ? 'border-[#736CED] bg-[#EEE9FF]' : 'border-[#E7E1FF]'
+                        } ${slot.isReserved ? 'opacity-50 cursor-not-allowed' : ''}`}
+                      >
+                        <div className="flex items-center gap-3">
+                          <div className="w-3 h-3 bg-[#6DD3CE] rounded-full flex-shrink-0"></div>
+                          <div>
+                            <p className="font-medium text-[#312A68] group-hover:text-[#4C3BCF]">
+                              {formatFullDateTime(slot.dateTime)}
+                            </p>
+                          </div>
                         </div>
                       </div>
-                    </div>
-                  ))}
+                    );
+                  })}
                 </div>
               ) : (
                 <div className="text-center py-12">
@@ -391,29 +381,30 @@ const Courts = () => {
                     <span className="text-[#736CED] text-2xl">📅</span>
                   </div>
                   <p className="text-[#312A68] text-lg mb-2">No Available Slots</p>
-                  <p className="text-[#312A68]/70 text-sm">
-                    All slots are currently reserved or unavailable.
-                  </p>
+                  <p className="text-[#312A68]/70 text-sm">All slots are currently reserved or unavailable.</p>
                 </div>
+              )}
+
+              {/* Booking Message */}
+              {bookingMessage && (
+                <p className={`mt-4 text-center font-medium ${bookingMessage.includes('❌') ? 'text-red-500' : 'text-green-600'}`}>
+                  {bookingMessage}
+                </p>
               )}
             </div>
 
             {/* Modal Footer */}
-            <div className="p-6 border-t border-gray-200 flex-shrink-0">
-              <div className="flex justify-end gap-3">
-                <button
-                  onClick={closeSlotsModal}
-                  className="px-6 py-2 text-[#736CED] border border-[#736CED] rounded-full hover:bg-[#E7E1FF] transition-colors"
-                >
-                  Close
-                </button>
-                <button
-                  className="px-6 py-2 bg-[#736CED] text-white rounded-full hover:bg-[#5A4BBA] transition-colors"
-                  disabled
-                >
-                  Book Slot (Coming Soon)
-                </button>
-              </div>
+            <div className="p-6 border-t border-gray-200 flex-shrink-0 flex justify-end gap-3">
+              <button onClick={closeSlotsModal} className="px-6 py-2 text-[#736CED] border border-[#736CED] rounded-full hover:bg-[#E7E1FF] transition-colors">
+                Close
+              </button>
+              <button
+                onClick={handleBookSlot}
+                disabled={!selectedSlot || bookingLoading}
+                className={`px-6 py-2 bg-[#736CED] text-white rounded-full transition-colors ${!selectedSlot || bookingLoading ? 'opacity-50 cursor-not-allowed' : 'hover:bg-[#5A4BBA]'}`}
+              >
+                {bookingLoading ? 'Booking...' : 'Book Slot'}
+              </button>
             </div>
           </div>
         </div>
