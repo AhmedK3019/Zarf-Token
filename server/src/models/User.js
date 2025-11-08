@@ -25,6 +25,7 @@ const userSchema = new mongoose.Schema({
     type: [
       {
         eventid: { type: mongoose.Schema.Types.ObjectId },
+        eventname: { type: String },
         eventtype: { type: String },
       },
     ],

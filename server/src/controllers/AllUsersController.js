@@ -160,6 +160,31 @@ const loginUser = async (req, res, next) => {
     next(error);
   }
 };
+
+const blockUser = async (req, res, next) => {
+  try {
+    const { id, role } = req.params;
+    let body = { status: "Blocked" };
+    let user;
+    switch (role) {
+      case ("Student", "TA", "Professor", "Staff"):
+        user = await User.findByIdAndUpdate(id, body, { new: true });
+        break;
+      case "Admin":
+        user = await Admin.findByIdAndUpdate(id, body, { new: true });
+        break;
+      case "Vendor":
+        user = await Vendor.findByIdAndUpdate(id, body, { new: true });
+        break;
+      case "EventsOffice":
+        user = await EventsOffice.findByIdAndUpdate(id, body, { new: true });
+        break;
+    }
+    res.status(200).json({ message: "User is Blocked", user });
+  } catch (error) {
+    next(error);
+  }
+};
 const createToken = (body) => {
   const payload = {
     id: String(body._id),
@@ -176,4 +201,5 @@ export default {
   deleteNotification,
   getAllAdminsAndOfficers,
   loginUser,
+  blockUser,
 };

@@ -249,7 +249,8 @@ const addAttendedEvent = async (req, res, next) => {
       return res.status(401).json({ message: "You are not authorized" });
     }
     const { id, type } = req.params;
-    const body = { eventid: id, eventtype: type };
+    const { name } = req.body;
+    const body = { eventid: id, eventname: name, eventtype: type };
     const result = await User.findByIdAndUpdate(
       { _id: userId },
       { $addToSet: { attendedevents: body } },
@@ -258,6 +259,37 @@ const addAttendedEvent = async (req, res, next) => {
     return res
       .status(200)
       .json({ message: "Attended successfully", addedEvent: result });
+  } catch (error) {
+    next(error);
+  }
+};
+
+const getAttendedEvents = async (req, res, next) => {
+  try {
+    const userId = req.userId;
+    if (!userId) {
+      return res.status(401).json({ message: "You are not authorized" });
+    }
+    const attendedEvents = await User.findById(userId, { attendedevents: 1 });
+    return res.status(200).json(attendedEvents);
+  } catch (error) {
+    next(error);
+  }
+};
+
+const removeEvent = async (req, res, next) => {
+  try {
+    const userId = req.userId;
+    const { id, type } = req.params;
+    if (!userId) {
+      return res.status(401).json({ message: "You are not authorized" });
+    }
+    const result = await User.findByIdAndUpdate(
+      userId,
+      { $pull: { attendedevents: { eventid: id, eventtype: type } } },
+      { new: true }
+    );
+    return res.status(200).json(result);
   } catch (error) {
     next(error);
   }
@@ -274,4 +306,6 @@ export default {
   getProfessors,
   getUser,
   addAttendedEvent,
+  getAttendedEvents,
+  removeEvent,
 };

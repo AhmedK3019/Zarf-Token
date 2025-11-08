@@ -14,4 +14,6 @@ router.delete("/:id", AllUsersController.deleteUserById);
 router.get("/allAdminsAndOfficers", AllUsersController.getAllAdminsAndOfficers);
 router.get("/:id", AllUsersController.getUserById);
 router.post("/login", AllUsersController.loginUser);
+router.patch("/blockUser/:id/:role", AllUsersController.blockUser);
+
 export default router;
