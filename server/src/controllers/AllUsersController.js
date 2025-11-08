@@ -164,10 +164,14 @@ const loginUser = async (req, res, next) => {
 const blockUser = async (req, res, next) => {
   try {
     const { id, role } = req.params;
+    console.log(id, role);
     let body = { status: "Blocked" };
     let user;
     switch (role) {
-      case ("Student", "TA", "Professor", "Staff"):
+      case "Student":
+      case "TA":
+      case "Professor":
+      case "Staff":
         user = await User.findByIdAndUpdate(id, body, { new: true });
         break;
       case "Admin":
@@ -176,11 +180,39 @@ const blockUser = async (req, res, next) => {
       case "Vendor":
         user = await Vendor.findByIdAndUpdate(id, body, { new: true });
         break;
-      case "EventsOffice":
+      case "Event office":
         user = await EventsOffice.findByIdAndUpdate(id, body, { new: true });
         break;
     }
+    console.log(user);
     res.status(200).json({ message: "User is Blocked", user });
+  } catch (error) {
+    next(error);
+  }
+};
+const unBlockUser = async (req, res, next) => {
+  try {
+    const { id, role } = req.params;
+    let body = { status: "Active" };
+    let user;
+    switch (role) {
+      case "Student":
+      case "TA":
+      case "Professor":
+      case "Staff":
+        user = await User.findByIdAndUpdate(id, body, { new: true });
+        break;
+      case "Admin":
+        user = await Admin.findByIdAndUpdate(id, body, { new: true });
+        break;
+      case "Vendor":
+        user = await Vendor.findByIdAndUpdate(id, body, { new: true });
+        break;
+      case "Event office":
+        user = await EventsOffice.findByIdAndUpdate(id, body, { new: true });
+        break;
+    }
+    res.status(200).json({ message: "User is Active", user });
   } catch (error) {
     next(error);
   }
@@ -202,4 +234,5 @@ export default {
   getAllAdminsAndOfficers,
   loginUser,
   blockUser,
+  unBlockUser,
 };

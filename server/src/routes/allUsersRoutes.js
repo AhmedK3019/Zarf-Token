@@ -15,5 +15,5 @@ router.get("/allAdminsAndOfficers", AllUsersController.getAllAdminsAndOfficers);
 router.get("/:id", AllUsersController.getUserById);
 router.post("/login", AllUsersController.loginUser);
 router.patch("/blockUser/:id/:role", AllUsersController.blockUser);
-
+router.patch("/unBlockUser/:id/:role", AllUsersController.unBlockUser);
 export default router;

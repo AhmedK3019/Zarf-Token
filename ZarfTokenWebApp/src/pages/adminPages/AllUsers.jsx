@@ -1,8 +1,10 @@
 import React, { useEffect, useState } from "react";
 import api from "../../services/api";
 import { useAuthUser } from "../../hooks/auth";
+import { useParams } from "react-router-dom";
 
 export default function AllUsers() {
+  // const { id, role } = useParams();
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -47,10 +49,10 @@ export default function AllUsers() {
     }
   };
 
-  const handleBlock = async (id) => {
+  const handleBlock = async (id, role) => {
     if (!window.confirm("Are you sure you want to block this user?")) return;
     try {
-      const res = await api.put(`/admin/blockUser/${id}`);
+      const res = await api.patch(`/allUsers/blockUser/${id}/${role}`);
       setMessage(res.data.message || "User blocked successfully");
       setTimeout(() => setMessage(null), 2000);
       // Refresh users list
@@ -62,10 +64,10 @@ export default function AllUsers() {
     }
   };
 
-  const handleUnblock = async (id) => {
+  const handleUnblock = async (id, role) => {
     if (!window.confirm("Are you sure you want to unblock this user?")) return;
     try {
-      const res = await api.put(`/admin/unblockUser/${id}`);
+      const res = await api.patch(`/allUsers/unBlockUser/${id}/${role}`);
       setMessage(res.data.message || "User unblocked successfully");
       setTimeout(() => setMessage(null), 2000);
       // Refresh users list
@@ -111,12 +113,12 @@ export default function AllUsers() {
       (u.companyname && u.companyname.toLowerCase().includes(term)) ||
       (u.email && u.email.toLowerCase().includes(term)) ||
       (u.role && u.role.toLowerCase().includes(term));
-    
+
     const matchesStatus =
       statusFilter === "all" ||
       (statusFilter === "active" && u.status?.toLowerCase() === "active") ||
       (statusFilter === "blocked" && u.status?.toLowerCase() === "blocked");
-    
+
     return matchesSearch && matchesStatus;
   });
 
@@ -124,7 +126,6 @@ export default function AllUsers() {
     <div className="min-h-screen w-full overflow-x-hidden overflow-y-auto bg-muted text-[#1F1B3B]">
       <div className="relative flex min-h-screen w-full flex-col items-center px-6 py-8">
         <div className="w-full max-w-6xl">
-
           {message && (
             <div className="mb-4 text-center bg-green-100 text-green-800 py-2 rounded">
               {message}
@@ -209,14 +210,14 @@ export default function AllUsers() {
                         <>
                           {user.status?.toLowerCase() === "active" ? (
                             <button
-                              onClick={() => handleBlock(user._id)}
+                              onClick={() => handleBlock(user._id, user.role)}
                               className="bg-orange-500 text-white font-medium px-4 py-2 rounded-full hover:bg-orange-600 transition-colors"
                             >
                               Block
                             </button>
                           ) : (
                             <button
-                              onClick={() => handleUnblock(user._id)}
+                              onClick={() => handleUnblock(user._id, user.role)}
                               className="bg-green-500 text-white font-medium px-4 py-2 rounded-full hover:bg-green-600 transition-colors"
                             >
                               Unblock
