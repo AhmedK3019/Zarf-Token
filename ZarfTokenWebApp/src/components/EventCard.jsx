@@ -93,7 +93,7 @@ const EventCard = ({
 
   return (
     <div className="relative bg-white rounded-lg p-6 border border-gray-200 shadow-sm hover:shadow-md transition-all hover:-translate-y-1 flex flex-col">
-      {typeof onToggleFavourite === "function" && (
+       {typeof onToggleFavourite === "function" && user && (user.role === "Student" || user.role === "Professor" || user.role === "TA" || user.role === "Staff") && (
         <button
           type="button"
           aria-label="Toggle favourite"
