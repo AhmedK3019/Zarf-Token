@@ -22,6 +22,10 @@ const tripSchema = new mongoose.Schema({
     type: [registeredPeople],
     default: [],
   },
+  registered: {
+    type: [registeredPeople],
+    default: [],
+  },
   type: { type: String, default: "trip" },
   ratings: {
     type: [
@@ -42,15 +46,16 @@ const tripSchema = new mongoose.Schema({
       },
     ],
     default: [],
-  revenue: {
-    type: mongoose.Schema.Types.Decimal128,
-    default: mongoose.Types.Decimal128.fromString("0.00"),
-    // getter to return a plain number in JSON output
-    get: (v) => {
-      return v ? v.toString() : "0.00";
+    revenue: {
+      type: mongoose.Schema.Types.Decimal128,
+      default: mongoose.Types.Decimal128.fromString("0.00"),
+      // getter to return a plain number in JSON output
+      get: (v) => {
+        return v ? v.toString() : "0.00";
+      },
     },
   },
-},});
+});
 
 const Trip = mongoose.model("Trip", tripSchema);
 

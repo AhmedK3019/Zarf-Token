@@ -26,6 +26,8 @@ const EventCard = ({
   onViewDetails,
   isFavourite,
   onToggleFavourite,
+  // Optional: a render-prop that allows callers to override the registration area
+  renderRegistrationControls,
 }) => {
   const navigate = useNavigate();
   const event = getEventDetails(rawEvent);
@@ -58,7 +60,9 @@ const EventCard = ({
 
   const canUpdate =
     user?.role?.toLowerCase().includes("event") &&
-    (event.type === "bazaar" || event.type === "conference" || event.type === "trip") &&
+    (event.type === "bazaar" ||
+      event.type === "conference" ||
+      event.type === "trip") &&
     new Date(event.startDate) > Date.now();
 
   const canRegister =
@@ -70,7 +74,8 @@ const EventCard = ({
     (event.capacity ? event.attendees.length < event.capacity : true);
 
   const isBazaar = event.type === "bazaar";
-  const isPlatformBooth = event.type === "booth" && !event.original?.isBazarBooth;
+  const isPlatformBooth =
+    event.type === "booth" && !event.original?.isBazarBooth;
   const isBazaarBooth = event.type === "booth" && event.original?.isBazarBooth;
   const isWorkshop = event.type === "workshop";
 
@@ -93,29 +98,48 @@ const EventCard = ({
 
   return (
     <div className="relative bg-white rounded-lg p-6 border border-gray-200 shadow-sm hover:shadow-md transition-all hover:-translate-y-1 flex flex-col">
-       {typeof onToggleFavourite === "function" && user && (user.role === "Student" || user.role === "Professor" || user.role === "TA" || user.role === "Staff") && (
-        <button
-          type="button"
-          aria-label="Toggle favourite"
-          data-testid="fav-toggle"
-          onClick={(e) => {
-            e.stopPropagation();
-            onToggleFavourite?.(rawEvent);
-          }}
-          className="absolute right-4 top-4 p-2 rounded-full bg-white/90 border hover:bg-white shadow-sm"
-          title={isFavourite ? "Remove from favourites" : "Add to favourites"}
-        >
-          <Heart size={18} color={isFavourite ? "#e11d48" : "#64748b"} fill={isFavourite ? "#e11d48" : "none"} />
-        </button>
-      )}
+      {typeof onToggleFavourite === "function" &&
+        user &&
+        (user.role === "Student" ||
+          user.role === "Professor" ||
+          user.role === "TA" ||
+          user.role === "Staff") && (
+          <button
+            type="button"
+            aria-label="Toggle favourite"
+            data-testid="fav-toggle"
+            onClick={(e) => {
+              e.stopPropagation();
+              onToggleFavourite?.(rawEvent);
+            }}
+            className="absolute right-4 top-4 p-2 rounded-full bg-white/90 border hover:bg-white shadow-sm"
+            title={isFavourite ? "Remove from favourites" : "Add to favourites"}
+          >
+            <Heart
+              size={18}
+              color={isFavourite ? "#e11d48" : "#64748b"}
+              fill={isFavourite ? "#e11d48" : "none"}
+            />
+          </button>
+        )}
 
       <div className="flex-grow">
         <div
           className="inline-flex items-center gap-2 rounded-full px-3 py-1 text-xs font-medium mb-4"
-          style={{ backgroundColor: `${eventTypeColor}15`, color: eventTypeColor }}
+          style={{
+            backgroundColor: `${eventTypeColor}15`,
+            color: eventTypeColor,
+          }}
         >
-          <span className="h-2 w-2 rounded-full" style={{ backgroundColor: eventTypeColor }} />
-          <span className="capitalize">{event.type === "booth" && !event.original?.isBazarBooth ? "Platform Booth" : event.type}</span>
+          <span
+            className="h-2 w-2 rounded-full"
+            style={{ backgroundColor: eventTypeColor }}
+          />
+          <span className="capitalize">
+            {event.type === "booth" && !event.original?.isBazarBooth
+              ? "Platform Booth"
+              : event.type}
+          </span>
         </div>
 
         <h3 className="text-xl font-bold text-[#4a4ae6] mb-3">{event.name}</h3>
@@ -137,7 +161,10 @@ const EventCard = ({
 
           {isPlatformBooth && event.vendor && (
             <p className="flex items-center gap-2">
-              <Building size={16} className="mt-1 text-gray-500 flex-shrink-0" />
+              <Building
+                size={16}
+                className="mt-1 text-gray-500 flex-shrink-0"
+              />
               Vendor: {event.vendor}
             </p>
           )}
@@ -151,7 +178,10 @@ const EventCard = ({
 
           {event.duration && event.type === "booth" && (
             <p className="flex items-center gap-2">
-              <Calendar size={16} className="mt-1 text-gray-500 flex-shrink-0" />
+              <Calendar
+                size={16}
+                className="mt-1 text-gray-500 flex-shrink-0"
+              />
               {event.duration} week{event.duration > 1 ? "s" : ""}
             </p>
           )}
@@ -159,31 +189,48 @@ const EventCard = ({
           {isBazaarBooth && event.location && (
             <p className="flex items-center gap-2">
               <MapPin size={16} className="mt-1 text-red-500 flex-shrink-0" />
-              <span className="text-gray-700">Booth Location: {event.location}</span>
+              <span className="text-gray-700">
+                Booth Location: {event.location}
+              </span>
             </p>
           )}
 
           {event.price > 0 && (
             <p className="flex items-center gap-2">
-              <DollarSign size={16} className="mt-1 text-gray-500 flex-shrink-0" />
+              <DollarSign
+                size={16}
+                className="mt-1 text-gray-500 flex-shrink-0"
+              />
               Price: {event.price} EGP
             </p>
           )}
 
           {event.startDate && (
             <div className="flex items-center gap-2">
-              <Calendar size={16} className="mt-1 text-gray-500 flex-shrink-0" />
+              <Calendar
+                size={16}
+                className="mt-1 text-gray-500 flex-shrink-0"
+              />
               <span>
                 Starts {formatSimpleDate(event.startDate)}
-                {event.duration && ` · ${event.duration} ${event.type === "workshop" ? "day" : "week"}${event.duration === 1 ? "" : "s"}`}
+                {event.duration &&
+                  ` · ${event.duration} ${
+                    event.type === "workshop" ? "day" : "week"
+                  }${event.duration === 1 ? "" : "s"}`}
               </span>
             </div>
           )}
 
           {event.registrationDeadline && (
             <div className="flex items-center gap-2 text-[#E53E3E]">
-              <ClockAlert size={16} className="mt-1 text-[#E53E3E] flex-shrink-0" />
-              <span>Register by: {formatSimpleDate(new Date(event.registrationDeadline))}</span>
+              <ClockAlert
+                size={16}
+                className="mt-1 text-[#E53E3E] flex-shrink-0"
+              />
+              <span>
+                Register by:{" "}
+                {formatSimpleDate(new Date(event.registrationDeadline))}
+              </span>
             </div>
           )}
         </div>
@@ -192,7 +239,11 @@ const EventCard = ({
           <div className="mt-4">
             <div
               ref={descriptionRef}
-              className={`text-gray-600 text-sm leading-relaxed ${hasOverflow ? "cursor-pointer hover:text-gray-800" : ""} transition-colors ${isDescriptionExpanded ? "line-clamp-none" : "line-clamp-1"}`}
+              className={`text-gray-600 text-sm leading-relaxed ${
+                hasOverflow ? "cursor-pointer hover:text-gray-800" : ""
+              } transition-colors ${
+                isDescriptionExpanded ? "line-clamp-none" : "line-clamp-1"
+              }`}
               onClick={toggleDescription}
             >
               {event.description}
@@ -253,31 +304,46 @@ const EventCard = ({
             </button>
           )}
 
-          {isRegistered && (
-            <button
-              disabled
-              className="text-xs bg-gray-200 text-gray-600 px-3 py-1.5 rounded-lg transition-colors cursor-not-allowed font-medium"
-            >
-              Registered
-            </button>
-          )}
+          {/* Registration area: allow caller to provide a custom renderer. If none is provided, fall back to default behavior. */}
+          {typeof renderRegistrationControls === "function" ? (
+            renderRegistrationControls({
+              event,
+              rawEvent,
+              isRegistered,
+              canRegister,
+            })
+          ) : (
+            <>
+              {isRegistered && (
+                <button
+                  disabled
+                  className="text-xs bg-gray-200 text-gray-600 px-3 py-1.5 rounded-lg transition-colors cursor-not-allowed font-medium"
+                >
+                  Registered
+                </button>
+              )}
 
-          {canRegister && (
-            <button
-              onClick={() => onRegister?.(event.original)}
-              className="text-xs bg-[#4a4ae6] text-white px-3 py-1.5 rounded-lg hover:bg-[#3d3dd4] transition-colors font-medium"
-            >
-              Register
-            </button>
-          )}
+              {canRegister && (
+                <button
+                  onClick={() => onRegister?.(event.original)}
+                  className="text-xs bg-[#4a4ae6] text-white px-3 py-1.5 rounded-lg hover:bg-[#3d3dd4] transition-colors font-medium"
+                >
+                  Register
+                </button>
+              )}
 
-          {userIsEligible && !canRegister && !isRegistered && (event.type === "trip" || event.type === "workshop") && (
-            <button
-              disabled
-              className="text-xs bg-gray-200 text-gray-600 px-3 py-1.5 rounded-lg transition-colors cursor-not-allowed font-medium"
-            >
-              Registration Closed
-            </button>
+              {userIsEligible &&
+                !canRegister &&
+                !isRegistered &&
+                (event.type === "trip" || event.type === "workshop") && (
+                  <button
+                    disabled
+                    className="text-xs bg-gray-200 text-gray-600 px-3 py-1.5 rounded-lg transition-colors cursor-not-allowed font-medium"
+                  >
+                    Registration Closed
+                  </button>
+                )}
+            </>
           )}
 
           {isBazaar && (
@@ -289,7 +355,11 @@ const EventCard = ({
             </button>
           )}
 
-          {(isPlatformBooth || isBazaarBooth || isWorkshop || event.type === "trip" || event.type === "conference") && (
+          {(isPlatformBooth ||
+            isBazaarBooth ||
+            isWorkshop ||
+            event.type === "trip" ||
+            event.type === "conference") && (
             <button
               onClick={() => onViewDetails?.(event.original)}
               className="text-xs font-semibold text-[#4a4ae6] hover:text-[#3d3dd4] transition-colors px-3 py-1.5"

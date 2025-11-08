@@ -55,13 +55,23 @@ const getEventsByType = async (req, res, next) => {
 const getEventsRegisteredByUser = async (req, res, next) => {
   try {
     const { userId } = req.params;
-    const workshops = await Workshop.find({
-      attendees: { $elemMatch: { userId } },
-    })
+    const workshops = await Workshop.find()
       .populate("professorsparticipating", "firstname lastname email")
       .populate("createdBy", "firstname lastname email");
-    const trips = await Trip.find({ attendees: { $elemMatch: { userId } } });
-    return res.status(200).json([...workshops, ...trips]);
+    const trips = await Trip.find();
+    const registeredWorkshops = workshops.filter(
+      (workshop) =>
+        workshop.attendees.filter(
+          (attendee) => attendee.userId.toString() === userId
+        ).length > 0
+    );
+    const registeredTrips = trips.filter(
+      (trip) =>
+        trip.attendees.filter(
+          (attendee) => attendee.userId.toString() === userId
+        ).length > 0
+    );
+    return res.status(200).json([...registeredWorkshops, ...registeredTrips]);
   } catch (error) {
     next(error);
   }
