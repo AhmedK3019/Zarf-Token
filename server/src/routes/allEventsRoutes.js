@@ -14,4 +14,9 @@ router.patch("/rateEvent/:id/:type", AllEventsController.rateEvent);
 router.get("/viewAllComments/:id/:type", AllEventsController.viewAllComments);
 
 router.get("/viewAllRatings/:id/:type", AllEventsController.viewAllRatings);
+
+router.delete(
+  "/deleteComment/:id/:commentid/:type",
+  AllEventsController.deleteComment
+);
 export default router;
