@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Calendar, Clock, Users, Dumbbell, ChevronLeft, ChevronRight, Plus, Trash2 } from "lucide-react";
+import { Calendar, Clock, Users, Dumbbell, ChevronLeft, ChevronRight, Plus, Trash2, Edit } from "lucide-react";
 import api from "../../services/api";
 import { useAuthUser } from "../../hooks/auth";
 
@@ -173,6 +173,129 @@ const CreateSessionModal = ({ isOpen, onClose, onSessionCreated }) => {
   );
 };
 
+// Edit Session Modal Component (only allows editing date, time, duration)
+const EditSessionModal = ({ isOpen, onClose, onSessionUpdated, session }) => {
+  const [formData, setFormData] = useState({
+    date: '',
+    time: '',
+    duration: 60
+  });
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
+
+  
+  useEffect(() => {
+    if (isOpen && session) {
+      setFormData({
+        date: session.date,
+        time: session.time,
+        duration: session.duration
+      });
+      setError('');
+    }
+  }, [isOpen, session]);
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setLoading(true);
+    setError('');
+
+    try {
+      const response = await api.put(`/gym-sessions/${session._id}`, formData);
+      onSessionUpdated(response.data);
+      onClose();
+    } catch (err) {
+      console.error('Error updating session:', err);
+      setError(err.response?.data?.error || 'Failed to update session');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  if (!isOpen || !session) return null;
+
+  const minDate = new Date().toISOString().split('T')[0];
+
+  return (
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+      <div className="bg-white rounded-2xl max-w-md w-full p-6">
+        <h3 className="text-xl font-bold text-[#4C3BCF] mb-4">Edit Gym Session</h3>
+        
+        {error && (
+          <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
+            {error}
+          </div>
+        )}
+
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Date
+            </label>
+            <input
+              type="date"
+              value={formData.date}
+              onChange={(e) => setFormData(prev => ({ ...prev, date: e.target.value }))}
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#736CED]"
+              required
+              min={minDate}
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Time
+            </label>
+            <input
+              type="time"
+              value={formData.time}
+              onChange={(e) => setFormData(prev => ({ ...prev, time: e.target.value }))}
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+              required
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">
+              Duration (minutes)
+            </label>
+            <select
+              value={formData.duration}
+              onChange={(e) => setFormData(prev => ({ ...prev, duration: parseInt(e.target.value) }))}
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
+              required
+            >
+              <option value={30}>30 minutes</option>
+              <option value={45}>45 minutes</option>
+              <option value={60}>60 minutes</option>
+              <option value={90}>90 minutes</option>
+              <option value={120}>120 minutes</option>
+            </select>
+          </div>
+
+          <div className="flex gap-3 pt-4">
+            <button
+              type="button"
+              onClick={onClose}
+              className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
+              disabled={loading}
+            >
+              Cancel
+            </button>
+            <button
+              type="submit"
+              className="flex-1 bg-[#4C3BCF] text-white py-2 px-4 rounded-lg hover:bg-[#3730A3] transition-colors disabled:opacity-50"
+              disabled={loading}
+            >
+              {loading ? 'Updating...' : 'Update Session'}
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  );
+};
+
 export default function GymSchedule() {
   const [sessions, setSessions] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -181,6 +304,7 @@ export default function GymSchedule() {
   const [selectedSession, setSelectedSession] = useState(null);
   const [registering, setRegistering] = useState(false);
   const [showCreateModal, setShowCreateModal] = useState(false);
+  const [showEditModal, setShowEditModal] = useState(false);
 
   const { user } = useAuthUser();
 
@@ -218,6 +342,21 @@ export default function GymSchedule() {
 
   const handleSessionCreated = (newSession) => {
     fetchMonthSessions();
+  };
+
+  const handleSessionUpdated = (updatedSession) => {
+    setSessions(prevSessions => 
+      prevSessions.map(session => 
+        session._id === updatedSession._id ? updatedSession : session
+      )
+    );
+    setSelectedSession(updatedSession);
+    setShowEditModal(false);
+  };
+
+  const handleEditSession = (session) => {
+    setSelectedSession(session);
+    setShowEditModal(true);
   };
 
   const handleSessionDeleted = (sessionId) => {
@@ -498,13 +637,22 @@ export default function GymSchedule() {
                <div className="flex justify-between items-start">
                   <h3 className="text-xl font-bold text-[#4C3BCF] mb-4">Session Details</h3>
                   {isEventsOffice && (
-                     <button 
-                        onClick={() => handleDeleteSession(selectedSession._id)} 
-                        className="p-2 text-red-500 hover:bg-red-100 rounded-full transition-colors"
-                        title="Delete Session"
-                     >
-                         <Trash2 size={20} />
-                     </button>
+                     <div className="flex gap-2">
+                        <button 
+                           onClick={() => handleEditSession(selectedSession)} 
+                           className="p-2 text-blue-500 hover:bg-blue-100 rounded-full transition-colors"
+                           title="Edit Session"
+                        >
+                            <Edit size={20} />
+                        </button>
+                        <button 
+                           onClick={() => handleDeleteSession(selectedSession._id)} 
+                           className="p-2 text-red-500 hover:bg-red-100 rounded-full transition-colors"
+                           title="Delete Session"
+                        >
+                            <Trash2 size={20} />
+                        </button>
+                     </div>
                   )}
               </div>
               
@@ -573,6 +721,14 @@ export default function GymSchedule() {
           isOpen={showCreateModal}
           onClose={() => setShowCreateModal(false)}
           onSessionCreated={handleSessionCreated}
+        />
+
+        {/* Edit Session Modal */}
+        <EditSessionModal
+          isOpen={showEditModal}
+          onClose={() => setShowEditModal(false)}
+          onSessionUpdated={handleSessionUpdated}
+          session={selectedSession}
         />
       </div>
     </div>
