@@ -180,14 +180,15 @@ export default function FavouriteEvents() {
                 userIsPrivileged={false}
                 userIsEligible={true}
                 onViewDetails={() => { setSelectedEvent(fav.item); setShowDetailsModal(true); }}
+                isFavourite={true}
+                onToggleFavourite={() => handleRemove(fav)}
               />
             ) : (
               <div className="border rounded-lg p-4 bg-gray-50 text-gray-600">Event no longer available</div>
             )}
-            <div className="mt-2 flex items-center justify-between">
-              <button onClick={() => { if (confirm("Remove from favorites?")) handleRemove(fav); }} className="text-sm text-red-600 hover:underline">Remove from Favorites</button>
-              {fav.status === "past" && <span className="text-xs text-gray-500">Past Event</span>}
-            </div>
+            {fav.status === "past" && (
+              <div className="mt-2 text-xs text-gray-500 text-center">Past Event</div>
+            )}
           </div>
         ))}
       </div>
