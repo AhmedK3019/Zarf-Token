@@ -23,7 +23,6 @@ const tripSchema = new mongoose.Schema({
     default: [],
   },
   type: { type: String, default: "trip" },
-<<<<<<< HEAD
   ratings: {
     type: [
       {
@@ -43,7 +42,6 @@ const tripSchema = new mongoose.Schema({
       },
     ],
     default: [],
-=======
   revenue: {
     type: mongoose.Schema.Types.Decimal128,
     default: mongoose.Types.Decimal128.fromString("0.00"),
@@ -51,9 +49,8 @@ const tripSchema = new mongoose.Schema({
     get: (v) => {
       return v ? v.toString() : "0.00";
     },
->>>>>>> 134b348581a61788e2a146ac30510350aa75e72d
   },
-});
+},});
 
 const Trip = mongoose.model("Trip", tripSchema);
 
