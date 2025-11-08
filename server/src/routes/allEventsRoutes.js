@@ -19,4 +19,5 @@ router.delete(
   "/deleteComment/:id/:commentid/:type",
   AllEventsController.deleteComment
 );
+router.delete("/removeRate/:id/:rateid/:type", AllEventsController.removeRate);
 export default router;
