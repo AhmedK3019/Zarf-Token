@@ -36,21 +36,22 @@ const tripSchema = new mongoose.Schema({
   comments: {
     type: [
       {
-        rating: { type: Number, enum: [0, 1, 2, 3, 4, 5], default: 0 },
+        comment: { type: String },
 
         userId: { type: mongoose.Schema.ObjectId, ref: "User" },
       },
     ],
     default: [],
-  revenue: {
-    type: mongoose.Schema.Types.Decimal128,
-    default: mongoose.Types.Decimal128.fromString("0.00"),
-    // getter to return a plain number in JSON output
-    get: (v) => {
-      return v ? v.toString() : "0.00";
+    revenue: {
+      type: mongoose.Schema.Types.Decimal128,
+      default: mongoose.Types.Decimal128.fromString("0.00"),
+      // getter to return a plain number in JSON output
+      get: (v) => {
+        return v ? v.toString() : "0.00";
+      },
     },
   },
-},});
+});
 
 const Trip = mongoose.model("Trip", tripSchema);
 

@@ -56,7 +56,7 @@ const workshopSchema = new mongoose.Schema({
   comments: {
     type: [
       {
-        rating: { type: Number, enum: [0, 1, 2, 3, 4, 5], default: 0 },
+        comment: { type: String },
 
         userId: { type: mongoose.Schema.ObjectId, ref: "User" },
       },

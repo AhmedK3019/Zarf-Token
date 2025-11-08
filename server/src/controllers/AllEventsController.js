@@ -73,41 +73,46 @@ const rateEvent = async (req, res, next) => {
     const userId = req.userId;
     if (!userId)
       return res.status(401).json({ message: "You are not authorized" });
+
     const { rating } = req.body;
-    const body = { rating: rating, userId: userId };
+    if (!rating)
+      return res.status(400).json({ message: "Rating value is required" });
+
+    const body = { rating, userId };
+
+    let model;
     switch (type) {
       case "trip":
-        await Trip.findByIdAndUpdate(
-          id,
-          { $addToSet: { ratings: body } },
-          { new: true }
-        );
+        model = Trip;
         break;
       case "workshop":
-        await Workshop.findByIdAndUpdate(
-          id,
-          { $addToSet: { ratings: body } },
-          { new: true }
-        );
+        model = Workshop;
         break;
       case "bazaar":
-        await Bazaar.findByIdAndUpdate(
-          id,
-          { $addToSet: { ratings: body } },
-          { new: true }
-        );
+        model = Bazaar;
         break;
       case "conference":
-        await Conference.findByIdAndUpdate(
-          id,
-          { $addToSet: { ratings: body } },
-          { new: true }
-        );
+        model = Conference;
         break;
       default:
         return res.status(400).json({ message: "Invalid event type" });
     }
-    return res.status(200).json({ message: "rated the event", rate: body });
+
+    let event = await model.findById(id);
+    if (!event) return res.status(404).json({ message: "Event not found" });
+
+    event.ratings = event.ratings.filter(
+      (r) => r.userId.toString() !== userId.toString()
+    );
+
+    event.ratings.push(body);
+
+    await event.save();
+
+    return res.status(200).json({
+      message: "Event rated successfully",
+      rating: body,
+    });
   } catch (error) {
     next(error);
   }
@@ -212,22 +217,22 @@ const deleteComment = async (req, res, next) => {
     let deletedComment;
     switch (type) {
       case "trip":
-        deleteComment = Trip.findByIdAndUpdate(id, {
+        deletedComment = await Trip.findByIdAndUpdate(id, {
           $pull: { comments: { _id: commentid } },
         });
         break;
       case "workshop":
-        deletedComment = Workshop.findByIdAndUpdate(id, {
+        deletedComment = await Workshop.findByIdAndUpdate(id, {
           $pull: { comments: { _id: commentid } },
         });
         break;
       case "bazaar":
-        deletedComment = Bazaar.findByIdAndUpdate(id, {
+        deletedComment = await Bazaar.findByIdAndUpdate(id, {
           $pull: { comments: { _id: commentid } },
         });
         break;
       case "conference":
-        deletedComment = Conference.findByIdAndUpdate(id, {
+        deletedComment = await Conference.findByIdAndUpdate(id, {
           $pull: { comments: { _id: commentid } },
         });
         break;
