@@ -215,6 +215,38 @@ const viewAllRatings = async (req, res, next) => {
     next(error);
   }
 };
+
+const deleteComment = async (req, res, next) => {
+  try {
+    const { id, commentid, type } = req.params;
+    let deletedComment;
+    switch (type) {
+      case "trip":
+        deleteComment = Trip.findByIdAndUpdate(id, {
+          $pull: { comments: { _id: commentid } },
+        });
+        break;
+      case "workshop":
+        deletedComment = Workshop.findByIdAndUpdate(id, {
+          $pull: { comments: { _id: commentid } },
+        });
+        break;
+      case "bazaar":
+        deletedComment = Bazaar.findByIdAndUpdate(id, {
+          $pull: { comments: { _id: commentid } },
+        });
+        break;
+      case "conference":
+        deletedComment = Conference.findByIdAndUpdate(id, {
+          $pull: { comments: { _id: commentid } },
+        });
+        break;
+    }
+    return res.json({ message: "Comment is deleted", deletedComment });
+  } catch (error) {
+    next(error);
+  }
+};
 export default {
   getAllEvents,
   getEventsByType,
@@ -223,4 +255,5 @@ export default {
   rateEvent,
   viewAllComments,
   viewAllRatings,
+  deleteComment,
 };
