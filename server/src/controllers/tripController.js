@@ -94,10 +94,15 @@ const registerForTrip = async (req, res, next) => {
     const { id } = req.params;
     const userId = req.userId;
     if (!userId) return res.status(401).json({ message: "No token provided" });
-    const check = await Trip.findById(id, { capacity: 1, attendees: 1 });
+    const check = await Trip.findById(id, {
+      capacity: 1,
+      attendees: 1,
+      registered: 1,
+    });
     if (!check) return res.status(404).json({ message: "Trip is not found" });
     if (
-      check.attendees.some((a) => a.userId?.toString() === userId.toString())
+      check.attendees.some((a) => a.userId?.toString() === userId.toString()) ||
+      check.registered.some((a) => a.userId?.toString() === userId.toString())
     ) {
       return res
         .status(400)
@@ -117,12 +122,43 @@ const registerForTrip = async (req, res, next) => {
     };
     const afterUpdate = await Trip.findByIdAndUpdate(
       id,
-      { $addToSet: { attendees: body } },
+      { $addToSet: { registered: body } },
       { new: true }
     );
     return res
       .status(200)
       .json({ message: "done updating", trip: afterUpdate });
+  } catch (error) {
+    next(error);
+  }
+};
+
+const cancelRegistration = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+    const userId = req.userId;
+    if (!userId) return res.status(401).json({ message: "No token provided" });
+    const trip = await Trip.findById(id);
+    if (!trip) return res.status(404).json({ message: "Trip not found" });
+
+    const isRegistered = trip.attendees.some(
+      (a) => a.userId?.toString() === userId.toString()
+    );
+    if (!isRegistered) {
+      return res
+        .status(400)
+        .json({ message: "You are not registered for this trip" });
+    }
+
+    const updatedTrip = await Trip.findByIdAndUpdate(
+      id,
+      { $pull: { attendees: { userId: userId } } },
+      { new: true }
+    );
+    return res.status(200).json({
+      message: "Registration cancelled successfully",
+      trip: updatedTrip,
+    });
   } catch (error) {
     next(error);
   }
@@ -135,4 +171,5 @@ export default {
   getAllTrips,
   getTrip,
   registerForTrip,
+  cancelRegistration,
 };

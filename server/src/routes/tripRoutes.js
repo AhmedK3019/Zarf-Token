@@ -8,4 +8,5 @@ router.get("/getTrip/:id", tripController.getTrip);
 router.put("/updateTrip/:id", tripController.updateTrip);
 router.delete("/deleteTrip/:id", tripController.deleteTrip);
 router.patch("/registerForaTrip/:id", tripController.registerForTrip);
+router.patch("/cancelRegistration/:id", tripController.cancelRegistration);
 export default router;

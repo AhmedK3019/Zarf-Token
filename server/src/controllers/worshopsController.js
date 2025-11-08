@@ -309,11 +309,16 @@ const registerForWorkshop = async (req, res, next) => {
     const { id } = req.params;
     const userId = req.userId;
     if (!userId) return res.status(401).json({ message: "No token provided" });
-    const check = await WorkShop.findById(id, { capacity: 1, attendees: 1 });
+    const check = await WorkShop.findById(id, {
+      capacity: 1,
+      attendees: 1,
+      registered: 1,
+    });
     if (!check)
       return res.status(404).json({ message: "Workshop is not found" });
     if (
-      check.attendees.some((a) => a.userId?.toString() === userId.toString())
+      check.attendees.some((a) => a.userId?.toString() === userId.toString()) ||
+      check.registered.some((a) => a.userId?.toString() === userId.toString())
     ) {
       return res
         .status(400)
@@ -333,12 +338,43 @@ const registerForWorkshop = async (req, res, next) => {
     };
     const afterUpdate = await WorkShop.findByIdAndUpdate(
       id,
-      { $addToSet: { attendees: body } },
+      { $addToSet: { registered: body } },
       { new: true }
     );
     return res
       .status(200)
       .json({ message: "done updating", workshop: afterUpdate });
+  } catch (error) {
+    next(error);
+  }
+};
+
+const cancelRegistration = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+    const userId = req.userId;
+    if (!userId) return res.status(401).json({ message: "No token provided" });
+    const workshop = await WorkShop.findById(id);
+    if (!workshop)
+      return res.status(404).json({ message: "Workshop not found" });
+    const attendee = workshop.attendees.find(
+      (a) => a.userId.toString() === userId.toString()
+    );
+    if (!attendee)
+      return res
+        .status(404)
+        .json({ message: "You are not registered for this workshop" });
+
+    const updatedWorkshop = await WorkShop.findByIdAndUpdate(
+      id,
+      { $pull: { attendees: { userId: userId } } },
+      { new: true }
+    );
+
+    return res.status(200).json({
+      message: "Registration canceled successfully",
+      workshop: updatedWorkshop,
+    });
   } catch (error) {
     next(error);
   }
@@ -359,6 +395,7 @@ export default {
   updateWorkshop,
   deleteWorkshop,
   registerForWorkshop,
+  cancelRegistration,
   updateWorkshopStatus,
   getMyWorkshops,
   requestEdits,

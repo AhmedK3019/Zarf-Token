@@ -22,6 +22,10 @@ const tripSchema = new mongoose.Schema({
     type: [registeredPeople],
     default: [],
   },
+  registered: {
+    type: [registeredPeople],
+    default: [],
+  },
   type: { type: String, default: "trip" },
   ratings: {
     type: [

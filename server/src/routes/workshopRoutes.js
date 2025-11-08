@@ -16,6 +16,7 @@ router.patch(
   "/registerForaWorkshop/:id",
   worshopsController.registerForWorkshop
 );
+router.patch("/cancelRegistration/:id", worshopsController.cancelRegistration);
 router.patch(
   "/updateWorkshopStatus/:id",
   worshopsController.updateWorkshopStatus
