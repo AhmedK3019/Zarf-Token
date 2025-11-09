@@ -83,7 +83,7 @@ const NavbarEventsOffice = () => {
                 </button>
 
                 {eventsOpen && (
-                  <div className="absolute left-0 mt-2 w-48 bg-white/95 rounded-lg shadow-lg z-20 py-2">
+                  <div className="absolute top-full left-0 mt-2 w-56 bg-white rounded-lg shadow-xl border border-gray-200 overflow-hidden z-50">
                     <NavLink
                       to="/dashboard/eventsOffice/all-events"
                       className={({ isActive }) =>
@@ -102,7 +102,7 @@ const NavbarEventsOffice = () => {
                     <NavLink
                       to="/dashboard/eventsOffice/create-event"
                       className={({ isActive }) =>
-                        `flex items-center gap-3 px-4 py-3 text-gray-800 hover:bg-primary/5 hover:text-primary transition-colors ${
+                        `flex items-center gap-3 px-4 py-3 text-gray-800 hover:bg-primary/5 hover:text-primary transition-colors border-t border-gray-200 ${
                           isActive
                             ? "bg-primary/10 text-primary font-semibold"
                             : ""
@@ -117,7 +117,7 @@ const NavbarEventsOffice = () => {
                     <NavLink
                       to="/dashboard/eventsOffice/archived-events"
                       className={({ isActive }) =>
-                        `flex items-center gap-3 px-4 py-3 text-gray-800 hover:bg-primary/5 hover:text-primary transition-colors ${
+                        `flex items-center gap-3 px-4 py-3 text-gray-800 hover:bg-primary/5 hover:text-primary transition-colors border-t border-gray-200 ${
                           isActive
                             ? "bg-primary/10 text-primary font-semibold"
                             : ""
@@ -127,6 +127,21 @@ const NavbarEventsOffice = () => {
                       <span className="flex items-center gap-2">
                         <Archive className="h-4 w-4" />
                         Archived Events
+                      </span>
+                    </NavLink>
+                    <NavLink
+                      to="/dashboard/eventsOffice/events-sales-report"
+                      className={({ isActive }) =>
+                        `flex items-center gap-3 px-4 py-3 text-gray-800 hover:bg-primary/5 hover:text-primary transition-colors border-t border-gray-200 ${
+                          isActive
+                            ? "bg-primary/10 text-primary font-semibold"
+                            : ""
+                        }`
+                      }
+                    >
+                      <span className="flex items-center gap-2">
+                        <FileText className="h-4 w-4" />
+                        Events Sales Report
                       </span>
                     </NavLink>
                   </div>
@@ -151,7 +166,7 @@ const NavbarEventsOffice = () => {
                 </button>
 
                 {requestsOpen && (
-                  <div className="absolute left-0 mt-2 w-56 bg-white/95 rounded-lg shadow-lg z-20 py-2">
+                  <div className="absolute top-full left-0 mt-2 w-56 bg-white rounded-lg shadow-xl border border-gray-200 overflow-hidden z-50">
                     <NavLink
                       to="/dashboard/eventsOffice/workshop-requests"
                       className={({ isActive }) =>
@@ -170,7 +185,7 @@ const NavbarEventsOffice = () => {
                     <NavLink
                       to="/dashboard/eventsOffice/vendor-requests"
                       className={({ isActive }) =>
-                        `flex items-center gap-3 px-4 py-3 text-gray-800 hover:bg-primary/5 hover:text-primary transition-colors ${
+                        `flex items-center gap-3 px-4 py-3 text-gray-800 hover:bg-primary/5 hover:text-primary transition-colors border-t border-gray-200 ${
                           isActive
                             ? "bg-primary/10 text-primary font-semibold"
                             : ""
