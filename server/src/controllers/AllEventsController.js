@@ -413,6 +413,99 @@ const removeRate = async (req, res, next) => {
     next(error);
   }
 };
+
+const archiveEvent = async (req, res, next) => {
+  try {
+    const { id, type } = req.params;
+    let model;
+    switch (type) {
+      case "trip":
+        model = Trip;
+        break;
+      case "workshop":
+        model = Workshop;
+        break;
+      case "bazaar":
+        model = Bazaar;
+        break;
+      // case "booth":
+      //   model = Booth;
+      //   break;
+      case "conference":
+        model = Conference;
+        break;
+      default:
+        return res.status(400).json({ message: "Invalid type" });
+    }
+    let event = await model.findById(id);
+    if (!event) return res.satuts(404).json({ message: "Event not found" });
+    if (new Date(event.startdate) - new Date() > 0) {
+      return res.json({ message: "Event start date has not passed yet" });
+    }
+    let result = await model.findByIdAndUpdate(
+      id,
+      { $set: { archive: true } },
+      { new: true }
+    );
+    return res
+      .status(200)
+      .json({ message: "event is archived successfully", result });
+  } catch (error) {
+    next(error);
+  }
+};
+const getArchivedEvents = async (req, res, next) => {
+  try {
+    let events = [];
+    let trips = await Trip.find({ archive: true });
+    let workshops = await Workshop.find({ archive: true });
+    let bazaars = await Bazaar.find({ archive: true });
+    let booths = await Booth.find({ archive: true });
+    let conferences = await Conference.find({ archive: true });
+    events = [...trips, ...workshops, ...bazaars, ...booths, ...conferences];
+    return res.status(200).json(events);
+  } catch (error) {
+    next(error);
+  }
+};
+
+const unArchiveEvent = async (req, res, next) => {
+  try {
+    const { id, type } = req.params;
+    let model;
+    switch (type) {
+      case "trip":
+        model = Trip;
+        break;
+      case "workshop":
+        model = Workshop;
+        break;
+      case "bazaar":
+        model = Bazaar;
+        break;
+      // case "booth":
+      //   model = Booth;
+      //   break;
+      case "conference":
+        model = Conference;
+        break;
+      default:
+        return res.status(400).json({ message: "Invalid type" });
+    }
+    let event = await model.findById(id);
+    if (!event) return res.satuts(404).json({ message: "Event not found" });
+    let result = await model.findByIdAndUpdate(
+      id,
+      { $set: { archive: false } },
+      { new: true }
+    );
+    return res
+      .status(200)
+      .json({ message: "event is archived successfully", result });
+  } catch (error) {
+    next(error);
+  }
+};
 export default {
   getAllEvents,
   getEventsByType,
@@ -423,4 +516,7 @@ export default {
   viewAllRatings,
   deleteComment,
   removeRate,
+  archiveEvent,
+  getArchivedEvents,
+  unArchiveEvent,
 };

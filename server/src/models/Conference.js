@@ -36,6 +36,7 @@ const conferenceSchema = new mongoose.Schema({
   },
   createdAt: { type: Date, default: Date.now },
   type: { type: String, default: "conference" },
+  archive: { type: Boolean, default: false },
 });
 
 const Conference = mongoose.model("Conference", conferenceSchema);

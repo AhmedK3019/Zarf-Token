@@ -54,6 +54,7 @@ const tripSchema = new mongoose.Schema({
         return v ? v.toString() : "0.00";
       },
     },
+    archive: { type: Boolean, default: false },
   },
 });
 

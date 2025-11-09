@@ -256,6 +256,7 @@ const addAttendedEvent = async (req, res, next) => {
       { $addToSet: { attendedevents: body } },
       { new: true }
     );
+
     return res
       .status(200)
       .json({ message: "Attended successfully", addedEvent: result });
