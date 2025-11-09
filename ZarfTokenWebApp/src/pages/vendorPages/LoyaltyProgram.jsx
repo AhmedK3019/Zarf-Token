@@ -394,10 +394,18 @@ const LoyaltyProgram = ({ vendor }) => {
                     <span>Updated {formatDate(app.updatedAt || app.createdAt)}</span>
                   </div>
                 </div>
-                {app.reviewerNotes && (
-                  <div className="mt-3 inline-flex items-center gap-2 rounded-full bg-gray-50 px-3 py-1 text-xs text-gray-600">
+                {(app.rejectionReason || app.reviewerNotes) && (
+                  <div
+                    className={`mt-3 inline-flex items-center gap-2 rounded-full px-3 py-1 text-xs ${
+                      app.status === "rejected"
+                        ? "bg-rose-50 text-rose-700"
+                        : "bg-gray-50 text-gray-600"
+                    }`}
+                  >
                     <FileText size={12} />
-                    <span>{app.reviewerNotes}</span>
+                    <span>
+                      {(app.rejectionReason || app.reviewerNotes || "").trim()}
+                    </span>
                   </div>
                 )}
               </div>
