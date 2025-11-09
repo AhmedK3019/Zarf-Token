@@ -1,6 +1,7 @@
 ﻿import React, { useState, useRef, useEffect } from "react";
 import { getEventDetails, formatSimpleDate } from "../pages/eventUtils";
 import { useNavigate } from "react-router-dom";
+import api from "../services/api";
 import {
   Clock,
   MapPin,
@@ -13,6 +14,9 @@ import {
   ChevronUp,
   Calendar,
   Heart,
+  X,
+  MessageCircle,
+  Star,
 } from "lucide-react";
 
 const EventCard = ({
@@ -26,7 +30,9 @@ const EventCard = ({
   onViewDetails,
   isFavourite,
   onToggleFavourite,
-  // Optional: a render-prop that allows callers to override the registration area
+  onViewComments,
+  onRateEvent,
+  refreshTrigger,
   renderRegistrationControls,
   footerExtra,
 }) => {
@@ -36,9 +42,47 @@ const EventCard = ({
   const [hasOverflow, setHasOverflow] = useState(false);
   const descriptionRef = useRef(null);
 
+  // Local state for ratings and comments display
+  const [ratings, setRatings] = useState([]);
+  const [comments, setComments] = useState([]);
+  const [ratingsLoading, setRatingsLoading] = useState(true);
+
   const isRegistered = Array.isArray(event.attendees)
     ? event.attendees.some((a) => a.userId === user?._id)
     : false;
+
+  // Check if user actually attended the event (for rating/commenting permissions)
+  // const hasAttended = Array.isArray(event.original?.attendees)
+  //   ? event.original.attendees.some((a) => a.userId === user?._id)
+  //   : false;
+
+  // Fetch ratings and comments on component mount
+  useEffect(() => {
+    const fetchRatingsAndComments = async () => {
+      if (['booth'].includes(event.type)) {
+        setRatingsLoading(false);
+        return;
+      }
+
+      try {
+        // Fetch ratings
+        const ratingsResponse = await api.get(`/allEvents/viewAllRatings/${event.id}/${event.type}`);
+        setRatings(ratingsResponse.data.ratings || []);
+
+        // Fetch comments
+        const commentsResponse = await api.get(`/allEvents/viewAllComments/${event.id}/${event.type}`);
+        setComments(commentsResponse.data.userComments || []);
+      } catch (error) {
+        console.error('Failed to fetch ratings/comments:', error);
+        setRatings([]);
+        setComments([]);
+      } finally {
+        setRatingsLoading(false);
+      }
+    };
+
+    fetchRatingsAndComments();
+  }, [event.id, event.type, refreshTrigger]); // Add refreshTrigger to dependency array
 
   const onUpdate = (type) => {
     navigate(`/dashboard/eventsOffice/edit-event/${type}/${event.id}`);
@@ -83,6 +127,10 @@ const EventCard = ({
   const toggleDescription = () => {
     if (hasOverflow) setIsDescriptionExpanded((v) => !v);
   };
+
+  const averageRating = ratings.length > 0 
+    ? ratings.reduce((sum, r) => sum + r.rating, 0) / ratings.length 
+    : 0;
 
   const getEventTypeColor = (type) => {
     const colors = {
@@ -373,6 +421,60 @@ const EventCard = ({
             <div className="w-full flex justify-start">{footerExtra}</div>
           )}
         </div>
+
+        {/* Ratings and Comments Section - Only for supported event types */}
+        {!['booth'].includes(event.type) && (
+          <div className="mt-4 pt-4">
+            {ratingsLoading ? (
+              <div className="text-center py-2">
+                <div className="text-xs text-gray-500">Loading ratings...</div>
+              </div>
+            ) : (
+              <>
+                <div className="flex items-center justify-between mb-3">
+                  <div className="flex items-center gap-1">
+                    <div className="flex">
+                      {[1, 2, 3, 4, 5].map((star) => (
+                        <Star
+                          key={star}
+                          size={14}
+                          className={`${
+                            star <= Math.round(averageRating) 
+                              ? 'text-yellow-400 fill-current' 
+                              : 'text-gray-300'
+                          }`}
+                        />
+                      ))}
+                    </div>
+                    <span className="text-sm text-gray-600 ml-1">
+                      ({averageRating > 0 ? `${averageRating.toFixed(1)}` : 'No ratings'})
+                    </span>
+                  </div>
+                  <span className="text-xs text-gray-500">
+                    {ratings.length} rating{ratings.length !== 1 ? 's' : ''}
+                  </span>
+                </div>
+                
+                <div className="flex gap-2">
+                  <button 
+                    onClick={() => onViewComments?.(event.original, event.id, event.type)}
+                    className="flex-1 text-xs bg-blue-50 text-blue-700 px-3 py-1.5 rounded-lg hover:bg-blue-100 transition-colors font-medium flex items-center justify-center gap-1"
+                  >
+                    <MessageCircle size={12} />
+                    Comments
+                  </button>
+                  <button 
+                    onClick={() => onRateEvent?.(event.original, event.id, event.type)}
+                    className="flex-1 text-xs bg-green-50 text-green-700 px-3 py-1.5 rounded-lg hover:bg-green-100 transition-colors font-medium flex items-center justify-center gap-1"
+                  >
+                    <Star size={12} />
+                    Rate Event
+                  </button>
+                </div>
+              </>
+            )}
+          </div>
+        )}
       </div>
     </div>
   );

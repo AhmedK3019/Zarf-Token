@@ -3,6 +3,8 @@ import api from "../../services/api";
 import { useAuthUser } from "../../hooks/auth";
 import EventCard from "../../components/EventCard";
 import EventDetailsModal from "../../components/EventDetailsModal";
+import { getEventDetails } from "../eventUtils";
+import { User, X, Star } from "lucide-react";
 
 const typeOptions = [
   { id: "", name: "All Types" },
@@ -48,6 +50,20 @@ export default function FavouriteEvents() {
   // Modals
   const [showDetailsModal, setShowDetailsModal] = useState(false);
   const [selectedEvent, setSelectedEvent] = useState(null);
+
+  // Rating and comments state
+  const [refreshTrigger, setRefreshTrigger] = useState(0);
+  const [showCommentsModal, setShowCommentsModal] = useState(false);
+  const [showRatingModal, setShowRatingModal] = useState(false);
+  const [selectedRatingEvent, setSelectedRatingEvent] = useState(null);
+  const [comments, setComments] = useState([]);
+  const [ratings, setRatings] = useState([]);
+  const [newComment, setNewComment] = useState('');
+  const [userRating, setUserRating] = useState(0);
+  const [commentsLoading, setCommentsLoading] = useState(false);
+  const [ratingsLoading, setRatingsLoading] = useState(false);
+  const [commentSubmitting, setCommentSubmitting] = useState(false);
+  const [ratingSubmitting, setRatingSubmitting] = useState(false);
 
   const fetchFavourites = async () => {
     if (!user?._id) return;
@@ -136,6 +152,111 @@ export default function FavouriteEvents() {
     }
   };
 
+  // Rating and Comments Handlers
+  const handleViewComments = async (eventRaw, eventId, eventType) => {
+    setSelectedRatingEvent(eventRaw);
+    setShowCommentsModal(true);
+    
+    if (['booth'].includes(eventType)) return;
+    
+    setCommentsLoading(true);
+    try {
+      const response = await api.get(`/allEvents/viewAllComments/${eventId}/${eventType}`);
+      setComments(response.data.userComments || []);
+    } catch (error) {
+      console.error('Failed to fetch comments:', error);
+      setComments([]);
+    } finally {
+      setCommentsLoading(false);
+    }
+  };
+
+  const handleRateEvent = async (eventRaw, eventId, eventType) => {
+    setSelectedRatingEvent(eventRaw);
+    setShowRatingModal(true);
+    
+    if (['booth'].includes(eventType)) return;
+    
+    setRatingsLoading(true);
+    try {
+      const response = await api.get(`/allEvents/viewAllRatings/${eventId}/${eventType}`);
+      setRatings(response.data.ratings || []);
+      
+      // Check if user has already rated
+      const existingRating = (response.data.ratings || []).find(r => r.userId === user?._id);
+      setUserRating(existingRating ? existingRating.rating : 0);
+    } catch (error) {
+      console.error('Failed to fetch ratings:', error);
+      setRatings([]);
+      setUserRating(0);
+    } finally {
+      setRatingsLoading(false);
+    }
+  };
+
+  const submitRating = async (rating) => {
+    if (!user || !rating || rating < 1 || rating > 5 || !selectedRatingEvent) return;
+    
+    setRatingSubmitting(true);
+    try {
+      const eventDetails = getEventDetails(selectedRatingEvent);
+      await api.patch(`/allEvents/rateEvent/${eventDetails.id}/${eventDetails.type}`, { rating });
+      
+      // Refresh ratings after submission
+      const response = await api.get(`/allEvents/viewAllRatings/${eventDetails.id}/${eventDetails.type}`);
+      setRatings(response.data.ratings || []);
+      setUserRating(rating);
+      setShowRatingModal(false);
+      
+      // Trigger refresh of all EventCard components
+      setRefreshTrigger(prev => prev + 1);
+    } catch (error) {
+      console.error('Failed to submit rating:', error);
+      alert(`Failed to submit rating: ${error.response?.data?.message || error.message}`);
+    } finally {
+      setRatingSubmitting(false);
+    }
+  };
+
+  const submitComment = async () => {
+    if (!user || !newComment.trim() || !selectedRatingEvent) return;
+    
+    setCommentSubmitting(true);
+    try {
+      const eventDetails = getEventDetails(selectedRatingEvent);
+      await api.patch(`/allEvents/addComment/${eventDetails.id}/${eventDetails.type}`, { 
+        comment: newComment.trim() 
+      });
+      
+      // Refresh comments after submission
+      const response = await api.get(`/allEvents/viewAllComments/${eventDetails.id}/${eventDetails.type}`);
+      setComments(response.data.userComments || []);
+      setNewComment('');
+      
+      // Trigger refresh of all EventCard components
+      setRefreshTrigger(prev => prev + 1);
+    } catch (error) {
+      console.error('Failed to submit comment:', error);
+      alert(`Failed to submit comment: ${error.response?.data?.message || error.message}`);
+    } finally {
+      setCommentSubmitting(false);
+    }
+  };
+
+  const closeCommentsModal = () => {
+    setShowCommentsModal(false);
+    setSelectedRatingEvent(null);
+    setComments([]);
+    setNewComment('');
+  };
+
+  const closeRatingModal = () => {
+    setShowRatingModal(false);
+    setSelectedRatingEvent(null);
+    setRatings([]);
+    setUserRating(0);
+  };
+
   const totalCount = filtered.length;
 
   return (
@@ -183,7 +304,7 @@ export default function FavouriteEvents() {
         </div>
       )}
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
         {filtered.map((fav) => (
           <div key={`${fav.itemType}-${fav.itemId}`} className="relative">
             {fav.item ? (
@@ -195,6 +316,9 @@ export default function FavouriteEvents() {
                 onViewDetails={() => { setSelectedEvent(fav.item); setShowDetailsModal(true); }}
                 isFavourite={true}
                 onToggleFavourite={() => handleRemove(fav)}
+                onViewComments={handleViewComments}
+                onRateEvent={handleRateEvent}
+                refreshTrigger={refreshTrigger}
               />
             ) : (
               <div className="border rounded-lg p-4 bg-gray-50 text-gray-600 flex flex-col gap-4">
@@ -211,6 +335,157 @@ export default function FavouriteEvents() {
       {showDetailsModal && selectedEvent && (
         <EventDetailsModal event={selectedEvent} onClose={() => setShowDetailsModal(false)} />
       )}
+
+      {/* Comments Modal */}
+      {showCommentsModal && selectedRatingEvent && (() => {
+        const hasAttended = true;
+        
+        return (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50" onClick={closeCommentsModal}>
+            <div className="bg-white rounded-2xl max-w-2xl w-full max-h-[80vh] overflow-hidden" onClick={(e) => e.stopPropagation()}>
+              <div className="flex items-center justify-between p-6 border-b">
+                <h3 className="text-xl font-bold text-[#4C3BCF]">
+                  Comments - {getEventDetails(selectedRatingEvent).name}
+                </h3>
+                <button
+                  onClick={closeCommentsModal}
+                  className="text-gray-500 hover:text-gray-700"
+                >
+                  <X size={24} />
+                </button>
+              </div>
+              
+              {/* Comments List */}
+              <div className="h-80 overflow-y-auto border-b">
+                <div className="p-6">
+                {commentsLoading ? (
+                  <div className="text-center py-8 text-gray-600">Loading comments...</div>
+                ) : comments.length > 0 ? (
+                  <div className="space-y-4">
+                    {comments.map((comment, index) => (
+                      <div key={index} className="border-b border-gray-100 pb-3 last:border-b-0">
+                        <div className="flex items-center gap-2 mb-2">
+                          <div className="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center">
+                            <User size={16} className="text-blue-600" />
+                          </div>
+                          <span className="font-medium text-gray-800">
+                            {comment.userId?.firstname || comment.userId?.lastname 
+                              ? `${comment.userId.firstname || ''} ${comment.userId.lastname || ''}`.trim()
+                              : 'Anonymous User'}
+                          </span>
+                        </div>
+                        <p className="text-gray-700 ml-10">{comment.comment}</p>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="text-center py-8 text-gray-600">
+                    No comments yet. Be the first to leave a comment!
+                  </div>
+                  )}
+                </div>
+              </div>
+              
+              {/* Add Comment Form */}
+              <div className="p-6 border-t bg-gray-50">
+                <h4 className="font-semibold text-gray-800 mb-3">Add a Comment</h4>
+                <div className="flex gap-3">
+                  <textarea
+                    value={newComment}
+                    onChange={(e) => setNewComment(e.target.value)}
+                    placeholder="Share your thoughts about this event..."
+                    className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#4C3BCF] focus:border-transparent resize-none"
+                    rows="3"
+                    disabled={commentSubmitting}
+                  />
+                  <button
+                    onClick={submitComment}
+                    disabled={!newComment.trim() || commentSubmitting}
+                    className="px-4 py-2 bg-[#4C3BCF] text-white rounded-lg hover:bg-[#3730A3] transition-colors disabled:opacity-50 disabled:cursor-not-allowed h-fit"
+                  >
+                    {commentSubmitting ? 'Posting...' : 'Post'}
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        );
+      })()}
+
+      {/* Rating Modal */}
+      {showRatingModal && selectedRatingEvent && (() => {
+        const hasAttended = true;
+        
+        return (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50" onClick={closeRatingModal}>
+            <div className="bg-white rounded-2xl max-w-md w-full" onClick={(e) => e.stopPropagation()}>
+              <div className="flex items-center justify-between p-6 border-b">
+                <h3 className="text-xl font-bold text-[#4C3BCF]">
+                  Rate Event
+                </h3>
+                <button
+                  onClick={closeRatingModal}
+                  className="text-gray-500 hover:text-gray-700"
+                >
+                  <X size={24} />
+                </button>
+              </div>
+              <div className="p-6">
+                <h4 className="font-semibold text-gray-800 mb-4">
+                  {getEventDetails(selectedRatingEvent).name}
+                </h4>
+                
+                {/* Rating Input */}
+                <div className="text-center mb-6">
+                  <p className="text-gray-600 mb-4">How would you rate this event?</p>
+                  <div className="flex justify-center gap-2 mb-4">
+                    {[1, 2, 3, 4, 5].map((star) => (
+                      <button
+                        key={star}
+                        onClick={() => setUserRating(star)}
+                        className="transition-colors"
+                        disabled={ratingSubmitting}
+                      >
+                        <Star
+                          size={32}
+                          className={`${
+                            star <= userRating 
+                              ? 'text-yellow-400 fill-current' 
+                              : 'text-gray-300 hover:text-yellow-200'
+                          }`}
+                        />
+                      </button>
+                    ))}
+                  </div>
+                  {userRating > 0 && (
+                    <p className="text-sm text-gray-600 mb-4">
+                      You selected {userRating} star{userRating !== 1 ? 's' : ''}
+                    </p>
+                  )}
+                </div>
+
+                <div className="flex gap-3">
+                  <button
+                    onClick={closeRatingModal}
+                    className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
+                    disabled={ratingSubmitting}
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    onClick={() => submitRating(userRating)}
+                    disabled={userRating === 0 || ratingSubmitting}
+                    className="flex-1 bg-[#4C3BCF] text-white py-2 px-4 rounded-lg hover:bg-[#3730A3] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    {ratingSubmitting ? 'Submitting...' : 'Submit Rating'}
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        );
+      })()}
+
     {toastMsg && (<div className={`fixed top-4 right-4 z-50 px-4 py-2 rounded-md text-white ${toastType==="error"?"bg-red-600":"bg-emerald-600"}`}>{toastMsg}</div>)}
     </div>
   );
