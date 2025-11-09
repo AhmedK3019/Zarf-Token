@@ -2,7 +2,21 @@
 
 <h1 style="border-bottom: none;">Zarf Token</h1>
 
-<h3>University Event Management System</h3>
+<h3>The GUC EMS</h3>
+
+![MongoDB](https://img.shields.io/badge/-MongoDB-black?style=flat-square&logo=mongodb)
+![Express.js](https://img.shields.io/badge/-Express.js-black?style=flat-square&logo=express)
+![React](https://img.shields.io/badge/-React-black?style=flat-square&logo=react)
+![Nodejs](https://img.shields.io/badge/-Nodejs-black?style=flat-square&logo=Node.js)
+![JavaScript](https://img.shields.io/badge/-JavaScript-black?style=flat-square&logo=javascript)
+![HTML5](https://img.shields.io/badge/-HTML5-E34F26?style=flat-square&logo=html5&logoColor=white)
+![CSS3](https://img.shields.io/badge/-CSS3-1572B6?style=flat-square&logo=css3)
+![Git](https://img.shields.io/badge/-Git-black?style=flat-square&logo=git)
+![GitHub](https://img.shields.io/badge/-GitHub-181717?style=flat-square&logo=github)
+![PostgreSQL](https://img.shields.io/badge/-PostgreSQL-336791?style=flat-square&logo=postgresql)
+![MySQL](https://img.shields.io/badge/-MySQL-black?style=flat-square&logo=mysql)
+![Docker](https://img.shields.io/badge/-Docker-black?style=flat-square&logo=docker)
+![Google Cloud](https://img.shields.io/badge/Google%20Cloud-black?style=flat-square&logo=google-cloud)
 
 <br>
 
@@ -34,7 +48,7 @@ Zarf Token solves these challenges by providing a unified platform that simplifi
 - Sprint 2 (Current)
 - Sprint 3
 
-**Status:** Zarf Token is currently in its initial development phase. We are working on establishing the foundational architecture and implementing core system requirements for Sprint 1.
+**Status:** We are now working very hard in sprint 2.
 
 ## Known Issues
 
@@ -465,8 +479,6 @@ Distributed under the MIT License. See `LICENSE` for more information.
 
 **Project Repository:** TBD
 
-**Documentation:** TBD
-
 **Contact:** For questions or support, please contact our scrum master [Abdelhamid Sameh Abdelhamid].
 
-**Last Updated:** October 2025
+**Last Updated:** November '25
