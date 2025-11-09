@@ -35,6 +35,15 @@ const boothSchema = new mongoose.Schema(
     },
     bazarId: { type: mongoose.Schema.Types.ObjectId, ref: "Bazaar" },
     type: { type: String, default: "booth" },
+    userComments: {
+      type: [
+        {
+          comment: { type: String },
+          userId: { type: mongoose.Schema.ObjectId, ref: "User" },
+        },
+      ],
+      default: [],
+    },
     revenue: {
       type: mongoose.Schema.Types.Decimal128,
       default: mongoose.Types.Decimal128.fromString("0.00"),

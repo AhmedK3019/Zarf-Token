@@ -57,7 +57,7 @@ const workshopSchema = new mongoose.Schema({
     ],
     default: [],
   },
-  comments: {
+  userComments: {
     type: [
       {
         comment: { type: String },

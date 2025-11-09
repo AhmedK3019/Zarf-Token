@@ -19,7 +19,7 @@ const bazaarSchema = new mongoose.Schema({
     ],
     default: [],
   },
-  comments: {
+  userComments: {
     type: [
       {
         comment: { type: String },

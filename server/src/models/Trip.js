@@ -37,7 +37,7 @@ const tripSchema = new mongoose.Schema({
     ],
     default: [],
   },
-  comments: {
+  userComments: {
     type: [
       {
         comment: { type: String },

@@ -24,7 +24,7 @@ const conferenceSchema = new mongoose.Schema({
     ],
     default: [],
   },
-  comments: {
+  userComments: {
     type: [
       {
         comment: { type: String },

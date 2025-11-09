@@ -4,6 +4,9 @@ import Conference from "../models/Conference.js";
 import Trip from "../models/Trip.js";
 import Booth from "../models/Booth.js";
 import { sendCommentDeletionNotification } from "../utils/mailer.js";
+import User from "../models/User.js";
+import Admin from "../models/Admin.js";
+import EventsOffice from "../models/EventsOffice.js";
 
 const getAllEvents = async (_req, res, next) => {
   try {
@@ -115,13 +118,23 @@ const rateEvent = async (req, res, next) => {
     let event = await model.findById(id);
     if (!event) return res.status(404).json({ message: "Event not found" });
 
-    event.ratings = event.ratings.filter(
-      (r) => r.userId.toString() !== userId.toString()
+    //remove
+    await model.findByIdAndUpdate(
+      id,
+      { 
+        $pull: { ratings: { userId: userId } },
+      },
+      { new: true }
     );
 
-    event.ratings.push(body);
-
-    await event.save();
+    //add
+    await model.findByIdAndUpdate(
+      id,
+      { 
+        $push: { ratings: body }
+      },
+      { new: true }
+    );
 
     return res.status(200).json({
       message: "Event rated successfully",
@@ -143,35 +156,35 @@ const addComment = async (req, res, next) => {
       case "trip":
         await Trip.findByIdAndUpdate(
           id,
-          { $push: { comments: body } },
+          { $push: { userComments: body } },
           { new: true }
         );
         break;
       case "workshop":
         await Workshop.findByIdAndUpdate(
           id,
-          { $push: { comments: body } },
+          { $push: { userComments: body } },
           { new: true }
         );
         break;
       case "bazaar":
         await Bazaar.findByIdAndUpdate(
           id,
-          { $push: { comments: body } },
+          { $push: { userComments: body } },
           { new: true }
         );
         break;
       case "conference":
         await Conference.findByIdAndUpdate(
           id,
-          { $push: { comments: body } },
+          { $push: { userComments: body } },
           { new: true }
         );
         break;
       case "booth":
         await Booth.findByIdAndUpdate(
           id,
-          { $push: { comments: body } },
+          { $push: { userComments: body } },
           { new: true }
         );
         break;
@@ -190,21 +203,50 @@ const viewAllComments = async (req, res, next) => {
     let comments;
     switch (type) {
       case "trip":
-        comments = await Trip.findById(id, { comments: 1 });
+        comments = await Trip.findById(id, { userComments: 1 });
         break;
       case "workshop":
-        comments = await Workshop.findById(id, { comments: 1 });
+        comments = await Workshop.findById(id, { userComments: 1 });
         break;
       case "conference":
-        comments = await Conference.findById(id, { comments: 1 });
+        comments = await Conference.findById(id, { userComments: 1 });
         break;
       case "bazaar":
-        comments = await Bazaar.findById(id, { comments: 1 });
+        comments = await Bazaar.findById(id, { userComments: 1 });
         break;
       case "booth":
-        comments = await Booth.findById(id, { comments: 1 });
+        comments = await Booth.findById(id, { userComments: 1 });
         break;
     }
+
+    if (comments?.userComments) {
+      const populatedComments = await Promise.all(
+        comments.userComments.map(async (comment) => {
+          if (comment.userId) {
+            
+            let user = await User.findById(comment.userId, 'firstname lastname').lean();
+
+            if (!user) {
+              user = await Admin.findById(comment.userId, 'firstname lastname').lean(); 
+            }
+            if (!user) {
+              user = await EventsOffice.findById(comment.userId, 'firstname lastname').lean(); 
+            }
+            
+            return {
+              ...comment.toObject(),
+              userId: user || { _id: comment.userId, firstname: 'Unknown', lastname: 'User' }
+            };
+          }
+          return comment.toObject();
+        })
+      );
+      comments = {
+        ...comments.toObject(),
+        userComments: populatedComments
+      };
+    }
+
     return res.status(200).json(comments);
   } catch (error) {
     next(error);
