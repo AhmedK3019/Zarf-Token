@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import api from '../../services/api';
 
+
 const Courts = () => {
   const [courts, setCourts] = useState([]);
   const [filteredCourts, setFilteredCourts] = useState([]);
@@ -51,7 +52,6 @@ const Courts = () => {
   const fetchCourts = async () => {
     setLoading(true);
     setError(null);
-
     try {
       const response = await api.get('/courts');
       setCourts(response.data);
@@ -68,7 +68,7 @@ const Courts = () => {
     fetchCourts();
   }, []);
 
-  // Filter courts by category and search
+  // Filter by category and search
   useEffect(() => {
     let filtered = courts;
     if (selectedCategory !== "all") {
@@ -90,13 +90,8 @@ const Courts = () => {
     setSelectedCategory(categoryId);
   };
 
-  const handleSearch = (searchValue) => {
-    setSearchTerm(searchValue);
-  };
-
-  const clearSearch = () => {
-    setSearchTerm("");
-  };
+  const handleSearch = (value) => setSearchTerm(value);
+  const clearSearch = () => setSearchTerm("");
 
   const getAvailableSlots = (court) => {
     return court.freeSlots?.filter(slot =>
@@ -124,59 +119,68 @@ const Courts = () => {
     setBookingMessage('');
   };
 
+  // ✅ FIXED BOOKING FUNCTION
   const handleBookSlot = async () => {
-  if (!selectedSlot || !selectedCourt) return;
-  setBookingLoading(true);
-  setBookingMessage('');
+    if (!selectedSlot || !selectedCourt) return;
+    setBookingLoading(true);
+    setBookingMessage('');
 
-  try {
-    const studentData = {
-      studentId: "123456",
-      studentName: "John Doe",
-      studentGucId: "GUC2025",
-    };
+    try {
+      const studentData = {
+        studentId: { type: String, required: true },
+        studentName: "John Doe",
+        studentGucId: "GUC2025",
+      };
 
-    const dateTime = new Date(selectedSlot.dateTime).toISOString();
+      // Ensure slot date is a valid ISO string
+      const dateTime = new Date(selectedSlot.dateTime).toISOString();
 
-    const response = await api.post(`/courts/${selectedCourt._id}/reserve`, {
-      courtId: selectedCourt._id,
-      dateTime,
-      ...studentData
-    });
+      const payload = {
+        courtId: selectedCourt._id,
+        dateTime,
+        ...studentData,
+      };
 
-    // Mark slot as reserved locally
-    const updatedSlots = selectedCourt.freeSlots.map(slot =>
-      slot._id === selectedSlot._id ? { ...slot, isReserved: true } : slot
-    );
+      console.log("📤 Sending booking payload:", payload);
 
-    const updatedCourt = { ...selectedCourt, freeSlots: updatedSlots };
-
-    // Update courts array and modal data
-    setCourts(prev =>
-      prev.map(court =>
-        court._id === updatedCourt._id ? updatedCourt : court
-      )
-    );
-    setSelectedCourt(updatedCourt);
-
-    setSelectedSlot(null);
-    setBookingMessage('✅ Slot successfully booked!');
-  } catch (err) {
-    console.error(err);
-    setBookingMessage(
-      err.response?.data?.error || '❌ Failed to book slot. Please try again.'
-    );
-  } finally {
-    setBookingLoading(false);
-  }
-};
+      // Post to backend route (no need for /:id since controller uses req.body.courtId)
+      const response =await api.post(`/courts/${selectedCourt._id}/reserve`, payload);
 
 
+      console.log("✅ Booking success:", response.data);
+
+      // Update slot locally
+      const updatedSlots = selectedCourt.freeSlots.map(slot =>
+        slot._id === selectedSlot._id ? { ...slot, isReserved: true } : slot
+      );
+
+      const updatedCourt = { ...selectedCourt, freeSlots: updatedSlots };
+
+      setCourts(prev =>
+        prev.map(court =>
+          court._id === updatedCourt._id ? updatedCourt : court
+        )
+      );
+
+      setSelectedCourt(updatedCourt);
+      setSelectedSlot(null);
+      setBookingMessage('✅ Slot successfully booked!');
+    } catch (err) {
+      console.error("❌ Booking failed:", err.response?.data || err.message);
+      setBookingMessage(
+        `❌ Booking failed: ${err.response?.data?.error || err.message}`
+      );
+    } finally {
+      setBookingLoading(false);
+    }
+  };
+
+  // ---------------- UI ----------------
   return (
     <div className="min-h-screen w-full overflow-hidden bg-muted text-[#1F1B3B]">
       <div className="relative flex min-h-screen w-full flex-col items-center">
         <main className="relative z-10 flex w-full flex-1 flex-col items-center px-6 py-8">
-          <div className="w-full ">
+          <div className="w-full">
             {/* Header */}
             <div className="mb-12 text-center">
               <h1 className="text-4xl font-bold text-[#736CED] sm:text-5xl mb-4">
@@ -322,11 +326,10 @@ const Courts = () => {
         </main>
       </div>
 
-      {/* Available Slots Modal */}
+      {/* Modal */}
       {showSlotsModal && selectedCourt && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
           <div className="bg-white rounded-2xl max-w-2xl w-full max-h-[90vh] flex flex-col">
-            {/* Modal Header */}
             <div className="p-6 border-b border-gray-200 flex-shrink-0">
               <div className="flex items-center justify-between">
                 <div>
@@ -344,7 +347,6 @@ const Courts = () => {
               </div>
             </div>
 
-            {/* Modal Body */}
             <div className="p-6 overflow-y-auto flex-1 min-h-0">
               <div className="mb-4">
                 <h3 className="text-lg font-semibold text-[#312A68] mb-4">All Available Time Slots</h3>
@@ -385,23 +387,30 @@ const Courts = () => {
                 </div>
               )}
 
-              {/* Booking Message */}
               {bookingMessage && (
-                <p className={`mt-4 text-center font-medium ${bookingMessage.includes('❌') ? 'text-red-500' : 'text-green-600'}`}>
+                <p
+                  className={`mt-4 text-center font-medium ${
+                    bookingMessage.includes('❌') ? 'text-red-500' : 'text-green-600'
+                  }`}
+                >
                   {bookingMessage}
                 </p>
               )}
             </div>
 
-            {/* Modal Footer */}
             <div className="p-6 border-t border-gray-200 flex-shrink-0 flex justify-end gap-3">
-              <button onClick={closeSlotsModal} className="px-6 py-2 text-[#736CED] border border-[#736CED] rounded-full hover:bg-[#E7E1FF] transition-colors">
+              <button
+                onClick={closeSlotsModal}
+                className="px-6 py-2 text-[#736CED] border border-[#736CED] rounded-full hover:bg-[#E7E1FF] transition-colors"
+              >
                 Close
               </button>
               <button
                 onClick={handleBookSlot}
                 disabled={!selectedSlot || bookingLoading}
-                className={`px-6 py-2 bg-[#736CED] text-white rounded-full transition-colors ${!selectedSlot || bookingLoading ? 'opacity-50 cursor-not-allowed' : 'hover:bg-[#5A4BBA]'}`}
+                className={`px-6 py-2 bg-[#736CED] text-white rounded-full transition-colors ${
+                  !selectedSlot || bookingLoading ? 'opacity-50 cursor-not-allowed' : 'hover:bg-[#5A4BBA]'
+                }`}
               >
                 {bookingLoading ? 'Booking...' : 'Book Slot'}
               </button>
