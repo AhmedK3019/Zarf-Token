@@ -121,6 +121,45 @@ export const sendBoothRejectionEmail = async (vendor, booth) => {
   return await sendEmail(vendor.email, subject, text);
 };
 
+export const sendVendorCancellationEmail = async ({
+  vendor,
+  request,
+  reason,
+  isAuto = false,
+}) => {
+  if (!vendor || !vendor.email) {
+    throw new Error(
+      "Invalid vendor information for sending cancellation email"
+    );
+  }
+  const eventLabel = request?.isBazarBooth
+    ? request?.bazarId?.bazaarname ||
+      request?.boothname ||
+      "Bazaar booth participation"
+    : request?.boothname || "Platform booth";
+
+  const subject = isAuto
+    ? "Participation auto-cancelled due to missed payment deadline"
+    : "Your participation request has been cancelled";
+
+  const reasonLine = reason
+    ? `<p><strong>Reason provided:</strong> ${reason}</p>`
+    : "";
+  const intro = isAuto
+    ? `We did not receive payment before the deadline, so your participation for <strong>${eventLabel}</strong> was automatically cancelled.`
+    : `This email confirms that your participation request for <strong>${eventLabel}</strong> has been cancelled as requested.`;
+
+  const html = `
+    <p>Dear ${vendor.companyname || "Vendor"},</p>
+    <p>${intro}</p>
+    ${reasonLine}
+    <p>If you would like to participate again, you can submit a new application at any time.</p>
+    <p>Best regards,<br/>GUC Events Team</p>
+  `;
+
+  return await sendEmail(vendor.email, subject, html, true);
+};
+
 export const sendCommentDeletionNotification = async (
   deletedComment,
   event

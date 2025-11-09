@@ -8,6 +8,10 @@ const peopleSchema = new mongoose.Schema({
 const boothSchema = new mongoose.Schema(
   {
     boothname: { type: String, required: true },
+    vendorRequestId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "VendorRequest",
+    },
     vendorId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Vendor",
@@ -30,11 +34,18 @@ const boothSchema = new mongoose.Schema(
     isBazarBooth: { type: Boolean, default: false },
     status: {
       type: String,
-      enum: ["Pending", "Approved", "Rejected"],
+      enum: ["Pending", "Approved", "Rejected", "Cancelled"],
       default: "Pending",
     },
     bazarId: { type: mongoose.Schema.Types.ObjectId, ref: "Bazaar" },
     type: { type: String, default: "booth" },
+    goLiveAt: { type: Date },
+    cancelledAt: { type: Date },
+    cancellationReason: { type: String },
+    cancellationSource: {
+      type: String,
+      enum: ["vendor", "system", "admin"],
+    },
     userComments: {
       type: [
         {
