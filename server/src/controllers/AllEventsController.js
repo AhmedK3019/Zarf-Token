@@ -121,7 +121,7 @@ const rateEvent = async (req, res, next) => {
     //remove
     await model.findByIdAndUpdate(
       id,
-      { 
+      {
         $pull: { ratings: { userId: userId } },
       },
       { new: true }
@@ -130,8 +130,8 @@ const rateEvent = async (req, res, next) => {
     //add
     await model.findByIdAndUpdate(
       id,
-      { 
-        $push: { ratings: body }
+      {
+        $push: { ratings: body },
       },
       { new: true }
     );
@@ -223,19 +223,31 @@ const viewAllComments = async (req, res, next) => {
       const populatedComments = await Promise.all(
         comments.userComments.map(async (comment) => {
           if (comment.userId) {
-            
-            let user = await User.findById(comment.userId, 'firstname lastname').lean();
+            let user = await User.findById(
+              comment.userId,
+              "firstname lastname"
+            ).lean();
 
             if (!user) {
-              user = await Admin.findById(comment.userId, 'firstname lastname').lean(); 
+              user = await Admin.findById(
+                comment.userId,
+                "firstname lastname"
+              ).lean();
             }
             if (!user) {
-              user = await EventsOffice.findById(comment.userId, 'firstname lastname').lean(); 
+              user = await EventsOffice.findById(
+                comment.userId,
+                "firstname lastname"
+              ).lean();
             }
-            
+
             return {
               ...comment.toObject(),
-              userId: user || { _id: comment.userId, firstname: 'Unknown', lastname: 'User' }
+              userId: user || {
+                _id: comment.userId,
+                firstname: "Unknown",
+                lastname: "User",
+              },
             };
           }
           return comment.toObject();
@@ -243,7 +255,7 @@ const viewAllComments = async (req, res, next) => {
       );
       comments = {
         ...comments.toObject(),
-        userComments: populatedComments
+        userComments: populatedComments,
       };
     }
 
@@ -287,39 +299,75 @@ const deleteComment = async (req, res, next) => {
     let event;
     switch (type) {
       case "trip":
-        event = await Trip.findByIdAndUpdate(id);
+        event = await Trip.findById(id);
         if (!event) return res.status(404).json({ message: "Event not found" });
-        deletedComment = event.comments.id(commentid);
+        deletedComment = event.userComments.id(commentid);
         if (!deletedComment)
           return res.status(404).json({ message: "Comment not found" });
+        console.log("here");
+        await Trip.findByIdAndUpdate(
+          id,
+          {
+            $pull: { userComments: { _id: commentid } },
+          },
+          { new: true }
+        );
         break;
       case "workshop":
-        event = await Workshop.findByIdAndUpdate(id);
+        event = await Workshop.findById(id);
         if (!event) return res.status(404).json({ message: "Event not found" });
-        deletedComment = event.comments.id(commentid);
+        deletedComment = event.userComments.id(commentid);
         if (!deletedComment)
           return res.status(404).json({ message: "Comment not found" });
+        await Workshop.findByIdAndUpdate(
+          id,
+          {
+            $pull: { userComments: { _id: commentid } },
+          },
+          { new: true }
+        );
         break;
       case "bazaar":
-        event = await Bazaar.findByIdAndUpdate(id);
+        event = await Bazaar.findById(id);
         if (!event) return res.status(404).json({ message: "Event not found" });
-        deletedComment = event.comments.id(commentid);
+        deletedComment = event.userComments.id(commentid);
         if (!deletedComment)
           return res.status(404).json({ message: "Comment not found" });
+        await Bazaar.findByIdAndUpdate(
+          id,
+          {
+            $pull: { userComments: commentid },
+          },
+          { new: true }
+        );
         break;
       case "conference":
-        event = await Conference.findByIdAndUpdate(id);
+        event = await Conference.findById(id);
         if (!event) return res.status(404).json({ message: "Event not found" });
-        deletedComment = event.comments.id(commentid);
+        deletedComment = event.userComments.id(commentid);
         if (!deletedComment)
           return res.status(404).json({ message: "Comment not found" });
+        await Conference.findByIdAndUpdate(
+          id,
+          {
+            $pull: { userComments: { _id: commentid } },
+          },
+          { new: true }
+        );
         break;
       case "booth":
-        event = await Booth.findByIdAndUpdate(id);
+        event = await Booth.findById(id);
         if (!event) return res.status(404).json({ message: "Event not found" });
-        deletedComment = event.comments.id(commentid);
+        deletedComment = event.userComments.id(commentid);
         if (!deletedComment)
           return res.status(404).json({ message: "Comment not found" });
+        await Booth.findByIdAndUpdate(
+          id,
+          {
+            $pull: { userComments: { _id: commentid } },
+          },
+          { new: true }
+        );
         break;
     }
     sendCommentDeletionNotification(deletedComment, event);
