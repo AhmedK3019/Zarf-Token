@@ -3,6 +3,9 @@ import { Calendar, Clock, Users, Dumbbell, ChevronLeft, ChevronRight, Plus, Tras
 import api from "../../services/api";
 import { useAuthUser } from "../../hooks/auth";
 
+const LIGHT_OVERLAY_CLASSES =
+  "fixed inset-0 z-50 flex items-center justify-center p-4 bg-muted bg-opacity-90 backdrop-blur-sm animate-fade-in";
+
 const MONTHS = [
   "January", "February", "March", "April", "May", "June",
   "July", "August", "September", "October", "November", "December"
@@ -68,8 +71,11 @@ const CreateSessionModal = ({ isOpen, onClose, onSessionCreated }) => {
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-      <div className="bg-white rounded-2xl max-w-md w-full p-6">
+    <div className={LIGHT_OVERLAY_CLASSES} onClick={onClose}>
+      <div
+        className="bg-white rounded-2xl max-w-md w-full p-6"
+        onClick={(e) => e.stopPropagation()}
+      >
         <h3 className="text-xl font-bold text-[#4C3BCF] mb-4">Create Gym Session</h3>
         
         {error && (
