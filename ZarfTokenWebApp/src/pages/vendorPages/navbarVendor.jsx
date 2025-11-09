@@ -88,11 +88,7 @@ const NavbarVendor = ({ vendor }) => {
                 Accepted
               </NavLink>
               <NavLink
-                to={
-                  vendor?.loyal
-                    ? "/dashboard/vendor/cancel-loyalty"
-                    : "/dashboard/vendor/apply-loyalty"
-                }
+                to="/dashboard/vendor/loyalty-program"
                 className={({ isActive }) =>
                   isActive
                     ? "px-4 py-2 rounded-lg bg-white/15 text-white font-semibold transition-all flex items-center gap-2"
