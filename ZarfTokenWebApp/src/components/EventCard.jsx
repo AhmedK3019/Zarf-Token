@@ -28,6 +28,7 @@ const EventCard = ({
   onToggleFavourite,
   // Optional: a render-prop that allows callers to override the registration area
   renderRegistrationControls,
+  footerExtra,
 }) => {
   const navigate = useNavigate();
   const event = getEventDetails(rawEvent);
@@ -366,6 +367,10 @@ const EventCard = ({
             >
               View Details
             </button>
+          )}
+
+          {footerExtra && (
+            <div className="w-full flex justify-start">{footerExtra}</div>
           )}
         </div>
       </div>

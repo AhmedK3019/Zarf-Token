@@ -48,6 +48,8 @@ export default function FavouriteEvents() {
   // Modals
   const [showDetailsModal, setShowDetailsModal] = useState(false);
   const [selectedEvent, setSelectedEvent] = useState(null);
+  const [pendingRemoval, setPendingRemoval] = useState(null);
+  const [isRemoving, setIsRemoving] = useState(false);
 
   const fetchFavourites = async () => {
     if (!user?._id) return;
@@ -112,18 +114,69 @@ export default function FavouriteEvents() {
   }, [favs, typeFilter, statusFilter, regFilter, sortBy]);
 
   const handleRemove = async (fav) => {
+    setIsRemoving(true);
     try {
       await api.post(`/user/removeFavourite/${user._id}`, {
         itemType: fav.itemType,
         itemId: fav.itemId,
       });
-      setFavs((cur) => cur.filter((x) => !(x.itemType === fav.itemType && x.itemId === fav.itemId))); setToastMsg("Removed from favorites"); setToastType("success"); setTimeout(()=>setToastMsg(null),2000);
+      setFavs((cur) =>
+        cur.filter(
+          (x) => !(x.itemType === fav.itemType && x.itemId === fav.itemId)
+        )
+      );
+      setToastMsg("Removed from favorites");
+      setToastType("success");
+      setTimeout(() => setToastMsg(null), 2000);
+      return true;
     } catch (e) {
-      setToastMsg(e?.response?.data?.message || "Failed to remove from favorites"); setToastType("error"); setTimeout(()=>setToastMsg(null),2500);
+      setToastMsg(
+        e?.response?.data?.message || "Failed to remove from favorites"
+      );
+      setToastType("error");
+      setTimeout(() => setToastMsg(null), 2500);
+      return false;
+    } finally {
+      setIsRemoving(false);
     }
   };
 
   const totalCount = filtered.length;
+
+  const getFavDisplayName = (fav) => {
+    if (!fav?.item) return "this event";
+    return (
+      fav.item?.workshopname ||
+      fav.item?.tripname ||
+      fav.item?.bazaarname ||
+      fav.item?.conferencename ||
+      fav.item?.boothname ||
+      fav.item?.name ||
+      "this event"
+    );
+  };
+
+  const handleProceedRemoval = async () => {
+    if (!pendingRemoval) return;
+    const ok = await handleRemove(pendingRemoval);
+    if (ok) setPendingRemoval(null);
+  };
+
+  const handleCancelRemoval = () => {
+    if (isRemoving) return;
+    setPendingRemoval(null);
+  };
+
+  const renderRemoveButton = (fav) => (
+    <button
+      type="button"
+      onClick={() => setPendingRemoval(fav)}
+      disabled={isRemoving}
+      className="inline-flex items-center justify-center gap-1 rounded-md bg-gradient-to-r from-rose-500 to-red-500 px-3 py-1.5 text-xs font-semibold text-white shadow hover:shadow-md hover:from-rose-600 hover:to-red-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:ring-rose-400 disabled:opacity-60 transition"
+    >
+      Remove From Favorites
+    </button>
+  );
 
   return (
     <div className="p-6 w-full">
@@ -181,10 +234,14 @@ export default function FavouriteEvents() {
                 userIsEligible={true}
                 onViewDetails={() => { setSelectedEvent(fav.item); setShowDetailsModal(true); }}
                 isFavourite={true}
-                onToggleFavourite={() => handleRemove(fav)}
+                onToggleFavourite={() => setPendingRemoval(fav)}
+                footerExtra={renderRemoveButton(fav)}
               />
             ) : (
-              <div className="border rounded-lg p-4 bg-gray-50 text-gray-600">Event no longer available</div>
+              <div className="border rounded-lg p-4 bg-gray-50 text-gray-600 flex flex-col gap-4">
+                <div>Event no longer available</div>
+                <div>{renderRemoveButton(fav)}</div>
+              </div>
             )}
             {fav.status === "past" && (
               <div className="mt-2 text-xs text-gray-500 text-center">Past Event</div>
@@ -192,6 +249,35 @@ export default function FavouriteEvents() {
           </div>
         ))}
       </div>
+
+      {pendingRemoval && (
+        <div className="fixed inset-0 z-40 flex items-center justify-center bg-black/40 px-4">
+          <div className="w-full max-w-sm rounded-2xl bg-white p-6 shadow-xl">
+            <h3 className="text-lg font-semibold text-[#312A68]">Remove from favorites?</h3>
+            <p className="mt-2 text-sm text-gray-600">
+              Are you sure you want to remove {getFavDisplayName(pendingRemoval)} from your favorites?
+            </p>
+            <div className="mt-6 flex justify-end gap-3">
+              <button
+                type="button"
+                onClick={handleCancelRemoval}
+                disabled={isRemoving}
+                className="rounded-md border border-gray-200 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-60"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={handleProceedRemoval}
+                disabled={isRemoving}
+                className="rounded-md bg-gradient-to-r from-rose-500 to-red-500 px-4 py-2 text-sm font-semibold text-white shadow hover:from-rose-600 hover:to-red-600 disabled:opacity-60"
+              >
+                {isRemoving ? "Removing..." : "Proceed"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {showDetailsModal && selectedEvent && (
         <EventDetailsModal event={selectedEvent} onClose={() => setShowDetailsModal(false)} />
