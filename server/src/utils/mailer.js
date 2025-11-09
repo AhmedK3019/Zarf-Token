@@ -2,7 +2,7 @@ import nodemailer from "nodemailer";
 import dotenv from "dotenv";
 import QRCode from "qrcode";
 import User from "../models/User.js";
-import EventsOffice from "../models/EventsOffice";
+import EventsOffice from "../models/EventsOffice.js";
 dotenv.config();
 
 export const transporter = nodemailer.createTransport({

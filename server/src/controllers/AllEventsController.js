@@ -3,7 +3,7 @@ import Bazaar from "../models/Bazaar.js";
 import Conference from "../models/Conference.js";
 import Trip from "../models/Trip.js";
 import Booth from "../models/Booth.js";
-import mailer from "../utils/mailer.js";
+import { sendCommentDeletionNotification } from "../utils/mailer.js";
 
 const getAllEvents = async (_req, res, next) => {
   try {
@@ -280,7 +280,7 @@ const deleteComment = async (req, res, next) => {
           return res.status(404).json({ message: "Comment not found" });
         break;
     }
-    mailer.sendCommentDeletionNotification(deletedComment, event);
+    sendCommentDeletionNotification(deletedComment, event);
     return res.json({ message: "Comment is deleted", deletedComment });
   } catch (error) {
     next(error);
