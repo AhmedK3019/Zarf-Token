@@ -23,15 +23,15 @@ Zarf Token solves these challenges by providing a unified platform that simplifi
 
 ## Build Status
 
-**Current Sprint:** Sprint 1 of 3
+**Current Sprint:** Sprint 2 of 3
 
 **Project Progress:** In Active Development
 
 **Completed Features:** 31 system requirements implemented, 27 system requirements tested
 
 **Sprint Overview:**
-- Sprint 1 (Current)
-- Sprint 2
+- Sprint 1
+- Sprint 2 (Current)
 - Sprint 3
 
 **Status:** Zarf Token is currently in its initial development phase. We are working on establishing the foundational architecture and implementing core system requirements for Sprint 1.
