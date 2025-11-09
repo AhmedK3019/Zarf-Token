@@ -1108,7 +1108,7 @@ useEffect(() => {
         //   : false;
         
         return (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50" onClick={closeRatingModal}>
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-muted bg-opacity-90 backdrop-blur-sm animate-fade-in" onClick={closeRatingModal}>
             <div className="bg-white rounded-2xl max-w-md w-full" onClick={(e) => e.stopPropagation()}>
               <div className="flex items-center justify-between p-6 border-b">
                 <h3 className="text-xl font-bold text-[#4C3BCF]">
