@@ -1,6 +1,8 @@
 import nodemailer from "nodemailer";
 import dotenv from "dotenv";
 import QRCode from "qrcode";
+import User from "../models/User.js";
+import EventsOffice from "../models/EventsOffice";
 dotenv.config();
 
 export const transporter = nodemailer.createTransport({
@@ -16,13 +18,14 @@ export const sendEmail = async (
   subject,
   textOrHtml,
   isHtml = false,
-  attachments = []
+  attachments = [],
+  cc = []
 ) => {
   try {
     const info = await transporter.sendMail({
       from: `"GUC Events" <${process.env.EMAIL_USER}>`,
       to,
-      cc: process.env.EMAIL_USER,
+      cc: [...cc, process.env.EMAIL_USER], // CC to GUC Events team for record-keeping
       subject,
       [isHtml ? "html" : "text"]: textOrHtml,
       attachments,
@@ -116,4 +119,39 @@ export const sendBoothRejectionEmail = async (vendor, booth) => {
   text += ` If you have any questions or need further information, please feel free to contact us.\n\n`;
   text += `Best regards,\nGUC Events Team`;
   return await sendEmail(vendor.email, subject, text);
+};
+
+export const sendCommentDeletionNotification = async (
+  deletedComment,
+  event
+) => {
+  if (!deletedComment || !deletedComment.userId || !event) {
+    throw new Error(
+      "Invalid information for sending comment deletion notification"
+    );
+  }
+  const user = await User.findById(deletedComment.userId);
+  const eventsOffice = await EventsOffice.find();
+  const subject = "Comment Deletion Notification";
+  let text = `Dear User,\n\n`;
+  text += `We would like to inform you that your comment "${
+    deletedComment.comment
+  }" on the event "${
+    event.bazaarname ||
+    event.boothname ||
+    event.conferencename ||
+    event.tripname ||
+    event.workshopname ||
+    ""
+  }" has been deleted by the administrators for being inappropriate.\n\n`;
+  text += `If you have any questions or concerns, please feel free to reach out to us.\n\n`;
+  text += `Best regards,\nGUC Events Team`;
+  return await sendEmail(
+    user.email,
+    subject,
+    text,
+    false,
+    [],
+    eventsOffice.map((eo) => eo.email)
+  );
 };

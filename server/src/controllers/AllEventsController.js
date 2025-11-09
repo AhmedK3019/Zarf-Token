@@ -3,6 +3,7 @@ import Bazaar from "../models/Bazaar.js";
 import Conference from "../models/Conference.js";
 import Trip from "../models/Trip.js";
 import Booth from "../models/Booth.js";
+import mailer from "../utils/mailer.js";
 
 const getAllEvents = async (_req, res, next) => {
   try {
@@ -104,6 +105,9 @@ const rateEvent = async (req, res, next) => {
       case "conference":
         model = Conference;
         break;
+      case "booth":
+        model = Booth;
+        break;
       default:
         return res.status(400).json({ message: "Invalid event type" });
     }
@@ -164,6 +168,13 @@ const addComment = async (req, res, next) => {
           { new: true }
         );
         break;
+      case "booth":
+        await Booth.findByIdAndUpdate(
+          id,
+          { $push: { comments: body } },
+          { new: true }
+        );
+        break;
       default:
         return res.status(400).json({ message: "Invalid event type" });
     }
@@ -190,6 +201,9 @@ const viewAllComments = async (req, res, next) => {
       case "bazaar":
         comments = await Bazaar.findById(id, { comments: 1 });
         break;
+      case "booth":
+        comments = await Booth.findById(id, { comments: 1 });
+        break;
     }
     return res.status(200).json(comments);
   } catch (error) {
@@ -214,6 +228,9 @@ const viewAllRatings = async (req, res, next) => {
       case "bazaar":
         Ratings = await Bazaar.findById(id, { ratings: 1 });
         break;
+      case "booth":
+        Ratings = await Booth.findById(id, { ratings: 1 });
+        break;
     }
     return res.status(200).json(Ratings);
   } catch (error) {
@@ -225,28 +242,45 @@ const deleteComment = async (req, res, next) => {
   try {
     const { id, commentid, type } = req.params;
     let deletedComment;
+    let event;
     switch (type) {
       case "trip":
-        deletedComment = await Trip.findByIdAndUpdate(id, {
-          $pull: { comments: { _id: commentid } },
-        });
+        event = await Trip.findByIdAndUpdate(id);
+        if (!event) return res.status(404).json({ message: "Event not found" });
+        deletedComment = event.comments.id(commentid);
+        if (!deletedComment)
+          return res.status(404).json({ message: "Comment not found" });
         break;
       case "workshop":
-        deletedComment = await Workshop.findByIdAndUpdate(id, {
-          $pull: { comments: { _id: commentid } },
-        });
+        event = await Workshop.findByIdAndUpdate(id);
+        if (!event) return res.status(404).json({ message: "Event not found" });
+        deletedComment = event.comments.id(commentid);
+        if (!deletedComment)
+          return res.status(404).json({ message: "Comment not found" });
         break;
       case "bazaar":
-        deletedComment = await Bazaar.findByIdAndUpdate(id, {
-          $pull: { comments: { _id: commentid } },
-        });
+        event = await Bazaar.findByIdAndUpdate(id);
+        if (!event) return res.status(404).json({ message: "Event not found" });
+        deletedComment = event.comments.id(commentid);
+        if (!deletedComment)
+          return res.status(404).json({ message: "Comment not found" });
         break;
       case "conference":
-        deletedComment = await Conference.findByIdAndUpdate(id, {
-          $pull: { comments: { _id: commentid } },
-        });
+        event = await Conference.findByIdAndUpdate(id);
+        if (!event) return res.status(404).json({ message: "Event not found" });
+        deletedComment = event.comments.id(commentid);
+        if (!deletedComment)
+          return res.status(404).json({ message: "Comment not found" });
+        break;
+      case "booth":
+        event = await Booth.findByIdAndUpdate(id);
+        if (!event) return res.status(404).json({ message: "Event not found" });
+        deletedComment = event.comments.id(commentid);
+        if (!deletedComment)
+          return res.status(404).json({ message: "Comment not found" });
         break;
     }
+    mailer.sendCommentDeletionNotification(deletedComment, event);
     return res.json({ message: "Comment is deleted", deletedComment });
   } catch (error) {
     next(error);
@@ -275,6 +309,11 @@ const removeRate = async (req, res, next) => {
         break;
       case "conference":
         deletedRating = await Conference.findByIdAndUpdate(id, {
+          $pull: { ratings: { _id: rateid } },
+        });
+        break;
+      case "booth":
+        deletedRating = await Booth.findByIdAndUpdate(id, {
           $pull: { ratings: { _id: rateid } },
         });
         break;
