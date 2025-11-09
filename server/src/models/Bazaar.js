@@ -38,8 +38,8 @@ const bazaarSchema = new mongoose.Schema({
     get: (v) => {
       return v ? v.toString() : "0.00";
     },
-    archive: { type: Boolean, default: false },
   },
+  archive: { type: Boolean, default: false },
 });
 
 const Bazaar = mongoose.model("Bazaar", bazaarSchema);

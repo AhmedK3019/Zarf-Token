@@ -46,16 +46,16 @@ const tripSchema = new mongoose.Schema({
       },
     ],
     default: [],
-    revenue: {
-      type: mongoose.Schema.Types.Decimal128,
-      default: mongoose.Types.Decimal128.fromString("0.00"),
-      // getter to return a plain number in JSON output
-      get: (v) => {
-        return v ? v.toString() : "0.00";
-      },
-    },
-    archive: { type: Boolean, default: false },
   },
+  revenue: {
+    type: mongoose.Schema.Types.Decimal128,
+    default: mongoose.Types.Decimal128.fromString("0.00"),
+    // getter to return a plain number in JSON output
+    get: (v) => {
+      return v ? v.toString() : "0.00";
+    },
+  },
+  archive: { type: Boolean, default: false },
 });
 
 const Trip = mongoose.model("Trip", tripSchema);

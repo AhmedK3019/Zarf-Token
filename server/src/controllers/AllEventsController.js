@@ -421,6 +421,7 @@ const archiveEvent = async (req, res, next) => {
     switch (type) {
       case "trip":
         model = Trip;
+        console.log("trip");
         break;
       case "workshop":
         model = Workshop;
@@ -438,18 +439,18 @@ const archiveEvent = async (req, res, next) => {
         return res.status(400).json({ message: "Invalid type" });
     }
     let event = await model.findById(id);
-    if (!event) return res.satuts(404).json({ message: "Event not found" });
+    if (!event) return res.stauts(404).json({ message: "Event not found" });
     if (new Date(event.startdate) - new Date() > 0) {
       return res.json({ message: "Event start date has not passed yet" });
     }
     let result = await model.findByIdAndUpdate(
       id,
-      { $set: { archive: true } },
+      { archive: true },
       { new: true }
     );
     return res
       .status(200)
-      .json({ message: "event is archived successfully", result });
+      .json({ message: "Event is archived successfully", result });
   } catch (error) {
     next(error);
   }
@@ -501,7 +502,7 @@ const unArchiveEvent = async (req, res, next) => {
     );
     return res
       .status(200)
-      .json({ message: "event is archived successfully", result });
+      .json({ message: "Event is unarchived successfully", result });
   } catch (error) {
     next(error);
   }
