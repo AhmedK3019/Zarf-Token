@@ -5,6 +5,7 @@ import React, {
   useRef,
   useState,
 } from "react";
+import { useNavigate } from "react-router-dom";
 import {
   AlertCircle,
   AlertTriangle,
@@ -25,6 +26,15 @@ const TERMS_MIN_CHARS = 50;
 const TERMS_MIN_WORDS = 10;
 const TERMS_MAX_CHARS = 2000;
 const ACTIVE_STATUSES = ["pending", "approved"];
+const STATUS_PAGE_PATH = "/dashboard/vendor/loyalty-program";
+const CONFETTI_COLORS = [
+  "#4C3BCF",
+  "#736CED",
+  "#23CE6B",
+  "#FFD447",
+  "#FF6B6B",
+  "#00B5D8",
+];
 
 const statusTone = {
   pending: {
@@ -179,8 +189,125 @@ const ApplicationCard = ({ application }) => {
 const normalizePromo = (value = "") =>
   value.toUpperCase().replace(/[^A-Z0-9-]/g, "");
 
+const buildReferenceId = (application) => {
+  const createdAt = application?.createdAt
+    ? new Date(application.createdAt)
+    : new Date();
+  const datePart = [
+    createdAt.getFullYear(),
+    String(createdAt.getMonth() + 1).padStart(2, "0"),
+    String(createdAt.getDate()).padStart(2, "0"),
+  ].join("");
+  const source =
+    application?._id ||
+    application?.promoCode ||
+    `${createdAt.getTime()}${Math.floor(Math.random() * 1000)}`;
+  const uniqueSegment = String(source)
+    .replace(/[^A-Za-z0-9]/g, "")
+    .slice(-4)
+    .toUpperCase()
+    .padStart(4, "0");
+  return `APP-${datePart}-${uniqueSegment}`;
+};
+
+const ConfettiBurst = ({ active }) => {
+  const pieces = useMemo(() => {
+    if (!active) return [];
+    return Array.from({ length: 80 }).map((_, idx) => ({
+      id: idx,
+      left: Math.random() * 100,
+      delay: Math.random() * 0.5,
+      duration: 2.8 + Math.random() * 1.4,
+      size: 6 + Math.random() * 8,
+      color: CONFETTI_COLORS[idx % CONFETTI_COLORS.length],
+      drift: (Math.random() - 0.5) * 120,
+    }));
+  }, [active]);
+
+  if (!active) return null;
+
+  return (
+    <div className="pointer-events-none fixed inset-0 z-[60] overflow-hidden">
+      {pieces.map((piece) => (
+        <span
+          key={piece.id}
+          className="confetti-piece"
+          style={{
+            left: `${piece.left}%`,
+            animationDelay: `${piece.delay}s`,
+            animationDuration: `${piece.duration}s`,
+            width: `${piece.size}px`,
+            height: `${Math.max(piece.size * 0.45, 3)}px`,
+            backgroundColor: piece.color,
+            "--confetti-drift": `${piece.drift}px`,
+          }}
+        />
+      ))}
+    </div>
+  );
+};
+
+const SubmissionSuccessModal = ({ data, countdown, onViewStatus }) => {
+  if (!data) return null;
+  return (
+    <div className="fixed inset-0 z-[65] flex items-center justify-center bg-black/60 p-4 backdrop-blur-sm">
+      <div className="w-full max-w-lg rounded-3xl bg-white p-8 text-center shadow-2xl animate-slide-up">
+        <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-emerald-50 text-emerald-600 shadow-inner">
+          <CheckCircle2 className="h-10 w-10" />
+        </div>
+        <h2 className="mt-4 text-2xl font-bold text-[#18122B]">
+          Application Submitted Successfully!{" "}
+          <span className="text-emerald-500">{"\u2713"}</span>
+        </h2>
+        <p className="mt-1 text-base font-semibold text-gray-700">
+          Application submitted and under review
+        </p>
+        <p className="mt-2 text-sm text-gray-600">
+          You'll receive an email once reviewed (2-3 business days).
+        </p>
+
+        <div className="mt-6 rounded-2xl bg-gray-50 p-4 text-left text-sm text-gray-600">
+          <div className="flex items-center justify-between">
+            <span className="font-semibold text-gray-800">
+              Application ID
+            </span>
+            <span className="font-mono text-[#4C3BCF]">{data.reference}</span>
+          </div>
+          <div className="mt-2 flex items-center justify-between">
+            <span>Promo Code</span>
+            <span className="font-semibold text-gray-800">
+              {data.promoCode}
+            </span>
+          </div>
+          <div className="mt-1 flex items-center justify-between">
+            <span>Discount</span>
+            <span className="font-semibold text-gray-800">
+              {data.discountRate}% OFF
+            </span>
+          </div>
+          {data.email && (
+            <p className="mt-3 text-xs text-gray-500">
+              Confirmation sent to <strong>{data.email}</strong>
+            </p>
+          )}
+        </div>
+        <p className="mt-4 text-xs uppercase tracking-wide text-gray-400">
+          Redirecting to status page in {Math.max(countdown ?? 3, 0)}s
+        </p>
+        <button
+          onClick={onViewStatus}
+          className="mt-4 w-full rounded-2xl bg-[#4C3BCF] px-5 py-3 text-sm font-semibold text-white shadow-lg transition hover:bg-[#3728a6]"
+        >
+          View Application Status
+        </button>
+      </div>
+    </div>
+  );
+};
+
 export default function ApplyLoyalty() {
   const { user } = useAuthUser();
+  const navigate = useNavigate();
   const vendorId = user?._id;
   const [formValues, setFormValues] = useState({
     promoCode: "",
@@ -192,13 +319,16 @@ export default function ApplyLoyalty() {
   const [loadingApps, setLoadingApps] = useState(true);
   const [appsError, setAppsError] = useState(null);
   const [submitting, setSubmitting] = useState(false);
-  const [submitSuccess, setSubmitSuccess] = useState(null);
+  const [celebration, setCelebration] = useState(null);
+  const [redirectCountdown, setRedirectCountdown] = useState(null);
   const [serverError, setServerError] = useState(null);
   const [promoStatus, setPromoStatus] = useState({
     state: "idle",
     available: null,
     message: null,
   });
+  const redirectTimerRef = useRef(null);
+  const countdownIntervalRef = useRef(null);
   const debounceRef = useRef(null);
 
   const fetchApplications = useCallback(async () => {
@@ -226,6 +356,51 @@ export default function ApplyLoyalty() {
   useEffect(() => {
     fetchApplications();
   }, [fetchApplications]);
+
+  useEffect(() => {
+    if (!celebration) {
+      setRedirectCountdown(null);
+      return;
+    }
+    setRedirectCountdown(3);
+    if (countdownIntervalRef.current) {
+      clearInterval(countdownIntervalRef.current);
+    }
+    if (redirectTimerRef.current) {
+      clearTimeout(redirectTimerRef.current);
+    }
+    countdownIntervalRef.current = setInterval(() => {
+      setRedirectCountdown((prev) => {
+        if (prev === null) return prev;
+        if (prev <= 1) {
+          clearInterval(countdownIntervalRef.current);
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+    redirectTimerRef.current = setTimeout(() => {
+      navigate(STATUS_PAGE_PATH);
+    }, 3000);
+    return () => {
+      if (countdownIntervalRef.current) {
+        clearInterval(countdownIntervalRef.current);
+      }
+      if (redirectTimerRef.current) {
+        clearTimeout(redirectTimerRef.current);
+      }
+    };
+  }, [celebration, navigate]);
+
+  const handleViewStatus = useCallback(() => {
+    if (countdownIntervalRef.current) {
+      clearInterval(countdownIntervalRef.current);
+    }
+    if (redirectTimerRef.current) {
+      clearTimeout(redirectTimerRef.current);
+    }
+    navigate(STATUS_PAGE_PATH);
+  }, [navigate]);
 
   const activeApplication = useMemo(
     () => applications.find((app) => ACTIVE_STATUSES.includes(app.status)),
@@ -347,10 +522,19 @@ export default function ApplyLoyalty() {
         termsAndConditions: formValues.terms.trim(),
       };
       const res = await api.post("/loyalty", payload);
-      setSubmitSuccess({
-        promoCode: res?.data?.promoCode || payload.promoCode,
-        message:
-          "Application submitted! A confirmation email was sent and the Events Office has been notified.",
+      const apiRecord =
+        res?.data && typeof res.data === "object" ? res.data : null;
+      const createdApplication = {
+        ...(apiRecord || {}),
+        promoCode: apiRecord?.promoCode || payload.promoCode,
+        discountRate: apiRecord?.discountRate || payload.discountRate,
+        createdAt: apiRecord?.createdAt || new Date().toISOString(),
+      };
+      setCelebration({
+        reference: buildReferenceId(createdApplication),
+        promoCode: createdApplication.promoCode,
+        discountRate: createdApplication.discountRate,
+        email: user?.email || null,
       });
       setFormValues({ promoCode: "", discountRate: 10, terms: "" });
       setTouched({});
@@ -381,7 +565,8 @@ export default function ApplyLoyalty() {
   };
 
   return (
-    <div className="space-y-6 p-6">
+    <>
+      <div className="space-y-6 p-6">
       <header className="flex flex-wrap items-center justify-between gap-4">
         <div>
           <p className="text-sm uppercase tracking-wide text-gray-500">
@@ -395,34 +580,25 @@ export default function ApplyLoyalty() {
             resubmit with updated details.
           </p>
         </div>
-        <button
-          onClick={fetchApplications}
-          className="inline-flex items-center gap-2 rounded-full border border-gray-200 px-4 py-2 text-sm font-semibold text-gray-600 hover:bg-gray-50"
-        >
-          <RefreshCcw size={16} />
-          Refresh status
-        </button>
-      </header>
-
-      {submitSuccess && (
-        <div className="flex items-center gap-4 rounded-2xl border border-emerald-200 bg-emerald-50/90 p-4 text-emerald-800">
-          <CheckCircle2 className="h-6 w-6" />
-          <div>
-            <p className="font-semibold">{submitSuccess.message}</p>
-            {user?.email && (
-              <p className="text-sm">
-                Confirmation sent to <strong>{user.email}</strong>.
-              </p>
-            )}
-          </div>
+        <div className="flex flex-wrap items-center gap-3">
           <button
-            onClick={() => setSubmitSuccess(null)}
-            className="ml-auto text-xs font-semibold uppercase tracking-wide"
+            type="button"
+            onClick={() => navigate(STATUS_PAGE_PATH)}
+            className="inline-flex items-center gap-2 rounded-full border border-[#736CED]/50 px-4 py-2 text-sm font-semibold text-[#4C3BCF] hover:bg-[#F6F3FF]"
           >
-            Dismiss
+            <ShieldCheck size={16} />
+            View status page
+          </button>
+          <button
+            type="button"
+            onClick={fetchApplications}
+            className="inline-flex items-center gap-2 rounded-full border border-gray-200 px-4 py-2 text-sm font-semibold text-gray-600 hover:bg-gray-50"
+          >
+            <RefreshCcw size={16} />
+            Refresh status
           </button>
         </div>
-      )}
+      </header>
 
       {activeApplication && (
         <div className="flex items-start gap-3 rounded-2xl border border-amber-200 bg-amber-50/80 p-4 text-amber-900">
@@ -655,5 +831,12 @@ export default function ApplyLoyalty() {
         )}
       </section>
     </div>
+    <ConfettiBurst active={Boolean(celebration)} />
+    <SubmissionSuccessModal
+      data={celebration}
+      countdown={redirectCountdown}
+      onViewStatus={handleViewStatus}
+    />
+    </>
   );
 }
