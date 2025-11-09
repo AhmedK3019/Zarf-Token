@@ -25,7 +25,7 @@ const DISCOUNT_MAX = 100;
 const TERMS_MIN_CHARS = 50;
 const TERMS_MIN_WORDS = 10;
 const TERMS_MAX_CHARS = 2000;
-const ACTIVE_STATUSES = ["pending", "approved"];
+const ACTIVE_STATUSES = ["pending"];
 const STATUS_PAGE_PATH = "/dashboard/vendor/loyalty-program";
 const CONFETTI_COLORS = [
   "#4C3BCF",

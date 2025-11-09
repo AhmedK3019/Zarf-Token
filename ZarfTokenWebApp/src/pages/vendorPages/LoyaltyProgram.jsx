@@ -120,8 +120,8 @@ const LoyaltyProgram = ({ vendor }) => {
     };
   }, [vendorId, refreshKey]);
 
-  const activeApplication = useMemo(
-    () => applications.find((app) => ["pending", "approved"].includes(app.status)),
+  const pendingApplication = useMemo(
+    () => applications.find((app) => app.status === "pending"),
     [applications]
   );
   const latestApplication = useMemo(
@@ -133,61 +133,45 @@ const LoyaltyProgram = ({ vendor }) => {
     [applications]
   );
 
-  const heroApplication = activeApplication || latestApplication;
+  const heroApplication = pendingApplication || latestApplication;
   const heroStatus = heroApplication?.status || "not_applied";
   const statusCopy = STATUS_INFO[heroStatus] || STATUS_INFO.not_applied;
   const hasHistory = applications.length > 0;
-  const canApply = !activeApplication;
+  const canApply = !pendingApplication;
 
   const primaryCta = useMemo(() => {
     if (!vendorId) return null;
-    if (canApply) {
-      return {
-        label: hasHistory ? "Apply Again" : "Apply Now",
-        to: "/dashboard/vendor/apply-loyalty",
-        variant: "primary",
-      };
-    }
-    if (activeApplication?.status === "pending") {
+    if (!canApply) {
       return {
         label: "View Submission",
         to: "/dashboard/vendor/apply-loyalty",
         variant: "secondary",
       };
     }
-    if (activeApplication?.status === "approved") {
-      return {
-        label: "Manage Partnership",
-        to: vendor?.loyal
-          ? "/dashboard/vendor/cancel-loyalty"
-          : "/dashboard/vendor/apply-loyalty",
-        variant: "secondary",
-      };
-    }
-    if (latestApplication?.status === "rejected") {
-      return {
-        label: "Apply Again",
-        to: "/dashboard/vendor/apply-loyalty",
-        variant: "primary",
-      };
-    }
-    return null;
+    return {
+      label: hasHistory ? "Apply Again" : "Apply Now",
+      to: "/dashboard/vendor/apply-loyalty",
+      variant: "primary",
+    };
   }, [
     vendorId,
     canApply,
     hasHistory,
-    activeApplication,
-    vendor?.loyal,
-    latestApplication,
   ]);
 
-  const secondaryCta =
-    approvedApplication && vendor?.loyal
-      ? {
-          label: "Cancel Partnership",
-          to: "/dashboard/vendor/cancel-loyalty",
-        }
-      : null;
+  const secondaryCta = useMemo(() => {
+    if (pendingApplication || !approvedApplication) return null;
+    if (vendor?.loyal) {
+      return {
+        label: "Cancel Partnership",
+        to: "/dashboard/vendor/cancel-loyalty",
+      };
+    }
+    return {
+      label: "View Approval",
+      to: "/dashboard/vendor/apply-loyalty",
+    };
+  }, [pendingApplication, approvedApplication, vendor?.loyal]);
 
   const handleNavigate = (to) => navigate(to);
 
