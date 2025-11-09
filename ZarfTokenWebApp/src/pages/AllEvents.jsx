@@ -7,6 +7,9 @@ import { getEventDetails, formatDate } from "./eventUtils";
 import EventDetailsModal from "../components/EventDetailsModal";
 import { X, User, Star, MessageCircle } from "lucide-react";
 
+const LIGHT_OVERLAY_CLASSES =
+  "fixed inset-0 z-50 flex items-center justify-center p-4 bg-muted bg-opacity-90 backdrop-blur-sm animate-fade-in";
+
 // ===== EXTRACTED MODAL COMPONENTS =====
 
 const RegistrationModal = ({
@@ -88,8 +91,11 @@ const BoothsModalContent = ({
   if (!selectedBazaar) return null;
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-2xl max-w-2xl w-full max-h-[80vh] overflow-y-auto">
+    <div className={LIGHT_OVERLAY_CLASSES} onClick={onClose}>
+      <div
+        className="bg-white rounded-2xl max-w-2xl w-full max-h-[80vh] overflow-y-auto"
+        onClick={(e) => e.stopPropagation()}
+      >
         <div className="p-6">
           <div className="flex justify-between items-center mb-4">
             <h2 className="text-2xl font-bold text-[#4C3BCF]">
@@ -1030,7 +1036,7 @@ useEffect(() => {
         //   : false;
         
         return (
-          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-muted bg-opacity-90 backdrop-blur-sm animate-fade-in" onClick={closeCommentsModal}>
+          <div className={LIGHT_OVERLAY_CLASSES} onClick={closeCommentsModal}>
             <div className="bg-white rounded-2xl max-w-2xl w-full max-h-[80vh] overflow-hidden" onClick={(e) => e.stopPropagation()}>
               <div className="flex items-center justify-between p-6 border-b">
                 <h3 className="text-xl font-bold text-[#4C3BCF]">
@@ -1108,7 +1114,7 @@ useEffect(() => {
         //   : false;
         
         return (
-          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-muted bg-opacity-90 backdrop-blur-sm animate-fade-in" onClick={closeRatingModal}>
+          <div className={LIGHT_OVERLAY_CLASSES} onClick={closeRatingModal}>
             <div className="bg-white rounded-2xl max-w-md w-full" onClick={(e) => e.stopPropagation()}>
               <div className="flex items-center justify-between p-6 border-b">
                 <h3 className="text-xl font-bold text-[#4C3BCF]">
