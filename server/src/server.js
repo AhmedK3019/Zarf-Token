@@ -28,6 +28,7 @@ import conferenceRoutes from "./routes/conferenceRoutes.js";
 import workshopRoutes from "./routes/workshopRoutes.js";
 import allEventsRoutes from "./routes/allEventsRoutes.js";
 import Admin from "./models/Admin.js";
+import { autoCancelOverdueVendorRequests } from "./utils/vendorRequestJobs.js";
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
@@ -65,6 +66,22 @@ cron.schedule("0 0 * * *", () => {
   // runs every day at midnight
   console.log("Updating court slots...");
   updateCourtSlots();
+});
+
+cron.schedule("*/30 * * * *", async () => {
+  try {
+    const cancelled = await autoCancelOverdueVendorRequests();
+    if (cancelled) {
+      console.log(
+        `Auto-cancelled ${cancelled} overdue vendor participation requests`
+      );
+    }
+  } catch (err) {
+    console.error(
+      "Auto-cancel vendor requests failed:",
+      err?.message || err
+    );
+  }
 });
 
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));
@@ -145,6 +162,20 @@ const connectDB = async () => {
         mailErr && mailErr.message ? mailErr.message : mailErr
       );
     }
+    autoCancelOverdueVendorRequests()
+      .then((count) => {
+        if (count) {
+          console.log(
+            `Boot cleanup: auto-cancelled ${count} overdue vendor participation requests`
+          );
+        }
+      })
+      .catch((err) => {
+        console.error(
+          "Boot auto-cancel vendor requests failed:",
+          err?.message || err
+        );
+      });
   } catch (error) {
     console.error("MongoDB connection error:", error);
     process.exit(1);

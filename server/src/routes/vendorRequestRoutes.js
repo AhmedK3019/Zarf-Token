@@ -20,6 +20,11 @@ router.get("/mine", auth, vendorRequestController.getMyRequests);
 router.get("/:id", vendorRequestController.getRequest);
 router.put("/:id", auth, vendorRequestController.updateRequest);
 router.post("/:id/accept", auth, vendorRequestController.acceptRequest);
+router.delete(
+  "/:id/cancel",
+  auth,
+  vendorRequestController.cancelParticipation
+);
 router.delete("/:id", auth, vendorRequestController.deleteRequest);
 
 export default router;

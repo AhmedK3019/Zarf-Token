@@ -30,6 +30,7 @@ const bazaarSchema = new mongoose.Schema({
     default: [],
   },
   type: { type: String, default: "bazaar" },
+  vendorParticipationCount: { type: Number, default: 0 },
   revenue: {
     type: mongoose.Schema.Types.Decimal128,
     default: mongoose.Types.Decimal128.fromString("0.00"),

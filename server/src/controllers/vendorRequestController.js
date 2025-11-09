@@ -8,6 +8,20 @@ import {
   sendBoothApprovalEmail,
   sendBoothRejectionEmail,
 } from "../utils/mailer.js";
+import {
+  PAYMENT_WINDOW_DAYS,
+  combineDateAndTime,
+  finalizeCancellation,
+  getCancellationEligibility,
+  incrementBazaarParticipation,
+  decrementBazaarParticipation,
+} from "../services/vendorRequestLifecycle.js";
+
+const computePaymentDueDate = (anchor = new Date()) => {
+  const due = new Date(anchor);
+  due.setDate(due.getDate() + PAYMENT_WINDOW_DAYS);
+  return due;
+};
 
 // create request for a bazar: POST /api/vendorRequests/bazar/:bazarId
 const createBazarRequest = async (req, res, next) => {
@@ -15,10 +29,13 @@ const createBazarRequest = async (req, res, next) => {
     const vendorId = req.user?._id || req.user?.id;
     const bazarId = req.params.bazarId;
     const bazar = await Bazaar.findById(bazarId);
+    if (!bazar) {
+      return res.status(404).json({ message: "Bazaar not found" });
+    }
     // calculate duration from bazar dates
     // booth duration is an enum: "1 week", "2 weeks", "3 weeks"
     // so round to nearest week
-    const duration = Math.round(
+    let duration = Math.round(
       (bazar.enddate - bazar.startdate) / (1000 * 60 * 60 * 24 * 7)
     );
     if (duration < 1) duration = 1;
@@ -42,6 +59,14 @@ const createBazarRequest = async (req, res, next) => {
       isBazarBooth: true,
       duration,
       bazarId: req.params.bazarId,
+      eventStartAt: combineDateAndTime(
+        bazar.startdate,
+        bazar.starttime || bazar.startTime
+      ),
+      eventEndAt: combineDateAndTime(
+        bazar.enddate,
+        bazar.endtime || bazar.endTime
+      ),
     });
 
     const notification = {
@@ -160,22 +185,42 @@ const updateRequest = async (req, res, next) => {
 
 const acceptRequest = async (req, res, next) => {
   try {
-    const request = await VendorRequest.findById(req.params.id);
-    const vendor = await Vendor.findById(request.vendorId);
+    const request = await VendorRequest.findById(req.params.id).populate(
+      "bazarId"
+    );
     if (!request)
       return res.status(404).json({ message: "VendorRequest not found" });
+    const vendor = await Vendor.findById(request.vendorId);
+    const approvedAt = new Date();
     request.status = "Approved";
+    request.approvedAt = approvedAt;
+    request.paymentStatus = "unpaid";
+    request.paymentDueAt = computePaymentDueDate(approvedAt);
+    if (
+      request.isBazarBooth &&
+      request.bazarId &&
+      !request.eventStartAt &&
+      request.bazarId.startdate
+    ) {
+      request.eventStartAt = combineDateAndTime(
+        request.bazarId.startdate,
+        request.bazarId.starttime
+      );
+    }
     await request.save();
+    await incrementBazaarParticipation(request);
     const booth = await Booth.create({
       boothname: vendor ? vendor.companyname : "Vendor Booth",
+      vendorRequestId: request._id,
       vendorId: request.vendorId,
       isBazarBooth: request.isBazarBooth,
       status: "Approved",
-      bazarId: request.bazarId,
+      bazarId: request.bazarId?._id || request.bazarId,
       boothSize: request.boothSize,
       people: request.people,
       location: request.location,
       duration: request.duration,
+      goLiveAt: request.eventStartAt,
     });
     try {
       await sendBoothApprovalEmail(vendor, booth);
@@ -197,13 +242,16 @@ const deleteRequest = async (req, res, next) => {
     if (!doc)
       return res.status(404).json({ message: "VendorRequest not found" });
     // send a rejection email to vendor
+    const wasApproved = doc.status === "Approved";
     doc.status = "Rejected";
     await doc.save();
-    const request = await VendorRequest.findById(req.params.id).populate(
-      "vendorId"
-    );
+    if (wasApproved) {
+      await decrementBazaarParticipation(doc);
+    }
+    await Booth.deleteMany({ vendorRequestId: doc._id });
+    await doc.populate("vendorId");
     try {
-      await sendBoothRejectionEmail(request.vendorId, doc);
+      await sendBoothRejectionEmail(doc.vendorId, doc);
     } catch (emailErr) {
       console.error(
         "Failed to send booth rejection email:",
@@ -211,6 +259,47 @@ const deleteRequest = async (req, res, next) => {
       );
     }
     res.json({ message: "VendorRequest rejected" });
+  } catch (err) {
+    next(err);
+  }
+};
+
+const cancelParticipation = async (req, res, next) => {
+  try {
+    const vendorId = req.user?._id || req.user?.id || req.userId;
+    if (!vendorId)
+      return res.status(401).json({ message: "Authentication required" });
+
+    const request = await VendorRequest.findById(req.params.id)
+      .populate("vendorId")
+      .populate("bazarId");
+    if (!request)
+      return res.status(404).json({ message: "VendorRequest not found" });
+
+    const booth = await Booth.findOne({ vendorRequestId: request._id });
+    const eligibility = getCancellationEligibility(request, {
+      vendorId,
+      boothDoc: booth,
+    });
+    if (!eligibility.ok) {
+      return res.status(400).json({ message: eligibility.message });
+    }
+
+    const reason =
+      typeof req.body?.reason === "string" && req.body.reason.trim().length
+        ? req.body.reason.trim()
+        : "Cancelled by vendor";
+
+    const result = await finalizeCancellation(request, {
+      reason,
+      source: "vendor",
+      vendorDoc: request.vendorId,
+    });
+
+    res.json({
+      message: "Participation cancelled successfully",
+      request: result.request,
+    });
   } catch (err) {
     next(err);
   }
@@ -225,4 +314,5 @@ export default {
   updateRequest,
   acceptRequest,
   deleteRequest,
+  cancelParticipation,
 };
