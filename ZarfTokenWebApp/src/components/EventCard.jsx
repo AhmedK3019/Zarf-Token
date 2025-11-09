@@ -2,7 +2,6 @@
 import { getEventDetails, formatSimpleDate } from "../pages/eventUtils";
 import { useNavigate } from "react-router-dom";
 import {
-  Clock,
   MapPin,
   User,
   Building,
@@ -96,154 +95,286 @@ const EventCard = ({
   };
 
   const eventTypeColor = getEventTypeColor(event.type);
+  const referenceDate = event.endDate || event.startDate;
+  const isPastEvent = referenceDate
+    ? new Date(referenceDate).getTime() < Date.now()
+    : false;
+  const startLabel = event.startDate ? formatSimpleDate(event.startDate) : null;
+  const registrationDeadlineLabel = event.registrationDeadline
+    ? formatSimpleDate(new Date(event.registrationDeadline))
+    : null;
+  const durationLabel =
+    event.duration &&
+    `${event.duration} ${
+      event.type === "workshop" ? "day" : "week"
+    }${event.duration === 1 ? "" : "s"}`;
+  const canShowFavourite =
+    typeof onToggleFavourite === "function" &&
+    user &&
+    (user.role === "Student" ||
+      user.role === "Professor" ||
+      user.role === "TA" ||
+      user.role === "Staff");
+
+  const infoRows = [
+    event.type === "conference" &&
+      event.professorname && {
+        icon: User,
+        label: event.professorname,
+      },
+    isBazaarBooth &&
+      event.original?.bazarId && {
+        icon: Store,
+        label: `Part of: ${event.original.bazarId.bazaarname || "Bazaar"}`,
+      },
+    isPlatformBooth &&
+      event.vendor && {
+        icon: Building,
+        label: `Vendor: ${event.vendor}`,
+      },
+    event.location && {
+      icon: MapPin,
+      label: isBazaarBooth ? `Booth Location: ${event.location}` : event.location,
+    },
+    event.price > 0 && {
+      icon: DollarSign,
+      label: `Price: ${event.price} EGP`,
+    },
+    event.type === "booth" &&
+      event.duration && {
+        icon: Calendar,
+        label: `${event.duration} week${event.duration > 1 ? "s" : ""}`,
+      },
+    startLabel && {
+      icon: Calendar,
+      label: durationLabel
+        ? `Starts ${startLabel} · ${durationLabel}`
+        : `Starts ${startLabel}`,
+    },
+    registrationDeadlineLabel && {
+      icon: ClockAlert,
+      label: `Register by ${registrationDeadlineLabel}`,
+      accent: "text-rose-600 font-semibold",
+    },
+    event.faculty && {
+      icon: Building,
+      label: `Faculty: ${event.faculty}`,
+      subtle: true,
+    },
+  ].filter(Boolean);
+
+  const actionButtons = [];
+  const actionButtonBase =
+    "w-full rounded-lg px-4 py-2 text-sm font-semibold text-center transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2";
+
+  const addActionButton = (node, key) => {
+    if (!node) return;
+    actionButtons.push(
+      <div key={key} className="flex w-full">
+        {node}
+      </div>
+    );
+  };
+
+  if (canDelete) {
+    addActionButton(
+      <button
+        type="button"
+        onClick={() => onDelete?.(event.original)}
+        className={`${actionButtonBase} border border-red-200 bg-red-50 text-red-600 hover:bg-red-100 focus-visible:ring-red-200`}
+      >
+        Delete
+      </button>,
+      "delete"
+    );
+  }
+
+  if (canUpdate) {
+    addActionButton(
+      <button
+        type="button"
+        onClick={() => onUpdate(event.type)}
+        className={`${actionButtonBase} border border-purple-200 bg-purple-50 text-purple-700 hover:bg-purple-100 focus-visible:ring-purple-200`}
+      >
+        Update
+      </button>,
+      "update"
+    );
+  }
+
+  const defaultRegistrationButtons = [];
+
+  if (isRegistered) {
+    defaultRegistrationButtons.push(
+      <button
+        key="registered"
+        type="button"
+        disabled
+        className={`${actionButtonBase} cursor-not-allowed border border-gray-200 bg-gray-50 text-[#555] focus-visible:ring-gray-200`}
+      >
+        Registered
+      </button>
+    );
+  }
+
+  if (canRegister) {
+    defaultRegistrationButtons.push(
+      <button
+        key="register"
+        type="button"
+        onClick={() => onRegister?.(event.original)}
+        className={`${actionButtonBase} bg-[#4a4ae6] text-white hover:bg-[#3d3dd4] focus-visible:ring-[#736ced]`}
+      >
+        Register
+      </button>
+    );
+  }
+
+  if (
+    userIsEligible &&
+    !canRegister &&
+    !isRegistered &&
+    (event.type === "trip" || event.type === "workshop")
+  ) {
+    defaultRegistrationButtons.push(
+      <button
+        key="registration-closed"
+        type="button"
+        disabled
+        className={`${actionButtonBase} border border-dashed border-gray-300 bg-gray-100 text-[#555] focus-visible:ring-gray-200`}
+      >
+        Registration Closed
+      </button>
+    );
+  }
+
+  const registrationControls =
+    typeof renderRegistrationControls === "function"
+      ? renderRegistrationControls({
+          event,
+          rawEvent,
+          isRegistered,
+          canRegister,
+        })
+      : defaultRegistrationButtons;
+
+  React.Children.toArray(registrationControls).forEach((control, index) => {
+    addActionButton(control, `reg-${index}`);
+  });
+
+  if (isBazaar) {
+    addActionButton(
+      <button
+        type="button"
+        onClick={() => onViewBooths?.(event.original)}
+        className={`${actionButtonBase} border border-[#4a4ae6]/30 text-[#4a4ae6] hover:bg-[#4a4ae6]/10 focus-visible:ring-[#4a4ae6]/30`}
+      >
+        View Booths
+      </button>,
+      "view-booths"
+    );
+  }
+
+  if (
+    isPlatformBooth ||
+    isBazaarBooth ||
+    isWorkshop ||
+    event.type === "trip" ||
+    event.type === "conference"
+  ) {
+    addActionButton(
+      <button
+        type="button"
+        onClick={() => onViewDetails?.(event.original)}
+        className={`${actionButtonBase} border border-[#4a4ae6]/30 text-[#4a4ae6] hover:bg-[#4a4ae6]/10 focus-visible:ring-[#4a4ae6]/30`}
+      >
+        View Details
+      </button>,
+      "view-details"
+    );
+  }
+
+  if (footerExtra) {
+    React.Children.toArray(footerExtra).forEach((extra, index) => {
+      addActionButton(extra, `extra-${index}`);
+    });
+  }
 
   return (
-    <div className="relative bg-white rounded-lg p-6 border border-gray-200 shadow-sm hover:shadow-md transition-all hover:-translate-y-1 flex flex-col">
-      {typeof onToggleFavourite === "function" &&
-        user &&
-        (user.role === "Student" ||
-          user.role === "Professor" ||
-          user.role === "TA" ||
-          user.role === "Staff") && (
-          <button
-            type="button"
-            aria-label="Toggle favourite"
-            data-testid="fav-toggle"
-            onClick={(e) => {
-              e.stopPropagation();
-              onToggleFavourite?.(rawEvent);
-            }}
-            className="absolute right-4 top-4 p-2 rounded-full bg-white/90 border hover:bg-white shadow-sm"
-            title={isFavourite ? "Remove from favourites" : "Add to favourites"}
-          >
-            <Heart
-              size={18}
-              color={isFavourite ? "#e11d48" : "#64748b"}
-              fill={isFavourite ? "#e11d48" : "none"}
-            />
-          </button>
-        )}
+    <div className="relative flex min-h-[420px] flex-col rounded-2xl border border-gray-100 bg-white p-6 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:scale-[1.02] hover:shadow-xl">
+      {(isPastEvent || canShowFavourite) && (
+        <div className="absolute right-4 top-4 flex items-center gap-2">
+          {isPastEvent && (
+            <span className="rounded-full bg-[#f0f0f0] px-2 py-1 text-[11px] font-semibold uppercase tracking-wide text-gray-700">
+              Past Event
+            </span>
+          )}
+          {canShowFavourite && (
+            <button
+              type="button"
+              aria-label="Toggle favourite"
+              data-testid="fav-toggle"
+              onClick={(e) => {
+                e.stopPropagation();
+                onToggleFavourite?.(rawEvent);
+              }}
+              className="rounded-full border border-gray-200 bg-white/90 p-2 shadow-sm transition hover:bg-white"
+              title={isFavourite ? "Remove from favourites" : "Add to favourites"}
+            >
+              <Heart
+                size={18}
+                color={isFavourite ? "#e11d48" : "#64748b"}
+                fill={isFavourite ? "#e11d48" : "none"}
+              />
+            </button>
+          )}
+        </div>
+      )}
 
-      <div className="flex-grow">
-        <div
-          className="inline-flex items-center gap-2 rounded-full px-3 py-1 text-xs font-medium mb-4"
-          style={{
-            backgroundColor: `${eventTypeColor}15`,
-            color: eventTypeColor,
-          }}
-        >
-          <span
-            className="h-2 w-2 rounded-full"
-            style={{ backgroundColor: eventTypeColor }}
-          />
-          <span className="capitalize">
+      <div className="flex h-full flex-col">
+        <div className="pb-4">
+          <div
+            className="mb-3 inline-flex items-center gap-2 rounded-full px-3 py-1 text-xs font-semibold capitalize"
+            style={{
+              backgroundColor: `${eventTypeColor}15`,
+              color: eventTypeColor,
+            }}
+          >
+            <span
+              className="h-2 w-2 rounded-full"
+              style={{ backgroundColor: eventTypeColor }}
+            />
             {event.type === "booth" && !event.original?.isBazarBooth
               ? "Platform Booth"
               : event.type}
-          </span>
+          </div>
+
+          <h3 className="text-lg font-semibold text-gray-900">{event.name}</h3>
         </div>
 
-        <h3 className="text-xl font-bold text-[#4a4ae6] mb-3">{event.name}</h3>
-
-        <div className="space-y-2 text-sm text-gray-700">
-          {event.type === "conference" && (
-            <p className="flex items-center gap-2">
-              <User size={16} className="mt-1 text-gray-500 flex-shrink-0" />
-              {event.professorname}
-            </p>
-          )}
-
-          {isBazaarBooth && event.original?.bazarId && (
-            <p className="flex items-center gap-2">
-              <Store size={16} className="mt-1 text-gray-500 flex-shrink-0" />
-              Part of: {event.original.bazarId.bazaarname || "Bazaar"}
-            </p>
-          )}
-
-          {isPlatformBooth && event.vendor && (
-            <p className="flex items-center gap-2">
-              <Building
-                size={16}
-                className="mt-1 text-gray-500 flex-shrink-0"
-              />
-              Vendor: {event.vendor}
-            </p>
-          )}
-
-          {event.location && !isBazaarBooth && (
-            <p className="flex items-center gap-2">
-              <MapPin size={16} className="mt-1 text-red-500 flex-shrink-0" />
-              <span className="text-gray-700">{event.location}</span>
-            </p>
-          )}
-
-          {event.duration && event.type === "booth" && (
-            <p className="flex items-center gap-2">
-              <Calendar
-                size={16}
-                className="mt-1 text-gray-500 flex-shrink-0"
-              />
-              {event.duration} week{event.duration > 1 ? "s" : ""}
-            </p>
-          )}
-
-          {isBazaarBooth && event.location && (
-            <p className="flex items-center gap-2">
-              <MapPin size={16} className="mt-1 text-red-500 flex-shrink-0" />
-              <span className="text-gray-700">
-                Booth Location: {event.location}
-              </span>
-            </p>
-          )}
-
-          {event.price > 0 && (
-            <p className="flex items-center gap-2">
-              <DollarSign
-                size={16}
-                className="mt-1 text-gray-500 flex-shrink-0"
-              />
-              Price: {event.price} EGP
-            </p>
-          )}
-
-          {event.startDate && (
-            <div className="flex items-center gap-2">
-              <Calendar
-                size={16}
-                className="mt-1 text-gray-500 flex-shrink-0"
-              />
-              <span>
-                Starts {formatSimpleDate(event.startDate)}
-                {event.duration &&
-                  ` · ${event.duration} ${
-                    event.type === "workshop" ? "day" : "week"
-                  }${event.duration === 1 ? "" : "s"}`}
+        <div className="space-y-2 pb-2 text-sm">
+          {infoRows.map(({ icon: Icon, label, accent, subtle }, index) => (
+            <div key={`info-${index}`} className="flex items-center gap-3">
+              <Icon size={16} className={subtle ? "text-gray-300" : "text-gray-400"} />
+              <span
+                className={`leading-5 ${
+                  accent ? accent : subtle ? "text-[#555]" : "text-gray-700"
+                }`}
+              >
+                {label}
               </span>
             </div>
-          )}
-
-          {event.registrationDeadline && (
-            <div className="flex items-center gap-2 text-[#E53E3E]">
-              <ClockAlert
-                size={16}
-                className="mt-1 text-[#E53E3E] flex-shrink-0"
-              />
-              <span>
-                Register by:{" "}
-                {formatSimpleDate(new Date(event.registrationDeadline))}
-              </span>
-            </div>
-          )}
+          ))}
         </div>
 
         {event.description && (
-          <div className="mt-4">
+          <div className="mt-4 flex-1">
             <div
               ref={descriptionRef}
-              className={`text-gray-600 text-sm leading-relaxed ${
+              className={`text-sm leading-relaxed text-[#555] ${
                 hasOverflow ? "cursor-pointer hover:text-gray-800" : ""
               } transition-colors ${
-                isDescriptionExpanded ? "line-clamp-none" : "line-clamp-1"
+                isDescriptionExpanded ? "line-clamp-none" : "line-clamp-2"
               }`}
               onClick={toggleDescription}
             >
@@ -253,7 +384,7 @@ const EventCard = ({
             {hasOverflow && (
               <button
                 onClick={toggleDescription}
-                className="mt-1 flex items-center gap-1 text-xs text-[#4a4ae6] hover:text-[#3d3dd4] transition-colors"
+                className="mt-1 flex items-center gap-1 text-xs font-semibold text-[#4a4ae6] hover:text-[#3d3dd4] transition-colors"
               >
                 {isDescriptionExpanded ? (
                   <>
@@ -268,109 +399,23 @@ const EventCard = ({
             )}
           </div>
         )}
-      </div>
 
-      <div className="mt-4 pt-4 border-t border-gray-200">
-        {event.faculty && (
-          <p className="text-xs text-gray-500 mb-2">Faculty: {event.faculty}</p>
-        )}
-
-        {event.website && (
-          <a
-            href={event.website}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="text-xs font-semibold text-[#4a4ae6] hover:text-[#3d3dd4] transition-colors underline mb-2 inline-block"
-          >
-            Visit Website
-          </a>
-        )}
-
-        <div className="mt-3 flex flex-wrap gap-2">
-          {canDelete && (
-            <button
-              onClick={() => onDelete?.(event.original)}
-              className="text-xs bg-red-50 text-red-700 px-3 py-1.5 rounded-lg hover:bg-red-100 transition-colors font-medium"
+        <div className="mt-6 border-t border-gray-100 pt-4">
+          {event.website && (
+            <a
+              href={event.website}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-xs font-semibold text-[#4a4ae6] underline-offset-2 hover:underline"
             >
-              Delete
-            </button>
+              Visit Website
+            </a>
           )}
 
-          {canUpdate && (
-            <button
-              onClick={() => onUpdate(event.type)}
-              className="text-xs bg-purple-50 text-purple-700 px-3 py-1.5 rounded-lg hover:bg-purple-100 transition-colors font-medium"
-            >
-              Update
-            </button>
-          )}
-
-          {/* Registration area: allow caller to provide a custom renderer. If none is provided, fall back to default behavior. */}
-          {typeof renderRegistrationControls === "function" ? (
-            renderRegistrationControls({
-              event,
-              rawEvent,
-              isRegistered,
-              canRegister,
-            })
-          ) : (
-            <>
-              {isRegistered && (
-                <button
-                  disabled
-                  className="text-xs bg-gray-200 text-gray-600 px-3 py-1.5 rounded-lg transition-colors cursor-not-allowed font-medium"
-                >
-                  Registered
-                </button>
-              )}
-
-              {canRegister && (
-                <button
-                  onClick={() => onRegister?.(event.original)}
-                  className="text-xs bg-[#4a4ae6] text-white px-3 py-1.5 rounded-lg hover:bg-[#3d3dd4] transition-colors font-medium"
-                >
-                  Register
-                </button>
-              )}
-
-              {userIsEligible &&
-                !canRegister &&
-                !isRegistered &&
-                (event.type === "trip" || event.type === "workshop") && (
-                  <button
-                    disabled
-                    className="text-xs bg-gray-200 text-gray-600 px-3 py-1.5 rounded-lg transition-colors cursor-not-allowed font-medium"
-                  >
-                    Registration Closed
-                  </button>
-                )}
-            </>
-          )}
-
-          {isBazaar && (
-            <button
-              onClick={() => onViewBooths?.(event.original)}
-              className="text-xs font-semibold text-[#4a4ae6] hover:text-[#3d3dd4] transition-colors px-3 py-1.5"
-            >
-              View Booths
-            </button>
-          )}
-
-          {(isPlatformBooth ||
-            isBazaarBooth ||
-            isWorkshop ||
-            event.type === "trip" ||
-            event.type === "conference") && (
-            <button
-              onClick={() => onViewDetails?.(event.original)}
-              className="text-xs font-semibold text-[#4a4ae6] hover:text-[#3d3dd4] transition-colors px-3 py-1.5"
-            >
-              View Details
-            </button>
-          )}
-
-          {footerExtra && (
-            <div className="w-full flex justify-start">{footerExtra}</div>
+          {actionButtons.length > 0 && (
+            <div className="mt-4 grid w-full gap-2 sm:grid-cols-2">
+              {actionButtons}
+            </div>
           )}
         </div>
       </div>

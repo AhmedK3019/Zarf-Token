@@ -201,9 +201,6 @@ export default function FavouriteEvents() {
                 <div>Event no longer available</div>
               </div>
             )}
-            {fav.status === "past" && (
-              <div className="mt-2 text-xs text-gray-500 text-center">Past Event</div>
-            )}
           </div>
         ))}
       </div>
