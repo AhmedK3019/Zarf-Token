@@ -340,8 +340,10 @@ export default function LoyaltyPartnersShowcase({
               {filteredPartners.map((partner) => {
                 const isExpanded = expanded.has(partner.id);
                 const readableDate = formatDate(partner.reviewedAt || partner.referenceDate);
-                const vendorInitial =
-                  partner.vendorLabel?.charAt(0)?.toUpperCase() || partner.promoCode?.charAt(0) || "?";
+                const logoSrc =
+                  partner.logo && partner.logo.trim()
+                    ? partner.logo
+                    : "/unknownicon.png";
                 return (
                   <article
                     key={partner.id}
@@ -349,20 +351,18 @@ export default function LoyaltyPartnersShowcase({
                   >
                     <div className="flex items-start justify-between gap-4">
                       <div className="flex gap-4">
-                        {partner.logo ? (
-                          <div className="h-16 w-16 overflow-hidden rounded-2xl border border-[#E4E0FF] bg-white">
-                            <img
-                              src={partner.logo}
-                              alt={`${partner.vendorLabel} logo`}
-                              className="h-full w-full object-cover"
-                              loading="lazy"
-                            />
-                          </div>
-                        ) : (
-                          <div className="flex h-16 w-16 items-center justify-center rounded-2xl border border-dashed border-[#E4E0FF] bg-[#F7F5FF] text-lg font-bold text-[#4C3BCF]">
-                            {vendorInitial}
-                          </div>
-                        )}
+                        <div className="h-16 w-16 overflow-hidden rounded-2xl border border-[#E4E0FF] bg-white">
+                          <img
+                            src={logoSrc}
+                            alt={`${partner.vendorLabel} logo`}
+                            className="h-full w-full object-cover"
+                            loading="lazy"
+                            onError={(e) => {
+                              if (e.currentTarget.src.endsWith("/unknownicon.png")) return;
+                              e.currentTarget.src = "/unknownicon.png";
+                            }}
+                          />
+                        </div>
                         <div>
                           <div className="flex flex-wrap items-center gap-2 text-xs font-semibold uppercase tracking-wide text-[#B0AADF]">
                             <p>Approved partner</p>
