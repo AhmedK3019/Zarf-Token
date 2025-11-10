@@ -40,6 +40,11 @@ const STATUS_INFO = {
     message:
       "If you’d like to rejoin the program, you can apply again with updated details.",
   },
+  inactive: {
+    title: "Participation Cancelled",
+    message:
+      "You left the program. Submit a new application whenever you’re ready to return.",
+  },
 };
 
 const STATUS_TONE = {
@@ -47,6 +52,7 @@ const STATUS_TONE = {
   approved: "bg-emerald-50 text-emerald-700 border-emerald-200",
   rejected: "bg-rose-50 text-rose-700 border-rose-200",
   cancelled: "bg-gray-50 text-gray-600 border-gray-200",
+  inactive: "bg-gray-50 text-gray-600 border-gray-200",
 };
 
 const StatusBadge = ({ status }) => {
@@ -88,6 +94,11 @@ const LoyaltyProgram = ({ vendor }) => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [refreshKey, setRefreshKey] = useState(0);
+  const [cancelModalOpen, setCancelModalOpen] = useState(false);
+  const [cancelReason, setCancelReason] = useState("");
+  const [cancelling, setCancelling] = useState(false);
+  const [cancelError, setCancelError] = useState(null);
+  const [toast, setToast] = useState(null);
 
   useEffect(() => {
     if (!vendorId) return;
@@ -119,6 +130,12 @@ const LoyaltyProgram = ({ vendor }) => {
       cancelled = true;
     };
   }, [vendorId, refreshKey]);
+
+  useEffect(() => {
+    if (!toast) return undefined;
+    const timer = setTimeout(() => setToast(null), 4000);
+    return () => clearTimeout(timer);
+  }, [toast]);
 
   const pendingApplication = useMemo(
     () => applications.find((app) => app.status === "pending"),
@@ -159,21 +176,48 @@ const LoyaltyProgram = ({ vendor }) => {
     hasHistory,
   ]);
 
-  const secondaryCta = useMemo(() => {
-    if (pendingApplication || !approvedApplication) return null;
-    if (vendor?.loyal) {
-      return {
-        label: "Cancel Partnership",
-        to: "/dashboard/vendor/cancel-loyalty",
-      };
-    }
-    return {
-      label: "View Approval",
-      to: "/dashboard/vendor/apply-loyalty",
-    };
-  }, [pendingApplication, approvedApplication, vendor?.loyal]);
-
   const handleNavigate = (to) => navigate(to);
+  const canCancelParticipation = Boolean(approvedApplication);
+
+  const openCancelModal = () => {
+    setCancelError(null);
+    setCancelReason("");
+    setCancelModalOpen(true);
+  };
+
+  const closeCancelModal = () => {
+    if (cancelling) return;
+    setCancelModalOpen(false);
+    setCancelReason("");
+    setCancelError(null);
+  };
+
+  const handleCancelParticipation = async () => {
+    if (!vendorId || !approvedApplication) return;
+    setCancelling(true);
+    setCancelError(null);
+    try {
+      await api.post("/loyalty/cancel", {
+        vendorId,
+        reason: cancelReason.trim(),
+      });
+      setCancelModalOpen(false);
+      setCancelReason("");
+      setToast({
+        type: "success",
+        message: "Participation cancelled successfully.",
+      });
+      setRefreshKey((key) => key + 1);
+    } catch (err) {
+      const message =
+        err?.response?.data?.error ||
+        err?.message ||
+        "Failed to cancel participation. Please try again.";
+      setCancelError(message);
+    } finally {
+      setCancelling(false);
+    }
+  };
 
   return (
     <div className="space-y-6 p-4 lg:p-6">
@@ -209,13 +253,13 @@ const LoyaltyProgram = ({ vendor }) => {
                 {primaryCta.label}
               </button>
             )}
-            {secondaryCta && (
+            {canCancelParticipation && (
               <button
-                onClick={() => handleNavigate(secondaryCta.to)}
-                className="inline-flex items-center gap-2 rounded-full border border-rose-200 px-4 py-2 text-sm font-semibold text-rose-600 hover:bg-rose-50"
+                onClick={openCancelModal}
+                className="inline-flex items-center gap-2 rounded-full border border-rose-200 px-4 py-2 text-sm font-semibold text-rose-600 transition hover:bg-rose-50"
               >
                 <ShieldCheck size={16} />
-                {secondaryCta.label}
+                Cancel Participation
               </button>
             )}
           </div>
@@ -413,6 +457,98 @@ const LoyaltyProgram = ({ vendor }) => {
             className="mt-3 inline-flex items-center gap-2 text-sm font-semibold text-[#4C3BCF] hover:text-[#3728a6]"
           >
             Apply Again
+          </button>
+        </div>
+      )}
+
+      {cancelModalOpen && (
+        <div className="fixed inset-0 z-40 flex items-center justify-center bg-black/30 px-4">
+          <div className="w-full max-w-lg rounded-3xl bg-white p-6 shadow-2xl">
+            <div className="flex items-start justify-between gap-3">
+              <div>
+                <p className="text-xs font-semibold uppercase tracking-wide text-rose-500">
+                  Cancel participation
+                </p>
+                <h3 className="text-2xl font-bold text-[#18122B]">Are you sure?</h3>
+                <p className="text-sm text-gray-600">
+                  Cancelling removes your promo from the loyalty directory immediately.
+                  Students will no longer see your offer until you submit a new application.
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={closeCancelModal}
+                className="rounded-full p-2 text-gray-400 hover:bg-gray-100"
+                aria-label="Close"
+              >
+                <X className="h-4 w-4" />
+              </button>
+            </div>
+
+            <div className="mt-4">
+              <label className="text-sm font-semibold text-gray-700">
+                Optional note for the Events Office
+              </label>
+              <textarea
+                rows={4}
+                value={cancelReason}
+                onChange={(e) => setCancelReason(e.target.value)}
+                placeholder="Briefly explain why you’re leaving the program."
+                className="mt-2 w-full rounded-2xl border border-gray-200 bg-gray-50 p-3 text-sm focus:border-[#4C3BCF] focus:bg-white focus:outline-none"
+              />
+            </div>
+            {cancelError && (
+              <p className="mt-2 text-sm text-rose-600">{cancelError}</p>
+            )}
+
+            <div className="mt-6 flex flex-wrap justify-end gap-3">
+              <button
+                type="button"
+                onClick={closeCancelModal}
+                disabled={cancelling}
+                className="rounded-full border border-gray-200 px-4 py-2 text-sm font-semibold text-gray-600 hover:bg-gray-50 disabled:cursor-not-allowed"
+              >
+                Keep participation
+              </button>
+              <button
+                type="button"
+                onClick={handleCancelParticipation}
+                disabled={cancelling}
+                className="inline-flex items-center gap-2 rounded-full border border-rose-200 bg-rose-600 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-rose-700 disabled:cursor-not-allowed disabled:opacity-60"
+              >
+                {cancelling ? (
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                ) : (
+                  <AlertTriangle className="h-4 w-4" />
+                )}
+                Confirm cancel
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {toast && (
+        <div
+          className={`fixed bottom-6 right-6 z-40 flex items-center gap-3 rounded-2xl border px-4 py-3 text-sm font-semibold shadow-lg ${
+            toast.type === "error"
+              ? "border-rose-200 bg-rose-50 text-rose-700"
+              : "border-emerald-200 bg-emerald-50 text-emerald-700"
+          }`}
+        >
+          {toast.type === "error" ? (
+            <AlertTriangle className="h-4 w-4" />
+          ) : (
+            <CheckCircle2 className="h-4 w-4" />
+          )}
+          <span>{toast.message}</span>
+          <button
+            type="button"
+            onClick={() => setToast(null)}
+            className="ml-2 rounded-full p-1 text-current/70 hover:bg-black/5"
+            aria-label="Dismiss notification"
+          >
+            <X className="h-3 w-3" />
           </button>
         </div>
       )}

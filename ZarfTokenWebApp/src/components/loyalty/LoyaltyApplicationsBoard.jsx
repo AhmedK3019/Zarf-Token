@@ -21,6 +21,7 @@ const STATUS_FILTERS = [
   { key: "approved", label: "Approved" },
   { key: "rejected", label: "Rejected" },
   { key: "cancelled", label: "Cancelled" },
+  { key: "inactive", label: "Inactive" },
 ];
 
 const tone = {
@@ -28,6 +29,7 @@ const tone = {
   approved: "bg-emerald-50 text-emerald-700 border-emerald-200",
   rejected: "bg-rose-50 text-rose-700 border-rose-200",
   cancelled: "bg-gray-50 text-gray-600 border-gray-200",
+  inactive: "bg-gray-50 text-gray-600 border-gray-200",
 };
 
 const StatusChip = ({ status }) => {

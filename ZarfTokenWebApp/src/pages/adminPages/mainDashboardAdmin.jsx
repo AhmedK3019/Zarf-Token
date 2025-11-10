@@ -4,6 +4,7 @@ import AllEvents from "../AllEvents";
 import SignUpRequests from "./SignUpRequests";
 import VendorRequests from "./VendorRequests";
 import LoyaltyVendors from "./LoyaltyVendors";
+import LoyaltyPartnersDirectory from "./LoyaltyPartnersDirectory";
 import AllUsers from "./AllUsers";
 import AddAdmin from "./AddAdminOrEventsOffice";
 import AllAdmins from "./AllAdminsAndOfficers";
@@ -22,6 +23,7 @@ const mainDashboardAdmin = () => {
           <Route path="/signup-requests" element={<SignUpRequests />} />
           <Route path="/vendor-requests" element={<VendorRequests />} />
           <Route path="/loyalty-vendors" element={<LoyaltyVendors />} />
+          <Route path="/loyalty-program" element={<LoyaltyPartnersDirectory />} />
           <Route path="/all-users" element={<AllUsers />} />
           <Route path="/add-admin" element={<AddAdmin />} />
           <Route path="/all-admins" element={<AllAdmins />} />

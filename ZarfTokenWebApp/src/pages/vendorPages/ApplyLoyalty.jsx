@@ -61,6 +61,12 @@ const statusTone = {
     border: "border-gray-200",
     label: "Cancelled",
   },
+  inactive: {
+    bg: "bg-gray-50",
+    text: "text-gray-600",
+    border: "border-gray-200",
+    label: "Inactive",
+  },
 };
 
 const formatDate = (value) => {

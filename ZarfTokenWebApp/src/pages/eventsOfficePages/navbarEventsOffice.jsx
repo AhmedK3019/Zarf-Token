@@ -224,6 +224,16 @@ const NavbarEventsOffice = () => {
                 Loyals
               </NavLink>
               <NavLink
+                to="/dashboard/eventsOffice/loyalty-program"
+                className={({ isActive }) =>
+                  isActive
+                    ? "px-4 py-2 rounded-lg bg-white/15 text-white font-semibold transition-all flex items-center"
+                    : "px-4 py-2 rounded-lg text-white/90 hover:text-white hover:bg-white/8 transition-all flex items-center"
+                }
+              >
+                Loyalty Partners
+              </NavLink>
+              <NavLink
                 to="/dashboard/eventsOffice/vendor-poll"
                 className={({ isActive }) =>
                   isActive

@@ -247,6 +247,18 @@ const NavbarAdmin = () => {
                 Loyals
               </NavLink>
 
+              {/* Loyalty Partners */}
+              <NavLink
+                to="/dashboard/admin/loyalty-program"
+                className={({ isActive }) =>
+                  isActive
+                    ? "px-4 py-2 rounded-lg bg-white/10 text-white font-semibold transition-all flex items-center"
+                    : "px-4 py-2 rounded-lg text-white/90 hover:text-white hover:bg-white/5 transition-all flex items-center"
+                }
+              >
+                Loyalty Partners
+              </NavLink>
+
               {/* Users Dropdown */}
               <div className="relative" ref={usersDropdownRef}>
                 <button
