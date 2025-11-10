@@ -67,12 +67,18 @@ const getEventsRegisteredByUser = async (req, res, next) => {
       (workshop) =>
         workshop.attendees.filter(
           (attendee) => attendee.userId.toString() === userId
+        ).length > 0 ||
+        workshop.registered.filter(
+          (registrant) => registrant.userId.toString() === userId
         ).length > 0
     );
     const registeredTrips = trips.filter(
       (trip) =>
         trip.attendees.filter(
           (attendee) => attendee.userId.toString() === userId
+        ).length > 0 ||
+        trip.registered.filter(
+          (registrant) => registrant.userId.toString() === userId
         ).length > 0
     );
     return res.status(200).json([...registeredWorkshops, ...registeredTrips]);
