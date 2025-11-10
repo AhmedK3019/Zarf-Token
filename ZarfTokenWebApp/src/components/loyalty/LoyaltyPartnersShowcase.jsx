@@ -2,6 +2,8 @@ import React, { useEffect, useMemo, useState } from "react";
 import { Filter, RefreshCcw, Search, ShieldCheck } from "lucide-react";
 import api from "../../services/api";
 import CopyButton from "../CopyButton.jsx";
+import { useAuthUser } from "../../hooks/auth";
+import NotFound from "../../pages/NotFoundPage.jsx";
 
 const DISCOUNT_FILTERS = [
   { key: "all", label: "All discounts", hint: "Full partner list" },
@@ -63,12 +65,27 @@ const SkeletonCard = () => (
   </div>
 );
 
+const normalizeRole = (value = "") =>
+  value.trim().toLowerCase().replace(/\s+/g, " ");
+
+const ALLOWED_ROLES = new Set([
+  "student",
+  "staff",
+  "ta",
+  "professor",
+  "event office",
+  "events office",
+  "eventsoffice",
+  "admin",
+]);
+
 export default function LoyaltyPartnersShowcase({
   title = "GUC Loyalty Program Partners",
   eyebrow,
   description = "Explore every active vendor in the GUC loyalty program. Each partner is reviewed by Events Office and Admin teams so that Students, Staff, TAs, Professors, Events Office, and Admins unlock trusted discounts.",
   audienceLabel = "Students · Staff · TAs · Professors · Events Office · Admin",
 } = {}) {
+  const { user } = useAuthUser();
   const [partners, setPartners] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -77,6 +94,10 @@ export default function LoyaltyPartnersShowcase({
   const [sortKey, setSortKey] = useState("recent");
   const [expanded, setExpanded] = useState(() => new Set());
   const [lastLoadedAt, setLastLoadedAt] = useState(null);
+  const hasToken =
+    typeof window !== "undefined" ? Boolean(localStorage.getItem("token")) : false;
+  const normalizedRole = normalizeRole(user?.role || "");
+  const canView = normalizedRole ? ALLOWED_ROLES.has(normalizedRole) : false;
 
   const fetchPartners = async () => {
     setLoading(true);
@@ -168,6 +189,14 @@ export default function LoyaltyPartnersShowcase({
     }).length;
     return { total, average, top, newThisMonth };
   }, [partners]);
+
+  if (!user && !hasToken) {
+    return <NotFound />;
+  }
+
+  if (user && !canView) {
+    return <NotFound />;
+  }
 
   const toggleExpanded = (id) => {
     setExpanded((prev) => {
