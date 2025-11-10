@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import CopyButton from "../../components/CopyButton.jsx";
 
 export default function GenerateQR() {
   const [name, setName] = useState("");
@@ -6,7 +7,6 @@ export default function GenerateQR() {
   const [qrSrc, setQrSrc] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
-  const [copied, setCopied] = useState(false);
 
   // payload to encode in QR: a small JSON string
   const makePayload = () =>
@@ -14,7 +14,6 @@ export default function GenerateQR() {
 
   const generate = async () => {
     setError(null);
-    setCopied(false);
     setLoading(true);
     const payload = makePayload();
     try {
@@ -47,17 +46,6 @@ export default function GenerateQR() {
     document.body.appendChild(a);
     a.click();
     a.remove();
-  };
-
-  const copyPayload = async () => {
-    try {
-      await navigator.clipboard.writeText(makePayload());
-      setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
-    } catch (err) {
-      console.error("copy failed", err);
-      setCopied(false);
-    }
   };
 
   return (
@@ -116,17 +104,16 @@ export default function GenerateQR() {
               Download PNG
             </button>
 
-            <button
-              onClick={copyPayload}
+            <CopyButton
+              value={makePayload()}
+              label="Copy payload"
+              ariaLabel="Copy payload JSON"
+              tooltip="Copy payload to clipboard"
+              copiedTooltip="Payload copied!"
               disabled={!name && !email}
-              className={`rounded-full px-3 py-2 text-sm ${
-                copied
-                  ? "bg-emerald-100 text-emerald-700"
-                  : "bg-gray-100 text-gray-800"
-              } disabled:opacity-50`}
-            >
-              {copied ? "Copied" : "Copy payload"}
-            </button>
+              className="rounded-full"
+              buttonClassName="rounded-full px-4 py-2 text-sm"
+            />
           </div>
 
           {error && <p className="mt-4 text-sm text-red-500">{error}</p>}

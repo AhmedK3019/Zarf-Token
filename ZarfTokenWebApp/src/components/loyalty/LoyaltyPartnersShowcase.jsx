@@ -1,6 +1,7 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { Filter, RefreshCcw, Search, ShieldCheck } from "lucide-react";
 import api from "../../services/api";
+import CopyButton from "../CopyButton.jsx";
 
 const DISCOUNT_FILTERS = [
   { key: "all", label: "All discounts", hint: "Full partner list" },
@@ -75,7 +76,6 @@ export default function LoyaltyPartnersShowcase({
   const [discountFilter, setDiscountFilter] = useState("all");
   const [sortKey, setSortKey] = useState("recent");
   const [expanded, setExpanded] = useState(() => new Set());
-  const [copiedCode, setCopiedCode] = useState(null);
   const [lastLoadedAt, setLastLoadedAt] = useState(null);
 
   const fetchPartners = async () => {
@@ -124,12 +124,6 @@ export default function LoyaltyPartnersShowcase({
     fetchPartners();
   }, []);
 
-  useEffect(() => {
-    if (!copiedCode) return undefined;
-    const timer = setTimeout(() => setCopiedCode(null), 2500);
-    return () => clearTimeout(timer);
-  }, [copiedCode]);
-
   const searchTerm = search.trim().toLowerCase();
 
   const filteredPartners = useMemo(() => {
@@ -174,21 +168,6 @@ export default function LoyaltyPartnersShowcase({
     }).length;
     return { total, average, top, newThisMonth };
   }, [partners]);
-
-  const handleCopyPromo = async (code) => {
-    if (!code) return;
-    try {
-      await navigator.clipboard.writeText(code);
-      setCopiedCode(code);
-    } catch (err) {
-      console.error("Failed to copy promo code:", err);
-      if (typeof window !== "undefined" && typeof window.alert === "function") {
-        window.alert(
-          err?.message || "Unable to copy promo code automatically. Please copy it manually."
-        );
-      }
-    }
-  };
 
   const toggleExpanded = (id) => {
     setExpanded((prev) => {
@@ -405,23 +384,17 @@ export default function LoyaltyPartnersShowcase({
                         <span className="inline-flex rounded-full bg-[#F2EDFF] px-3 py-1 text-sm font-semibold text-[#4C3BCF]">
                           {partner.discountRate}% off
                         </span>
-                        <p className="text-xs font-semibold uppercase tracking-wide text-[#B0AADF]">
+                        <p className="mt-5 text-xs font-semibold uppercase tracking-wide text-[#B0AADF]">
                           Promo code
                         </p>
-                        <span className="text-lg font-semibold text-[#251E53]">
+                        <span className="mt+5 text-lg font-semibold text-[#251E53]">
                           {partner.promoCode}
                         </span>
-                        <button
-                          type="button"
-                          onClick={() => handleCopyPromo(partner.promoCode)}
-                          className={`inline-flex items-center gap-2 rounded-2xl px-3 py-1 text-xs font-semibold transition ${
-                            copiedCode === partner.promoCode
-                              ? "bg-emerald-100 text-emerald-700"
-                              : "border border-[#D8D3FF] text-[#4C3BCF] hover:bg-[#EFEAFF]"
-                          }`}
-                        >
-                          {copiedCode === partner.promoCode ? "Copied" : "Copy code"}
-                        </button>
+                        <CopyButton
+                          value={partner.promoCode}
+                          className="mt-1"
+                          ariaLabel={`Copy promo code ${partner.promoCode}`}
+                        />
                       </div>
                     </div>
 
