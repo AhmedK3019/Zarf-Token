@@ -1,5 +1,6 @@
 import mongoose from "mongoose";
-
+import User from "../models/User.js";
+import EventsOffice from "../models/EventsOffice.js";
 const conferenceSchema = new mongoose.Schema({
   conferencename: { type: String, required: true },
   professorname: { type: String, required: true },
@@ -37,6 +38,19 @@ const conferenceSchema = new mongoose.Schema({
   createdAt: { type: Date, default: Date.now },
   type: { type: String, default: "conference" },
   archive: { type: Boolean, default: false },
+});
+conferenceSchema.post("save", async function (doc, next) {
+  try {
+    const message = `Check out ${doc.conferencename} — a new conference has been created!`;
+    await User.updateMany({}, { $push: { notifications: { message } } });
+    await EventsOffice.updateMany(
+      {},
+      { $push: { notifications: { message } } }
+    );
+    next();
+  } catch (error) {
+    next(error);
+  }
 });
 
 const Conference = mongoose.model("Conference", conferenceSchema);

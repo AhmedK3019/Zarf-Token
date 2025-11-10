@@ -1,5 +1,6 @@
 import mongoose from "mongoose";
-
+import User from "../models/User.js";
+import EventsOffice from "../models/EventsOffice.js";
 const peopleSchema = new mongoose.Schema({
   name: { type: String, required: true },
   email: { type: String, required: true },
@@ -68,4 +69,20 @@ const boothSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
+boothSchema.post("save", async function (doc, next) {
+  try {
+    if (!doc.isBazarBooth) {
+      const message = `Check out ${doc.boothname} — a new booth has been created!`;
+      await User.updateMany({}, { $push: { notifications: { message } } });
+      await EventsOffice.updateMany(
+        {},
+        { $push: { notifications: { message } } }
+      );
+      next();
+    }
+    next();
+  } catch (error) {
+    next(error);
+  }
+});
 export default mongoose.model("Booth", boothSchema);

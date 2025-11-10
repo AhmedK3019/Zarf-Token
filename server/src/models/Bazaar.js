@@ -1,5 +1,6 @@
 import mongoose from "mongoose";
-
+import User from "../models/User.js";
+import EventsOffice from "../models/EventsOffice.js";
 const bazaarSchema = new mongoose.Schema({
   bazaarname: { type: String, required: true },
   startdate: { type: Date, required: true },
@@ -42,5 +43,18 @@ const bazaarSchema = new mongoose.Schema({
   archive: { type: Boolean, default: false },
 });
 
+bazaarSchema.post("save", async function (doc, next) {
+  try {
+    const message = `Check out ${doc.bazaarname} — a new bazaar has been created!`;
+    await User.updateMany({}, { $push: { notifications: { message } } });
+    await EventsOffice.updateMany(
+      {},
+      { $push: { notifications: { message } } }
+    );
+    next();
+  } catch (error) {
+    next(error);
+  }
+});
 const Bazaar = mongoose.model("Bazaar", bazaarSchema);
 export default Bazaar;

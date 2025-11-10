@@ -1,4 +1,6 @@
 import mongoose from "mongoose";
+import User from "../models/User.js";
+import EventsOffice from "../models/EventsOffice.js";
 const registeredPeople = new mongoose.Schema({
   userId: { type: mongoose.Schema.ObjectId, ref: "User" },
   firstname: { type: String, required: true },
@@ -57,7 +59,19 @@ const tripSchema = new mongoose.Schema({
   },
   archive: { type: Boolean, default: false },
 });
-
+tripSchema.post("save", async function (doc, next) {
+  try {
+    const message = `Check out ${doc.tripname} — a new trip has been created!`;
+    await User.updateMany({}, { $push: { notifications: { message } } });
+    await EventsOffice.updateMany(
+      {},
+      { $push: { notifications: { message } } }
+    );
+    next();
+  } catch (error) {
+    next(error);
+  }
+});
 const Trip = mongoose.model("Trip", tripSchema);
 
 export default Trip;
