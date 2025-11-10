@@ -228,19 +228,6 @@ const viewAllComments = async (req, res, next) => {
               "firstname lastname"
             ).lean();
 
-            if (!user) {
-              user = await Admin.findById(
-                comment.userId,
-                "firstname lastname"
-              ).lean();
-            }
-            if (!user) {
-              user = await EventsOffice.findById(
-                comment.userId,
-                "firstname lastname"
-              ).lean();
-            }
-
             return {
               ...comment.toObject(),
               userId: user || {
@@ -295,19 +282,6 @@ const viewAllRatings = async (req, res, next) => {
               rating.userId,
               "firstname lastname"
             ).lean();
-
-            if (!user) {
-              user = await Admin.findById(
-                rating.userId,
-                "firstname lastname"
-              ).lean();
-            }
-            if (!user) {
-              user = await EventsOffice.findById(
-                rating.userId,
-                "firstname lastname"
-              ).lean();
-            }
 
             return {
               ...rating.toObject(),
