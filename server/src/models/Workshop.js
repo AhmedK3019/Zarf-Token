@@ -81,6 +81,12 @@ const workshopSchema = new mongoose.Schema({
     },
   },
   archive: { type: Boolean, default: false },
+  allowedusers: [
+    {
+      type: String,
+      enum: ["Student", "Professor", "TA", "Staff"],
+    },
+  ],
 });
 
 workshopSchema.post("save", async function (doc, next) {

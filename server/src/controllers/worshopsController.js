@@ -1,5 +1,6 @@
 import WorkShop from "../models/Workshop.js";
 import EventsOffice from "../models/EventsOffice.js";
+import userController from "./userController.js";
 import mongoose from "mongoose";
 import Joi from "joi";
 import jwt from "jsonwebtoken";
@@ -207,6 +208,13 @@ const updateWorkshopStatus = async (req, res, next) => {
     updatedStatus.currentMessage.message = "";
     updatedStatus.comments = "";
     await updatedStatus.save();
+    let message = "";
+    if (updatedStatus.status == "Approved") {
+      message = `${updatedStatus.workshopname} has been accepted`;
+    } else {
+      message = `${updatedStatus.workshopname} has been rejected`;
+    }
+    await userController.updateNotifications(updatedStatus.createdBy, message);
     return res.status(200).json({
       message: "Status is updated successfully",
       workshop: updatedStatus,

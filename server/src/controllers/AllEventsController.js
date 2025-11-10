@@ -10,13 +10,16 @@ import EventsOffice from "../models/EventsOffice.js";
 
 const getAllEvents = async (_req, res, next) => {
   try {
-    const workshops = await Workshop.find()
+    let filter = { archive: false };
+    const workshops = await Workshop.find(filter)
       .populate("professorsparticipating", "firstname lastname email")
       .populate("createdBy", "firstname lastname email");
-    const Bazzars = await Bazaar.find();
-    const Conferences = await Conference.find();
-    const Trips = await Trip.find();
-    const Booths = await Booth.find().populate("vendorId").populate("bazarId");
+    const Bazzars = await Bazaar.find(filter);
+    const Conferences = await Conference.find(filter);
+    const Trips = await Trip.find(filter);
+    const Booths = await Booth.find(filter)
+      .populate("vendorId")
+      .populate("bazarId");
     return res
       .status(200)
       .json([...workshops, ...Bazzars, ...Conferences, ...Trips, ...Booths]);
@@ -67,12 +70,18 @@ const getEventsRegisteredByUser = async (req, res, next) => {
       (workshop) =>
         workshop.attendees.filter(
           (attendee) => attendee.userId.toString() === userId
+        ).length > 0 ||
+        workshop.registered.filter(
+          (registrant) => registrant.userId.toString() === userId
         ).length > 0
     );
     const registeredTrips = trips.filter(
       (trip) =>
         trip.attendees.filter(
           (attendee) => attendee.userId.toString() === userId
+        ).length > 0 ||
+        trip.registered.filter(
+          (registrant) => registrant.userId.toString() === userId
         ).length > 0
     );
     return res.status(200).json([...registeredWorkshops, ...registeredTrips]);
@@ -228,19 +237,6 @@ const viewAllComments = async (req, res, next) => {
               "firstname lastname"
             ).lean();
 
-            if (!user) {
-              user = await Admin.findById(
-                comment.userId,
-                "firstname lastname"
-              ).lean();
-            }
-            if (!user) {
-              user = await EventsOffice.findById(
-                comment.userId,
-                "firstname lastname"
-              ).lean();
-            }
-
             return {
               ...comment.toObject(),
               userId: user || {
@@ -268,25 +264,53 @@ const viewAllComments = async (req, res, next) => {
 const viewAllRatings = async (req, res, next) => {
   try {
     const { id, type } = req.params;
-    let Ratings;
+    let ratings;
     switch (type) {
       case "trip":
-        Ratings = await Trip.findById(id, { ratings: 1 });
+        ratings = await Trip.findById(id, { ratings: 1 });
         break;
       case "workshop":
-        Ratings = await Workshop.findById(id, { ratings: 1 });
+        ratings = await Workshop.findById(id, { ratings: 1 });
         break;
       case "conference":
-        Ratings = await Conference.findById(id, { ratings: 1 });
+        ratings = await Conference.findById(id, { ratings: 1 });
         break;
       case "bazaar":
-        Ratings = await Bazaar.findById(id, { ratings: 1 });
+        ratings = await Bazaar.findById(id, { ratings: 1 });
         break;
       case "booth":
-        Ratings = await Booth.findById(id, { ratings: 1 });
+        ratings = await Booth.findById(id, { ratings: 1 });
         break;
     }
-    return res.status(200).json(Ratings);
+
+    if (ratings?.ratings) {
+      const populatedRatings = await Promise.all(
+        ratings.ratings.map(async (rating) => {
+          if (rating.userId) {
+            let user = await User.findById(
+              rating.userId,
+              "firstname lastname"
+            ).lean();
+
+            return {
+              ...rating.toObject(),
+              userId: user || {
+                _id: rating.userId,
+                firstname: "Unknown",
+                lastname: "User",
+              },
+            };
+          }
+          return rating.toObject();
+        })
+      );
+      ratings = {
+        ...ratings.toObject(),
+        ratings: populatedRatings,
+      };
+    }
+
+    return res.status(200).json(ratings);
   } catch (error) {
     next(error);
   }
@@ -440,7 +464,7 @@ const archiveEvent = async (req, res, next) => {
     }
     let event = await model.findById(id);
     if (!event) return res.stauts(404).json({ message: "Event not found" });
-    if (new Date(event.startdate) - new Date() > 0) {
+    if (new Date(event.enddate) - new Date() > 0) {
       return res.json({ message: "Event start date has not passed yet" });
     }
     let result = await model.findByIdAndUpdate(
