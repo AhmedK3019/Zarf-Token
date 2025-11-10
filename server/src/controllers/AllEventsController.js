@@ -10,13 +10,16 @@ import EventsOffice from "../models/EventsOffice.js";
 
 const getAllEvents = async (_req, res, next) => {
   try {
-    const workshops = await Workshop.find()
+    let filter = { archive: false };
+    const workshops = await Workshop.find(filter)
       .populate("professorsparticipating", "firstname lastname email")
       .populate("createdBy", "firstname lastname email");
-    const Bazzars = await Bazaar.find();
-    const Conferences = await Conference.find();
-    const Trips = await Trip.find();
-    const Booths = await Booth.find().populate("vendorId").populate("bazarId");
+    const Bazzars = await Bazaar.find(filter);
+    const Conferences = await Conference.find(filter);
+    const Trips = await Trip.find(filter);
+    const Booths = await Booth.find(filter)
+      .populate("vendorId")
+      .populate("bazarId");
     return res
       .status(200)
       .json([...workshops, ...Bazzars, ...Conferences, ...Trips, ...Booths]);
@@ -234,19 +237,6 @@ const viewAllComments = async (req, res, next) => {
               "firstname lastname"
             ).lean();
 
-            if (!user) {
-              user = await Admin.findById(
-                comment.userId,
-                "firstname lastname"
-              ).lean();
-            }
-            if (!user) {
-              user = await EventsOffice.findById(
-                comment.userId,
-                "firstname lastname"
-              ).lean();
-            }
-
             return {
               ...comment.toObject(),
               userId: user || {
@@ -301,19 +291,6 @@ const viewAllRatings = async (req, res, next) => {
               rating.userId,
               "firstname lastname"
             ).lean();
-
-            if (!user) {
-              user = await Admin.findById(
-                rating.userId,
-                "firstname lastname"
-              ).lean();
-            }
-            if (!user) {
-              user = await EventsOffice.findById(
-                rating.userId,
-                "firstname lastname"
-              ).lean();
-            }
 
             return {
               ...rating.toObject(),
@@ -487,7 +464,7 @@ const archiveEvent = async (req, res, next) => {
     }
     let event = await model.findById(id);
     if (!event) return res.stauts(404).json({ message: "Event not found" });
-    if (new Date(event.startdate) - new Date() > 0) {
+    if (new Date(event.enddate) - new Date() > 0) {
       return res.json({ message: "Event start date has not passed yet" });
     }
     let result = await model.findByIdAndUpdate(

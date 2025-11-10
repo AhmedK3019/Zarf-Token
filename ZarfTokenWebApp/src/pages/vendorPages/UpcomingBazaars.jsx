@@ -254,7 +254,7 @@ export default function UpcomingBazars() {
 
                     {/* Apply Button */}
                     {myRequests.some(
-                      (request) => request.bazarId._id === bazaar._id
+                      (request) => request._id === bazaar._id
                     ) ? (
                       <div className="mt-6">
                         <p className="text-[#E53E3E]">You Already Applied</p>

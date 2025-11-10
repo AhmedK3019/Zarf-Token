@@ -587,15 +587,16 @@ const EventCard = ({
                     <MessageCircle size={12} />
                     Comments
                   </button>
-                  <button
-                    onClick={() =>
-                      onRateEvent?.(event.original, event.id, event.type)
-                    }
-                    className="flex-1 text-xs bg-green-50 text-green-700 px-3 py-1.5 rounded-lg hover:bg-green-100 transition-colors font-medium flex items-center justify-center gap-1"
-                  >
-                    <Star size={12} />
-                    Rate Event
-                  </button>
+                  {/* Rate button - only for regular users */}
+                  {user?.role !== "Admin" && user?.role !== "Event office" && (
+                    <button 
+                      onClick={() => onRateEvent?.(event.original, event.id, event.type)}
+                      className="flex-1 text-xs bg-green-50 text-green-700 px-3 py-1.5 rounded-lg hover:bg-green-100 transition-colors font-medium flex items-center justify-center gap-1"
+                    >
+                      <Star size={12} />
+                      Rate Event
+                    </button>
+                  )}
                 </div>
               </>
             )}

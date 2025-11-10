@@ -296,6 +296,20 @@ const removeEvent = async (req, res, next) => {
   }
 };
 
+const updateNotifications = async (id, message, next) => {
+  try {
+    const notify = await User.findByIdAndUpdate(
+      id,
+      {
+        $push: { notifications: { message } },
+      },
+      { new: true }
+    );
+    if (!notify) return { message: "user is not found" };
+  } catch (error) {
+    next();
+  }
+};
 export default {
   signup,
   loginUser,
@@ -309,4 +323,5 @@ export default {
   addAttendedEvent,
   getAttendedEvents,
   removeEvent,
+  updateNotifications,
 };

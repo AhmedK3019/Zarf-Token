@@ -5,7 +5,7 @@ import { useAuthUser } from "../hooks/auth";
 import EventCard from "../components/EventCard";
 import { getEventDetails, formatDate } from "./eventUtils";
 import EventDetailsModal from "../components/EventDetailsModal";
-import { X, User, Star, MessageCircle } from "lucide-react";
+import { X, User, Star, MessageCircle, Trash2 } from "lucide-react";
 
 const LIGHT_OVERLAY_CLASSES =
   "fixed inset-0 z-50 flex items-center justify-center p-4 bg-muted bg-opacity-90 backdrop-blur-sm animate-fade-in";
@@ -711,6 +711,29 @@ useEffect(() => {
     setSelectedEvent(null);
   };
 
+  const deleteComment = async (commentId) => {
+    if (!selectedRatingEvent) return;
+    
+    // Show confirmation dialog
+    const confirmDelete = window.confirm("Are you sure you want to delete this comment? This action cannot be undone.");
+    if (!confirmDelete) return;
+    
+    try {
+      const eventDetails = getEventDetails(selectedRatingEvent);
+      await api.delete(`/allEvents/deleteComment/${eventDetails.id}/${commentId}/${eventDetails.type}`);
+      
+      // Refresh comments after deletion
+      const response = await api.get(`/allEvents/viewAllComments/${eventDetails.id}/${eventDetails.type}`);
+      setComments(response.data.userComments || []);
+      
+      // Trigger refresh of all EventCard components
+      setRefreshTrigger(prev => prev + 1);
+    } catch (error) {
+      console.error('Failed to delete comment:', error);
+      alert(`Failed to delete comment: ${error.response?.data?.message || error.message}`);
+    }
+  };
+
   const submitRegistration = async () => {
     if (!registerModalEvent) return;
     setRegError(null);
@@ -1078,15 +1101,27 @@ useEffect(() => {
                   <div className="space-y-4">
                     {comments.map((comment, index) => (
                       <div key={index} className="border-b border-gray-100 pb-3 last:border-b-0">
-                        <div className="flex items-center gap-2 mb-2">
-                          <div className="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center">
-                            <User size={16} className="text-blue-600" />
+                        <div className="flex items-center justify-between mb-2">
+                          <div className="flex items-center gap-2">
+                            <div className="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center">
+                              <User size={16} className="text-blue-600" />
+                            </div>
+                            <span className="font-medium text-gray-800">
+                              {comment.userId?.firstname && comment.userId?.lastname 
+                                ? `${comment.userId.firstname} ${comment.userId.lastname}`
+                                : comment.userId?.firstname || comment.userId?.lastname || 'Anonymous'}
+                            </span>
                           </div>
-                          <span className="font-medium text-gray-800">
-                            {comment.userId?.firstname && comment.userId?.lastname 
-                              ? `${comment.userId.firstname} ${comment.userId.lastname}`
-                              : comment.userId?.firstname || comment.userId?.lastname || 'Anonymous'}
-                          </span>
+                          {/* Delete button - only visible to admins */}
+                          {user?.role === "Admin" && (
+                            <button
+                              onClick={() => deleteComment(comment._id)}
+                              className="text-red-500 hover:text-red-700 hover:bg-red-50 p-1 rounded transition-colors"
+                              title="Delete comment"
+                            >
+                              <Trash2 size={16} />
+                            </button>
+                          )}
                         </div>
                         <p className="text-gray-700 ml-10">{comment.comment}</p>
                       </div>
@@ -1100,27 +1135,29 @@ useEffect(() => {
                 </div>
               </div>
               
-              {/* Add Comment Form */}
-              <div className="p-6 border-t bg-gray-50">
-                <h4 className="font-semibold text-gray-800 mb-3">Add a Comment</h4>
-                <div className="flex gap-3">
-                  <textarea
-                    value={newComment}
-                    onChange={(e) => setNewComment(e.target.value)}
-                    placeholder="Share your thoughts about this event..."
-                    className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#4C3BCF] focus:border-transparent resize-none"
-                    rows="3"
-                    disabled={commentSubmitting}
-                  />
-                  <button
-                    onClick={submitComment}
-                    disabled={!newComment.trim() || commentSubmitting}
-                    className="px-4 py-2 bg-[#4C3BCF] text-white rounded-lg hover:bg-[#3730A3] transition-colors disabled:opacity-50 disabled:cursor-not-allowed h-fit"
-                  >
-                    {commentSubmitting ? 'Posting...' : 'Post'}
-                  </button>
+              {/* Add Comment Form - Only for regular users */}
+              {user?.role !== "Admin" && user?.role !== "Event office" && (
+                <div className="p-6 border-t bg-gray-50">
+                  <h4 className="font-semibold text-gray-800 mb-3">Add a Comment</h4>
+                  <div className="flex gap-3">
+                    <textarea
+                      value={newComment}
+                      onChange={(e) => setNewComment(e.target.value)}
+                      placeholder="Share your thoughts about this event..."
+                      className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#4C3BCF] focus:border-transparent resize-none"
+                      rows="3"
+                      disabled={commentSubmitting}
+                    />
+                    <button
+                      onClick={submitComment}
+                      disabled={!newComment.trim() || commentSubmitting}
+                      className="px-4 py-2 bg-[#4C3BCF] text-white rounded-lg hover:bg-[#3730A3] transition-colors disabled:opacity-50 disabled:cursor-not-allowed h-fit"
+                    >
+                      {commentSubmitting ? 'Posting...' : 'Post'}
+                    </button>
+                  </div>
                 </div>
-              </div>
+              )}
             </div>
           </div>
         );
