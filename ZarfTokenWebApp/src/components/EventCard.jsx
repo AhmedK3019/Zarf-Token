@@ -31,6 +31,7 @@ const EventCard = ({
   onToggleFavourite,
   onViewComments,
   onRateEvent,
+  onViewRatings,
   refreshTrigger,
   renderRegistrationControls,
   footerExtra,
@@ -46,9 +47,19 @@ const EventCard = ({
   const [comments, setComments] = useState([]);
   const [ratingsLoading, setRatingsLoading] = useState(true);
 
-  const isRegistered = Array.isArray(event.attendees)
-    ? event.attendees.some((a) => a.userId === user?._id)
-    : false;
+  const inAttendees =
+    Array.isArray(event.attendees) &&
+    event.attendees.some(
+      (a) => String(a.userId ?? a.user ?? a._id) === String(user?._id)
+    );
+
+  const inRegistered =
+    Array.isArray(event.registered) &&
+    event.registered.some(
+      (r) => String(r.userId ?? r.user ?? r._id) === String(user?._id)
+    );
+
+  const isRegistered = inAttendees || inRegistered;
 
   // Check if user actually attended the event (for rating/commenting permissions)
   // const hasAttended = Array.isArray(event.original?.attendees)
@@ -58,21 +69,25 @@ const EventCard = ({
   // Fetch ratings and comments on component mount
   useEffect(() => {
     const fetchRatingsAndComments = async () => {
-      if (['booth'].includes(event.type)) {
+      if (["booth"].includes(event.type)) {
         setRatingsLoading(false);
         return;
       }
 
       try {
         // Fetch ratings
-        const ratingsResponse = await api.get(`/allEvents/viewAllRatings/${event.id}/${event.type}`);
+        const ratingsResponse = await api.get(
+          `/allEvents/viewAllRatings/${event.id}/${event.type}`
+        );
         setRatings(ratingsResponse.data.ratings || []);
 
         // Fetch comments
-        const commentsResponse = await api.get(`/allEvents/viewAllComments/${event.id}/${event.type}`);
+        const commentsResponse = await api.get(
+          `/allEvents/viewAllComments/${event.id}/${event.type}`
+        );
         setComments(commentsResponse.data.userComments || []);
       } catch (error) {
-        console.error('Failed to fetch ratings/comments:', error);
+        console.error("Failed to fetch ratings/comments:", error);
         setRatings([]);
         setComments([]);
       } finally {
@@ -127,9 +142,10 @@ const EventCard = ({
     if (hasOverflow) setIsDescriptionExpanded((v) => !v);
   };
 
-  const averageRating = ratings.length > 0 
-    ? ratings.reduce((sum, r) => sum + r.rating, 0) / ratings.length 
-    : 0;
+  const averageRating =
+    ratings.length > 0
+      ? ratings.reduce((sum, r) => sum + r.rating, 0) / ratings.length
+      : 0;
 
   const getEventTypeColor = (type) => {
     const colors = {
@@ -153,9 +169,9 @@ const EventCard = ({
     : null;
   const durationLabel =
     event.duration &&
-    `${event.duration} ${
-      event.type === "workshop" ? "day" : "week"
-    }${event.duration === 1 ? "" : "s"}`;
+    `${event.duration} ${event.type === "workshop" ? "day" : "week"}${
+      event.duration === 1 ? "" : "s"
+    }`;
   const canShowFavourite =
     typeof onToggleFavourite === "function" &&
     user &&
@@ -182,7 +198,9 @@ const EventCard = ({
       },
     event.location && {
       icon: MapPin,
-      label: isBazaarBooth ? `Booth Location: ${event.location}` : event.location,
+      label: isBazaarBooth
+        ? `Booth Location: ${event.location}`
+        : event.location,
     },
     event.price > 0 && {
       icon: DollarSign,
@@ -367,7 +385,9 @@ const EventCard = ({
                 onToggleFavourite?.(rawEvent);
               }}
               className="rounded-full border border-gray-200 bg-white/90 p-2 shadow-sm transition hover:bg-white"
-              title={isFavourite ? "Remove from favourites" : "Add to favourites"}
+              title={
+                isFavourite ? "Remove from favourites" : "Add to favourites"
+              }
             >
               <Heart
                 size={18}
@@ -403,7 +423,10 @@ const EventCard = ({
         <div className="space-y-2 pb-2 text-sm">
           {infoRows.map(({ icon: Icon, label, accent, subtle }, index) => (
             <div key={`info-${index}`} className="flex items-center gap-3">
-              <Icon size={16} className={subtle ? "text-gray-300" : "text-gray-400"} />
+              <Icon
+                size={16}
+                className={subtle ? "text-gray-300" : "text-gray-400"}
+              />
               <span
                 className={`leading-5 ${
                   accent ? accent : subtle ? "text-[#555]" : "text-gray-700"
@@ -468,7 +491,7 @@ const EventCard = ({
         </div>
 
         {/* Ratings and Comments Section - Only for supported event types */}
-        {!['booth'].includes(event.type) && (
+        {!["booth"].includes(event.type) && (
           <div className="mt-4 pt-4">
             {ratingsLoading ? (
               <div className="text-center py-2">
@@ -477,44 +500,58 @@ const EventCard = ({
             ) : (
               <>
                 <div className="flex items-center justify-between mb-3">
-                  <div className="flex items-center gap-1">
+                  <button
+                    onClick={() =>
+                      onViewRatings?.(event.original, event.id, event.type)
+                    }
+                    className="flex items-center gap-1 hover:bg-gray-50 rounded-lg p-1 -ml-1 transition-colors group"
+                  >
                     <div className="flex">
                       {[1, 2, 3, 4, 5].map((star) => (
                         <Star
                           key={star}
                           size={14}
                           className={`${
-                            star <= Math.round(averageRating) 
-                              ? 'text-yellow-400 fill-current' 
-                              : 'text-gray-300'
-                          }`}
+                            star <= Math.round(averageRating)
+                              ? "text-yellow-400 fill-current group-hover:text-yellow-500"
+                              : "text-gray-300 group-hover:text-gray-400"
+                          } transition-colors`}
                         />
                       ))}
                     </div>
                     <span className="text-sm text-gray-600 ml-1">
-                      ({averageRating > 0 ? `${averageRating.toFixed(1)}` : 'No ratings'})
+                      (
+                      {averageRating > 0
+                        ? `${averageRating.toFixed(1)}`
+                        : "No ratings"}
+                      )
                     </span>
-                  </div>
+                  </button>
                   <span className="text-xs text-gray-500">
-                    {ratings.length} rating{ratings.length !== 1 ? 's' : ''}
+                    {ratings.length} rating{ratings.length !== 1 ? "s" : ""}
                   </span>
                 </div>
-                
+
                 <div className="flex gap-2">
-                  <button 
-                    onClick={() => onViewComments?.(event.original, event.id, event.type)}
+                  <button
+                    onClick={() =>
+                      onViewComments?.(event.original, event.id, event.type)
+                    }
                     className="flex-1 text-xs bg-blue-50 text-blue-700 px-3 py-1.5 rounded-lg hover:bg-blue-100 transition-colors font-medium flex items-center justify-center gap-1"
                   >
                     <MessageCircle size={12} />
                     Comments
                   </button>
-                  <button 
-                    onClick={() => onRateEvent?.(event.original, event.id, event.type)}
-                    className="flex-1 text-xs bg-green-50 text-green-700 px-3 py-1.5 rounded-lg hover:bg-green-100 transition-colors font-medium flex items-center justify-center gap-1"
-                  >
-                    <Star size={12} />
-                    Rate Event
-                  </button>
+                  {/* Rate button - only for regular users */}
+                  {user?.role !== "Admin" && user?.role !== "Event office" && (
+                    <button 
+                      onClick={() => onRateEvent?.(event.original, event.id, event.type)}
+                      className="flex-1 text-xs bg-green-50 text-green-700 px-3 py-1.5 rounded-lg hover:bg-green-100 transition-colors font-medium flex items-center justify-center gap-1"
+                    >
+                      <Star size={12} />
+                      Rate Event
+                    </button>
+                  )}
                 </div>
               </>
             )}

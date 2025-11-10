@@ -70,12 +70,18 @@ const getEventsRegisteredByUser = async (req, res, next) => {
       (workshop) =>
         workshop.attendees.filter(
           (attendee) => attendee.userId.toString() === userId
+        ).length > 0 ||
+        workshop.registered.filter(
+          (registrant) => registrant.userId.toString() === userId
         ).length > 0
     );
     const registeredTrips = trips.filter(
       (trip) =>
         trip.attendees.filter(
           (attendee) => attendee.userId.toString() === userId
+        ).length > 0 ||
+        trip.registered.filter(
+          (registrant) => registrant.userId.toString() === userId
         ).length > 0
     );
     return res.status(200).json([...registeredWorkshops, ...registeredTrips]);
@@ -231,19 +237,6 @@ const viewAllComments = async (req, res, next) => {
               "firstname lastname"
             ).lean();
 
-            if (!user) {
-              user = await Admin.findById(
-                comment.userId,
-                "firstname lastname"
-              ).lean();
-            }
-            if (!user) {
-              user = await EventsOffice.findById(
-                comment.userId,
-                "firstname lastname"
-              ).lean();
-            }
-
             return {
               ...comment.toObject(),
               userId: user || {
@@ -271,25 +264,53 @@ const viewAllComments = async (req, res, next) => {
 const viewAllRatings = async (req, res, next) => {
   try {
     const { id, type } = req.params;
-    let Ratings;
+    let ratings;
     switch (type) {
       case "trip":
-        Ratings = await Trip.findById(id, { ratings: 1 });
+        ratings = await Trip.findById(id, { ratings: 1 });
         break;
       case "workshop":
-        Ratings = await Workshop.findById(id, { ratings: 1 });
+        ratings = await Workshop.findById(id, { ratings: 1 });
         break;
       case "conference":
-        Ratings = await Conference.findById(id, { ratings: 1 });
+        ratings = await Conference.findById(id, { ratings: 1 });
         break;
       case "bazaar":
-        Ratings = await Bazaar.findById(id, { ratings: 1 });
+        ratings = await Bazaar.findById(id, { ratings: 1 });
         break;
       case "booth":
-        Ratings = await Booth.findById(id, { ratings: 1 });
+        ratings = await Booth.findById(id, { ratings: 1 });
         break;
     }
-    return res.status(200).json(Ratings);
+
+    if (ratings?.ratings) {
+      const populatedRatings = await Promise.all(
+        ratings.ratings.map(async (rating) => {
+          if (rating.userId) {
+            let user = await User.findById(
+              rating.userId,
+              "firstname lastname"
+            ).lean();
+
+            return {
+              ...rating.toObject(),
+              userId: user || {
+                _id: rating.userId,
+                firstname: "Unknown",
+                lastname: "User",
+              },
+            };
+          }
+          return rating.toObject();
+        })
+      );
+      ratings = {
+        ...ratings.toObject(),
+        ratings: populatedRatings,
+      };
+    }
+
+    return res.status(200).json(ratings);
   } catch (error) {
     next(error);
   }

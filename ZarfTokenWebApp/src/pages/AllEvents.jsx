@@ -5,7 +5,7 @@ import { useAuthUser } from "../hooks/auth";
 import EventCard from "../components/EventCard";
 import { getEventDetails, formatDate } from "./eventUtils";
 import EventDetailsModal from "../components/EventDetailsModal";
-import { X, User, Star, MessageCircle } from "lucide-react";
+import { X, User, Star, MessageCircle, Trash2 } from "lucide-react";
 
 const LIGHT_OVERLAY_CLASSES =
   "fixed inset-0 z-50 flex items-center justify-center p-4 bg-muted bg-opacity-90 backdrop-blur-sm animate-fade-in";
@@ -199,6 +199,7 @@ const AllEvents = () => {
   // Rating and Comments Modal States
   const [showCommentsModal, setShowCommentsModal] = useState(false);
   const [showRatingModal, setShowRatingModal] = useState(false);
+  const [showRatingsListModal, setShowRatingsListModal] = useState(false);
   const [selectedRatingEvent, setSelectedRatingEvent] = useState(null);
   const [comments, setComments] = useState([]);
   const [ratings, setRatings] = useState([]);
@@ -578,8 +579,6 @@ useEffect(() => {
     setSelectedRatingEvent(eventRaw);
     setShowCommentsModal(true);
     
-    if (['booth'].includes(eventType)) return;
-    
     setCommentsLoading(true);
     try {
       const response = await api.get(`/allEvents/viewAllComments/${eventId}/${eventType}`);
@@ -607,8 +606,6 @@ useEffect(() => {
     
     setShowRatingModal(true);
     
-    if (['booth'].includes(eventType)) return;
-    
     setRatingsLoading(true);
     try {
       const response = await api.get(`/allEvents/viewAllRatings/${eventId}/${eventType}`);
@@ -621,6 +618,22 @@ useEffect(() => {
       console.error('Failed to fetch ratings:', error);
       setRatings([]);
       setUserRating(0);
+    } finally {
+      setRatingsLoading(false);
+    }
+  };
+
+  const handleViewRatings = async (eventRaw, eventId, eventType) => {
+    setSelectedEvent(eventRaw);
+    setShowRatingsListModal(true);
+    
+    setRatingsLoading(true);
+    try {
+      const response = await api.get(`/allEvents/viewAllRatings/${eventId}/${eventType}`);
+      setRatings(response.data.ratings || []);
+    } catch (error) {
+      console.error('Failed to fetch ratings:', error);
+      setRatings([]);
     } finally {
       setRatingsLoading(false);
     }
@@ -691,6 +704,34 @@ useEffect(() => {
     setSelectedRatingEvent(null);
     setRatings([]);
     setUserRating(0);
+  };
+
+  const closeRatingsListModal = () => {
+    setShowRatingsListModal(false);
+    setSelectedEvent(null);
+  };
+
+  const deleteComment = async (commentId) => {
+    if (!selectedRatingEvent) return;
+    
+    // Show confirmation dialog
+    const confirmDelete = window.confirm("Are you sure you want to delete this comment? This action cannot be undone.");
+    if (!confirmDelete) return;
+    
+    try {
+      const eventDetails = getEventDetails(selectedRatingEvent);
+      await api.delete(`/allEvents/deleteComment/${eventDetails.id}/${commentId}/${eventDetails.type}`);
+      
+      // Refresh comments after deletion
+      const response = await api.get(`/allEvents/viewAllComments/${eventDetails.id}/${eventDetails.type}`);
+      setComments(response.data.userComments || []);
+      
+      // Trigger refresh of all EventCard components
+      setRefreshTrigger(prev => prev + 1);
+    } catch (error) {
+      console.error('Failed to delete comment:', error);
+      alert(`Failed to delete comment: ${error.response?.data?.message || error.message}`);
+    }
   };
 
   const submitRegistration = async () => {
@@ -980,6 +1021,7 @@ useEffect(() => {
                 onToggleFavourite={handleToggleFavourite}
                 onViewComments={handleViewComments}
                 onRateEvent={handleRateEvent}
+                onViewRatings={handleViewRatings}
                 refreshTrigger={refreshTrigger}
               />
             ))}
@@ -1059,15 +1101,27 @@ useEffect(() => {
                   <div className="space-y-4">
                     {comments.map((comment, index) => (
                       <div key={index} className="border-b border-gray-100 pb-3 last:border-b-0">
-                        <div className="flex items-center gap-2 mb-2">
-                          <div className="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center">
-                            <User size={16} className="text-blue-600" />
+                        <div className="flex items-center justify-between mb-2">
+                          <div className="flex items-center gap-2">
+                            <div className="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center">
+                              <User size={16} className="text-blue-600" />
+                            </div>
+                            <span className="font-medium text-gray-800">
+                              {comment.userId?.firstname && comment.userId?.lastname 
+                                ? `${comment.userId.firstname} ${comment.userId.lastname}`
+                                : comment.userId?.firstname || comment.userId?.lastname || 'Anonymous'}
+                            </span>
                           </div>
-                          <span className="font-medium text-gray-800">
-                            {comment.userId?.firstname || comment.userId?.lastname 
-                              ? `${comment.userId.firstname || ''} ${comment.userId.lastname || ''}`.trim()
-                              : 'Anonymous User'}
-                          </span>
+                          {/* Delete button - only visible to admins */}
+                          {user?.role === "Admin" && (
+                            <button
+                              onClick={() => deleteComment(comment._id)}
+                              className="text-red-500 hover:text-red-700 hover:bg-red-50 p-1 rounded transition-colors"
+                              title="Delete comment"
+                            >
+                              <Trash2 size={16} />
+                            </button>
+                          )}
                         </div>
                         <p className="text-gray-700 ml-10">{comment.comment}</p>
                       </div>
@@ -1081,27 +1135,29 @@ useEffect(() => {
                 </div>
               </div>
               
-              {/* Add Comment Form */}
-              <div className="p-6 border-t bg-gray-50">
-                <h4 className="font-semibold text-gray-800 mb-3">Add a Comment</h4>
-                <div className="flex gap-3">
-                  <textarea
-                    value={newComment}
-                    onChange={(e) => setNewComment(e.target.value)}
-                    placeholder="Share your thoughts about this event..."
-                    className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#4C3BCF] focus:border-transparent resize-none"
-                    rows="3"
-                    disabled={commentSubmitting}
-                  />
-                  <button
-                    onClick={submitComment}
-                    disabled={!newComment.trim() || commentSubmitting}
-                    className="px-4 py-2 bg-[#4C3BCF] text-white rounded-lg hover:bg-[#3730A3] transition-colors disabled:opacity-50 disabled:cursor-not-allowed h-fit"
-                  >
-                    {commentSubmitting ? 'Posting...' : 'Post'}
-                  </button>
+              {/* Add Comment Form - Only for regular users */}
+              {user?.role !== "Admin" && user?.role !== "Event office" && (
+                <div className="p-6 border-t bg-gray-50">
+                  <h4 className="font-semibold text-gray-800 mb-3">Add a Comment</h4>
+                  <div className="flex gap-3">
+                    <textarea
+                      value={newComment}
+                      onChange={(e) => setNewComment(e.target.value)}
+                      placeholder="Share your thoughts about this event..."
+                      className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#4C3BCF] focus:border-transparent resize-none"
+                      rows="3"
+                      disabled={commentSubmitting}
+                    />
+                    <button
+                      onClick={submitComment}
+                      disabled={!newComment.trim() || commentSubmitting}
+                      className="px-4 py-2 bg-[#4C3BCF] text-white rounded-lg hover:bg-[#3730A3] transition-colors disabled:opacity-50 disabled:cursor-not-allowed h-fit"
+                    >
+                      {commentSubmitting ? 'Posting...' : 'Post'}
+                    </button>
+                  </div>
                 </div>
-              </div>
+              )}
             </div>
           </div>
         );
@@ -1184,6 +1240,69 @@ useEffect(() => {
           </div>
         );
       })()}
+
+      {/* Ratings List Modal */}
+      {showRatingsListModal && selectedEvent && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50" onClick={closeRatingsListModal}>
+          <div className="bg-white rounded-lg p-6 max-w-md w-full max-h-[80vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
+            <div className="flex justify-between items-center mb-4">
+              <h3 className="text-lg font-semibold">Ratings for {getEventDetails(selectedEvent).name}</h3>
+              <button 
+                onClick={closeRatingsListModal}
+                className="text-gray-500 hover:text-gray-700"
+              >
+                ✕
+              </button>
+            </div>
+
+            <div className="space-y-3">
+              {ratingsLoading ? (
+                <div className="text-center py-4">
+                  <div className="text-gray-500">Loading ratings...</div>
+                </div>
+              ) : ratings && ratings.length > 0 ? (
+                ratings.map((rating, index) => (
+                  <div key={index} className="border-b border-gray-200 pb-3">
+                    <div className="flex items-center justify-between">
+                      <span className="font-medium text-gray-800">
+                        {rating.userId?.firstname && rating.userId?.lastname 
+                          ? `${rating.userId.firstname} ${rating.userId.lastname}`
+                          : rating.userId?.firstname || rating.userId?.lastname || 'Anonymous'}
+                      </span>
+                      <div className="flex">
+                        {[1, 2, 3, 4, 5].map((star) => (
+                          <span
+                            key={star}
+                            className={`text-lg ${
+                              star <= rating.rating ? 'text-yellow-400' : 'text-gray-300'
+                            }`}
+                          >
+                            ★
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                    {rating.comment && (
+                      <p className="text-gray-600 text-sm mt-1">{rating.comment}</p>
+                    )}
+                  </div>
+                ))
+              ) : (
+                <p className="text-gray-500 text-center py-4">No ratings available for this event.</p>
+              )}
+            </div>
+
+            <div className="mt-4 pt-3 border-t">
+              <button
+                onClick={closeRatingsListModal}
+                className="w-full px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors"
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
