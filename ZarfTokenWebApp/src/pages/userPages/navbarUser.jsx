@@ -297,7 +297,7 @@ const NavbarUser = () => {
                 }
               >
                 <Star className="h-4 w-4" />
-                Loyals
+                Loyalty Partners
               </NavLink>
               <NavLink
                 to="/dashboard/user/vendors-poll"

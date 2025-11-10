@@ -7,6 +7,7 @@ import WorkshopRequests from "./WorkshopRequests";
 import ArchivedEvents from "./ArchivedEvents";
 import GenerateQR from "./GenerateQR";
 import LoyaltyVendors from "../adminPages/LoyaltyVendors";
+import LoyaltyPartnersDirectory from "./LoyaltyPartnersDirectory";
 import VendorRequests from "../adminPages/VendorRequests";
 import VendorPoll from "./VendorPoll";
 import GymSchedule from "../userPages/GymSchedule";
@@ -27,6 +28,7 @@ const mainDashboardEventsOffice = () => {
           <Route path="archived-events" element={<ArchivedEvents />} />
           <Route path="generate-qr" element={<GenerateQR />} />
           <Route path="loyalty-vendors" element={<LoyaltyVendors />} />
+          <Route path="loyalty-program" element={<LoyaltyPartnersDirectory />} />
           <Route path="vendor-requests" element={<VendorRequests />} />
           <Route path="vendor-poll" element={<VendorPoll />} />
           <Route path="gym-schedule" element={<GymSchedule />} />
