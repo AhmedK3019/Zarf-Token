@@ -65,6 +65,12 @@ const boothSchema = new mongoose.Schema(
       },
     },
     archive: { type: Boolean, default: false },
+    allowedusers: [
+      {
+        type: String,
+        enum: ["Student", "Professor", "TA", "Staff", "Event office", "Admin"],
+      },
+    ],
   },
   { timestamps: true }
 );
