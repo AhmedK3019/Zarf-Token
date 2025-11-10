@@ -26,6 +26,7 @@ export default function RegisteredEvents() {
   const [refreshTrigger, setRefreshTrigger] = useState(0);
   const [showCommentsModal, setShowCommentsModal] = useState(false);
   const [showRatingModal, setShowRatingModal] = useState(false);
+  const [showRatingsListModal, setShowRatingsListModal] = useState(false);
   const [selectedRatingEvent, setSelectedRatingEvent] = useState(null);
   const [comments, setComments] = useState([]);
   const [ratings, setRatings] = useState([]);
@@ -250,8 +251,6 @@ export default function RegisteredEvents() {
     setSelectedRatingEvent(eventRaw);
     setShowCommentsModal(true);
     
-    if (['booth'].includes(eventType)) return;
-    
     setCommentsLoading(true);
     try {
       const response = await api.get(`/allEvents/viewAllComments/${eventId}/${eventType}`);
@@ -267,8 +266,6 @@ export default function RegisteredEvents() {
   const handleRateEvent = async (eventRaw, eventId, eventType) => {
     setSelectedRatingEvent(eventRaw);
     setShowRatingModal(true);
-    
-    if (['booth'].includes(eventType)) return;
     
     setRatingsLoading(true);
     try {
@@ -350,6 +347,27 @@ export default function RegisteredEvents() {
     setUserRating(0);
   };
 
+  const handleViewRatings = async (eventRaw, eventId, eventType) => {
+    setSelectedEvent(eventRaw);
+    setShowRatingsListModal(true);
+    
+    setRatingsLoading(true);
+    try {
+      const response = await api.get(`/allEvents/viewAllRatings/${eventId}/${eventType}`);
+      setRatings(response.data.ratings || []);
+    } catch (error) {
+      console.error('Failed to fetch ratings:', error);
+      setRatings([]);
+    } finally {
+      setRatingsLoading(false);
+    }
+  };
+
+  const closeRatingsListModal = () => {
+    setShowRatingsListModal(false);
+    setSelectedEvent(null);
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen w-full bg-muted flex items-center justify-center text-[#736CED]">
@@ -399,6 +417,7 @@ export default function RegisteredEvents() {
                     onToggleFavourite={handleToggleFavourite}
                     onViewComments={handleViewComments}
                     onRateEvent={handleRateEvent}
+                    onViewRatings={handleViewRatings}
                     refreshTrigger={refreshTrigger}
                     renderRegistrationControls={renderRegistrationControls}
                   />
@@ -607,6 +626,67 @@ export default function RegisteredEvents() {
             </div>
           );
         })()}
+
+        {/* Ratings List Modal */}
+        {showRatingsListModal && selectedEvent && (
+          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50" onClick={closeRatingsListModal}>
+            <div className="bg-white rounded-lg p-6 max-w-md w-full max-h-[80vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
+            <div className="flex justify-between items-center mb-4">
+              <h3 className="text-lg font-semibold">Ratings for {getEventDetails(selectedEvent).name}</h3>
+              <button 
+                onClick={closeRatingsListModal}
+                className="text-gray-500 hover:text-gray-700"
+              >
+                ✕
+              </button>
+            </div>              <div className="space-y-3">
+                {ratingsLoading ? (
+                  <div className="text-center py-4">
+                    <div className="text-gray-500">Loading ratings...</div>
+                  </div>
+                ) : ratings && ratings.length > 0 ? (
+                  ratings.map((rating, index) => (
+                    <div key={index} className="border-b border-gray-200 pb-3">
+                      <div className="flex items-center justify-between">
+                        <span className="font-medium text-gray-800">
+                          {rating.userId?.firstname && rating.userId?.lastname 
+                            ? `${rating.userId.firstname} ${rating.userId.lastname}`
+                            : rating.userId?.firstname || rating.userId?.lastname || 'Anonymous'}
+                        </span>
+                        <div className="flex">
+                          {[1, 2, 3, 4, 5].map((star) => (
+                            <span
+                              key={star}
+                              className={`text-lg ${
+                                star <= rating.rating ? 'text-yellow-400' : 'text-gray-300'
+                              }`}
+                            >
+                              ★
+                            </span>
+                          ))}
+                        </div>
+                      </div>
+                      {rating.comment && (
+                        <p className="text-gray-600 text-sm mt-1">{rating.comment}</p>
+                      )}
+                    </div>
+                  ))
+                ) : (
+                  <p className="text-gray-500 text-center py-4">No ratings available for this event.</p>
+                )}
+              </div>
+
+              <div className="mt-4 pt-3 border-t">
+                <button
+                  onClick={closeRatingsListModal}
+                  className="w-full px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors"
+                >
+                  Close
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );

@@ -199,6 +199,7 @@ const AllEvents = () => {
   // Rating and Comments Modal States
   const [showCommentsModal, setShowCommentsModal] = useState(false);
   const [showRatingModal, setShowRatingModal] = useState(false);
+  const [showRatingsListModal, setShowRatingsListModal] = useState(false);
   const [selectedRatingEvent, setSelectedRatingEvent] = useState(null);
   const [comments, setComments] = useState([]);
   const [ratings, setRatings] = useState([]);
@@ -578,8 +579,6 @@ useEffect(() => {
     setSelectedRatingEvent(eventRaw);
     setShowCommentsModal(true);
     
-    if (['booth'].includes(eventType)) return;
-    
     setCommentsLoading(true);
     try {
       const response = await api.get(`/allEvents/viewAllComments/${eventId}/${eventType}`);
@@ -607,8 +606,6 @@ useEffect(() => {
     
     setShowRatingModal(true);
     
-    if (['booth'].includes(eventType)) return;
-    
     setRatingsLoading(true);
     try {
       const response = await api.get(`/allEvents/viewAllRatings/${eventId}/${eventType}`);
@@ -621,6 +618,22 @@ useEffect(() => {
       console.error('Failed to fetch ratings:', error);
       setRatings([]);
       setUserRating(0);
+    } finally {
+      setRatingsLoading(false);
+    }
+  };
+
+  const handleViewRatings = async (eventRaw, eventId, eventType) => {
+    setSelectedEvent(eventRaw);
+    setShowRatingsListModal(true);
+    
+    setRatingsLoading(true);
+    try {
+      const response = await api.get(`/allEvents/viewAllRatings/${eventId}/${eventType}`);
+      setRatings(response.data.ratings || []);
+    } catch (error) {
+      console.error('Failed to fetch ratings:', error);
+      setRatings([]);
     } finally {
       setRatingsLoading(false);
     }
@@ -691,6 +704,11 @@ useEffect(() => {
     setSelectedRatingEvent(null);
     setRatings([]);
     setUserRating(0);
+  };
+
+  const closeRatingsListModal = () => {
+    setShowRatingsListModal(false);
+    setSelectedEvent(null);
   };
 
   const submitRegistration = async () => {
@@ -980,6 +998,7 @@ useEffect(() => {
                 onToggleFavourite={handleToggleFavourite}
                 onViewComments={handleViewComments}
                 onRateEvent={handleRateEvent}
+                onViewRatings={handleViewRatings}
                 refreshTrigger={refreshTrigger}
               />
             ))}
@@ -1064,9 +1083,9 @@ useEffect(() => {
                             <User size={16} className="text-blue-600" />
                           </div>
                           <span className="font-medium text-gray-800">
-                            {comment.userId?.firstname || comment.userId?.lastname 
-                              ? `${comment.userId.firstname || ''} ${comment.userId.lastname || ''}`.trim()
-                              : 'Anonymous User'}
+                            {comment.userId?.firstname && comment.userId?.lastname 
+                              ? `${comment.userId.firstname} ${comment.userId.lastname}`
+                              : comment.userId?.firstname || comment.userId?.lastname || 'Anonymous'}
                           </span>
                         </div>
                         <p className="text-gray-700 ml-10">{comment.comment}</p>
@@ -1184,6 +1203,69 @@ useEffect(() => {
           </div>
         );
       })()}
+
+      {/* Ratings List Modal */}
+      {showRatingsListModal && selectedEvent && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50" onClick={closeRatingsListModal}>
+          <div className="bg-white rounded-lg p-6 max-w-md w-full max-h-[80vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
+            <div className="flex justify-between items-center mb-4">
+              <h3 className="text-lg font-semibold">Ratings for {getEventDetails(selectedEvent).name}</h3>
+              <button 
+                onClick={closeRatingsListModal}
+                className="text-gray-500 hover:text-gray-700"
+              >
+                ✕
+              </button>
+            </div>
+
+            <div className="space-y-3">
+              {ratingsLoading ? (
+                <div className="text-center py-4">
+                  <div className="text-gray-500">Loading ratings...</div>
+                </div>
+              ) : ratings && ratings.length > 0 ? (
+                ratings.map((rating, index) => (
+                  <div key={index} className="border-b border-gray-200 pb-3">
+                    <div className="flex items-center justify-between">
+                      <span className="font-medium text-gray-800">
+                        {rating.userId?.firstname && rating.userId?.lastname 
+                          ? `${rating.userId.firstname} ${rating.userId.lastname}`
+                          : rating.userId?.firstname || rating.userId?.lastname || 'Anonymous'}
+                      </span>
+                      <div className="flex">
+                        {[1, 2, 3, 4, 5].map((star) => (
+                          <span
+                            key={star}
+                            className={`text-lg ${
+                              star <= rating.rating ? 'text-yellow-400' : 'text-gray-300'
+                            }`}
+                          >
+                            ★
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                    {rating.comment && (
+                      <p className="text-gray-600 text-sm mt-1">{rating.comment}</p>
+                    )}
+                  </div>
+                ))
+              ) : (
+                <p className="text-gray-500 text-center py-4">No ratings available for this event.</p>
+              )}
+            </div>
+
+            <div className="mt-4 pt-3 border-t">
+              <button
+                onClick={closeRatingsListModal}
+                className="w-full px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors"
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

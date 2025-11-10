@@ -31,6 +31,7 @@ const EventCard = ({
   onToggleFavourite,
   onViewComments,
   onRateEvent,
+  onViewRatings,
   refreshTrigger,
   renderRegistrationControls,
   footerExtra,
@@ -499,7 +500,12 @@ const EventCard = ({
             ) : (
               <>
                 <div className="flex items-center justify-between mb-3">
-                  <div className="flex items-center gap-1">
+                  <button
+                    onClick={() =>
+                      onViewRatings?.(event.original, event.id, event.type)
+                    }
+                    className="flex items-center gap-1 hover:bg-gray-50 rounded-lg p-1 -ml-1 transition-colors group"
+                  >
                     <div className="flex">
                       {[1, 2, 3, 4, 5].map((star) => (
                         <Star
@@ -507,9 +513,9 @@ const EventCard = ({
                           size={14}
                           className={`${
                             star <= Math.round(averageRating)
-                              ? "text-yellow-400 fill-current"
-                              : "text-gray-300"
-                          }`}
+                              ? "text-yellow-400 fill-current group-hover:text-yellow-500"
+                              : "text-gray-300 group-hover:text-gray-400"
+                          } transition-colors`}
                         />
                       ))}
                     </div>
@@ -520,7 +526,7 @@ const EventCard = ({
                         : "No ratings"}
                       )
                     </span>
-                  </div>
+                  </button>
                   <span className="text-xs text-gray-500">
                     {ratings.length} rating{ratings.length !== 1 ? "s" : ""}
                   </span>
