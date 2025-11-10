@@ -127,7 +127,7 @@ const Courts = () => {
 
     try {
       const studentData = {
-        studentId: { type: String, required: true },
+        studentId: "672a4b69a93f8f22b6e0b9a3",
         studentName: "John Doe",
         studentGucId: "GUC2025",
       };
