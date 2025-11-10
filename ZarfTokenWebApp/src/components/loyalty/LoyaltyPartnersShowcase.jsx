@@ -361,48 +361,68 @@ export default function LoyaltyPartnersShowcase({
               {filteredPartners.map((partner) => {
                 const isExpanded = expanded.has(partner.id);
                 const readableDate = formatDate(partner.reviewedAt || partner.referenceDate);
+                const vendorInitial =
+                  partner.vendorLabel?.charAt(0)?.toUpperCase() || partner.promoCode?.charAt(0) || "?";
                 return (
                   <article
                     key={partner.id}
                     className="flex h-full flex-col rounded-[30px] border border-white/70 bg-white/95 p-6 shadow-xl shadow-[#4C3BCF]/10"
                   >
                     <div className="flex items-start justify-between gap-4">
-                      <div>
-                        <p className="text-xs font-semibold uppercase tracking-wide text-[#B0AADF]">
-                          Approved partner
-                        </p>
-                        <h3 className="mt-1 text-2xl font-bold text-[#251E53]">
-                          {partner.vendorLabel}
-                        </h3>
-                        {partner.vendorEmail && (
-                          <p className="text-sm text-[#6B64A8]">{partner.vendorEmail}</p>
+                      <div className="flex gap-4">
+                        {partner.logo ? (
+                          <div className="h-16 w-16 overflow-hidden rounded-2xl border border-[#E4E0FF] bg-white">
+                            <img
+                              src={partner.logo}
+                              alt={`${partner.vendorLabel} logo`}
+                              className="h-full w-full object-cover"
+                              loading="lazy"
+                            />
+                          </div>
+                        ) : (
+                          <div className="flex h-16 w-16 items-center justify-center rounded-2xl border border-dashed border-[#E4E0FF] bg-[#F7F5FF] text-lg font-bold text-[#4C3BCF]">
+                            {vendorInitial}
+                          </div>
                         )}
+                        <div>
+                          <div className="flex flex-wrap items-center gap-2 text-xs font-semibold uppercase tracking-wide text-[#B0AADF]">
+                            <p>Approved partner</p>
+                            {readableDate && (
+                              <span className="rounded-full bg-[#EDEBFF] px-3 py-1 text-[0.65rem] font-semibold text-[#4C3BCF]">
+                                Updated {readableDate}
+                              </span>
+                            )}
+                          </div>
+                          <h3 className="mt-1 text-2xl font-bold text-[#251E53]">
+                            {partner.vendorLabel}
+                          </h3>
+                          {partner.vendorEmail && (
+                            <p className="text-sm text-[#6B64A8]">{partner.vendorEmail}</p>
+                          )}
+                        </div>
                       </div>
                       <div className="flex flex-col items-end gap-2 text-right">
-                        <span className="inline-flex rounded-full bg-[#F2EDFF] px-3 py-1 text-xs font-semibold text-[#4C3BCF]">
-                          {partner.discountRate}% OFF
+                        <span className="inline-flex rounded-full bg-[#F2EDFF] px-3 py-1 text-sm font-semibold text-[#4C3BCF]">
+                          {partner.discountRate}% off
                         </span>
-                        <span className="text-xs text-[#8F88BF]">
-                          {readableDate ? `Updated ${readableDate}` : "Awaiting review date"}
+                        <p className="text-xs font-semibold uppercase tracking-wide text-[#B0AADF]">
+                          Promo code
+                        </p>
+                        <span className="text-lg font-semibold text-[#251E53]">
+                          {partner.promoCode}
                         </span>
+                        <button
+                          type="button"
+                          onClick={() => handleCopyPromo(partner.promoCode)}
+                          className={`inline-flex items-center gap-2 rounded-2xl px-3 py-1 text-xs font-semibold transition ${
+                            copiedCode === partner.promoCode
+                              ? "bg-emerald-100 text-emerald-700"
+                              : "border border-[#D8D3FF] text-[#4C3BCF] hover:bg-[#EFEAFF]"
+                          }`}
+                        >
+                          {copiedCode === partner.promoCode ? "Copied" : "Copy code"}
+                        </button>
                       </div>
-                    </div>
-
-                    <div className="mt-5 flex flex-wrap items-center gap-3">
-                      <div className="inline-flex rounded-2xl border border-[#E4E0FF] bg-[#F7F5FF] px-4 py-2 text-sm font-semibold text-[#4C3BCF]">
-                        Promo: {partner.promoCode}
-                      </div>
-                      <button
-                        type="button"
-                        onClick={() => handleCopyPromo(partner.promoCode)}
-                        className={`inline-flex items-center gap-2 rounded-2xl px-4 py-2 text-sm font-semibold transition ${
-                          copiedCode === partner.promoCode
-                            ? "bg-emerald-100 text-emerald-700"
-                            : "border border-[#D8D3FF] text-[#4C3BCF] hover:bg-[#EFEAFF]"
-                        }`}
-                      >
-                        {copiedCode === partner.promoCode ? "Copied" : "Copy code"}
-                      </button>
                     </div>
 
                     <div className="mt-5 rounded-2xl bg-[#F7F5FF] p-4">
@@ -422,9 +442,17 @@ export default function LoyaltyPartnersShowcase({
                           onClick={() => toggleExpanded(partner.id)}
                           className="mt-3 inline-flex text-sm font-semibold text-[#4C3BCF] transition hover:text-[#2E1CFF]"
                         >
-                          {isExpanded ? "Show less" : "Read full terms"}
+                          {isExpanded ? "Show less" : "Expand terms"}
                         </button>
                       )}
+                      <div className="mt-4 flex justify-end">
+                        <button
+                          type="button"
+                          className="inline-flex items-center justify-center rounded-2xl border border-[#4C3BCF] px-4 py-2 text-sm font-semibold text-[#4C3BCF] transition hover:bg-[#4C3BCF] hover:text-white"
+                        >
+                          View Details
+                        </button>
+                      </div>
                     </div>
                   </article>
                 );
