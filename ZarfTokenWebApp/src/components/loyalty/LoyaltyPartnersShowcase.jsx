@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState } from "react";
-import { RefreshCcw } from "lucide-react";
+import { Filter, RefreshCcw, Search, ShieldCheck } from "lucide-react";
 import api from "../../services/api";
 
 const DISCOUNT_FILTERS = [
@@ -64,7 +64,7 @@ const SkeletonCard = () => (
 
 export default function LoyaltyPartnersShowcase({
   title = "GUC Loyalty Program Partners",
-  eyebrow = "Verified perks · On-campus favorites",
+  eyebrow,
   description = "Explore every active vendor in the GUC loyalty program. Each partner is reviewed by Events Office and Admin teams so that Students, Staff, TAs, Professors, Events Office, and Admins unlock trusted discounts.",
   audienceLabel = "Students · Staff · TAs · Professors · Events Office · Admin",
 } = {}) {
@@ -206,9 +206,11 @@ export default function LoyaltyPartnersShowcase({
     <div className="w-full bg-gradient-to-b from-[#FDFBFF] via-white to-[#F2F0FF] text-[#1F1B3B]">
       <div className="mx-auto flex w-full max-w-6xl flex-col gap-10 px-4 py-10 sm:px-6 lg:px-8">
         <section className="rounded-[32px] border border-white/60 bg-gradient-to-br from-white/90 via-white to-[#F4F1FF] p-8 shadow-2xl shadow-[#4C3BCF]/10">
-          <p className="text-xs font-semibold uppercase tracking-[0.3em] text-[#978FE0]">
-            {eyebrow}
-          </p>
+          {eyebrow && (
+            <p className="text-xs font-semibold uppercase tracking-[0.3em] text-[#978FE0]">
+              {eyebrow}
+            </p>
+          )}
           <h1 className="mt-3 text-3xl font-bold text-[#251E53] sm:text-4xl lg:text-5xl">
             {title}
           </h1>
@@ -216,7 +218,8 @@ export default function LoyaltyPartnersShowcase({
             {description}
           </p>
           <div className="mt-6 flex flex-wrap items-center gap-4 text-sm font-medium text-[#4B4470]">
-            <span className="inline-flex rounded-full bg-[#F2EDFF] px-4 py-2 text-[#4C3BCF]">
+            <span className="inline-flex items-center gap-2 rounded-full bg-[#F2EDFF] px-4 py-2 text-[#4C3BCF]">
+              <ShieldCheck className="h-4 w-4" />
               Verified for {audienceLabel}
             </span>
             {lastLoadedAt && (
@@ -256,16 +259,18 @@ export default function LoyaltyPartnersShowcase({
         <section className="space-y-5 rounded-[28px] border border-white/60 bg-white/90 p-6 shadow-xl shadow-[#4C3BCF]/10">
           <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
             <div className="flex flex-1 flex-wrap gap-3">
-              <div className="flex-1 min-w-[220px]">
+              <div className="relative flex-1 min-w-[220px]">
+                <Search className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-[#8C84C4]" />
                 <input
                   type="text"
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
                   placeholder="Search by vendor or promo code"
-                  className="w-full rounded-2xl border border-[#E4E0FF] bg-white py-3 px-4 text-sm text-[#312A68] placeholder:text-[#B3AEDE] focus:border-[#736CED] focus:outline-none"
+                  className="w-full rounded-2xl border border-[#E4E0FF] bg-white py-3 pl-10 pr-4 text-sm text-[#312A68] placeholder:text-[#B3AEDE] focus:border-[#736CED] focus:outline-none"
                 />
               </div>
-              <div className="rounded-2xl border border-dashed border-[#E4E0FF] px-4 py-3 text-sm text-[#4B4470]">
+              <div className="flex items-center gap-2 rounded-2xl border border-dashed border-[#E4E0FF] px-4 py-3 text-sm text-[#4B4470]">
+                <Filter className="h-4 w-4 text-[#736CED]" />
                 {filteredPartners.length} partners visible
               </div>
             </div>
