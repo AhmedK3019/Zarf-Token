@@ -564,22 +564,40 @@ export default function RegisteredEvents() {
             const walletBalance = Number(user?.wallet ?? 0);
             const canPayWallet = walletBalance >= amount && amount > 0;
 
+            const refreshRegistered = async () => {
+              try {
+                const res = await api.get(
+                  `/allEvents/getEventsRegisteredByMe/${user._id}`
+                );
+                setEvents(res.data || []);
+              } catch (_) {}
+            };
+
             const handlePayWithWallet = async () => {
               if (!canPayWallet) return;
               setPaySubmitting(true);
               try {
-                // TODO: integrate backend endpoint to charge wallet and confirm registration payment
-                // await api.post(`/payments/wallet/${details.type}/${details.id}`);
-                setToastMsg("Wallet payment flow to be integrated");
-                setToastType("info");
+                const endpointMap = {
+                  workshop: `/workshops/payForWorkshop/${details.id}`,
+                  trip: `/trips/payForTrip/${details.id}`,
+                };
+                const ep = endpointMap[details.type];
+                if (!ep)
+                  throw new Error("Wallet payment not supported for this type");
+                await api.post(ep, { method: "wallet" });
+                setToastMsg("Wallet payment successful");
+                setToastType("success");
                 setTimeout(() => setToastMsg(null), 1500);
                 setShowPayModal(false);
+                await refreshRegistered();
               } catch (e) {
                 setToastMsg(
-                  e?.response?.data?.message || "Wallet payment failed"
+                  e?.response?.data?.message ||
+                    e.message ||
+                    "Wallet payment failed"
                 );
                 setToastType("error");
-                setTimeout(() => setToastMsg(null), 2000);
+                setTimeout(() => setToastMsg(null), 2500);
               } finally {
                 setPaySubmitting(false);
               }
@@ -588,19 +606,28 @@ export default function RegisteredEvents() {
             const handlePayWithStripe = async () => {
               setPaySubmitting(true);
               try {
-                // TODO: integrate Stripe Checkout or Payment Element flow
-                // Example: const { data } = await api.post(`/payments/stripe/create-session`, { eventId: details.id, type: details.type });
-                // window.location.href = data.checkoutUrl;
-                setToastMsg("Stripe payment flow to be integrated");
-                setToastType("info");
-                setTimeout(() => setToastMsg(null), 1500);
-                setShowPayModal(false);
+                const endpointMap = {
+                  workshop: `/workshops/payForWorkshop/${details.id}`,
+                  trip: `/trips/payForTrip/${details.id}`,
+                };
+                const ep = endpointMap[details.type];
+                if (!ep)
+                  throw new Error("Stripe payment not supported for this type");
+                const { data } = await api.post(ep, { method: "stripe" });
+                if (data?.url) {
+                  // redirect to Stripe Checkout
+                  window.location.href = data.url;
+                } else {
+                  throw new Error("Stripe session URL missing");
+                }
               } catch (e) {
                 setToastMsg(
-                  e?.response?.data?.message || "Stripe payment failed"
+                  e?.response?.data?.message ||
+                    e.message ||
+                    "Stripe payment failed"
                 );
                 setToastType("error");
-                setTimeout(() => setToastMsg(null), 2000);
+                setTimeout(() => setToastMsg(null), 2500);
               } finally {
                 setPaySubmitting(false);
               }

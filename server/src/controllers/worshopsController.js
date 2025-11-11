@@ -1,6 +1,7 @@
 import WorkShop from "../models/Workshop.js";
 import EventsOffice from "../models/EventsOffice.js";
 import User from "../models/User.js";
+import Stripe from "stripe";
 import userController from "./userController.js";
 import mongoose from "mongoose";
 import Joi from "joi";
@@ -396,6 +397,7 @@ const cancelRegistration = async (req, res, next) => {
 };
 
 const payForWorkshop = async (req, res, next) => {
+  // Supports 'wallet' | 'stripe' | 'creditcard' (legacy mock)
   try {
     const { id } = req.params;
     const userId = req.userId;
@@ -413,25 +415,75 @@ const payForWorkshop = async (req, res, next) => {
         .json({ message: "You are not registered for this workshop" });
     if (attendee.paid)
       return res.status(400).json({ message: "You have already paid" });
+
+    const amount = workshop.requiredFunding; // unified field for cost
     if (method === "wallet") {
       const user = await User.findById(userId);
-      if (user.wallet < workshop.requiredFunding) {
+      if (!user) return res.status(404).json({ message: "User not found" });
+      if (user.wallet < amount) {
         return res.status(400).json({ message: "Insufficient funds" });
       }
-      user.wallet -= workshop.requiredFunding;
+      user.wallet -= amount;
       await user.save();
+      attendee.paid = true;
+      workshop.attendees.push(attendee);
+      workshop.registered = workshop.registered.filter(
+        (a) => a.userId.toString() !== userId.toString()
+      );
+      await workshop.save();
+      return res.status(200).json({ message: "Payment successful", workshop });
+    } else if (method === "stripe") {
+      if (!process.env.STRIPE_SECRET_KEY) {
+        return res
+          .status(500)
+          .json({ message: "Stripe is not configured on the server" });
+      }
+      try {
+        const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
+        const session = await stripe.checkout.sessions.create({
+          payment_method_types: ["card"],
+          mode: "payment",
+          line_items: [
+            {
+              price_data: {
+                currency: "egp",
+                product_data: { name: workshop.workshopname },
+                unit_amount: Math.round(amount * 100),
+              },
+              quantity: 1,
+            },
+          ],
+          success_url: `${
+            process.env.FRONTEND_URL || "http://localhost:5173"
+          }/payment-success?type=workshop&id=${id}&session_id={CHECKOUT_SESSION_ID}`,
+          cancel_url: `${
+            process.env.FRONTEND_URL || "http://localhost:5173"
+          }/payment-cancelled?type=workshop&id=${id}`,
+          metadata: { userId, workshopId: id, type: "workshop" },
+        });
+        return res
+          .status(200)
+          .json({ url: session.url, sessionId: session.id });
+      } catch (stripeErr) {
+        console.error("Stripe session creation failed", stripeErr);
+        return res
+          .status(500)
+          .json({ message: "Failed to create Stripe session" });
+      }
     } else if (method === "creditcard") {
-      // Process credit card payment (mocked)
-      // In real application, integrate with payment gateway
-      console.log("Processing credit card payment...");
+      // legacy mock path
+      attendee.paid = true;
+      workshop.attendees.push(attendee);
+      workshop.registered = workshop.registered.filter(
+        (a) => a.userId.toString() !== userId.toString()
+      );
+      await workshop.save();
+      return res
+        .status(200)
+        .json({ message: "Mock credit card payment successful", workshop });
+    } else {
+      return res.status(400).json({ message: "Unsupported payment method" });
     }
-    attendee.paid = true;
-    workshop.attendees.push(attendee);
-    workshop.registered = workshop.registered.filter(
-      (a) => a.userId.toString() !== userId.toString()
-    );
-    await workshop.save();
-    return res.status(200).json({ message: "Payment successful", workshop });
   } catch (error) {
     next(error);
   }
