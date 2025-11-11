@@ -47,17 +47,62 @@ const EventCard = ({
   const [comments, setComments] = useState([]);
   const [ratingsLoading, setRatingsLoading] = useState(true);
 
-  const inAttendees =
-    Array.isArray(event.attendees) &&
-    event.attendees.some(
-      (a) => String(a.userId ?? a.user ?? a._id) === String(user?._id)
-    );
+  // Robust ID normalization helpers (handles ObjectId, populated user docs, strings)
+  const toIdString = (val) => {
+    if (!val) return null;
+    if (typeof val === "string") return val;
+    if (typeof val === "number") return String(val);
+    if (typeof val === "object") {
+      if (val._id) return String(val._id);
+      // Mongoose ObjectId has a toString that returns hex string
+      if (
+        typeof val.toString === "function" &&
+        val.toString !== Object.prototype.toString
+      ) {
+        const s = val.toString();
+        return typeof s === "string" && s !== "[object Object]" ? s : null;
+      }
+    }
+    return null;
+  };
 
-  const inRegistered =
-    Array.isArray(event.registered) &&
-    event.registered.some(
-      (r) => String(r.userId ?? r.user ?? r._id) === String(user?._id)
+  const getEntryUserId = (entry) => {
+    if (!entry) return null;
+    // Try common shapes in order
+    return (
+      toIdString(entry.userId?._id) ||
+      toIdString(entry.userId) ||
+      toIdString(entry.user?._id) ||
+      toIdString(entry.user) ||
+      toIdString(entry._id) ||
+      toIdString(entry)
     );
+  };
+
+  const userIdStr = toIdString(user?._id);
+
+  const attendeesArr = Array.isArray(event.attendees)
+    ? event.attendees
+    : Array.isArray(rawEvent?.attendees)
+    ? rawEvent.attendees
+    : Array.isArray(event.original?.attendees)
+    ? event.original.attendees
+    : [];
+
+  const registeredArr = Array.isArray(event.registered)
+    ? event.registered
+    : Array.isArray(rawEvent?.registered)
+    ? rawEvent.registered
+    : Array.isArray(event.original?.registered)
+    ? event.original.registered
+    : [];
+
+  const inAttendees = Boolean(
+    userIdStr && attendeesArr.some((a) => getEntryUserId(a) === userIdStr)
+  );
+  const inRegistered = Boolean(
+    userIdStr && registeredArr.some((r) => getEntryUserId(r) === userIdStr)
+  );
 
   const isRegistered = inAttendees || inRegistered;
 
@@ -130,7 +175,7 @@ const EventCard = ({
     event.registrationDeadline &&
     new Date() < new Date(event.registrationDeadline) &&
     !isRegistered &&
-    (event.capacity ? event.attendees.length < event.capacity : true);
+    (event.capacity ? (attendeesArr?.length ?? 0) < event.capacity : true);
 
   const isBazaar = event.type === "bazaar";
   const isPlatformBooth =
@@ -384,7 +429,7 @@ const EventCard = ({
                 e.stopPropagation();
                 onToggleFavourite?.(rawEvent);
               }}
-              className="rounded-full border border-gray-200 bg-white/90 p-2 shadow-sm transition hover:bg-white"
+              className="rounded-full border border-gray-200 bg-white/90 p-2 shadow-sm transition hover:bg-white hover:shadow-md hover:cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2"
               title={
                 isFavourite ? "Remove from favourites" : "Add to favourites"
               }
@@ -544,8 +589,10 @@ const EventCard = ({
                   </button>
                   {/* Rate button - only for regular users */}
                   {user?.role !== "Admin" && user?.role !== "Event office" && (
-                    <button 
-                      onClick={() => onRateEvent?.(event.original, event.id, event.type)}
+                    <button
+                      onClick={() =>
+                        onRateEvent?.(event.original, event.id, event.type)
+                      }
                       className="flex-1 text-xs bg-green-50 text-green-700 px-3 py-1.5 rounded-lg hover:bg-green-100 transition-colors font-medium flex items-center justify-center gap-1"
                     >
                       <Star size={12} />

@@ -1,5 +1,6 @@
 import WorkShop from "../models/Workshop.js";
 import EventsOffice from "../models/EventsOffice.js";
+import User from "../models/User.js";
 import userController from "./userController.js";
 import mongoose from "mongoose";
 import Joi from "joi";
@@ -379,10 +380,58 @@ const cancelRegistration = async (req, res, next) => {
       { new: true }
     );
 
+    await User.findByIdAndUpdate(
+      userId,
+      { $inc: { wallet: updatedWorkshop.requiredFunding } },
+      { new: true }
+    );
+
     return res.status(200).json({
       message: "Registration canceled successfully",
       workshop: updatedWorkshop,
     });
+  } catch (error) {
+    next(error);
+  }
+};
+
+const payForWorkshop = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+    const userId = req.userId;
+    if (!userId) return res.status(401).json({ message: "No token provided" });
+    const workshop = await WorkShop.findById(id);
+    const method = req.body.method;
+    if (!workshop)
+      return res.status(404).json({ message: "Workshop not found" });
+    const attendee = workshop.registered.find(
+      (a) => a.userId.toString() === userId.toString()
+    );
+    if (!attendee)
+      return res
+        .status(404)
+        .json({ message: "You are not registered for this workshop" });
+    if (attendee.paid)
+      return res.status(400).json({ message: "You have already paid" });
+    if (method === "wallet") {
+      const user = await User.findById(userId);
+      if (user.wallet < workshop.requiredFunding) {
+        return res.status(400).json({ message: "Insufficient funds" });
+      }
+      user.wallet -= workshop.requiredFunding;
+      await user.save();
+    } else if (method === "creditcard") {
+      // Process credit card payment (mocked)
+      // In real application, integrate with payment gateway
+      console.log("Processing credit card payment...");
+    }
+    attendee.paid = true;
+    workshop.attendees.push(attendee);
+    workshop.registered = workshop.registered.filter(
+      (a) => a.userId.toString() !== userId.toString()
+    );
+    await workshop.save();
+    return res.status(200).json({ message: "Payment successful", workshop });
   } catch (error) {
     next(error);
   }
@@ -409,4 +458,5 @@ export default {
   requestEdits,
   acceptEdits,
   rejectEdits,
+  payForWorkshop,
 };
