@@ -207,11 +207,11 @@ const AllEvents = () => {
   const [ratingsLoading, setRatingsLoading] = useState(false);
   const [userRating, setUserRating] = useState(0);
   const [ratingSubmitting, setRatingSubmitting] = useState(false);
-  
+
   // Comment submission state
-  const [newComment, setNewComment] = useState('');
+  const [newComment, setNewComment] = useState("");
   const [commentSubmitting, setCommentSubmitting] = useState(false);
-  
+
   // Refresh trigger for EventCard components
   const [refreshTrigger, setRefreshTrigger] = useState(0);
 
@@ -249,11 +249,7 @@ const AllEvents = () => {
     "Online",
   ];
 
-  const filterableProfessors = [
-    "Dr Mo salah",
-    "Dr Marck",
-    "Catherine",
-  ];
+  const filterableProfessors = ["Dr Mo salah", "Dr Marck", "Catherine"];
 
   const userIsPrivileged =
     user?.role?.toLowerCase().includes("admin") ||
@@ -267,10 +263,19 @@ const AllEvents = () => {
   // Fetch favourites for heart status
   useEffect(() => {
     (async () => {
-      if (!user?._id) { setFavKeys(new Set()); return; }
+      if (!user?._id) {
+        setFavKeys(new Set());
+        return;
+      }
+      if (userIsPrivileged || !userIsEligible) {
+        setFavKeys(new Set());
+        return;
+      }
       try {
         const res = await api.get(`/user/getFavourites/${user._id}`);
-        const setKeys = new Set((res?.data?.favourites||[]).map(f => `${f.itemType}:${f.itemId}`));
+        const setKeys = new Set(
+          (res?.data?.favourites || []).map((f) => `${f.itemType}:${f.itemId}`)
+        );
         setFavKeys(setKeys);
       } catch (e) {
         // non-fatal
@@ -324,140 +329,163 @@ const AllEvents = () => {
     setSearchTerm("");
   }, [selectedCategory]);
 
-// Search, Filtering and Sorting logic
-useEffect(() => {
-  // 1. Get all filter values
-  const lowercasedSearch = searchTerm.toLowerCase().trim();
-  const hasSearch = lowercasedSearch !== "";
+  // Search, Filtering and Sorting logic
+  useEffect(() => {
+    // 1. Get all filter values
+    const lowercasedSearch = searchTerm.toLowerCase().trim();
+    const hasSearch = lowercasedSearch !== "";
 
-  const lowercasedLocation = filterLocation.toLowerCase();
-  const hasLocationFilter = lowercasedLocation !== "";
+    const lowercasedLocation = filterLocation.toLowerCase();
+    const hasLocationFilter = lowercasedLocation !== "";
 
-  const hasProfessorFilter = filterProfessor.toLowerCase() !== "";
-  const lowercasedProfessor = filterProfessor.toLowerCase();
-  
-  const hasDateFilter = filterDate.trim() !== "";
-  const hasStartDateFilter = startDateFilter.trim() !== "";
-  const hasEndDateFilter = endDateFilter.trim() !== "";
+    const hasProfessorFilter = filterProfessor.toLowerCase() !== "";
+    const lowercasedProfessor = filterProfessor.toLowerCase();
 
-  // 2. Apply all filters
-  let filtered = events.filter((rawEvent) => {
-    const event = getEventDetails(rawEvent);
+    const hasDateFilter = filterDate.trim() !== "";
+    const hasStartDateFilter = startDateFilter.trim() !== "";
+    const hasEndDateFilter = endDateFilter.trim() !== "";
 
-    // Filter 1: Main Search Bar (Name, general text, etc.)
-    let matchesSearch = true;
-    if (hasSearch) {
-      let searchtype = "";
-      if (event.type === "booth") {
-        searchtype = "platform booth";
-      }
-      matchesSearch =
-        event.name?.toLowerCase().includes(lowercasedSearch) ||
-        `${event.createdBy?.firstname} ${event.createdBy?.lastname}`
-          .toLowerCase()
-          .includes(lowercasedSearch) ||
-        event.professors?.some((prof) =>
-          `${prof.firstname} ${prof.lastname}`
+    // 2. Apply all filters
+    let filtered = events.filter((rawEvent) => {
+      const event = getEventDetails(rawEvent);
+
+      // Filter 1: Main Search Bar (Name, general text, etc.)
+      let matchesSearch = true;
+      if (hasSearch) {
+        let searchtype = "";
+        if (event.type === "booth") {
+          searchtype = "platform booth";
+        }
+        matchesSearch =
+          event.name?.toLowerCase().includes(lowercasedSearch) ||
+          `${event.createdBy?.firstname} ${event.createdBy?.lastname}`
             .toLowerCase()
-            .includes(lowercasedSearch)
-        ) ||
-        event.type?.toLowerCase().includes(lowercasedSearch) ||
-        searchtype.toLowerCase().includes(lowercasedSearch) ||
-        event.location?.toLowerCase().includes(lowercasedSearch) ||
-        event.vendor?.toLowerCase().includes(lowercasedSearch) ||
-        (event.original?.vendorId?.companyname
-          ?.toLowerCase()
-          .includes(lowercasedSearch));
-    }
-
-    // Filter 2: Dedicated Location Filter
-    const matchesLocation =
-      !hasLocationFilter ||
-      event.location?.toLowerCase().includes(lowercasedLocation);
-
-    // Filter 3: Professor Filter
-    let matchesProfessor = true;
-    if (hasProfessorFilter) {
-      if (event.type === "workshop" || event.type === "conference") {
-        const conferenceProfMatch =
-          event.type === "conference" &&
-          event.professorname?.toLowerCase().includes(lowercasedProfessor);
-
-        const workshopProfMatch =
-          event.type === "workshop" &&
+            .includes(lowercasedSearch) ||
           event.professors?.some((prof) =>
             `${prof.firstname} ${prof.lastname}`
               .toLowerCase()
-              .includes(lowercasedProfessor)
-          );
-        
-        matchesProfessor = conferenceProfMatch || workshopProfMatch;
-      } else {
-        matchesProfessor = false; 
+              .includes(lowercasedSearch)
+          ) ||
+          event.type?.toLowerCase().includes(lowercasedSearch) ||
+          searchtype.toLowerCase().includes(lowercasedSearch) ||
+          event.location?.toLowerCase().includes(lowercasedSearch) ||
+          event.vendor?.toLowerCase().includes(lowercasedSearch) ||
+          event.original?.vendorId?.companyname
+            ?.toLowerCase()
+            .includes(lowercasedSearch);
       }
-    }
 
-    // Filter 4: Specific Date Filter (exact match)
-    let matchesDate = true;
-    if (hasDateFilter && event.startDate) {
-      const filterParts = filterDate.split("-").map(Number);
-      const filterYear = filterParts[0];
-      const filterMonth = filterParts[1] - 1;
-      const filterDay = filterParts[2];
+      // Filter 2: Dedicated Location Filter
+      const matchesLocation =
+        !hasLocationFilter ||
+        event.location?.toLowerCase().includes(lowercasedLocation);
 
-      const eventStartDate = new Date(event.startDate);
-      const eventYear = eventStartDate.getFullYear();
-      const eventMonth = eventStartDate.getMonth();
-      const eventDay = eventStartDate.getDate();
-      
-      matchesDate = (eventYear === filterYear) && (eventMonth === filterMonth) && (eventDay === filterDay);
-    }
+      // Filter 3: Professor Filter
+      let matchesProfessor = true;
+      if (hasProfessorFilter) {
+        if (event.type === "workshop" || event.type === "conference") {
+          const conferenceProfMatch =
+            event.type === "conference" &&
+            event.professorname?.toLowerCase().includes(lowercasedProfessor);
 
-    // Filter 5: Start Date Range Filter (INCLUSIVE - events on or after start date)
-    let matchesStartDate = true;
-    if (hasStartDateFilter && event.startDate) {
-      const filterStartDate = new Date(startDateFilter);
-      const eventStartDate = new Date(event.startDate);
-      // Set both dates to midnight for proper inclusive comparison
-      filterStartDate.setHours(0, 0, 0, 0);
-      eventStartDate.setHours(0, 0, 0, 0);
-      matchesStartDate = eventStartDate >= filterStartDate;
-    }
+          const workshopProfMatch =
+            event.type === "workshop" &&
+            event.professors?.some((prof) =>
+              `${prof.firstname} ${prof.lastname}`
+                .toLowerCase()
+                .includes(lowercasedProfessor)
+            );
 
-    // Filter 6: End Date Range Filter (INCLUSIVE - events on or before end date)  
-    let matchesEndDate = true;
-    if (hasEndDateFilter && event.startDate) {
-      const filterEndDate = new Date(endDateFilter);
-      const eventStartDate = new Date(event.startDate);
-      // Set both dates to midnight for proper inclusive comparison
-      filterEndDate.setHours(0, 0, 0, 0);
-      eventStartDate.setHours(0, 0, 0, 0);
-      matchesEndDate = eventStartDate <= filterEndDate;
-    }
-    // Must match ALL active filters
-    return matchesSearch && matchesLocation && matchesProfessor && matchesDate && matchesStartDate && matchesEndDate;
-  });
-
-  // 3. Apply Date Sorting
-  if (dateSort) {
-    filtered = filtered.sort((a, b) => {
-      const eventA = getEventDetails(a);
-      const eventB = getEventDetails(b);
-      
-      const dateA = eventA.startDate ? new Date(eventA.startDate) : new Date(0);
-      const dateB = eventB.startDate ? new Date(eventB.startDate) : new Date(0);
-      
-      if (dateSort === "newest") {
-        return dateB - dateA; // Most recent first
-      } else if (dateSort === "oldest") {
-        return dateA - dateB; // Oldest first
+          matchesProfessor = conferenceProfMatch || workshopProfMatch;
+        } else {
+          matchesProfessor = false;
+        }
       }
-      return 0;
+
+      // Filter 4: Specific Date Filter (exact match)
+      let matchesDate = true;
+      if (hasDateFilter && event.startDate) {
+        const filterParts = filterDate.split("-").map(Number);
+        const filterYear = filterParts[0];
+        const filterMonth = filterParts[1] - 1;
+        const filterDay = filterParts[2];
+
+        const eventStartDate = new Date(event.startDate);
+        const eventYear = eventStartDate.getFullYear();
+        const eventMonth = eventStartDate.getMonth();
+        const eventDay = eventStartDate.getDate();
+
+        matchesDate =
+          eventYear === filterYear &&
+          eventMonth === filterMonth &&
+          eventDay === filterDay;
+      }
+
+      // Filter 5: Start Date Range Filter (INCLUSIVE - events on or after start date)
+      let matchesStartDate = true;
+      if (hasStartDateFilter && event.startDate) {
+        const filterStartDate = new Date(startDateFilter);
+        const eventStartDate = new Date(event.startDate);
+        // Set both dates to midnight for proper inclusive comparison
+        filterStartDate.setHours(0, 0, 0, 0);
+        eventStartDate.setHours(0, 0, 0, 0);
+        matchesStartDate = eventStartDate >= filterStartDate;
+      }
+
+      // Filter 6: End Date Range Filter (INCLUSIVE - events on or before end date)
+      let matchesEndDate = true;
+      if (hasEndDateFilter && event.startDate) {
+        const filterEndDate = new Date(endDateFilter);
+        const eventStartDate = new Date(event.startDate);
+        // Set both dates to midnight for proper inclusive comparison
+        filterEndDate.setHours(0, 0, 0, 0);
+        eventStartDate.setHours(0, 0, 0, 0);
+        matchesEndDate = eventStartDate <= filterEndDate;
+      }
+      // Must match ALL active filters
+      return (
+        matchesSearch &&
+        matchesLocation &&
+        matchesProfessor &&
+        matchesDate &&
+        matchesStartDate &&
+        matchesEndDate
+      );
     });
-  }
 
-  setFilteredEvents(filtered);
-}, [searchTerm, events, filterLocation, filterProfessor, filterDate, startDateFilter, endDateFilter, dateSort]);
+    // 3. Apply Date Sorting
+    if (dateSort) {
+      filtered = filtered.sort((a, b) => {
+        const eventA = getEventDetails(a);
+        const eventB = getEventDetails(b);
+
+        const dateA = eventA.startDate
+          ? new Date(eventA.startDate)
+          : new Date(0);
+        const dateB = eventB.startDate
+          ? new Date(eventB.startDate)
+          : new Date(0);
+
+        if (dateSort === "newest") {
+          return dateB - dateA; // Most recent first
+        } else if (dateSort === "oldest") {
+          return dateA - dateB; // Oldest first
+        }
+        return 0;
+      });
+    }
+
+    setFilteredEvents(filtered);
+  }, [
+    searchTerm,
+    events,
+    filterLocation,
+    filterProfessor,
+    filterDate,
+    startDateFilter,
+    endDateFilter,
+    dateSort,
+  ]);
   // ===== EVENT HANDLERS =====
 
   const handleToggleFavourite = async (raw) => {
@@ -465,16 +493,32 @@ useEffect(() => {
       const key = `${raw.type}:${raw._id}`;
       const isFav = favKeys.has(key);
       if (isFav) {
-        await api.post(`/user/removeFavourite/${user._id}`, { itemType: raw.type, itemId: raw._id });
-        const next = new Set(favKeys); next.delete(key); setFavKeys(next);
-        setToastMsg('Removed from favorites'); setToastType('success'); setTimeout(()=>setToastMsg(null),1500);
+        await api.post(`/user/removeFavourite/${user._id}`, {
+          itemType: raw.type,
+          itemId: raw._id,
+        });
+        const next = new Set(favKeys);
+        next.delete(key);
+        setFavKeys(next);
+        setToastMsg("Removed from favorites");
+        setToastType("success");
+        setTimeout(() => setToastMsg(null), 1500);
       } else {
-        await api.post(`/user/addFavourite/${user._id}`, { itemType: raw.type, itemId: raw._id });
-        const next = new Set(favKeys); next.add(key); setFavKeys(next);
-        setToastMsg('Added to favorites'); setToastType('success'); setTimeout(()=>setToastMsg(null),1500);
+        await api.post(`/user/addFavourite/${user._id}`, {
+          itemType: raw.type,
+          itemId: raw._id,
+        });
+        const next = new Set(favKeys);
+        next.add(key);
+        setFavKeys(next);
+        setToastMsg("Added to favorites");
+        setToastType("success");
+        setTimeout(() => setToastMsg(null), 1500);
       }
     } catch (e) {
-      setToastMsg(e?.response?.data?.message || 'Action failed'); setToastType('error'); setTimeout(()=>setToastMsg(null),2000);
+      setToastMsg(e?.response?.data?.message || "Action failed");
+      setToastType("error");
+      setTimeout(() => setToastMsg(null), 2000);
     }
   };
 
@@ -578,13 +622,15 @@ useEffect(() => {
   const handleViewComments = async (eventRaw, eventId, eventType) => {
     setSelectedRatingEvent(eventRaw);
     setShowCommentsModal(true);
-    
+
     setCommentsLoading(true);
     try {
-      const response = await api.get(`/allEvents/viewAllComments/${eventId}/${eventType}`);
+      const response = await api.get(
+        `/allEvents/viewAllComments/${eventId}/${eventType}`
+      );
       setComments(response.data.userComments || []);
     } catch (error) {
-      console.error('Failed to fetch comments:', error);
+      console.error("Failed to fetch comments:", error);
       setComments([]);
     } finally {
       setCommentsLoading(false);
@@ -593,29 +639,33 @@ useEffect(() => {
 
   const handleRateEvent = async (eventRaw, eventId, eventType) => {
     setSelectedRatingEvent(eventRaw);
-    
+
     // Allow everyone to comment and rate for now
     // const hasAttended = Array.isArray(eventRaw.attendees)
     //   ? eventRaw.attendees.some((a) => a.userId === user?._id || a.userId?._id === user?._id)
     //   : false;
-    
+
     // if (!hasAttended) {
     //   // If user didn't attend, show ratings in view-only mode
     //   setShowCommentsModal(false);
     // }
-    
+
     setShowRatingModal(true);
-    
+
     setRatingsLoading(true);
     try {
-      const response = await api.get(`/allEvents/viewAllRatings/${eventId}/${eventType}`);
+      const response = await api.get(
+        `/allEvents/viewAllRatings/${eventId}/${eventType}`
+      );
       setRatings(response.data.ratings || []);
-      
+
       // Check if user has already rated
-      const existingRating = (response.data.ratings || []).find(r => r.userId === user?._id);
+      const existingRating = (response.data.ratings || []).find(
+        (r) => r.userId === user?._id
+      );
       setUserRating(existingRating ? existingRating.rating : 0);
     } catch (error) {
-      console.error('Failed to fetch ratings:', error);
+      console.error("Failed to fetch ratings:", error);
       setRatings([]);
       setUserRating(0);
     } finally {
@@ -626,13 +676,15 @@ useEffect(() => {
   const handleViewRatings = async (eventRaw, eventId, eventType) => {
     setSelectedEvent(eventRaw);
     setShowRatingsListModal(true);
-    
+
     setRatingsLoading(true);
     try {
-      const response = await api.get(`/allEvents/viewAllRatings/${eventId}/${eventType}`);
+      const response = await api.get(
+        `/allEvents/viewAllRatings/${eventId}/${eventType}`
+      );
       setRatings(response.data.ratings || []);
     } catch (error) {
-      console.error('Failed to fetch ratings:', error);
+      console.error("Failed to fetch ratings:", error);
       setRatings([]);
     } finally {
       setRatingsLoading(false);
@@ -640,28 +692,42 @@ useEffect(() => {
   };
 
   const submitRating = async (rating) => {
-    if (!user || !rating || rating < 1 || rating > 5 || !selectedRatingEvent) return;
-    
+    if (!user || !rating || rating < 1 || rating > 5 || !selectedRatingEvent)
+      return;
+
     setRatingSubmitting(true);
     try {
       const eventDetails = getEventDetails(selectedRatingEvent);
-      console.log('Submitting rating:', { rating, eventId: eventDetails.id, eventType: eventDetails.type });
-      
-      await api.patch(`/allEvents/rateEvent/${eventDetails.id}/${eventDetails.type}`, { rating });
-      
+      console.log("Submitting rating:", {
+        rating,
+        eventId: eventDetails.id,
+        eventType: eventDetails.type,
+      });
+
+      await api.patch(
+        `/allEvents/rateEvent/${eventDetails.id}/${eventDetails.type}`,
+        { rating }
+      );
+
       // Refresh ratings after submission
-      const response = await api.get(`/allEvents/viewAllRatings/${eventDetails.id}/${eventDetails.type}`);
+      const response = await api.get(
+        `/allEvents/viewAllRatings/${eventDetails.id}/${eventDetails.type}`
+      );
       setRatings(response.data.ratings || []);
       setUserRating(rating);
       setShowRatingModal(false);
-      
+
       // Trigger refresh of all EventCard components
-      setRefreshTrigger(prev => prev + 1);
+      setRefreshTrigger((prev) => prev + 1);
     } catch (error) {
-      console.error('Failed to submit rating:', error);
-      console.error('Error response:', error.response?.data);
-      console.error('Error status:', error.response?.status);
-      alert(`Failed to submit rating: ${error.response?.data?.message || error.message}`);
+      console.error("Failed to submit rating:", error);
+      console.error("Error response:", error.response?.data);
+      console.error("Error status:", error.response?.status);
+      alert(
+        `Failed to submit rating: ${
+          error.response?.data?.message || error.message
+        }`
+      );
     } finally {
       setRatingSubmitting(false);
     }
@@ -669,24 +735,33 @@ useEffect(() => {
 
   const submitComment = async () => {
     if (!user || !newComment.trim() || !selectedRatingEvent) return;
-    
+
     setCommentSubmitting(true);
     try {
       const eventDetails = getEventDetails(selectedRatingEvent);
-      await api.patch(`/allEvents/addComment/${eventDetails.id}/${eventDetails.type}`, { 
-        comment: newComment.trim() 
-      });
-      
+      await api.patch(
+        `/allEvents/addComment/${eventDetails.id}/${eventDetails.type}`,
+        {
+          comment: newComment.trim(),
+        }
+      );
+
       // Refresh comments after submission
-      const response = await api.get(`/allEvents/viewAllComments/${eventDetails.id}/${eventDetails.type}`);
+      const response = await api.get(
+        `/allEvents/viewAllComments/${eventDetails.id}/${eventDetails.type}`
+      );
       setComments(response.data.userComments || []);
-      setNewComment('');
-      
+      setNewComment("");
+
       // Trigger refresh of all EventCard components
-      setRefreshTrigger(prev => prev + 1);
+      setRefreshTrigger((prev) => prev + 1);
     } catch (error) {
-      console.error('Failed to submit comment:', error);
-      alert(`Failed to submit comment: ${error.response?.data?.message || error.message}`);
+      console.error("Failed to submit comment:", error);
+      alert(
+        `Failed to submit comment: ${
+          error.response?.data?.message || error.message
+        }`
+      );
     } finally {
       setCommentSubmitting(false);
     }
@@ -696,7 +771,7 @@ useEffect(() => {
     setShowCommentsModal(false);
     setSelectedRatingEvent(null);
     setComments([]);
-    setNewComment('');
+    setNewComment("");
   };
 
   const closeRatingModal = () => {
@@ -713,24 +788,34 @@ useEffect(() => {
 
   const deleteComment = async (commentId) => {
     if (!selectedRatingEvent) return;
-    
+
     // Show confirmation dialog
-    const confirmDelete = window.confirm("Are you sure you want to delete this comment? This action cannot be undone.");
+    const confirmDelete = window.confirm(
+      "Are you sure you want to delete this comment? This action cannot be undone."
+    );
     if (!confirmDelete) return;
-    
+
     try {
       const eventDetails = getEventDetails(selectedRatingEvent);
-      await api.delete(`/allEvents/deleteComment/${eventDetails.id}/${commentId}/${eventDetails.type}`);
-      
+      await api.delete(
+        `/allEvents/deleteComment/${eventDetails.id}/${commentId}/${eventDetails.type}`
+      );
+
       // Refresh comments after deletion
-      const response = await api.get(`/allEvents/viewAllComments/${eventDetails.id}/${eventDetails.type}`);
+      const response = await api.get(
+        `/allEvents/viewAllComments/${eventDetails.id}/${eventDetails.type}`
+      );
       setComments(response.data.userComments || []);
-      
+
       // Trigger refresh of all EventCard components
-      setRefreshTrigger(prev => prev + 1);
+      setRefreshTrigger((prev) => prev + 1);
     } catch (error) {
-      console.error('Failed to delete comment:', error);
-      alert(`Failed to delete comment: ${error.response?.data?.message || error.message}`);
+      console.error("Failed to delete comment:", error);
+      alert(
+        `Failed to delete comment: ${
+          error.response?.data?.message || error.message
+        }`
+      );
     }
   };
 
@@ -794,208 +879,249 @@ useEffect(() => {
           ))}
         </div>
 
-       {/* Search Bar with Filter Button */}
-      <div className="mb-8">
-        <div className="relative max-w-3xl mx-auto flex gap-2">
-          <div className="relative flex-1">
-            <input
-              type="text"
-              placeholder="Search by event name, professor name, vendor, or location..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full px-6 py-4 pr-14 rounded-lg border border-gray-300 bg-white focus:outline-none focus:ring-2 focus:ring-[#4a4ae6] focus:border-transparent shadow-sm"
-            />
-            <svg
-              className="absolute right-4 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+        {/* Search Bar with Filter Button */}
+        <div className="mb-8">
+          <div className="relative max-w-3xl mx-auto flex gap-2">
+            <div className="relative flex-1">
+              <input
+                type="text"
+                placeholder="Search by event name, professor name, vendor, or location..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="w-full px-6 py-4 pr-14 rounded-lg border border-gray-300 bg-white focus:outline-none focus:ring-2 focus:ring-[#4a4ae6] focus:border-transparent shadow-sm"
               />
-            </svg>
-          </div>
-          
-          {/* Filter Button */}
-          <button
-            onClick={() => setShowFilters(!showFilters)}
-            className="px-4 py-4 rounded-lg border border-gray-300 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-[#4a4ae6] focus:border-transparent shadow-sm flex items-center gap-2"
-          >
-            <svg className="h-5 w-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
-            </svg>
-            <span className="hidden sm:inline">{showFilters ? "Hide Filters" : "Filters"}</span>
-          </button>
-        </div>
-
-        {/* Filters Dropdown */}
-      {showFilters && (
-        <div className="max-w-3xl mx-auto mt-4 p-6 bg-white rounded-lg shadow-lg border border-gray-200">
-          <div className="flex justify-between items-center mb-4">
-            <h3 className="text-lg font-semibold text-gray-800">Filter & Sort Events</h3>
-            <button
-              onClick={() => setShowFilters(false)}
-              className="text-gray-500 hover:text-gray-700"
-            >
-              <svg className="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              <svg
+                className="absolute right-4 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+                />
               </svg>
-            </button>
-          </div>
-          
-          {/* Basic Filters */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-            {/* Location Filter */}
-            <div>
-              <label htmlFor="filter-location" className="block text-sm font-medium text-gray-700 mb-1">
-                Location
-              </label>
-              <select
-                id="filter-location"
-                value={filterLocation}
-                onChange={(e) => setFilterLocation(e.target.value)}
-                className="w-full px-4 py-2 rounded-lg border border-gray-300 bg-white focus:outline-none focus:ring-2 focus:ring-[#4a4ae6] focus:border-transparent"
-              >
-                <option value="">All Locations</option>
-                {filterableLocations.map((loc) => (
-                  <option key={loc} value={loc}>
-                    {loc}
-                  </option>
-                ))}
-              </select>
             </div>
 
-            {/* Professor Filter */}
-            <div>
-              <label htmlFor="filter-professor" className="block text-sm font-medium text-gray-700 mb-1">
-                Professor
-              </label>
-              <select
-                id="filter-professor"
-                value={filterProfessor}
-                onChange={(e) => setFilterProfessor(e.target.value)}
-                className="w-full px-4 py-2 rounded-lg border border-gray-300 bg-white focus:outline-none focus:ring-2 focus:ring-[#4a4ae6] focus:border-transparent"
-              >
-                <option value="">All Professors</option>
-                {filterableProfessors.map((prof) => (
-                  <option key={prof} value={prof}>
-                    {prof}
-                  </option>
-                ))}
-              </select>
-            </div>
-          </div>
-
-        {/* Date Filtering & Sorting Section */}
-  <div className="border-t pt-4">
-  <h4 className="text-md font-medium text-gray-800 mb-4">Date Options</h4>
-  
-  <div className="space-y-4">
-    {/* Row 1: Filter Options */}
-    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-      {/* Specific Date Filter */}
-      <div>
-        <label htmlFor="filter-date" className="block text-sm font-medium text-gray-700 mb-2">
-          Filter by Specific Date
-        </label>
-        <div className="relative max-w-xs">
-          <input
-            type="date"
-            id="filter-date"
-            value={filterDate}
-            onChange={(e) => setFilterDate(e.target.value)}
-            className="w-full px-4 py-2.5 rounded-lg border border-gray-300 bg-white focus:outline-none focus:ring-2 focus:ring-[#4a4ae6] focus:border-transparent"
-          />
-          {filterDate && (
+            {/* Filter Button */}
             <button
-              onClick={() => setFilterDate("")}
-              className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
-              title="Clear specific date"
+              onClick={() => setShowFilters(!showFilters)}
+              className="px-4 py-4 rounded-lg border border-gray-300 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-[#4a4ae6] focus:border-transparent shadow-sm flex items-center gap-2"
             >
-              <span className="text-xl">×</span>
+              <svg
+                className="h-5 w-5 text-gray-600"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"
+                />
+              </svg>
+              <span className="hidden sm:inline">
+                {showFilters ? "Hide Filters" : "Filters"}
+              </span>
             </button>
+          </div>
+
+          {/* Filters Dropdown */}
+          {showFilters && (
+            <div className="max-w-3xl mx-auto mt-4 p-6 bg-white rounded-lg shadow-lg border border-gray-200">
+              <div className="flex justify-between items-center mb-4">
+                <h3 className="text-lg font-semibold text-gray-800">
+                  Filter & Sort Events
+                </h3>
+                <button
+                  onClick={() => setShowFilters(false)}
+                  className="text-gray-500 hover:text-gray-700"
+                >
+                  <svg
+                    className="h-6 w-6"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M6 18L18 6M6 6l12 12"
+                    />
+                  </svg>
+                </button>
+              </div>
+
+              {/* Basic Filters */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+                {/* Location Filter */}
+                <div>
+                  <label
+                    htmlFor="filter-location"
+                    className="block text-sm font-medium text-gray-700 mb-1"
+                  >
+                    Location
+                  </label>
+                  <select
+                    id="filter-location"
+                    value={filterLocation}
+                    onChange={(e) => setFilterLocation(e.target.value)}
+                    className="w-full px-4 py-2 rounded-lg border border-gray-300 bg-white focus:outline-none focus:ring-2 focus:ring-[#4a4ae6] focus:border-transparent"
+                  >
+                    <option value="">All Locations</option>
+                    {filterableLocations.map((loc) => (
+                      <option key={loc} value={loc}>
+                        {loc}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                {/* Professor Filter */}
+                <div>
+                  <label
+                    htmlFor="filter-professor"
+                    className="block text-sm font-medium text-gray-700 mb-1"
+                  >
+                    Professor
+                  </label>
+                  <select
+                    id="filter-professor"
+                    value={filterProfessor}
+                    onChange={(e) => setFilterProfessor(e.target.value)}
+                    className="w-full px-4 py-2 rounded-lg border border-gray-300 bg-white focus:outline-none focus:ring-2 focus:ring-[#4a4ae6] focus:border-transparent"
+                  >
+                    <option value="">All Professors</option>
+                    {filterableProfessors.map((prof) => (
+                      <option key={prof} value={prof}>
+                        {prof}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              </div>
+
+              {/* Date Filtering & Sorting Section */}
+              <div className="border-t pt-4">
+                <h4 className="text-md font-medium text-gray-800 mb-4">
+                  Date Options
+                </h4>
+
+                <div className="space-y-4">
+                  {/* Row 1: Filter Options */}
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {/* Specific Date Filter */}
+                    <div>
+                      <label
+                        htmlFor="filter-date"
+                        className="block text-sm font-medium text-gray-700 mb-2"
+                      >
+                        Filter by Specific Date
+                      </label>
+                      <div className="relative max-w-xs">
+                        <input
+                          type="date"
+                          id="filter-date"
+                          value={filterDate}
+                          onChange={(e) => setFilterDate(e.target.value)}
+                          className="w-full px-4 py-2.5 rounded-lg border border-gray-300 bg-white focus:outline-none focus:ring-2 focus:ring-[#4a4ae6] focus:border-transparent"
+                        />
+                        {filterDate && (
+                          <button
+                            onClick={() => setFilterDate("")}
+                            className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                            title="Clear specific date"
+                          >
+                            <span className="text-xl">×</span>
+                          </button>
+                        )}
+                      </div>
+                    </div>
+
+                    {/* Date Sorting */}
+                    <div>
+                      <label
+                        htmlFor="date-sort"
+                        className="block text-sm font-medium text-gray-700 mb-2"
+                      >
+                        Sort Events by Date
+                      </label>
+                      <div className="max-w-xs">
+                        <select
+                          id="date-sort"
+                          value={dateSort}
+                          onChange={(e) => setDateSort(e.target.value)}
+                          className="w-full px-4 py-2.5 rounded-lg border border-gray-300 bg-white focus:outline-none focus:ring-2 focus:ring-[#4a4ae6] focus:border-transparent"
+                        >
+                          <option value="">No Date Sorting</option>
+                          <option value="newest">Newest First</option>
+                          <option value="oldest">Oldest First</option>
+                        </select>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Row 2: Date Range Filter */}
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Filter by Date Range
+                    </label>
+                    <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 max-w-md">
+                      <div className="relative flex-1 min-w-[150px]">
+                        <input
+                          type="date"
+                          value={startDateFilter}
+                          onChange={(e) => setStartDateFilter(e.target.value)}
+                          className="w-full px-4 py-2.5 rounded-lg border border-gray-300 bg-white focus:outline-none focus:ring-2 focus:ring-[#4a4ae6] focus:border-transparent"
+                          placeholder="Start date"
+                        />
+                      </div>
+
+                      <div className="hidden sm:block text-gray-500 font-medium">
+                        to
+                      </div>
+
+                      <div className="relative flex-1 min-w-[150px]">
+                        <input
+                          type="date"
+                          value={endDateFilter}
+                          onChange={(e) => setEndDateFilter(e.target.value)}
+                          className="w-full px-4 py-2.5 rounded-lg border border-gray-300 bg-white focus:outline-none focus:ring-2 focus:ring-[#4a4ae6] focus:border-transparent"
+                          placeholder="End date"
+                        />
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              {/* Clear Filters Button */}
+              <div className="mt-6 flex justify-between items-center">
+                <div className="text-sm text-gray-600">
+                  {filteredEvents.length} event
+                  {filteredEvents.length !== 1 ? "s" : ""} found
+                </div>
+                <button
+                  onClick={() => {
+                    setFilterLocation("");
+                    setFilterProfessor("");
+                    setFilterDate("");
+                    setStartDateFilter("");
+                    setEndDateFilter("");
+                    setDateSort("");
+                  }}
+                  className="px-4 py-2 text-sm text-gray-600 hover:text-gray-800 underline"
+                >
+                  Clear all filters
+                </button>
+              </div>
+            </div>
           )}
         </div>
-      </div>
 
-      {/* Date Sorting */}
-      <div>
-        <label htmlFor="date-sort" className="block text-sm font-medium text-gray-700 mb-2">
-          Sort Events by Date
-        </label>
-        <div className="max-w-xs">
-          <select
-            id="date-sort"
-            value={dateSort}
-            onChange={(e) => setDateSort(e.target.value)}
-            className="w-full px-4 py-2.5 rounded-lg border border-gray-300 bg-white focus:outline-none focus:ring-2 focus:ring-[#4a4ae6] focus:border-transparent"
-          >
-            <option value="">No Date Sorting</option>
-            <option value="newest">Newest First</option>
-            <option value="oldest">Oldest First</option>
-          </select>
-        </div>
-      </div>
-    </div>
-
-    {/* Row 2: Date Range Filter */}
-    <div>
-      <label className="block text-sm font-medium text-gray-700 mb-2">
-        Filter by Date Range
-      </label>
-      <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 max-w-md">
-        <div className="relative flex-1 min-w-[150px]">
-          <input
-            type="date"
-            value={startDateFilter}
-            onChange={(e) => setStartDateFilter(e.target.value)}
-            className="w-full px-4 py-2.5 rounded-lg border border-gray-300 bg-white focus:outline-none focus:ring-2 focus:ring-[#4a4ae6] focus:border-transparent"
-            placeholder="Start date"
-          />
-        </div>
-        
-        <div className="hidden sm:block text-gray-500 font-medium">to</div>
-        
-        <div className="relative flex-1 min-w-[150px]">
-          <input
-            type="date"
-            value={endDateFilter}
-            onChange={(e) => setEndDateFilter(e.target.value)}
-            className="w-full px-4 py-2.5 rounded-lg border border-gray-300 bg-white focus:outline-none focus:ring-2 focus:ring-[#4a4ae6] focus:border-transparent"
-            placeholder="End date"
-          />
-        </div>
-      </div>
-    </div>
-  </div>
-</div>
-          {/* Clear Filters Button */}
-          <div className="mt-6 flex justify-between items-center">
-            <div className="text-sm text-gray-600">
-              {filteredEvents.length} event{filteredEvents.length !== 1 ? 's' : ''} found
-            </div>
-            <button
-              onClick={() => {
-                setFilterLocation("");
-                setFilterProfessor("");
-                setFilterDate("");
-                setStartDateFilter("");
-                setEndDateFilter("");
-                setDateSort("");
-              }}
-              className="px-4 py-2 text-sm text-gray-600 hover:text-gray-800 underline"
-            >
-              Clear all filters
-            </button>
-          </div>
-        </div>
-      )}
-      </div>
-        
         {/* Events Grid */}
         {loading ? (
           <div className="text-center py-12">
@@ -1017,7 +1143,10 @@ useEffect(() => {
                 onRegister={handleRegisterEvent}
                 onViewBooths={handleViewBooths}
                 onViewDetails={handleViewDetails}
-                isFavourite={favKeys.has(`${event.type}-${event._id}`) || favKeys.has(`${event.type}:${event._id}`)}
+                isFavourite={
+                  favKeys.has(`${event.type}-${event._id}`) ||
+                  favKeys.has(`${event.type}:${event._id}`)
+                }
                 onToggleFavourite={handleToggleFavourite}
                 onViewComments={handleViewComments}
                 onRateEvent={handleRateEvent}
@@ -1033,9 +1162,16 @@ useEffect(() => {
             </p>
           </div>
         )}
-      {toastMsg && (<div className={`fixed top-4 right-4 z-50 px-4 py-2 rounded-md text-white ${toastType==='error'?'bg-red-600':'bg-emerald-600'}`}>{toastMsg}</div>)}
+        {toastMsg && (
+          <div
+            className={`fixed top-4 right-4 z-50 px-4 py-2 rounded-md text-white ${
+              toastType === "error" ? "bg-red-600" : "bg-emerald-600"
+            }`}
+          >
+            {toastMsg}
+          </div>
+        )}
       </main>
-
       {/* Modals */}
       {showDetailsModal && selectedEvent && (
         <EventDetailsModal
@@ -1043,7 +1179,6 @@ useEffect(() => {
           onClose={() => setShowDetailsModal(false)}
         />
       )}
-
       {showBoothsModal && (
         <BoothsModalContent
           selectedBazaar={selectedBazaar}
@@ -1052,7 +1187,6 @@ useEffect(() => {
           onClose={closeBoothsModal}
         />
       )}
-
       {showRegisterModal && (
         <RegistrationModal
           registerModalEvent={registerModalEvent}
@@ -1068,186 +1202,216 @@ useEffect(() => {
           onSubmit={submitRegistration}
         />
       )}
-
       {/* Comments Modal */}
-      {showCommentsModal && selectedRatingEvent && (() => {
-        // Allow everyone to comment for now
-        const hasAttended = true;
-        // const hasAttended = Array.isArray(selectedRatingEvent.attendees)
-        //   ? selectedRatingEvent.attendees.some((a) => a.userId === user?._id || a.userId?._id === user?._id)
-        //   : false;
-        
-        return (
-          <div className={LIGHT_OVERLAY_CLASSES} onClick={closeCommentsModal}>
-            <div className="bg-white rounded-2xl max-w-2xl w-full max-h-[80vh] overflow-hidden" onClick={(e) => e.stopPropagation()}>
-              <div className="flex items-center justify-between p-6 border-b">
-                <h3 className="text-xl font-bold text-[#4C3BCF]">
-                  Comments - {getEventDetails(selectedRatingEvent).name}
-                </h3>
-                <button
-                  onClick={closeCommentsModal}
-                  className="text-gray-500 hover:text-gray-700"
-                >
-                  <X size={24} />
-                </button>
-              </div>
-              
-              {/* Comments List */}
-              <div className="h-80 overflow-y-auto border-b">
-                <div className="p-6">
-                {commentsLoading ? (
-                  <div className="text-center py-8 text-gray-600">Loading comments...</div>
-                ) : comments.length > 0 ? (
-                  <div className="space-y-4">
-                    {comments.map((comment, index) => (
-                      <div key={index} className="border-b border-gray-100 pb-3 last:border-b-0">
-                        <div className="flex items-center justify-between mb-2">
-                          <div className="flex items-center gap-2">
-                            <div className="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center">
-                              <User size={16} className="text-blue-600" />
-                            </div>
-                            <span className="font-medium text-gray-800">
-                              {comment.userId?.firstname && comment.userId?.lastname 
-                                ? `${comment.userId.firstname} ${comment.userId.lastname}`
-                                : comment.userId?.firstname || comment.userId?.lastname || 'Anonymous'}
-                            </span>
-                          </div>
-                          {/* Delete button - only visible to admins */}
-                          {user?.role === "Admin" && (
-                            <button
-                              onClick={() => deleteComment(comment._id)}
-                              className="text-red-500 hover:text-red-700 hover:bg-red-50 p-1 rounded transition-colors"
-                              title="Delete comment"
-                            >
-                              <Trash2 size={16} />
-                            </button>
-                          )}
-                        </div>
-                        <p className="text-gray-700 ml-10">{comment.comment}</p>
-                      </div>
-                    ))}
-                  </div>
-                ) : (
-                  <div className="text-center py-8 text-gray-600">
-                    No comments yet. Be the first to leave a comment!
-                  </div>
-                  )}
+      {showCommentsModal &&
+        selectedRatingEvent &&
+        (() => {
+          // Allow everyone to comment for now
+          const hasAttended = true;
+          // const hasAttended = Array.isArray(selectedRatingEvent.attendees)
+          //   ? selectedRatingEvent.attendees.some((a) => a.userId === user?._id || a.userId?._id === user?._id)
+          //   : false;
+
+          return (
+            <div className={LIGHT_OVERLAY_CLASSES} onClick={closeCommentsModal}>
+              <div
+                className="bg-white rounded-2xl max-w-2xl w-full max-h-[80vh] overflow-hidden"
+                onClick={(e) => e.stopPropagation()}
+              >
+                <div className="flex items-center justify-between p-6 border-b">
+                  <h3 className="text-xl font-bold text-[#4C3BCF]">
+                    Comments - {getEventDetails(selectedRatingEvent).name}
+                  </h3>
+                  <button
+                    onClick={closeCommentsModal}
+                    className="text-gray-500 hover:text-gray-700"
+                  >
+                    <X size={24} />
+                  </button>
                 </div>
+
+                {/* Comments List */}
+                <div className="h-80 overflow-y-auto border-b">
+                  <div className="p-6">
+                    {commentsLoading ? (
+                      <div className="text-center py-8 text-gray-600">
+                        Loading comments...
+                      </div>
+                    ) : comments.length > 0 ? (
+                      <div className="space-y-4">
+                        {comments.map((comment, index) => (
+                          <div
+                            key={index}
+                            className="border-b border-gray-100 pb-3 last:border-b-0"
+                          >
+                            <div className="flex items-center justify-between mb-2">
+                              <div className="flex items-center gap-2">
+                                <div className="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center">
+                                  <User size={16} className="text-blue-600" />
+                                </div>
+                                <span className="font-medium text-gray-800">
+                                  {comment.userId?.firstname &&
+                                  comment.userId?.lastname
+                                    ? `${comment.userId.firstname} ${comment.userId.lastname}`
+                                    : comment.userId?.firstname ||
+                                      comment.userId?.lastname ||
+                                      "Anonymous"}
+                                </span>
+                              </div>
+                              {/* Delete button - only visible to admins */}
+                              {user?.role === "Admin" && (
+                                <button
+                                  onClick={() => deleteComment(comment._id)}
+                                  className="text-red-500 hover:text-red-700 hover:bg-red-50 p-1 rounded transition-colors"
+                                  title="Delete comment"
+                                >
+                                  <Trash2 size={16} />
+                                </button>
+                              )}
+                            </div>
+                            <p className="text-gray-700 ml-10">
+                              {comment.comment}
+                            </p>
+                          </div>
+                        ))}
+                      </div>
+                    ) : (
+                      <div className="text-center py-8 text-gray-600">
+                        No comments yet. Be the first to leave a comment!
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                {/* Add Comment Form - Only for regular users */}
+                {user?.role !== "Admin" && user?.role !== "Event office" && (
+                  <div className="p-6 border-t bg-gray-50">
+                    <h4 className="font-semibold text-gray-800 mb-3">
+                      Add a Comment
+                    </h4>
+                    <div className="flex gap-3">
+                      <textarea
+                        value={newComment}
+                        onChange={(e) => setNewComment(e.target.value)}
+                        placeholder="Share your thoughts about this event..."
+                        className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#4C3BCF] focus:border-transparent resize-none"
+                        rows="3"
+                        disabled={commentSubmitting}
+                      />
+                      <button
+                        onClick={submitComment}
+                        disabled={!newComment.trim() || commentSubmitting}
+                        className="px-4 py-2 bg-[#4C3BCF] text-white rounded-lg hover:bg-[#3730A3] transition-colors disabled:opacity-50 disabled:cursor-not-allowed h-fit"
+                      >
+                        {commentSubmitting ? "Posting..." : "Post"}
+                      </button>
+                    </div>
+                  </div>
+                )}
               </div>
-              
-              {/* Add Comment Form - Only for regular users */}
-              {user?.role !== "Admin" && user?.role !== "Event office" && (
-                <div className="p-6 border-t bg-gray-50">
-                  <h4 className="font-semibold text-gray-800 mb-3">Add a Comment</h4>
+            </div>
+          );
+        })()}{" "}
+      {/* Rate Event Modal */}
+      {showRatingModal &&
+        selectedRatingEvent &&
+        (() => {
+          // Allow everyone to rate for now
+          const hasAttended = true;
+          // const hasAttended = Array.isArray(selectedRatingEvent.attendees)
+          //   ? selectedRatingEvent.attendees.some((a) => a.userId === user?._id || a.userId?._id === user?._id)
+          //   : false;
+
+          return (
+            <div className={LIGHT_OVERLAY_CLASSES} onClick={closeRatingModal}>
+              <div
+                className="bg-white rounded-2xl max-w-md w-full"
+                onClick={(e) => e.stopPropagation()}
+              >
+                <div className="flex items-center justify-between p-6 border-b">
+                  <h3 className="text-xl font-bold text-[#4C3BCF]">
+                    Rate Event
+                  </h3>
+                  <button
+                    onClick={closeRatingModal}
+                    className="text-gray-500 hover:text-gray-700"
+                  >
+                    <X size={24} />
+                  </button>
+                </div>
+                <div className="p-6">
+                  <h4 className="font-semibold text-gray-800 mb-4">
+                    {getEventDetails(selectedRatingEvent).name}
+                  </h4>
+
+                  {/* Rating Input */}
+                  <div className="text-center mb-6">
+                    <p className="text-gray-600 mb-4">
+                      How would you rate this event?
+                    </p>
+                    <div className="flex justify-center gap-2 mb-4">
+                      {[1, 2, 3, 4, 5].map((star) => (
+                        <button
+                          key={star}
+                          onClick={() => setUserRating(star)}
+                          className="transition-colors"
+                          disabled={ratingSubmitting}
+                        >
+                          <Star
+                            size={32}
+                            className={`${
+                              star <= userRating
+                                ? "text-yellow-400 fill-current"
+                                : "text-gray-300 hover:text-yellow-200"
+                            }`}
+                          />
+                        </button>
+                      ))}
+                    </div>
+                    {userRating > 0 && (
+                      <p className="text-sm text-gray-600 mb-4">
+                        You selected {userRating} star
+                        {userRating !== 1 ? "s" : ""}
+                      </p>
+                    )}
+                  </div>
+
                   <div className="flex gap-3">
-                    <textarea
-                      value={newComment}
-                      onChange={(e) => setNewComment(e.target.value)}
-                      placeholder="Share your thoughts about this event..."
-                      className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#4C3BCF] focus:border-transparent resize-none"
-                      rows="3"
-                      disabled={commentSubmitting}
-                    />
                     <button
-                      onClick={submitComment}
-                      disabled={!newComment.trim() || commentSubmitting}
-                      className="px-4 py-2 bg-[#4C3BCF] text-white rounded-lg hover:bg-[#3730A3] transition-colors disabled:opacity-50 disabled:cursor-not-allowed h-fit"
+                      onClick={closeRatingModal}
+                      className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
+                      disabled={ratingSubmitting}
                     >
-                      {commentSubmitting ? 'Posting...' : 'Post'}
+                      Cancel
+                    </button>
+                    <button
+                      onClick={() => submitRating(userRating)}
+                      disabled={userRating === 0 || ratingSubmitting}
+                      className="flex-1 bg-[#4C3BCF] text-white py-2 px-4 rounded-lg hover:bg-[#3730A3] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      {ratingSubmitting ? "Submitting..." : "Submit Rating"}
                     </button>
                   </div>
                 </div>
-              )}
-            </div>
-          </div>
-        );
-      })()}      {/* Rate Event Modal */}
-      {showRatingModal && selectedRatingEvent && (() => {
-        // Allow everyone to rate for now
-        const hasAttended = true;
-        // const hasAttended = Array.isArray(selectedRatingEvent.attendees)
-        //   ? selectedRatingEvent.attendees.some((a) => a.userId === user?._id || a.userId?._id === user?._id)
-        //   : false;
-        
-        return (
-          <div className={LIGHT_OVERLAY_CLASSES} onClick={closeRatingModal}>
-            <div className="bg-white rounded-2xl max-w-md w-full" onClick={(e) => e.stopPropagation()}>
-              <div className="flex items-center justify-between p-6 border-b">
-                <h3 className="text-xl font-bold text-[#4C3BCF]">
-                  Rate Event
-                </h3>
-                <button
-                  onClick={closeRatingModal}
-                  className="text-gray-500 hover:text-gray-700"
-                >
-                  <X size={24} />
-                </button>
-              </div>
-              <div className="p-6">
-                <h4 className="font-semibold text-gray-800 mb-4">
-                  {getEventDetails(selectedRatingEvent).name}
-                </h4>
-                
-                {/* Rating Input */}
-                <div className="text-center mb-6">
-                  <p className="text-gray-600 mb-4">How would you rate this event?</p>
-                  <div className="flex justify-center gap-2 mb-4">
-                    {[1, 2, 3, 4, 5].map((star) => (
-                      <button
-                        key={star}
-                        onClick={() => setUserRating(star)}
-                        className="transition-colors"
-                        disabled={ratingSubmitting}
-                      >
-                        <Star
-                          size={32}
-                          className={`${
-                            star <= userRating 
-                              ? 'text-yellow-400 fill-current' 
-                              : 'text-gray-300 hover:text-yellow-200'
-                          }`}
-                        />
-                      </button>
-                    ))}
-                  </div>
-                  {userRating > 0 && (
-                    <p className="text-sm text-gray-600 mb-4">
-                      You selected {userRating} star{userRating !== 1 ? 's' : ''}
-                    </p>
-                  )}
-                </div>
-
-               
-
-                <div className="flex gap-3">
-                  <button
-                    onClick={closeRatingModal}
-                    className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
-                    disabled={ratingSubmitting}
-                  >
-                    Cancel
-                  </button>
-                  <button
-                    onClick={() => submitRating(userRating)}
-                    disabled={userRating === 0 || ratingSubmitting}
-                    className="flex-1 bg-[#4C3BCF] text-white py-2 px-4 rounded-lg hover:bg-[#3730A3] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                  >
-                    {ratingSubmitting ? 'Submitting...' : 'Submit Rating'}
-                  </button>
-                </div>
               </div>
             </div>
-          </div>
-        );
-      })()}
-
+          );
+        })()}
       {/* Ratings List Modal */}
       {showRatingsListModal && selectedEvent && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50" onClick={closeRatingsListModal}>
-          <div className="bg-white rounded-lg p-6 max-w-md w-full max-h-[80vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
+        <div
+          className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50"
+          onClick={closeRatingsListModal}
+        >
+          <div
+            className="bg-white rounded-lg p-6 max-w-md w-full max-h-[80vh] overflow-y-auto"
+            onClick={(e) => e.stopPropagation()}
+          >
             <div className="flex justify-between items-center mb-4">
-              <h3 className="text-lg font-semibold">Ratings for {getEventDetails(selectedEvent).name}</h3>
-              <button 
+              <h3 className="text-lg font-semibold">
+                Ratings for {getEventDetails(selectedEvent).name}
+              </h3>
+              <button
                 onClick={closeRatingsListModal}
                 className="text-gray-500 hover:text-gray-700"
               >
@@ -1265,16 +1429,20 @@ useEffect(() => {
                   <div key={index} className="border-b border-gray-200 pb-3">
                     <div className="flex items-center justify-between">
                       <span className="font-medium text-gray-800">
-                        {rating.userId?.firstname && rating.userId?.lastname 
+                        {rating.userId?.firstname && rating.userId?.lastname
                           ? `${rating.userId.firstname} ${rating.userId.lastname}`
-                          : rating.userId?.firstname || rating.userId?.lastname || 'Anonymous'}
+                          : rating.userId?.firstname ||
+                            rating.userId?.lastname ||
+                            "Anonymous"}
                       </span>
                       <div className="flex">
                         {[1, 2, 3, 4, 5].map((star) => (
                           <span
                             key={star}
                             className={`text-lg ${
-                              star <= rating.rating ? 'text-yellow-400' : 'text-gray-300'
+                              star <= rating.rating
+                                ? "text-yellow-400"
+                                : "text-gray-300"
                             }`}
                           >
                             ★
@@ -1283,12 +1451,16 @@ useEffect(() => {
                       </div>
                     </div>
                     {rating.comment && (
-                      <p className="text-gray-600 text-sm mt-1">{rating.comment}</p>
+                      <p className="text-gray-600 text-sm mt-1">
+                        {rating.comment}
+                      </p>
                     )}
                   </div>
                 ))
               ) : (
-                <p className="text-gray-500 text-center py-4">No ratings available for this event.</p>
+                <p className="text-gray-500 text-center py-4">
+                  No ratings available for this event.
+                </p>
               )}
             </div>
 
