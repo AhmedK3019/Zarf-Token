@@ -156,10 +156,57 @@ const cancelRegistration = async (req, res, next) => {
       { $pull: { attendees: { userId: userId } } },
       { new: true }
     );
+
+    await User.findByIdAndUpdate(
+      userId,
+      { $inc: { wallet: trip.price } },
+      { new: true }
+    );
     return res.status(200).json({
       message: "Registration cancelled successfully",
       trip: updatedTrip,
     });
+  } catch (error) {
+    next(error);
+  }
+};
+
+const payForTrip = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+    const userId = req.userId;
+    if (!userId) return res.status(401).json({ message: "No token provided" });
+    const trip = await Trip.findById(id);
+    const method = req.body.method;
+    if (!trip) return res.status(404).json({ message: "Trip not found" });
+    const attendee = trip.registered.find(
+      (a) => a.userId.toString() === userId.toString()
+    );
+    if (!attendee)
+      return res
+        .status(404)
+        .json({ message: "You are not registered for this trip" });
+    if (attendee.paid)
+      return res.status(400).json({ message: "You have already paid" });
+    if (method === "wallet") {
+      const user = await User.findById(userId);
+      if (user.wallet < trip.price) {
+        return res.status(400).json({ message: "Insufficient funds" });
+      }
+      user.wallet -= trip.price;
+      await user.save();
+    } else if (method === "creditcard") {
+      // Process credit card payment (mocked)
+      // In real application, integrate with payment gateway
+      console.log("Processing credit card payment...");
+    }
+    attendee.paid = true;
+    trip.attendees.push(attendee);
+    trip.registered = trip.registered.filter(
+      (a) => a.userId.toString() !== userId.toString()
+    );
+    await trip.save();
+    return res.status(200).json({ message: "Payment successful", trip });
   } catch (error) {
     next(error);
   }

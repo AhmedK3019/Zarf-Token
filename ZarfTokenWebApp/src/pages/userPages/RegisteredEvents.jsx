@@ -36,6 +36,7 @@ export default function RegisteredEvents() {
   const [ratingsLoading, setRatingsLoading] = useState(false);
   const [commentSubmitting, setCommentSubmitting] = useState(false);
   const [ratingSubmitting, setRatingSubmitting] = useState(false);
+  const [paySubmitting, setPaySubmitting] = useState(false);
 
   useEffect(() => {
     const fetchRegisteredEvents = async () => {
@@ -244,7 +245,7 @@ export default function RegisteredEvents() {
           }}
           className="w-full text-sm bg-[#f59e0b] text-white px-4 py-2 rounded-lg hover:bg-[#d97706] transition-colors font-medium"
         >
-          Pay
+          Pay {event.price || event.requiredFunding} EGP
         </button>
       );
     }
@@ -552,35 +553,133 @@ export default function RegisteredEvents() {
         )}
 
         {/* Pay placeholder modal */}
-        {showPayModal && payEvent && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-            <div className="bg-white rounded-2xl max-w-md w-full p-6">
-              <div className="flex justify-between items-center mb-4">
-                <h2 className="text-xl font-bold text-[#4a4ae6]">
-                  Pay for {getEventDetails(payEvent).name}
-                </h2>
-                <button
-                  onClick={() => setShowPayModal(false)}
-                  className="text-gray-500 text-2xl"
+        {showPayModal &&
+          payEvent &&
+          (() => {
+            const details = getEventDetails(payEvent);
+            const amount =
+              details.price && details.price > 0
+                ? details.price
+                : details.requiredFunding || 0;
+            const walletBalance = Number(user?.wallet ?? 0);
+            const canPayWallet = walletBalance >= amount && amount > 0;
+
+            const handlePayWithWallet = async () => {
+              if (!canPayWallet) return;
+              setPaySubmitting(true);
+              try {
+                // TODO: integrate backend endpoint to charge wallet and confirm registration payment
+                // await api.post(`/payments/wallet/${details.type}/${details.id}`);
+                setToastMsg("Wallet payment flow to be integrated");
+                setToastType("info");
+                setTimeout(() => setToastMsg(null), 1500);
+                setShowPayModal(false);
+              } catch (e) {
+                setToastMsg(
+                  e?.response?.data?.message || "Wallet payment failed"
+                );
+                setToastType("error");
+                setTimeout(() => setToastMsg(null), 2000);
+              } finally {
+                setPaySubmitting(false);
+              }
+            };
+
+            const handlePayWithStripe = async () => {
+              setPaySubmitting(true);
+              try {
+                // TODO: integrate Stripe Checkout or Payment Element flow
+                // Example: const { data } = await api.post(`/payments/stripe/create-session`, { eventId: details.id, type: details.type });
+                // window.location.href = data.checkoutUrl;
+                setToastMsg("Stripe payment flow to be integrated");
+                setToastType("info");
+                setTimeout(() => setToastMsg(null), 1500);
+                setShowPayModal(false);
+              } catch (e) {
+                setToastMsg(
+                  e?.response?.data?.message || "Stripe payment failed"
+                );
+                setToastType("error");
+                setTimeout(() => setToastMsg(null), 2000);
+              } finally {
+                setPaySubmitting(false);
+              }
+            };
+
+            return (
+              <div
+                className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-muted bg-opacity-90 backdrop-blur-sm animate-fade-in"
+                onClick={() => setShowPayModal(false)}
+              >
+                <div
+                  className="bg-white rounded-2xl max-w-lg w-full p-6"
+                  onClick={(e) => e.stopPropagation()}
                 >
-                  ×
-                </button>
+                  <div className="flex justify-between items-center mb-4">
+                    <h2 className="text-xl font-bold text-[#4a4ae6]">
+                      Pay for {details.name}
+                    </h2>
+                    <button
+                      onClick={() => setShowPayModal(false)}
+                      className="text-gray-500 hover:text-gray-700"
+                      aria-label="Close"
+                    >
+                      <X size={22} />
+                    </button>
+                  </div>
+
+                  <div className="mb-4 text-sm text-gray-700">
+                    <div className="flex items-center justify-between">
+                      <span className="text-gray-600">Amount due</span>
+                      <span className="font-semibold">{amount} EGP</span>
+                    </div>
+                    <div className="flex items-center justify-between mt-1">
+                      <span className="text-gray-600">Wallet balance</span>
+                      <span className="font-semibold">
+                        {walletBalance.toFixed(2)} EGP
+                      </span>
+                    </div>
+                  </div>
+
+                  <div className="grid gap-3 sm:grid-cols-2">
+                    <button
+                      onClick={handlePayWithWallet}
+                      disabled={!canPayWallet || paySubmitting}
+                      className={`w-full rounded-lg px-4 py-3 text-sm font-semibold text-center transition border ${
+                        canPayWallet
+                          ? "bg-emerald-50 text-emerald-700 border-emerald-200 hover:bg-emerald-100"
+                          : "bg-gray-100 text-gray-400 border-gray-200 cursor-not-allowed"
+                      }`}
+                      title={
+                        canPayWallet
+                          ? "Pay using wallet"
+                          : "Insufficient wallet balance"
+                      }
+                    >
+                      {paySubmitting ? "Processing..." : "Pay with Wallet"}
+                    </button>
+
+                    <button
+                      onClick={handlePayWithStripe}
+                      disabled={paySubmitting}
+                      className="w-full rounded-lg px-4 py-3 text-sm font-semibold text-center transition bg-[#4C3BCF] text-white hover:bg-[#3730A3]"
+                    >
+                      {paySubmitting ? "Processing..." : "Pay with Card"}
+                    </button>
+                  </div>
+
+                  <div className="flex justify-end gap-3 mt-4">
+                    <button
+                      onClick={() => setShowPayModal(false)}
+                      className="px-4 py-2 rounded-lg border border-gray-200 text-gray-700 hover:bg-gray-50"
+                    >
+                      Close
+                    </button>
+                  </div>
+                </div>
               </div>
-              <p className="text-sm text-gray-700 mb-4">
-                Payment flow not implemented yet. We'll discuss details and
-                integrate the gateway.
-              </p>
-              <div className="flex justify-end gap-3">
-                <button
-                  onClick={() => setShowPayModal(false)}
-                  className="px-4 py-2 rounded-full border"
-                >
-                  Close
-                </button>
-              </div>
-            </div>
-          </div>
-        )}
+            );
+          })()}
 
         {/* Comments Modal */}
         {showCommentsModal &&
