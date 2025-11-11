@@ -32,23 +32,26 @@ const getEventsByType = async (req, res, next) => {
   try {
     const { type } = req.params;
     let events;
+    let filter = { archive: false };
     switch (type) {
       case "workshops":
-        events = await Workshop.find()
+        events = await Workshop.find(filter)
           .populate("professorsparticipating", "firstname lastname email")
           .populate("createdBy", "firstname lastname email");
         break;
       case "bazaars":
-        events = await Bazaar.find();
+        events = await Bazaar.find(filter);
         break;
       case "conferences":
-        events = await Conference.find();
+        events = await Conference.find(filter);
         break;
       case "trips":
-        events = await Trip.find();
+        events = await Trip.find(filter);
         break;
       case "booths":
-        events = await Booth.find().populate("vendorId").populate("bazarId");
+        events = await Booth.find(filter)
+          .populate("vendorId")
+          .populate("bazarId");
         break;
       default:
         return res.status(400).json({ message: "Invalid event type" });
@@ -62,10 +65,11 @@ const getEventsByType = async (req, res, next) => {
 const getEventsRegisteredByUser = async (req, res, next) => {
   try {
     const { userId } = req.params;
-    const workshops = await Workshop.find()
+    let filter = { archive: false };
+    const workshops = await Workshop.find(filter)
       .populate("professorsparticipating", "firstname lastname email")
       .populate("createdBy", "firstname lastname email");
-    const trips = await Trip.find();
+    const trips = await Trip.find(filter);
     const registeredWorkshops = workshops.filter(
       (workshop) =>
         workshop.attendees.filter(
