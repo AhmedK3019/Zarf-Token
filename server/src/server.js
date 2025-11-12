@@ -27,9 +27,11 @@ import vendorRequestRoutes from "./routes/vendorRequestRoutes.js";
 import conferenceRoutes from "./routes/conferenceRoutes.js";
 import workshopRoutes from "./routes/workshopRoutes.js";
 import allEventsRoutes from "./routes/allEventsRoutes.js";
+import stripeRoutes from "./routes/stripeRoutes.js";
 import Admin from "./models/Admin.js";
 import { autoCancelOverdueVendorRequests } from "./utils/vendorRequestJobs.js";
 import Stripe from "stripe";
+import { sendPaymentReceiptEmail } from "./utils/mailer.js";
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
@@ -57,9 +59,15 @@ app.post(
       console.error("Stripe webhook signature verification failed", err);
       return res.status(400).send(`Webhook Error: ${err.message}`);
     }
+    console.log("Stripe webhook received:", event.type);
     if (event.type === "checkout.session.completed") {
       const session = event.data.object;
       const { userId, tripId, workshopId, type } = session.metadata || {};
+      const payerEmail =
+        session.customer_details?.email || session.customer_email || null;
+      const amountPaid = session.amount_total
+        ? session.amount_total / 100
+        : undefined;
       try {
         if (type === "trip" && tripId) {
           const Trip = (await import("./models/Trip.js")).default;
@@ -75,6 +83,25 @@ app.post(
                 (r) => r.userId.toString() !== userId.toString()
               );
               await trip.save();
+              // Send receipt to the attendee
+              try {
+                await sendPaymentReceiptEmail({
+                  to: payerEmail || pending.email,
+                  name: `${pending.firstname} ${pending.lastname}`.trim(),
+                  eventType: "trip",
+                  eventName: trip.tripname,
+                  amount: amountPaid ?? trip.price,
+                  currency: (session.currency || "egp").toUpperCase(),
+                  paymentMethod: "Card (Stripe)",
+                  date: new Date(session.created * 1000),
+                  transactionId: session.payment_intent || session.id,
+                });
+              } catch (mailErr) {
+                console.error(
+                  "Failed to send trip Stripe receipt:",
+                  mailErr?.message || mailErr
+                );
+              }
             }
           }
         } else if (type === "workshop" && workshopId) {
@@ -91,6 +118,24 @@ app.post(
                 (r) => r.userId.toString() !== userId.toString()
               );
               await workshop.save();
+              try {
+                await sendPaymentReceiptEmail({
+                  to: payerEmail || pending.email,
+                  name: `${pending.firstname} ${pending.lastname}`.trim(),
+                  eventType: "workshop",
+                  eventName: workshop.workshopname,
+                  amount: amountPaid ?? workshop.requiredFunding,
+                  currency: (session.currency || "egp").toUpperCase(),
+                  paymentMethod: "Card (Stripe)",
+                  date: new Date(session.created * 1000),
+                  transactionId: session.payment_intent || session.id,
+                });
+              } catch (mailErr) {
+                console.error(
+                  "Failed to send workshop Stripe receipt:",
+                  mailErr?.message || mailErr
+                );
+              }
             }
           }
         }
@@ -132,6 +177,7 @@ app.use("/api/bazaars", bazaarRoutes);
 app.use("/api/conferences", conferenceRoutes);
 app.use("/api/workshops", workshopRoutes);
 app.use("/api/allEvents", allEventsRoutes);
+app.use("/api/stripe", stripeRoutes);
 cron.schedule("0 0 * * *", () => {
   // runs every day at midnight
   console.log("Updating court slots...");

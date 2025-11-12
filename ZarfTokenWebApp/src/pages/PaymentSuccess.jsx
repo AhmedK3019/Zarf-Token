@@ -10,12 +10,21 @@ export default function PaymentSuccess() {
   const sessionId = searchParams.get("session_id");
 
   useEffect(() => {
-    // Optionally poll backend to confirm attendee paid status
-    const timeout = setTimeout(() => {
-      // Redirect user back to their registered events page
-      navigate("/dashboard/user");
-    }, 2500);
-    return () => clearTimeout(timeout);
+    let cancelled = false;
+    const confirm = async () => {
+      try {
+        if (!sessionId) return; // nothing to confirm
+        await api.post("/stripe/confirm", { sessionId });
+      } catch (e) {
+        // non-fatal; webhook may still complete
+      } finally {
+        if (!cancelled) setTimeout(() => navigate("/dashboard/user"), 1200);
+      }
+    };
+    confirm();
+    return () => {
+      cancelled = true;
+    };
   }, [navigate]);
 
   return (
