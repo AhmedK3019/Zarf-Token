@@ -3,6 +3,7 @@ import express from "express";
 const router = express.Router();
 
 router.post("/createWorkshop", worshopsController.createWorkshop);
+router.post("/payForWorkshop/:id", worshopsController.payForWorkshop);
 
 router.get("/getAllWorkshops", worshopsController.getAllWorkshops);
 

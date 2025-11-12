@@ -35,6 +35,21 @@ export function UserProvider({ children }) {
     // keep logoutReason visible until dismissed
   }, []);
 
+  // Manually refresh the user from the server (e.g., after wallet changes)
+  const refreshUser = useCallback(async () => {
+    try {
+      const res = await api.get("/auth/me");
+      if (res?.data?.user) {
+        setUser(res.data.user);
+        return true;
+      }
+      return false;
+    } catch (e) {
+      // Silent failure; caller can decide what to do
+      return false;
+    }
+  }, []);
+
   // hydrate from token on startup (best-effort, client-side decode)
   useEffect(() => {
     const hydrate = async () => {
@@ -50,7 +65,6 @@ export function UserProvider({ children }) {
             if (payload.id) restored._id = payload.id;
             setUser((prev) => ({ ...(prev || {}), ...restored }));
             hasUserEverRef.current = true;
-            return;
           }
         } catch (err) {
           // fallthrough to server-side /me check
@@ -214,7 +228,7 @@ export function UserProvider({ children }) {
 
   return (
     <UserContext.Provider
-      value={{ user, login, logout, logoutReason, dismissLogout }}
+      value={{ user, login, logout, refreshUser, logoutReason, dismissLogout }}
     >
       {logoutReason ? (
         <div

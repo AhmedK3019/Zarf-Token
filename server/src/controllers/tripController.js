@@ -1,5 +1,8 @@
 import Trip from "../models/Trip.js";
+import User from "../models/User.js"; // Needed for wallet operations
 import Joi from "joi";
+import Stripe from "stripe";
+import { sendPaymentReceiptEmail } from "../utils/mailer.js";
 
 const TripSchema = Joi.object({
   tripname: Joi.string().required(),
@@ -172,12 +175,13 @@ const cancelRegistration = async (req, res, next) => {
 };
 
 const payForTrip = async (req, res, next) => {
+  // Handles three methods: wallet (instant), stripe (create checkout), creditcard (legacy mock)
   try {
     const { id } = req.params;
     const userId = req.userId;
     if (!userId) return res.status(401).json({ message: "No token provided" });
     const trip = await Trip.findById(id);
-    const method = req.body.method;
+    const method = req.body.method; // 'wallet' | 'stripe' | 'creditcard'
     if (!trip) return res.status(404).json({ message: "Trip not found" });
     const attendee = trip.registered.find(
       (a) => a.userId.toString() === userId.toString()
@@ -188,25 +192,105 @@ const payForTrip = async (req, res, next) => {
         .json({ message: "You are not registered for this trip" });
     if (attendee.paid)
       return res.status(400).json({ message: "You have already paid" });
+
     if (method === "wallet") {
       const user = await User.findById(userId);
+      if (!user) return res.status(404).json({ message: "User not found" });
       if (user.wallet < trip.price) {
         return res.status(400).json({ message: "Insufficient funds" });
       }
       user.wallet -= trip.price;
       await user.save();
+      attendee.paid = true;
+      trip.attendees.push(attendee);
+      trip.registered = trip.registered.filter(
+        (a) => a.userId.toString() !== userId.toString()
+      );
+      await trip.save();
+      // Send receipt email (non-blocking best-effort)
+      try {
+        await sendPaymentReceiptEmail({
+          to: attendee.email,
+          name: `${attendee.firstname} ${attendee.lastname}`.trim(),
+          eventType: "trip",
+          eventName: trip.tripname,
+          amount: trip.price,
+          currency: "EGP",
+          paymentMethod: "Wallet",
+        });
+      } catch (e) {
+        console.error("Failed to send trip wallet receipt:", e?.message || e);
+      }
+      return res.status(200).json({ message: "Payment successful", trip });
+    } else if (method === "stripe") {
+      // Create Stripe Checkout Session and return URL (do NOT mark paid yet; webhook will finalize)
+      if (!process.env.STRIPE_SECRET_KEY) {
+        return res
+          .status(500)
+          .json({ message: "Stripe is not configured on the server" });
+      }
+      try {
+        const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
+        const session = await stripe.checkout.sessions.create({
+          payment_method_types: ["card"],
+          mode: "payment",
+          line_items: [
+            {
+              price_data: {
+                currency: "egp",
+                product_data: { name: trip.tripname },
+                unit_amount: Math.round(trip.price * 100),
+              },
+              quantity: 1,
+            },
+          ],
+          success_url: `${
+            process.env.FRONTEND_URL || "http://localhost:5173"
+          }/payment-success?type=trip&id=${id}&session_id={CHECKOUT_SESSION_ID}`,
+          cancel_url: `${
+            process.env.FRONTEND_URL || "http://localhost:5173"
+          }/payment-cancelled?type=trip&id=${id}`,
+          metadata: { userId, tripId: id, type: "trip" },
+        });
+        return res
+          .status(200)
+          .json({ url: session.url, sessionId: session.id });
+      } catch (stripeErr) {
+        console.error("Stripe session creation failed", stripeErr);
+        return res
+          .status(500)
+          .json({ message: "Failed to create Stripe session" });
+      }
     } else if (method === "creditcard") {
-      // Process credit card payment (mocked)
-      // In real application, integrate with payment gateway
-      console.log("Processing credit card payment...");
+      // Legacy mock path retained for backward compatibility
+      attendee.paid = true;
+      trip.attendees.push(attendee);
+      trip.registered = trip.registered.filter(
+        (a) => a.userId.toString() !== userId.toString()
+      );
+      await trip.save();
+      try {
+        await sendPaymentReceiptEmail({
+          to: attendee.email,
+          name: `${attendee.firstname} ${attendee.lastname}`.trim(),
+          eventType: "trip",
+          eventName: trip.tripname,
+          amount: trip.price,
+          currency: "EGP",
+          paymentMethod: "Credit Card (Mock)",
+        });
+      } catch (e) {
+        console.error(
+          "Failed to send trip creditcard receipt:",
+          e?.message || e
+        );
+      }
+      return res
+        .status(200)
+        .json({ message: "Mock credit card payment successful", trip });
+    } else {
+      return res.status(400).json({ message: "Unsupported payment method" });
     }
-    attendee.paid = true;
-    trip.attendees.push(attendee);
-    trip.registered = trip.registered.filter(
-      (a) => a.userId.toString() !== userId.toString()
-    );
-    await trip.save();
-    return res.status(200).json({ message: "Payment successful", trip });
   } catch (error) {
     next(error);
   }
@@ -220,4 +304,5 @@ export default {
   getTrip,
   registerForTrip,
   cancelRegistration,
+  payForTrip,
 };

@@ -121,6 +121,63 @@ export const sendBoothRejectionEmail = async (vendor, booth) => {
   return await sendEmail(vendor.email, subject, text);
 };
 
+// Send a payment receipt email to the payer
+// params: { to, name, eventType, eventName, amount, currency = "EGP", paymentMethod, date = new Date(), transactionId }
+export const sendPaymentReceiptEmail = async (params) => {
+  const {
+    to,
+    name,
+    eventType,
+    eventName,
+    amount,
+    currency = "EGP",
+    paymentMethod,
+    date = new Date(),
+    transactionId,
+  } = params || {};
+
+  if (!to) throw new Error("sendPaymentReceiptEmail: 'to' is required");
+  const safeName = name || "Participant";
+  const safeEventType = (eventType || "event").toString();
+  const safeEventName = eventName || "";
+  const paidAt = new Date(date);
+  const formattedDate = isNaN(paidAt.getTime())
+    ? new Date().toLocaleString()
+    : paidAt.toLocaleString();
+  const method = paymentMethod || "Payment";
+  const amountText =
+    typeof amount === "number" && !isNaN(amount)
+      ? `${amount.toFixed(2)} ${currency}`
+      : `N/A ${currency}`;
+
+  const txnLine = transactionId
+    ? `<p style="margin:4px 0;color:#555;">Transaction ID: <strong>${transactionId}</strong></p>`
+    : "";
+
+  const subject = `Payment receipt for your ${safeEventType}`;
+  const html = `
+    <div style="font-family: Arial, Helvetica, sans-serif; font-size: 14px; color: #222;">
+      <p>Dear ${safeName},</p>
+      <p>Thank you for your ${method.toLowerCase()} for the ${safeEventType}${
+    safeEventName ? ` "<strong>${safeEventName}</strong>"` : ""
+  }. This email confirms that your payment has been received.</p>
+      <div style="border:1px solid #eee; padding:12px; border-radius:8px; background:#fafafa; margin: 12px 0;">
+        <p style="margin:4px 0;color:#555;">Event: <strong>${
+          safeEventName || safeEventType
+        }</strong></p>
+        <p style="margin:4px 0;color:#555;">Amount: <strong>${amountText}</strong></p>
+        <p style="margin:4px 0;color:#555;">Payment method: <strong>${method}</strong></p>
+        <p style="margin:4px 0;color:#555;">Paid at: <strong>${formattedDate}</strong></p>
+        ${txnLine}
+      </div>
+      <p>If you have any questions, please reply to this email.</p>
+      <p>Best regards,<br/>GUC Events Team</p>
+    </div>
+  `;
+
+  return await sendEmail(to, subject, html, true);
+};
+
 export const sendVendorCancellationEmail = async ({
   vendor,
   request,

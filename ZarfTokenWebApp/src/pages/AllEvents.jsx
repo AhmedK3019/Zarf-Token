@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { useParams } from "react-router-dom";
 import api from "../services/api";
 import { useAuthUser } from "../hooks/auth";
@@ -284,50 +284,51 @@ const AllEvents = () => {
   }, [user?._id]);
 
   // Fetch events based on category
-  useEffect(() => {
-    const fetchEventsByCategory = async () => {
-      const fetchId = ++lastFetchIdRef.current;
-      setLoading(true);
-      setError(null);
-      setEvents([]);
-      setFilteredEvents([]);
-      try {
-        const endpoint =
-          selectedCategory === "all"
-            ? "/allEvents/getAllEvents"
-            : `/allEvents/getEventsByType/${selectedCategory}`;
-        const response = await api.get(endpoint);
-        // Ignore if a newer request has been initiated
-        if (fetchId !== lastFetchIdRef.current) return;
-        const eventsData = response.data || [];
-        let visibleEvents;
-        if (selectedCategory === "booths") {
-          visibleEvents = eventsData.filter(
-            (event) => event.type === "booth" && !event.isBazarBooth
-          );
-        } else {
-          visibleEvents = eventsData.filter(
-            (event) =>
-              (event.type !== "booth" || !event.isBazarBooth) &&
-              (event.type !== "workshop" || event.status === "Approved")
-          );
-        }
-        setEvents(visibleEvents);
-        setFilteredEvents(visibleEvents);
-      } catch (err) {
-        // Only report errors for the latest request
-        if (fetchId === lastFetchIdRef.current) {
-          setError("Failed to fetch events. Please try again.");
-        }
-      } finally {
-        if (fetchId === lastFetchIdRef.current) {
-          setLoading(false);
-        }
+  const fetchEventsByCategory = useCallback(async () => {
+    const fetchId = ++lastFetchIdRef.current;
+    setLoading(true);
+    setError(null);
+    setEvents([]);
+    setFilteredEvents([]);
+    try {
+      const endpoint =
+        selectedCategory === "all"
+          ? "/allEvents/getAllEvents"
+          : `/allEvents/getEventsByType/${selectedCategory}`;
+      const response = await api.get(endpoint);
+      // Ignore if a newer request has been initiated
+      if (fetchId !== lastFetchIdRef.current) return;
+      const eventsData = response.data || [];
+      let visibleEvents;
+      if (selectedCategory === "booths") {
+        visibleEvents = eventsData.filter(
+          (event) => event.type === "booth" && !event.isBazarBooth
+        );
+      } else {
+        visibleEvents = eventsData.filter(
+          (event) =>
+            (event.type !== "booth" || !event.isBazarBooth) &&
+            (event.type !== "workshop" || event.status === "Approved")
+        );
       }
-    };
+      setEvents(visibleEvents);
+      setFilteredEvents(visibleEvents);
+    } catch (err) {
+      // Only report errors for the latest request
+      if (fetchId === lastFetchIdRef.current) {
+        setError("Failed to fetch events. Please try again.");
+      }
+    } finally {
+      if (fetchId === lastFetchIdRef.current) {
+        setLoading(false);
+      }
+    }
+  }, [selectedCategory]);
+
+  useEffect(() => {
     fetchEventsByCategory();
     setSearchTerm("");
-  }, [selectedCategory]);
+  }, [selectedCategory, fetchEventsByCategory]);
 
   // Search, Filtering and Sorting logic
   useEffect(() => {
@@ -845,10 +846,10 @@ const AllEvents = () => {
       alert("Registration successful!");
       closeRegisterModal();
 
-      // Refetch events
-      const currentCategory = selectedCategory;
-      setSelectedCategory("");
-      setSelectedCategory(currentCategory);
+      // Refresh events to reflect registration changes
+      await fetchEventsByCategory();
+      // Also bump refreshTrigger so child cards react if they rely on it
+      setRefreshTrigger((prev) => prev + 1);
     } catch (err) {
       setRegError(
         err?.response?.data?.message || err?.message || "Failed to register"

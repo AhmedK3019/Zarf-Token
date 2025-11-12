@@ -12,6 +12,8 @@ import SignUp from "./pages/signUp";
 import NotFound from "./pages/notFound";
 import "./App.css";
 import { useAuthUser } from "./hooks/auth";
+import PaymentSuccess from "./pages/PaymentSuccess";
+import PaymentCancelled from "./pages/PaymentCancelled";
 // import EditBazaar from "./pages/bazaarPages/EditBazaar";
 // import EditTrip from "./pages/tripPages/EditTrip";
 // import EditConference from "./pages/conferencePages/EditConference";
@@ -27,6 +29,8 @@ function App() {
         <Route path="/events" element={<EventsPage />} />
         <Route path="/events/:category" element={<EventsPage />} />
         <Route path="/signup" element={<SignUp />} />
+        <Route path="/payment-success" element={<PaymentSuccess />} />
+        <Route path="/payment-cancelled" element={<PaymentCancelled />} />
         <Route
           path="/dashboard/user/*"
           element={

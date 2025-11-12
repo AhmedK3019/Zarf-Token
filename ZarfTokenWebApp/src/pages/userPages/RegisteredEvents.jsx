@@ -7,7 +7,7 @@ import { getEventDetails } from "../eventUtils";
 import { User, X, Star, Trash2 } from "lucide-react";
 
 export default function RegisteredEvents() {
-  const { user } = useAuthUser();
+  const { user, refreshUser } = useAuthUser();
   const [events, setEvents] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -152,6 +152,8 @@ export default function RegisteredEvents() {
         `/allEvents/getEventsRegisteredByMe/${user._id}`
       );
       setEvents(res.data || []);
+      // Refresh user (wallet refund, etc.)
+      await refreshUser();
     } catch (err) {
       setToastMsg(err?.response?.data?.message || "Cancel failed");
       setToastType("error");
@@ -224,15 +226,30 @@ export default function RegisteredEvents() {
     const paid = Boolean(attendee.paid);
 
     // 1) Registered & paid & upcoming -> show 'Registered'
-    if (paid && startDate && startDate.getTime() > now) {
-      return (
-        <button
-          disabled
-          className="w-full rounded-lg px-4 py-2 text-sm font-semibold text-center transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 cursor-not-allowed border border-gray-200 bg-gray-50 text-[#555] focus-visible:ring-gray-200"
-        >
-          Registered
-        </button>
-      );
+    if (paid && startDate) {
+      const twoWeeks = 1000 * 60 * 60 * 24 * 14;
+      if (startDate.getTime() - now >= twoWeeks) {
+        return (
+          <button
+            onClick={() => handleCancelRegistration(rawEvent)}
+            className="w-full rounded-lg px-4 py-2 text-sm font-semibold text-center transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 border border-gray-200 focus-visible:ring-gray-200 bg-red-50 text-red-700 hover:bg-red-100"
+          >
+            Cancel registration
+          </button>
+        );
+      }
+
+      // otherwise upcoming and within 2 weeks -> show Registered
+      if (startDate.getTime() > now) {
+        return (
+          <button
+            disabled
+            className="w-full rounded-lg px-4 py-2 text-sm font-semibold text-center transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 cursor-not-allowed border border-gray-200 bg-gray-50 text-[#555] focus-visible:ring-gray-200"
+          >
+            Registered
+          </button>
+        );
+      }
     }
 
     // 2) Registered but NOT paid & upcoming -> show Pay button (opens placeholder modal)
@@ -260,33 +277,6 @@ export default function RegisteredEvents() {
           Registration canceled
         </button>
       );
-    }
-
-    // 4) Registered & paid & event at least 2 weeks ahead -> Cancel registration button
-    if (paid && startDate) {
-      const twoWeeks = 1000 * 60 * 60 * 24 * 14;
-      if (startDate.getTime() - now >= twoWeeks) {
-        return (
-          <button
-            onClick={() => handleCancelRegistration(rawEvent)}
-            className="w-full rounded-lg px-4 py-2 text-sm font-semibold text-center transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 border border-gray-200 focus-visible:ring-gray-200 bg-red-50 text-red-700"
-          >
-            Cancel registration
-          </button>
-        );
-      }
-
-      // otherwise upcoming and within 2 weeks -> show Registered
-      if (startDate.getTime() > now) {
-        return (
-          <button
-            disabled
-            className="text-xs bg-gray-200 text-gray-600 px-3 py-1.5 rounded-lg transition-colors cursor-not-allowed font-medium"
-          >
-            Registered
-          </button>
-        );
-      }
     }
 
     return null;
@@ -564,22 +554,42 @@ export default function RegisteredEvents() {
             const walletBalance = Number(user?.wallet ?? 0);
             const canPayWallet = walletBalance >= amount && amount > 0;
 
+            const refreshRegistered = async () => {
+              try {
+                const res = await api.get(
+                  `/allEvents/getEventsRegisteredByMe/${user._id}`
+                );
+                setEvents(res.data || []);
+              } catch (_) {}
+            };
+
             const handlePayWithWallet = async () => {
               if (!canPayWallet) return;
               setPaySubmitting(true);
               try {
-                // TODO: integrate backend endpoint to charge wallet and confirm registration payment
-                // await api.post(`/payments/wallet/${details.type}/${details.id}`);
-                setToastMsg("Wallet payment flow to be integrated");
-                setToastType("info");
+                const endpointMap = {
+                  workshop: `/workshops/payForWorkshop/${details.id}`,
+                  trip: `/trips/payForTrip/${details.id}`,
+                };
+                const ep = endpointMap[details.type];
+                if (!ep)
+                  throw new Error("Wallet payment not supported for this type");
+                await api.post(ep, { method: "wallet" });
+                setToastMsg("Wallet payment successful");
+                setToastType("success");
                 setTimeout(() => setToastMsg(null), 1500);
                 setShowPayModal(false);
+                await refreshRegistered();
+                // Wallet deducted, refresh user object
+                await refreshUser();
               } catch (e) {
                 setToastMsg(
-                  e?.response?.data?.message || "Wallet payment failed"
+                  e?.response?.data?.message ||
+                    e.message ||
+                    "Wallet payment failed"
                 );
                 setToastType("error");
-                setTimeout(() => setToastMsg(null), 2000);
+                setTimeout(() => setToastMsg(null), 2500);
               } finally {
                 setPaySubmitting(false);
               }
@@ -588,19 +598,28 @@ export default function RegisteredEvents() {
             const handlePayWithStripe = async () => {
               setPaySubmitting(true);
               try {
-                // TODO: integrate Stripe Checkout or Payment Element flow
-                // Example: const { data } = await api.post(`/payments/stripe/create-session`, { eventId: details.id, type: details.type });
-                // window.location.href = data.checkoutUrl;
-                setToastMsg("Stripe payment flow to be integrated");
-                setToastType("info");
-                setTimeout(() => setToastMsg(null), 1500);
-                setShowPayModal(false);
+                const endpointMap = {
+                  workshop: `/workshops/payForWorkshop/${details.id}`,
+                  trip: `/trips/payForTrip/${details.id}`,
+                };
+                const ep = endpointMap[details.type];
+                if (!ep)
+                  throw new Error("Stripe payment not supported for this type");
+                const { data } = await api.post(ep, { method: "stripe" });
+                if (data?.url) {
+                  // redirect to Stripe Checkout
+                  window.location.href = data.url;
+                } else {
+                  throw new Error("Stripe session URL missing");
+                }
               } catch (e) {
                 setToastMsg(
-                  e?.response?.data?.message || "Stripe payment failed"
+                  e?.response?.data?.message ||
+                    e.message ||
+                    "Stripe payment failed"
                 );
                 setToastType("error");
-                setTimeout(() => setToastMsg(null), 2000);
+                setTimeout(() => setToastMsg(null), 2500);
               } finally {
                 setPaySubmitting(false);
               }

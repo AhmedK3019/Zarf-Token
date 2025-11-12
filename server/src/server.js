@@ -27,17 +27,132 @@ import vendorRequestRoutes from "./routes/vendorRequestRoutes.js";
 import conferenceRoutes from "./routes/conferenceRoutes.js";
 import workshopRoutes from "./routes/workshopRoutes.js";
 import allEventsRoutes from "./routes/allEventsRoutes.js";
+import stripeRoutes from "./routes/stripeRoutes.js";
 import Admin from "./models/Admin.js";
 import { autoCancelOverdueVendorRequests } from "./utils/vendorRequestJobs.js";
+import Stripe from "stripe";
+import { sendPaymentReceiptEmail } from "./utils/mailer.js";
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
 dotenv.config();
 const app = express();
+// Register Stripe webhook BEFORE express.json so we can access raw body
+app.post(
+  "/api/stripe/webhook",
+  express.raw({ type: "application/json" }),
+  async (req, res) => {
+    if (!process.env.STRIPE_SECRET_KEY || !process.env.STRIPE_WEBHOOK_SECRET) {
+      console.warn("Stripe webhook called but keys are missing.");
+      return res.status(200).send();
+    }
+    const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
+    const sig = req.headers["stripe-signature"];
+    let event;
+    try {
+      event = stripe.webhooks.constructEvent(
+        req.body,
+        sig,
+        process.env.STRIPE_WEBHOOK_SECRET
+      );
+    } catch (err) {
+      console.error("Stripe webhook signature verification failed", err);
+      return res.status(400).send(`Webhook Error: ${err.message}`);
+    }
+    console.log("Stripe webhook received:", event.type);
+    if (event.type === "checkout.session.completed") {
+      const session = event.data.object;
+      const { userId, tripId, workshopId, type } = session.metadata || {};
+      const payerEmail =
+        session.customer_details?.email || session.customer_email || null;
+      const amountPaid = session.amount_total
+        ? session.amount_total / 100
+        : undefined;
+      try {
+        if (type === "trip" && tripId) {
+          const Trip = (await import("./models/Trip.js")).default;
+          const trip = await Trip.findById(tripId);
+          if (trip) {
+            const pending = trip.registered.find(
+              (r) => r.userId.toString() === userId.toString()
+            );
+            if (pending && !pending.paid) {
+              pending.paid = true;
+              trip.attendees.push(pending);
+              trip.registered = trip.registered.filter(
+                (r) => r.userId.toString() !== userId.toString()
+              );
+              await trip.save();
+              // Send receipt to the attendee
+              try {
+                await sendPaymentReceiptEmail({
+                  to: payerEmail || pending.email,
+                  name: `${pending.firstname} ${pending.lastname}`.trim(),
+                  eventType: "trip",
+                  eventName: trip.tripname,
+                  amount: amountPaid ?? trip.price,
+                  currency: (session.currency || "egp").toUpperCase(),
+                  paymentMethod: "Card (Stripe)",
+                  date: new Date(session.created * 1000),
+                  transactionId: session.payment_intent || session.id,
+                });
+              } catch (mailErr) {
+                console.error(
+                  "Failed to send trip Stripe receipt:",
+                  mailErr?.message || mailErr
+                );
+              }
+            }
+          }
+        } else if (type === "workshop" && workshopId) {
+          const WorkShop = (await import("./models/Workshop.js")).default;
+          const workshop = await WorkShop.findById(workshopId);
+          if (workshop) {
+            const pending = workshop.registered.find(
+              (r) => r.userId.toString() === userId.toString()
+            );
+            if (pending && !pending.paid) {
+              pending.paid = true;
+              workshop.attendees.push(pending);
+              workshop.registered = workshop.registered.filter(
+                (r) => r.userId.toString() !== userId.toString()
+              );
+              await workshop.save();
+              try {
+                await sendPaymentReceiptEmail({
+                  to: payerEmail || pending.email,
+                  name: `${pending.firstname} ${pending.lastname}`.trim(),
+                  eventType: "workshop",
+                  eventName: workshop.workshopname,
+                  amount: amountPaid ?? workshop.requiredFunding,
+                  currency: (session.currency || "egp").toUpperCase(),
+                  paymentMethod: "Card (Stripe)",
+                  date: new Date(session.created * 1000),
+                  transactionId: session.payment_intent || session.id,
+                });
+              } catch (mailErr) {
+                console.error(
+                  "Failed to send workshop Stripe receipt:",
+                  mailErr?.message || mailErr
+                );
+              }
+            }
+          }
+        }
+      } catch (dbErr) {
+        console.error("Webhook DB finalize error", dbErr);
+        // Don't fail webhook; Stripe will not retry on 200
+      }
+    }
+    res.status(200).send();
+  }
+);
+
+// JSON parser for all other routes
 app.use(express.json());
 app.use(
   cors({
-    origin: "http://localhost:5173", // Update this to match your frontend URL
+    origin: process.env.FRONTEND_URL || "http://localhost:5173", // Update this to match your frontend URL
     credentials: true,
   })
 );
@@ -62,6 +177,7 @@ app.use("/api/bazaars", bazaarRoutes);
 app.use("/api/conferences", conferenceRoutes);
 app.use("/api/workshops", workshopRoutes);
 app.use("/api/allEvents", allEventsRoutes);
+app.use("/api/stripe", stripeRoutes);
 cron.schedule("0 0 * * *", () => {
   // runs every day at midnight
   console.log("Updating court slots...");
@@ -77,10 +193,7 @@ cron.schedule("*/30 * * * *", async () => {
       );
     }
   } catch (err) {
-    console.error(
-      "Auto-cancel vendor requests failed:",
-      err?.message || err
-    );
+    console.error("Auto-cancel vendor requests failed:", err?.message || err);
   }
 });
 
