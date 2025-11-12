@@ -2,6 +2,7 @@ import Trip from "../models/Trip.js";
 import User from "../models/User.js"; // Needed for wallet operations
 import Joi from "joi";
 import Stripe from "stripe";
+import { sendPaymentReceiptEmail } from "../utils/mailer.js";
 
 const TripSchema = Joi.object({
   tripname: Joi.string().required(),
@@ -206,6 +207,20 @@ const payForTrip = async (req, res, next) => {
         (a) => a.userId.toString() !== userId.toString()
       );
       await trip.save();
+      // Send receipt email (non-blocking best-effort)
+      try {
+        await sendPaymentReceiptEmail({
+          to: attendee.email,
+          name: `${attendee.firstname} ${attendee.lastname}`.trim(),
+          eventType: "trip",
+          eventName: trip.tripname,
+          amount: trip.price,
+          currency: "EGP",
+          paymentMethod: "Wallet",
+        });
+      } catch (e) {
+        console.error("Failed to send trip wallet receipt:", e?.message || e);
+      }
       return res.status(200).json({ message: "Payment successful", trip });
     } else if (method === "stripe") {
       // Create Stripe Checkout Session and return URL (do NOT mark paid yet; webhook will finalize)
@@ -254,6 +269,22 @@ const payForTrip = async (req, res, next) => {
         (a) => a.userId.toString() !== userId.toString()
       );
       await trip.save();
+      try {
+        await sendPaymentReceiptEmail({
+          to: attendee.email,
+          name: `${attendee.firstname} ${attendee.lastname}`.trim(),
+          eventType: "trip",
+          eventName: trip.tripname,
+          amount: trip.price,
+          currency: "EGP",
+          paymentMethod: "Credit Card (Mock)",
+        });
+      } catch (e) {
+        console.error(
+          "Failed to send trip creditcard receipt:",
+          e?.message || e
+        );
+      }
       return res
         .status(200)
         .json({ message: "Mock credit card payment successful", trip });

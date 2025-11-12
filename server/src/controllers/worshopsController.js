@@ -2,6 +2,7 @@ import WorkShop from "../models/Workshop.js";
 import EventsOffice from "../models/EventsOffice.js";
 import User from "../models/User.js";
 import Stripe from "stripe";
+import { sendPaymentReceiptEmail } from "../utils/mailer.js";
 import userController from "./userController.js";
 import mongoose from "mongoose";
 import Joi from "joi";
@@ -431,6 +432,22 @@ const payForWorkshop = async (req, res, next) => {
         (a) => a.userId.toString() !== userId.toString()
       );
       await workshop.save();
+      try {
+        await sendPaymentReceiptEmail({
+          to: attendee.email,
+          name: `${attendee.firstname} ${attendee.lastname}`.trim(),
+          eventType: "workshop",
+          eventName: workshop.workshopname,
+          amount,
+          currency: "EGP",
+          paymentMethod: "Wallet",
+        });
+      } catch (e) {
+        console.error(
+          "Failed to send workshop wallet receipt:",
+          e?.message || e
+        );
+      }
       return res.status(200).json({ message: "Payment successful", workshop });
     } else if (method === "stripe") {
       if (!process.env.STRIPE_SECRET_KEY) {
@@ -478,6 +495,22 @@ const payForWorkshop = async (req, res, next) => {
         (a) => a.userId.toString() !== userId.toString()
       );
       await workshop.save();
+      try {
+        await sendPaymentReceiptEmail({
+          to: attendee.email,
+          name: `${attendee.firstname} ${attendee.lastname}`.trim(),
+          eventType: "workshop",
+          eventName: workshop.workshopname,
+          amount,
+          currency: "EGP",
+          paymentMethod: "Credit Card (Mock)",
+        });
+      } catch (e) {
+        console.error(
+          "Failed to send workshop creditcard receipt:",
+          e?.message || e
+        );
+      }
       return res
         .status(200)
         .json({ message: "Mock credit card payment successful", workshop });
