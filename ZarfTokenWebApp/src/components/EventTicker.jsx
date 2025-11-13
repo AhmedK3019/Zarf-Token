@@ -20,9 +20,6 @@ const EventTicker = () => {
         <div className="ticker-track">
           {[...events, ...events].map((event, index) => (
             <span key={`${index}-${event}`} className="ticker-item">
-              <span className="ticker-dot" aria-hidden="true">
-                |
-              </span>
               {event}
             </span>
           ))}
