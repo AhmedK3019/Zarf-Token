@@ -9,8 +9,8 @@ const events = [
   "Oracle Egypt Office Tour - Smart Village",
   "Amazon Web Services Cloud Experience - Smart Village",
   "Campus Sustainability Fair - Green Future Day",
-  "Innovation Hackathon - University Main Hall",
-  "Tech Career Fair - University Central HallZ",
+  "Innovation Hackathon - C Building",
+  "Tech Career Fair - GIU Campus",
 ];
 
 const EventTicker = () => {
