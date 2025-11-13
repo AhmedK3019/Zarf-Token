@@ -7,7 +7,12 @@ import NotFound from "../../pages/NotFoundPage.jsx";
 
 const DISCOUNT_FILTERS = [
   { key: "all", label: "All discounts", hint: "Full partner list" },
-  { key: "starter", label: "Up to 10%", hint: "Quick treats", match: (rate) => rate <= 10 },
+  {
+    key: "starter",
+    label: "Up to 10%",
+    hint: "Quick treats",
+    match: (rate) => rate <= 10,
+  },
   {
     key: "core",
     label: "11% - 20%",
@@ -20,13 +25,18 @@ const DISCOUNT_FILTERS = [
     hint: "Premium perks",
     match: (rate) => rate >= 21 && rate <= 35,
   },
-  { key: "elite", label: "36%+", hint: "Hero boosts", match: (rate) => rate >= 36 },
+  {
+    key: "elite",
+    label: "36%+",
+    hint: "Hero boosts",
+    match: (rate) => rate >= 36,
+  },
 ];
 
 const SORTING = {
   recent: {
-    label: "Recently updated",
-    sorter: (a, b) => (b.referenceDate || 0) - (a.referenceDate || 0),
+    label: "Most recent",
+    sorter: (a, b) => (b.createdAt || 0) - (a.createdAt || 0),
   },
   discount: {
     label: "Highest discount",
@@ -82,8 +92,7 @@ const ALLOWED_ROLES = new Set([
 export default function LoyaltyPartnersShowcase({
   title = "GUC Loyalty Program Partners",
   eyebrow,
-  description = "Explore every active vendor in the GUC loyalty program. Each partner is reviewed by Events Office and Admin teams so that Students, Staff, TAs, Professors, Events Office, and Admins unlock trusted discounts.",
-  audienceLabel = "Students · Staff · TAs · Professors · Events Office · Admin",
+  description = "Explore every active vendor in the GUC loyalty program.",
 } = {}) {
   const { user } = useAuthUser();
   const [partners, setPartners] = useState([]);
@@ -95,7 +104,9 @@ export default function LoyaltyPartnersShowcase({
   const [expanded, setExpanded] = useState(() => new Set());
   const [lastLoadedAt, setLastLoadedAt] = useState(null);
   const hasToken =
-    typeof window !== "undefined" ? Boolean(localStorage.getItem("token")) : false;
+    typeof window !== "undefined"
+      ? Boolean(localStorage.getItem("token"))
+      : false;
   const normalizedRole = normalizeRole(user?.role || "");
   const canView = normalizedRole ? ALLOWED_ROLES.has(normalizedRole) : false;
 
@@ -103,26 +114,42 @@ export default function LoyaltyPartnersShowcase({
     setLoading(true);
     setError(null);
     try {
-      const res = await api.get("/loyalty", { params: { status: "approved" } });
+      const res = await api.get("/loyalty");
       const rows = Array.isArray(res.data) ? res.data : [];
+      // Build partner objects synchronously; logo served inline by backend.
+      // Ensure we use the API base (including `/api`) so route `/api/uploads/fileId/:id` resolves.
+      const apiBase = (
+        (api && api.defaults && api.defaults.baseURL) ||
+        import.meta.env.VITE_API_URL ||
+        "http://localhost:3000/api"
+      ).replace(/\/$/, "");
       const normalized = rows
-        .filter((row) => String(row?.status || "").toLowerCase() === "approved")
         .map((row) => {
           const vendor = row?.vendorId || {};
           const vendorLabel =
-            vendor.companyname || vendor.name || vendor.legalname || vendor.email || "Partner";
+            vendor.companyname ||
+            vendor.name ||
+            vendor.legalname ||
+            vendor.email ||
+            "Partner";
           const referenceDate =
-            new Date(row.reviewedAt || row.updatedAt || row.createdAt).getTime() || null;
+            new Date(
+              row.reviewedAt || row.updatedAt || row.createdAt
+            ).getTime() || null;
+          const logoFileId = vendor.logo;
+          const logoUrl = logoFileId
+            ? `${apiBase}/uploads/fileId/${logoFileId}`
+            : "";
+          console.log(logoUrl);
           return {
             id: row._id,
             vendorLabel,
             vendorEmail: vendor.email || "",
             vendorStatus: vendor.status || "Active",
-            logo: vendor.logo,
+            logo: logoUrl,
             promoCode: row.promoCode,
             discountRate: Number(row.discountRate) || 0,
             termsAndConditions: row.termsAndConditions || "",
-            reviewedAt: row.reviewedAt,
             referenceDate,
           };
         })
@@ -148,7 +175,9 @@ export default function LoyaltyPartnersShowcase({
   const searchTerm = search.trim().toLowerCase();
 
   const filteredPartners = useMemo(() => {
-    const range = DISCOUNT_FILTERS.find((filter) => filter.key === discountFilter);
+    const range = DISCOUNT_FILTERS.find(
+      (filter) => filter.key === discountFilter
+    );
     return partners
       .filter((partner) => {
         if (!searchTerm) return true;
@@ -174,9 +203,11 @@ export default function LoyaltyPartnersShowcase({
       };
     }
     const total = partners.length;
-    const average = partners.reduce((sum, partner) => sum + partner.discountRate, 0) / total;
+    const average =
+      partners.reduce((sum, partner) => sum + partner.discountRate, 0) / total;
     const top = partners.reduce(
-      (max, partner) => (partner.discountRate > max ? partner.discountRate : max),
+      (max, partner) =>
+        partner.discountRate > max ? partner.discountRate : max,
       0
     );
     const now = new Date();
@@ -184,7 +215,8 @@ export default function LoyaltyPartnersShowcase({
       if (!partner.referenceDate) return false;
       const date = new Date(partner.referenceDate);
       return (
-        date.getFullYear() === now.getFullYear() && date.getMonth() === now.getMonth()
+        date.getFullYear() === now.getFullYear() &&
+        date.getMonth() === now.getMonth()
       );
     }).length;
     return { total, average, top, newThisMonth };
@@ -226,10 +258,6 @@ export default function LoyaltyPartnersShowcase({
             {description}
           </p>
           <div className="mt-6 flex flex-wrap items-center gap-4 text-sm font-medium text-[#4B4470]">
-            <span className="inline-flex items-center gap-2 rounded-full bg-[#F2EDFF] px-4 py-2 text-[#4C3BCF]">
-              <ShieldCheck className="h-4 w-4" />
-              Verified for {audienceLabel}
-            </span>
             {lastLoadedAt && (
               <span className="inline-flex rounded-full border border-[#E4E0FF] px-4 py-2 text-[#6B64A8]">
                 Updated {formatDate(lastLoadedAt)}
@@ -245,7 +273,11 @@ export default function LoyaltyPartnersShowcase({
           </div>
 
           <div className="mt-8 grid gap-4 md:grid-cols-4">
-            <StatBadge label="Active partners" value={stats.total} accent="text-[#4C3BCF]" />
+            <StatBadge
+              label="Active partners"
+              value={stats.total}
+              accent="text-[#4C3BCF]"
+            />
             <StatBadge
               label="Average discount"
               value={stats.average ? `${stats.average.toFixed(1)}%` : "—"}
@@ -348,7 +380,8 @@ export default function LoyaltyPartnersShowcase({
                 No partners match your filters
               </h3>
               <p className="text-sm text-[#4B4470]">
-                Try resetting the discount filter or searching for another partner or promo code.
+                Try resetting the discount filter or searching for another
+                partner or promo code.
               </p>
               <button
                 type="button"
@@ -368,11 +401,12 @@ export default function LoyaltyPartnersShowcase({
             <div className="grid gap-6 md:grid-cols-2">
               {filteredPartners.map((partner) => {
                 const isExpanded = expanded.has(partner.id);
-                const readableDate = formatDate(partner.reviewedAt || partner.referenceDate);
-                const logoSrc =
-                  partner.logo && partner.logo.trim()
-                    ? partner.logo
-                    : "/unknownicon.png";
+                const readableDate = formatDate(
+                  partner.reviewedAt || partner.referenceDate
+                );
+                const logoSrc = partner.logo
+                  ? partner.logo
+                  : "/unknownicon.png";
                 return (
                   <article
                     key={partner.id}
@@ -380,14 +414,17 @@ export default function LoyaltyPartnersShowcase({
                   >
                     <div className="flex items-start justify-between gap-4">
                       <div className="flex gap-4">
-                        <div className="h-16 w-16 overflow-hidden rounded-2xl border border-[#E4E0FF] bg-white">
+                        <div className="h-16 w-16 overflow-hidden rounded-2xl border border-[#E4E0FF] bg-white p-1 flex items-center justify-center">
                           <img
                             src={logoSrc}
                             alt={`${partner.vendorLabel} logo`}
-                            className="h-full w-full object-cover"
+                            className="max-h-full max-w-full object-contain"
                             loading="lazy"
                             onError={(e) => {
-                              if (e.currentTarget.src.endsWith("/unknownicon.png")) return;
+                              if (
+                                e.currentTarget.src.endsWith("/unknownicon.png")
+                              )
+                                return;
                               e.currentTarget.src = "/unknownicon.png";
                             }}
                           />
@@ -405,7 +442,9 @@ export default function LoyaltyPartnersShowcase({
                             {partner.vendorLabel}
                           </h3>
                           {partner.vendorEmail && (
-                            <p className="text-sm text-[#6B64A8]">{partner.vendorEmail}</p>
+                            <p className="text-sm text-[#6B64A8]">
+                              {partner.vendorEmail}
+                            </p>
                           )}
                         </div>
                       </div>
@@ -472,6 +511,8 @@ const StatBadge = ({ label, value, accent }) => (
     <p className="text-xs font-semibold uppercase tracking-wide text-[#A199D8]">
       {label}
     </p>
-    <p className={`text-2xl font-bold ${accent || "text-[#251E53]"}`}>{value}</p>
+    <p className={`text-2xl font-bold ${accent || "text-[#251E53]"}`}>
+      {value}
+    </p>
   </div>
 );
