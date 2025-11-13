@@ -53,7 +53,7 @@ function CreateTrip({ onCancel }) {
       errorValue.capacity = "Please enter the trip's capacity";
     }
     if (tripData.allowedusers.length == 0) {
-      errorValue.allowedusers = "Please choose one value at least";
+      errorValue.allowedusers = "Please select at least one role";
     }
 
     return errorValue;

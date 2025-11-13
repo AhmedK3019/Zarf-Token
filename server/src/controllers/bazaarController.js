@@ -11,6 +11,7 @@ const bazaarSchema = Joi.object({
   location: Joi.string().required(),
   shortdescription: Joi.string().required(),
   registrationdeadline: Joi.date().required(),
+  allowedusers: Joi.array().min(1),
 });
 
 const createBazaar = async (req, res, next) => {

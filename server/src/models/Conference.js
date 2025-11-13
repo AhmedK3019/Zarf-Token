@@ -38,6 +38,7 @@ const conferenceSchema = new mongoose.Schema({
   createdAt: { type: Date, default: Date.now },
   type: { type: String, default: "conference" },
   archive: { type: Boolean, default: false },
+  allowedusers: ["Student", "TA", "Professor", "Staff"],
 });
 conferenceSchema.post("save", async function (doc, next) {
   try {

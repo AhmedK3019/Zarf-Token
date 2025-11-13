@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import api from "../../services/api";
 import { useParams, useNavigate } from "react-router-dom";
+import { all } from "axios";
 
 const EditBazaar = () => {
   const { id } = useParams();
@@ -15,6 +16,7 @@ const EditBazaar = () => {
     location: "",
     shortdescription: "",
     registrationdeadline: "",
+    allowedusers: [],
   });
   const [successMessage, setSuccessMessage] = useState("");
   const [errorvalues, setErrors] = useState({});
@@ -66,10 +68,24 @@ const EditBazaar = () => {
       errorValues.registrationdeadline =
         "Please enter the registrationdeadline";
     }
+    if (bazaarData.allowedusers.length == 0) {
+      errorValues.allowedusers = "Please select at least one role";
+    }
 
     return errorValues;
   };
-
+  const handleAllowedUsersChange = (e) => {
+    const { value, checked } = e.target;
+    let updatedUsers = [...bazaarData.allowedusers];
+    if (checked) {
+      updatedUsers.push(value);
+    } else {
+      updatedUsers = updatedUsers.filter((user) => user !== value);
+    }
+    setBazaarData({ ...bazaarData, allowedusers: updatedUsers });
+    setSuccessMessage("");
+    setErrors({});
+  };
   const handleSubmission = async (e) => {
     e.preventDefault();
     const validation = validateForm();
@@ -89,6 +105,7 @@ const EditBazaar = () => {
         location: bazaarData.location,
         shortdescription: bazaarData.shortdescription,
         registrationdeadline: bazaarData.registrationdeadline,
+        allowedusers: bazaarData.allowedusers,
       };
       if (new Date(bazaarData.enddate) - new Date(bazaarData.startdate) <= 0) {
         setErrors({
@@ -363,6 +380,37 @@ const EditBazaar = () => {
             {errorvalues.registrationdeadline && (
               <p className="text-red-500 text-sm mt-1">
                 {errorvalues.registrationdeadline}
+              </p>
+            )}
+          </div>
+          <div>
+            <label className="block text-gray-700 font-medium mb-2">
+              Allowed users:
+            </label>
+            <div className="grid grid-cols-2 gap-4">
+              {["Student", "Professor", "TA", "Staff"].map((role) => (
+                <label
+                  key={role}
+                  htmlFor={role}
+                  className="flex items-center space-x-3 bg-gray-50 border border-purple-300 rounded-xl px-4 py-2 hover:bg-purple-50 transition"
+                >
+                  <input
+                    type="checkbox"
+                    id={role}
+                    value={role}
+                    checked={bazaarData.allowedusers.includes(role)}
+                    onChange={handleAllowedUsersChange}
+                    className="w-5 h-5 text-purple-600 border-gray-300 rounded focus:ring-2 focus:ring-purple-400"
+                  />
+                  <span className="text-gray-700 capitalize font-medium">
+                    {role}
+                  </span>
+                </label>
+              ))}
+            </div>
+            {errorvalues.allowedusers && (
+              <p className="text-red-500 text-sm mt-1">
+                {errorvalues.allowedusers}
               </p>
             )}
           </div>

@@ -19,6 +19,7 @@ const EditConference = () => {
     requiredbudget: "",
     sourceoffunding: "",
     extrarequiredresources: "",
+    allowedusers: [],
   });
   const [errorvalues, setErrors] = useState({});
   const [successMessage, setSuccessMessage] = useState("");
@@ -80,9 +81,23 @@ const EditConference = () => {
     if (conferenceData.sourceoffunding.trim() === "") {
       errorValues.sourceoffunding = "Please enter the source of funding";
     }
+    if (conferenceData.allowedusers.length == 0) {
+      errorValues.allowedusers = "Please select at least one role";
+    }
     return errorValues;
   };
-
+  const handleAllowedUsersChange = (e) => {
+    const { value, checked } = e.target;
+    let updatedUsers = [...conferenceData.allowedusers];
+    if (checked) {
+      updatedUsers.push(value);
+    } else {
+      updatedUsers = updatedUsers.filter((user) => user != value);
+    }
+    setConferenceData({ ...conferenceData, allowedusers: updatedUsers });
+    setSuccessMessage("");
+    setErrors({});
+  };
   const handleSubmission = async (e) => {
     e.preventDefault();
     const validation = validateForm();
@@ -91,6 +106,7 @@ const EditConference = () => {
       setSuccessMessage("");
       return;
     }
+
     try {
       const body = {
         conferencename: conferenceData.conferencename,
@@ -106,6 +122,7 @@ const EditConference = () => {
         requiredbudget: conferenceData.requiredbudget,
         sourceoffunding: conferenceData.sourceoffunding,
         extrarequiredresources: conferenceData.extrarequiredresources,
+        allowedusers: conferenceData.allowedusers,
       };
       if (
         new Date(conferenceData.enddate) - new Date(conferenceData.startdate) <
@@ -559,6 +576,38 @@ const EditConference = () => {
               }}
               className="w-full border border-purple-oklch(29.3% 0.136 325.661) rounded-xl px-4 py-2 focus:ring-2 focus:ring-purple-oklch(29.3% 0.136 325.661) focus:outline-none"
             />
+          </div>
+          <div>
+            <label className="block text-gray-700 font-medium mb-2">
+              Allowed users:
+            </label>
+            <div className="grid grid-cols-2 gap-4">
+              {["Student", "Professor", "TA", "Staff"].map((role) => (
+                <label
+                  key={role}
+                  htmlFor={role}
+                  className="flex items-center space-x-3 bg-gray-50 border border-purple-300 rounded-xl px-4 py-2 hover:bg-purple-50 transition"
+                >
+                  <input
+                    type="checkbox"
+                    id={role}
+                    value={role}
+                    checked={conferenceData.allowedusers.includes(role)}
+                    onChange={handleAllowedUsersChange}
+                    className="w-5 h-5 text-purple-600 border-gray-300 rounded focus:ring-2 focus:ring-purple-400"
+                  />
+                  <span className="text-gray-700 capitalize font-medium">
+                    {role}
+                  </span>
+                </label>
+              ))}
+            </div>
+
+            {errorvalues.allowedusers && (
+              <p className="text-red-500 text-sm mt-1">
+                {errorvalues.allowedusers}
+              </p>
+            )}
           </div>
           <div className="grid grid-cols-2 gap-4">
             <button

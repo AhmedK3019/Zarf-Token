@@ -41,11 +41,12 @@ const bazaarSchema = new mongoose.Schema({
     },
   },
   archive: { type: Boolean, default: false },
+  allowedusers: ["Student", "TA", "Professor", "Staff"],
 });
 
 bazaarSchema.post("save", async function (doc, next) {
   try {
-    const message = `Check out ${doc.bazaarname} — a new bazaar has been created!`;
+    const message = `Check out ${doc.bazaarname} — a new bazaar is available!`;
     await User.updateMany({}, { $push: { notifications: { message } } });
     await EventsOffice.updateMany(
       {},

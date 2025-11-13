@@ -15,6 +15,7 @@ const conferenceSchema = Joi.object({
   requiredbudget: Joi.number().required(),
   sourceoffunding: Joi.string().valid("External", "GUC").required(),
   extrarequiredresources: Joi.string().allow(""),
+  allowedusers: Joi.array().min(1),
 });
 
 const createConference = async (req, res, next) => {
