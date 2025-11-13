@@ -247,8 +247,11 @@ const NavbarEventsOffice = () => {
                       }
                     >
                       <span className="flex items-center gap-2">
-                        <Star className="h-4 w-4" />
-                        Loyals
+                        <span className="relative">
+                          <Star className="h-4 w-4 text-black" />
+                          <Star className="h-4 w-4 text-black/70 absolute -right-1 -top-1" />
+                        </span>
+                        Loyalty Applications
                       </span>
                     </NavLink>
                     <NavLink
