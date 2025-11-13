@@ -41,12 +41,6 @@ const bazaarSchema = new mongoose.Schema({
     },
   },
   archive: { type: Boolean, default: false },
-  allowedusers: [
-    {
-      type: String,
-      enum: ["Student", "Professor", "TA", "Staff", "Event office", "Admin"],
-    },
-  ],
 });
 
 bazaarSchema.post("save", async function (doc, next) {

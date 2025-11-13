@@ -16,12 +16,14 @@ function EditTrip() {
     registerationdeadline: "",
     price: "",
     capacity: "",
+    allowedusers: [],
   });
   useEffect(() => {
     api
       .get(`/trips/getTrip/${id}`)
       .then((res) => {
         const trip = res.data.trip;
+        console.log(trip);
         setTripData({
           ...trip,
           startdate: trip.startdate?.slice(0, 10) || "",
@@ -70,8 +72,28 @@ function EditTrip() {
     if (!tripData.capacity) {
       errorValue.capacity = "Please enter the trip's capacity";
     }
+    if (tripData.allowedusers.length == 0) {
+      errorValue.allowedusers = "Please enter at least one value";
+    }
 
     return errorValue;
+  };
+
+  const handleAllowedUsersChange = (e) => {
+    const { value, checked } = e.target;
+    let updatedUsers = [...tripData.allowedusers];
+
+    if (checked) {
+      // Add the value
+      updatedUsers.push(value);
+    } else {
+      // Remove it if unchecked
+      updatedUsers = updatedUsers.filter((user) => user !== value);
+    }
+
+    setTripData({ ...tripData, allowedusers: updatedUsers });
+    setSuccessMessage("");
+    setError({});
   };
 
   const handleSubmission = async (e) => {
@@ -96,6 +118,7 @@ function EditTrip() {
         registerationdeadline: tripData.registerationdeadline,
         price: tripData.price,
         capacity: tripData.capacity,
+        allowedusers: tripData.allowedusers,
       };
       if (new Date(tripData.enddate) - new Date(tripData.startdate) < 0) {
         setError({
@@ -436,6 +459,33 @@ function EditTrip() {
               )}
             </div>
           </div>
+
+          <div>
+            <label className="block text-gray-700 font-medium mb-2">
+              Allowed Users:
+            </label>
+            <div className="grid grid-cols-2 gap-4">
+              {["Student", "Staff", "TA", "Professor"].map((role) => (
+                <label
+                  key={role}
+                  htmlFor={role}
+                  className="flex items-center space-x-3 bg-gray-50 border border-purple-300 rounded-xl px-4 py-2 hover:bg-purple-50 transition"
+                >
+                  <input
+                    type="checkbox"
+                    id={role}
+                    value={role}
+                    checked={tripData.allowedusers.includes(role)}
+                    onChange={handleAllowedUsersChange}
+                  />
+                  <span className="text-gray-700 capitalize font-medium">
+                    {role}
+                  </span>
+                </label>
+              ))}
+            </div>
+          </div>
+
           <div className="grid grid-cols-2 gap-4">
             <button
               type="submit"

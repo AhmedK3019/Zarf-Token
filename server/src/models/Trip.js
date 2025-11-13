@@ -61,7 +61,7 @@ const tripSchema = new mongoose.Schema({
   allowedusers: [
     {
       type: String,
-      enum: ["Student", "Professor", "TA", "Staff", "Event office", "Admin"],
+      enum: ["Student", "Professor", "TA", "Staff"],
     },
   ],
 });

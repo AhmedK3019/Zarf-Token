@@ -14,6 +14,7 @@ function CreateTrip({ onCancel }) {
     registerationdeadline: "",
     price: "",
     capacity: "",
+    allowedusers: [],
   });
 
   const [successMessage, setSuccessMessage] = useState("");
@@ -51,6 +52,9 @@ function CreateTrip({ onCancel }) {
     if (tripData.capacity == "") {
       errorValue.capacity = "Please enter the trip's capacity";
     }
+    if (tripData.allowedusers.length == 0) {
+      errorValue.allowedusers = "Please choose one value at least";
+    }
 
     return errorValue;
   };
@@ -75,7 +79,9 @@ function CreateTrip({ onCancel }) {
         registerationdeadline: tripData.registerationdeadline,
         price: tripData.price,
         capacity: tripData.capacity,
+        allowedusers: tripData.allowedusers,
       };
+      console.log(body);
       if (new Date(tripData.enddate) - new Date(tripData.startdate) < 0) {
         setError({
           general: "Start date should be before the end date",
@@ -145,6 +151,7 @@ function CreateTrip({ onCancel }) {
         registerationdeadline: "",
         price: "",
         capacity: "",
+        allowedusers: [],
       });
       setSuccessMessage("Trip created successfully!");
       setError({});
@@ -153,6 +160,23 @@ function CreateTrip({ onCancel }) {
       setSuccessMessage("");
       setError({ general: error.message });
     }
+  };
+
+  const handleAllowedUsersChange = (e) => {
+    const { value, checked } = e.target;
+    let updatedUsers = [...tripData.allowedusers];
+
+    if (checked) {
+      // Add the value
+      updatedUsers.push(value);
+    } else {
+      // Remove it if unchecked
+      updatedUsers = updatedUsers.filter((user) => user !== value);
+    }
+
+    setTripData({ ...tripData, allowedusers: updatedUsers });
+    setSuccessMessage("");
+    setError({});
   };
   return (
     <div className="min-h-screen flex items-center justify-center bg-transparent py-10 px-4">
@@ -433,6 +457,41 @@ function CreateTrip({ onCancel }) {
               )}
             </div>
           </div>
+
+          <div>
+            <label className="block text-gray-700 font-medium mb-2">
+              Allowed Users:
+            </label>
+
+            <div className="grid grid-cols-2 gap-4">
+              {["Student", "Professor", "TA", "Staff"].map((role) => (
+                <label
+                  key={role}
+                  htmlFor={role}
+                  className="flex items-center space-x-3 bg-gray-50 border border-purple-300 rounded-xl px-4 py-2 hover:bg-purple-50 transition"
+                >
+                  <input
+                    type="checkbox"
+                    id={role}
+                    value={role}
+                    checked={tripData.allowedusers.includes(role)}
+                    onChange={handleAllowedUsersChange}
+                    className="w-5 h-5 text-purple-600 border-gray-300 rounded focus:ring-2 focus:ring-purple-400"
+                  />
+                  <span className="text-gray-700 capitalize font-medium">
+                    {role}
+                  </span>
+                </label>
+              ))}
+            </div>
+
+            {errorvalues.allowedusers && (
+              <p className="text-red-500 text-sm mt-1">
+                {errorvalues.allowedusers}
+              </p>
+            )}
+          </div>
+
           <div className="grid grid-cols-2 gap-4">
             <button
               type="submit"

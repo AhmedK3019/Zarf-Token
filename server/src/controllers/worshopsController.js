@@ -35,6 +35,7 @@ const workshopSchema = Joi.object({
     awaitingResponseFrom: Joi.string().allow(""),
     message: Joi.string().allow(""),
   }),
+  allowedusers: Joi.array().min(1),
 });
 
 const attendeesSchema = Joi.object({
@@ -214,6 +215,8 @@ const updateWorkshopStatus = async (req, res, next) => {
     let message = "";
     if (updatedStatus.status == "Approved") {
       message = `${updatedStatus.workshopname} has been accepted`;
+      const Message = `Check out ${doc.workshopname} — a new workshop is available!`;
+      await User.updateMany({}, { $push: { notifications: { Message } } });
     } else {
       message = `${updatedStatus.workshopname} has been rejected`;
     }

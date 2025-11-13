@@ -89,19 +89,6 @@ const workshopSchema = new mongoose.Schema({
   ],
 });
 
-workshopSchema.post("save", async function (doc, next) {
-  try {
-    const message = `Check out ${doc.workshopname} — a new workshop has been created!`;
-    await User.updateMany({}, { $push: { notifications: { message } } });
-    await EventsOffice.updateMany(
-      {},
-      { $push: { notifications: { message } } }
-    );
-    next();
-  } catch (error) {
-    next(error);
-  }
-});
 const Workshop = mongoose.model("Workshop", workshopSchema);
 
 export default Workshop;

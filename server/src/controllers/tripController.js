@@ -19,6 +19,7 @@ const TripSchema = Joi.object({
   ratings: Joi.array().default([]),
   comments: Joi.array().default([]),
   archive: Joi.boolean().default(false),
+  allowedusers: Joi.array().min(1),
 });
 
 const attendeesSchema = Joi.object({
