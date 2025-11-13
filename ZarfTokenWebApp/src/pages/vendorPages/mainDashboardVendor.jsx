@@ -9,7 +9,7 @@ import LoyaltyProgram from "./LoyaltyProgram";
 import CancelLoyalty from "./CancelLoyalty";
 import NotFound from "../NotFoundPage";
 
-const mainDashboardVendor = ({ vendor }) => {
+const MainDashboardVendor = ({ vendor }) => {
   return (
     <div>
       <NavbarVendor vendor={vendor} />
@@ -36,4 +36,4 @@ const mainDashboardVendor = ({ vendor }) => {
   );
 };
 
-export default mainDashboardVendor;
+export default MainDashboardVendor;

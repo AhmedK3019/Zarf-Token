@@ -11,6 +11,7 @@ import {
   ShieldCheck,
   Sparkles,
   Tag,
+  X,
 } from "lucide-react";
 import api from "../../services/api";
 import { useAuthUser } from "../../context/UserContext";
@@ -197,17 +198,22 @@ const LoyaltyProgram = ({ vendor }) => {
     setCancelling(true);
     setCancelError(null);
     try {
-      await api.post("/loyalty/cancel", {
-        vendorId,
-        reason: cancelReason.trim(),
+      await api.delete("/loyalty/vendor", {
+        data: { reason: cancelReason.trim() },
       });
+      setApplications((prev) =>
+        prev.filter((app) => app._id !== approvedApplication._id)
+      );
       setCancelModalOpen(false);
       setCancelReason("");
       setToast({
         type: "success",
-        message: "Participation cancelled successfully.",
+        message: "Loyalty program removed from the directory.",
       });
       setRefreshKey((key) => key + 1);
+      if (typeof window !== "undefined") {
+        window.dispatchEvent(new CustomEvent("notifications:refresh"));
+      }
     } catch (err) {
       const message =
         err?.response?.data?.error ||

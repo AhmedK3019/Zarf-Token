@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import api from "../services/api";
 import { useAuthUser } from "../hooks/auth";
 import { Bell } from "lucide-react";
@@ -12,7 +12,7 @@ export default function NotificationsDrawer() {
 
   const unreadCount = notifications.filter((n) => !n.isRead).length;
 
-  const fetchNotifications = async () => {
+  const fetchNotifications = useCallback(async () => {
     if (!user?._id) return;
     setLoading(true);
     setError("");
@@ -26,12 +26,12 @@ export default function NotificationsDrawer() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [user?._id]);
 
   useEffect(() => {
     // fetch when drawer opens
     if (open) fetchNotifications();
-  }, [open, user]);
+  }, [open, fetchNotifications]);
 
   // Proactively fetch notifications when component mounts or user changes
   useEffect(() => {
@@ -43,7 +43,14 @@ export default function NotificationsDrawer() {
     const onFocus = () => fetchNotifications();
     window.addEventListener("focus", onFocus);
     return () => window.removeEventListener("focus", onFocus);
-  }, [user]);
+  }, [user, fetchNotifications]);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return undefined;
+    const handleRefresh = () => fetchNotifications();
+    window.addEventListener("notifications:refresh", handleRefresh);
+    return () => window.removeEventListener("notifications:refresh", handleRefresh);
+  }, [fetchNotifications]);
 
   const markAsRead = async (id) => {
     if (!user?._id) return;
