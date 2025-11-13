@@ -6,6 +6,9 @@ import EventDetailsModal from "../../components/EventDetailsModal";
 import { getEventDetails } from "../eventUtils";
 import { User, X, Star, Trash2 } from "lucide-react";
 
+const LIGHT_OVERLAY_CLASSES =
+  "fixed inset-0 z-50 flex items-center justify-center p-4 bg-muted bg-opacity-90 backdrop-blur-sm animate-fade-in";
+
 export default function RegisteredEvents() {
   const { user, refreshUser } = useAuthUser();
   const [events, setEvents] = useState([]);
@@ -28,6 +31,7 @@ export default function RegisteredEvents() {
   const [showRatingModal, setShowRatingModal] = useState(false);
   const [showRatingsListModal, setShowRatingsListModal] = useState(false);
   const [selectedRatingEvent, setSelectedRatingEvent] = useState(null);
+  const [hasAttended, setHasAttended] = useState(false); // Add attendance state
   const [comments, setComments] = useState([]);
   const [ratings, setRatings] = useState([]);
   const [newComment, setNewComment] = useState("");
@@ -284,7 +288,25 @@ export default function RegisteredEvents() {
 
   // Rating and Comments Handlers
   const handleViewComments = async (eventRaw, eventId, eventType) => {
+    console.log("🚀 handleViewComments called with:", { eventRaw, eventId, eventType });
+    alert("Comments button clicked! Event: " + getEventDetails(eventRaw).name);
+    
     setSelectedRatingEvent(eventRaw);
+    
+    // Calculate attendance once here
+    const attendees = getEventDetails(eventRaw).attendees;
+    const userHasAttended = Array.isArray(attendees) 
+      ? attendees.some((a) => 
+          (a.userId === user?._id || a.userId?._id === user?._id) &&
+          a.paid === true &&
+          a.cancelled !== true
+        ) 
+      : false;
+    
+    console.log("📝 Setting hasAttended to:", userHasAttended);
+    setHasAttended(userHasAttended);
+    
+    console.log("🔧 Setting showCommentsModal to true");
     setShowCommentsModal(true);
 
     setCommentsLoading(true);
@@ -292,6 +314,7 @@ export default function RegisteredEvents() {
       const response = await api.get(
         `/allEvents/viewAllComments/${eventId}/${eventType}`
       );
+      console.log("📥 Comments response:", response.data);
       setComments(response.data.userComments || []);
     } catch (error) {
       console.error("Failed to fetch comments:", error);
@@ -303,6 +326,18 @@ export default function RegisteredEvents() {
 
   const handleRateEvent = async (eventRaw, eventId, eventType) => {
     setSelectedRatingEvent(eventRaw);
+    
+    // Calculate attendance once here
+    const attendees = getEventDetails(eventRaw).attendees;
+    const userHasAttended = Array.isArray(attendees) 
+      ? attendees.some((a) => 
+          (a.userId === user?._id || a.userId?._id === user?._id) &&
+          a.paid === true &&
+          a.cancelled !== true
+        ) 
+      : false;
+    
+    setHasAttended(userHasAttended);
     setShowRatingModal(true);
 
     setRatingsLoading(true);
@@ -430,6 +465,7 @@ export default function RegisteredEvents() {
   const closeCommentsModal = () => {
     setShowCommentsModal(false);
     setSelectedRatingEvent(null);
+    setHasAttended(false); // Reset attendance state
     setComments([]);
     setNewComment("");
   };
@@ -437,6 +473,7 @@ export default function RegisteredEvents() {
   const closeRatingModal = () => {
     setShowRatingModal(false);
     setSelectedRatingEvent(null);
+    setHasAttended(false); // Reset attendance state
     setRatings([]);
     setUserRating(0);
   };
@@ -700,278 +737,277 @@ export default function RegisteredEvents() {
             );
           })()}
 
-        {/* Comments Modal */}
-        {showCommentsModal &&
-          selectedRatingEvent &&
-          (() => {
-            const hasAttended = true;
-
-            return (
-              <div
-                className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-muted bg-opacity-90 backdrop-blur-sm animate-fade-in"
-                onClick={closeCommentsModal}
-              >
-                <div
-                  className="bg-white rounded-2xl max-w-2xl w-full max-h-[80vh] overflow-hidden"
-                  onClick={(e) => e.stopPropagation()}
-                >
-                  <div className="flex items-center justify-between p-6 border-b">
-                    <h3 className="text-xl font-bold text-[#4C3BCF]">
-                      Comments - {getEventDetails(selectedRatingEvent).name}
-                    </h3>
-                    <button
-                      onClick={closeCommentsModal}
-                      className="text-gray-500 hover:text-gray-700"
-                    >
-                      <X size={24} />
-                    </button>
-                  </div>
-
-                  {/* Comments List */}
-                  <div className="h-80 overflow-y-auto border-b">
-                    <div className="p-6">
-                      {commentsLoading ? (
-                        <div className="text-center py-8 text-gray-600">
-                          Loading comments...
-                        </div>
-                      ) : comments.length > 0 ? (
-                        <div className="space-y-4">
-                          {comments.map((comment, index) => (
-                            <div
-                              key={index}
-                              className="border-b border-gray-100 pb-3 last:border-b-0"
-                            >
-                              <div className="flex items-center justify-between mb-2">
-                                <div className="flex items-center gap-2">
-                                  <div className="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center">
-                                    <User size={16} className="text-blue-600" />
-                                  </div>
-                                  <span className="font-medium text-gray-800">
-                                    {comment.userId?.firstname ||
-                                    comment.userId?.lastname
-                                      ? `${comment.userId.firstname || ""} ${
-                                          comment.userId.lastname || ""
-                                        }`.trim()
-                                      : "Anonymous User"}
-                                  </span>
-                                </div>
-                                {/* Delete button - only visible to admins */}
-                                {user?.role === "Admin" && (
-                                  <button
-                                    onClick={() => deleteComment(comment._id)}
-                                    className="text-red-500 hover:text-red-700 hover:bg-red-50 p-1 rounded transition-colors"
-                                    title="Delete comment"
-                                  >
-                                    <Trash2 size={16} />
-                                  </button>
-                                )}
-                              </div>
-                              <p className="text-gray-700 ml-10">
-                                {comment.comment}
-                              </p>
-                            </div>
-                          ))}
-                        </div>
-                      ) : (
-                        <div className="text-center py-8 text-gray-600">
-                          No comments yet. Be the first to leave a comment!
-                        </div>
-                      )}
-                    </div>
-                  </div>
-
-                  {/* Add Comment Form - Only for regular users */}
-                  {user?.role !== "Admin" && user?.role !== "Event office" && (
-                    <div className="p-6 border-t bg-gray-50">
-                      <h4 className="font-semibold text-gray-800 mb-3">
-                        Add a Comment
-                      </h4>
-                      <div className="flex gap-3">
-                        <textarea
-                          value={newComment}
-                          onChange={(e) => setNewComment(e.target.value)}
-                          placeholder="Share your thoughts about this event..."
-                          className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#4C3BCF] focus:border-transparent resize-none"
-                          rows="3"
-                          disabled={commentSubmitting}
-                        />
-                        <button
-                          onClick={submitComment}
-                          disabled={!newComment.trim() || commentSubmitting}
-                          className="px-4 py-2 bg-[#4C3BCF] text-white rounded-lg hover:bg-[#3730A3] transition-colors disabled:opacity-50 disabled:cursor-not-allowed h-fit"
-                        >
-                          {commentSubmitting ? "Posting..." : "Post"}
-                        </button>
-                      </div>
-                    </div>
-                  )}
-                </div>
-              </div>
-            );
-          })()}
-
-        {/* Rating Modal */}
-        {showRatingModal &&
-          selectedRatingEvent &&
-          (() => {
-            const hasAttended = true;
-
-            return (
-              <div
-                className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-muted bg-opacity-90 backdrop-blur-sm animate-fade-in"
-                onClick={closeRatingModal}
-              >
-                <div
-                  className="bg-white rounded-2xl max-w-md w-full"
-                  onClick={(e) => e.stopPropagation()}
-                >
-                  <div className="flex items-center justify-between p-6 border-b">
-                    <h3 className="text-xl font-bold text-[#4C3BCF]">
-                      Rate Event
-                    </h3>
-                    <button
-                      onClick={closeRatingModal}
-                      className="text-gray-500 hover:text-gray-700"
-                    >
-                      <X size={24} />
-                    </button>
-                  </div>
-                  <div className="p-6">
-                    <h4 className="font-semibold text-gray-800 mb-4">
-                      {getEventDetails(selectedRatingEvent).name}
-                    </h4>
-
-                    {/* Rating Input */}
-                    <div className="text-center mb-6">
-                      <p className="text-gray-600 mb-4">
-                        How would you rate this event?
-                      </p>
-                      <div className="flex justify-center gap-2 mb-4">
-                        {[1, 2, 3, 4, 5].map((star) => (
-                          <button
-                            key={star}
-                            onClick={() => setUserRating(star)}
-                            className="transition-colors"
-                            disabled={ratingSubmitting}
-                          >
-                            <Star
-                              size={32}
-                              className={`${
-                                star <= userRating
-                                  ? "text-yellow-400 fill-current"
-                                  : "text-gray-300 hover:text-yellow-200"
-                              }`}
-                            />
-                          </button>
-                        ))}
-                      </div>
-                      {userRating > 0 && (
-                        <p className="text-sm text-gray-600 mb-4">
-                          You selected {userRating} star
-                          {userRating !== 1 ? "s" : ""}
-                        </p>
-                      )}
-                    </div>
-
-                    <div className="flex gap-3">
-                      <button
-                        onClick={closeRatingModal}
-                        className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
-                        disabled={ratingSubmitting}
-                      >
-                        Cancel
-                      </button>
-                      <button
-                        onClick={() => submitRating(userRating)}
-                        disabled={userRating === 0 || ratingSubmitting}
-                        className="flex-1 bg-[#4C3BCF] text-white py-2 px-4 rounded-lg hover:bg-[#3730A3] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                      >
-                        {ratingSubmitting ? "Submitting..." : "Submit Rating"}
-                      </button>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            );
-          })()}
-
-        {/* Ratings List Modal */}
-        {showRatingsListModal && selectedEvent && (
-          <div
-            className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50"
-            onClick={closeRatingsListModal}
-          >
-            <div
-              className="bg-white rounded-lg p-6 max-w-md w-full max-h-[80vh] overflow-y-auto"
-              onClick={(e) => e.stopPropagation()}
-            >
-              <div className="flex justify-between items-center mb-4">
-                <h3 className="text-lg font-semibold">
-                  Ratings for {getEventDetails(selectedEvent).name}
-                </h3>
-                <button
-                  onClick={closeRatingsListModal}
-                  className="text-gray-500 hover:text-gray-700"
-                >
-                  ✕
-                </button>
-              </div>{" "}
-              <div className="space-y-3">
-                {ratingsLoading ? (
-                  <div className="text-center py-4">
-                    <div className="text-gray-500">Loading ratings...</div>
-                  </div>
-                ) : ratings && ratings.length > 0 ? (
-                  ratings.map((rating, index) => (
-                    <div key={index} className="border-b border-gray-200 pb-3">
-                      <div className="flex items-center justify-between">
-                        <span className="font-medium text-gray-800">
-                          {rating.userId?.firstname && rating.userId?.lastname
-                            ? `${rating.userId.firstname} ${rating.userId.lastname}`
-                            : rating.userId?.firstname ||
-                              rating.userId?.lastname ||
-                              "Anonymous"}
-                        </span>
-                        <div className="flex">
-                          {[1, 2, 3, 4, 5].map((star) => (
-                            <span
-                              key={star}
-                              className={`text-lg ${
-                                star <= rating.rating
-                                  ? "text-yellow-400"
-                                  : "text-gray-300"
-                              }`}
-                            >
-                              ★
-                            </span>
-                          ))}
-                        </div>
-                      </div>
-                      {rating.comment && (
-                        <p className="text-gray-600 text-sm mt-1">
-                          {rating.comment}
-                        </p>
-                      )}
-                    </div>
-                  ))
-                ) : (
-                  <p className="text-gray-500 text-center py-4">
-                    No ratings available for this event.
-                  </p>
-                )}
-              </div>
-              <div className="mt-4 pt-3 border-t">
-                <button
-                  onClick={closeRatingsListModal}
-                  className="w-full px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors"
-                >
-                  Close
-                </button>
-              </div>
-            </div>
-          </div>
-        )}
-      </div>
+       {/* Comments Modal */}
+             {showCommentsModal && selectedRatingEvent && (
+               <div className={LIGHT_OVERLAY_CLASSES} onClick={closeCommentsModal}>
+                 <div
+                   className="bg-white rounded-2xl max-w-2xl w-full max-h-[80vh] overflow-hidden"
+                   onClick={(e) => e.stopPropagation()}
+                 >
+                   <div className="flex items-center justify-between p-6 border-b">
+                     <h3 className="text-xl font-bold text-[#4C3BCF]">
+                       Comments - {getEventDetails(selectedRatingEvent).name}
+                     </h3>
+                     <button
+                       onClick={closeCommentsModal}
+                       className="text-gray-500 hover:text-gray-700"
+                     >
+                       <X size={24} />
+                     </button>
+                   </div>
+       
+                   {/* Comments List */}
+                   <div className="h-80 overflow-y-auto border-b">
+                     <div className="p-6">
+                       {commentsLoading ? (
+                         <div className="text-center py-8 text-gray-600">
+                           Loading comments...
+                         </div>
+                       ) : comments.length > 0 ? (
+                         <div className="space-y-4">
+                           {comments.map((comment, index) => (
+                             <div
+                               key={index}
+                               className="border-b border-gray-100 pb-3 last:border-b-0"
+                             >
+                               <div className="flex items-center justify-between mb-2">
+                                 <div className="flex items-center gap-2">
+                                   <div className="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center">
+                                     <User size={16} className="text-blue-600" />
+                                   </div>
+                                   <span className="font-medium text-gray-800">
+                                     {comment.userId?.firstname &&
+                                     comment.userId?.lastname
+                                       ? `${comment.userId.firstname} ${comment.userId.lastname}`
+                                       : comment.userId?.firstname ||
+                                         comment.userId?.lastname ||
+                                         "Anonymous"}
+                                   </span>
+                                 </div>
+                                 {/* Delete button - only visible to admins */}
+                                 {user?.role === "Admin" && (
+                                   <button
+                                     onClick={() => deleteComment(comment._id)}
+                                     className="text-red-500 hover:text-red-700 hover:bg-red-50 p-1 rounded transition-colors"
+                                     title="Delete comment"
+                                   >
+                                     <Trash2 size={16} />
+                                   </button>
+                                 )}
+                               </div>
+                               <p className="text-gray-700 ml-10">
+                                 {comment.comment}
+                               </p>
+                             </div>
+                           ))}
+                         </div>
+                       ) : (
+                         <div className="text-center py-8 text-gray-600">
+                           No comments yet. Be the first to leave a comment!
+                         </div>
+                       )}
+                     </div>
+                   </div>
+       
+                   {/* Add Comment Form - Only for regular users who attended */}
+                   {user?.role !== "Admin" && user?.role !== "Event office" && hasAttended && (
+                     <div className="p-6 border-t bg-gray-50">
+                       <h4 className="font-semibold text-gray-800 mb-3">
+                         Add a Comment
+                       </h4>
+                       <div className="flex gap-3">
+                         <textarea
+                           value={newComment}
+                           onChange={(e) => setNewComment(e.target.value)}
+                           placeholder="Share your thoughts about this event..."
+                           className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#4C3BCF] focus:border-transparent resize-none"
+                           rows="3"
+                           disabled={commentSubmitting}
+                         />
+                         <button
+                           onClick={submitComment}
+                           disabled={!newComment.trim() || commentSubmitting}
+                           className="px-4 py-2 bg-[#4C3BCF] text-white rounded-lg hover:bg-[#3730A3] transition-colors disabled:opacity-50 disabled:cursor-not-allowed h-fit"
+                         >
+                           {commentSubmitting ? "Posting..." : "Post"}
+                         </button>
+                       </div>
+                     </div>
+                   )}
+                   
+                   {/* Message for non-attendees */}
+                   {user?.role !== "Admin" && user?.role !== "Event office" && !hasAttended && (
+                     <div className="p-6 border-t bg-gray-50">
+                       <div className="text-center text-gray-600">
+                         <p className="mb-2">Only paid attendees who haven't cancelled can leave comments.</p>
+                         <p className="text-sm">Register and attend this event to share your thoughts!</p>
+                       </div>
+                     </div>
+                   )}
+                 </div>
+               </div>
+             )}
+             
+             {/* Rate Event Modal */}
+             {showRatingModal && selectedRatingEvent && (
+               <div className={LIGHT_OVERLAY_CLASSES} onClick={closeRatingModal}>
+                 <div
+                   className="bg-white rounded-2xl max-w-md w-full"
+                   onClick={(e) => e.stopPropagation()}
+                 >
+                   <div className="flex items-center justify-between p-6 border-b">
+                     <h3 className="text-xl font-bold text-[#4C3BCF]">
+                       Rate Event
+                     </h3>
+                     <button
+                       onClick={closeRatingModal}
+                       className="text-gray-500 hover:text-gray-700"
+                     >
+                       <X size={24} />
+                     </button>
+                   </div>
+                   <div className="p-6">
+                     <h4 className="font-semibold text-gray-800 mb-4">
+                       {getEventDetails(selectedRatingEvent).name}
+                     </h4>
+       
+                     {/* Rating Input */}
+                     {hasAttended ? (
+                       <div className="text-center mb-6">
+                         <p className="text-gray-600 mb-4">
+                           How would you rate this event?
+                         </p>
+                         <div className="flex justify-center gap-2 mb-4">
+                           {[1, 2, 3, 4, 5].map((star) => (
+                             <button
+                               key={star}
+                               onClick={() => setUserRating(star)}
+                               className="transition-colors"
+                               disabled={ratingSubmitting}
+                             >
+                               <Star
+                                 size={32}
+                                 className={`${
+                                   star <= userRating
+                                     ? "text-yellow-400 fill-current"
+                                     : "text-gray-300 hover:text-yellow-200"
+                                 }`}
+                               />
+                             </button>
+                           ))}
+                         </div>
+                         {userRating > 0 && (
+                           <p className="text-sm text-gray-600 mb-4">
+                             You selected {userRating} star
+                             {userRating !== 1 ? "s" : ""}
+                           </p>
+                         )}
+                       </div>
+                     ) : (
+                       <div className="text-center mb-6">
+                         <p className="text-gray-600 mb-2">Only paid attendees who haven't cancelled can rate this event.</p>
+                         <p className="text-sm text-gray-500">Register and attend this event to share your rating!</p>
+                       </div>
+                     )}
+       
+                     <div className="flex gap-3">
+                       <button
+                         onClick={closeRatingModal}
+                         className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
+                         disabled={ratingSubmitting}
+                       >
+                         Cancel
+                       </button>
+                       <button
+                         onClick={() => submitRating(userRating)}
+                         disabled={userRating === 0 || ratingSubmitting}
+                         className="flex-1 bg-[#4C3BCF] text-white py-2 px-4 rounded-lg hover:bg-[#3730A3] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                       >
+                         {ratingSubmitting ? "Submitting..." : "Submit Rating"}
+                       </button>
+                     </div>
+                   </div>
+                 </div>
+               </div>
+             )}      {/* Ratings List Modal */}
+             {showRatingsListModal && selectedEvent && (
+               <div
+                 className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50"
+                 onClick={closeRatingsListModal}
+               >
+                 <div
+                   className="bg-white rounded-lg p-6 max-w-md w-full max-h-[80vh] overflow-y-auto"
+                   onClick={(e) => e.stopPropagation()}
+                 >
+                   <div className="flex justify-between items-center mb-4">
+                     <h3 className="text-lg font-semibold">
+                       Ratings for {getEventDetails(selectedEvent).name}
+                     </h3>
+                     <button
+                       onClick={closeRatingsListModal}
+                       className="text-gray-500 hover:text-gray-700"
+                     >
+                       ✕
+                     </button>
+                   </div>
+       
+                   <div className="space-y-3">
+                     {ratingsLoading ? (
+                       <div className="text-center py-4">
+                         <div className="text-gray-500">Loading ratings...</div>
+                       </div>
+                     ) : ratings && ratings.length > 0 ? (
+                       ratings.map((rating, index) => (
+                         <div key={index} className="border-b border-gray-200 pb-3">
+                           <div className="flex items-center justify-between">
+                             <span className="font-medium text-gray-800">
+                               {rating.userId?.firstname && rating.userId?.lastname
+                                 ? `${rating.userId.firstname} ${rating.userId.lastname}`
+                                 : rating.userId?.firstname ||
+                                   rating.userId?.lastname ||
+                                   "Anonymous"}
+                             </span>
+                             <div className="flex">
+                               {[1, 2, 3, 4, 5].map((star) => (
+                                 <span
+                                   key={star}
+                                   className={`text-lg ${
+                                     star <= rating.rating
+                                       ? "text-yellow-400"
+                                       : "text-gray-300"
+                                   }`}
+                                 >
+                                   ★
+                                 </span>
+                               ))}
+                             </div>
+                           </div>
+                           {rating.comment && (
+                             <p className="text-gray-600 text-sm mt-1">
+                               {rating.comment}
+                             </p>
+                           )}
+                         </div>
+                       ))
+                     ) : (
+                       <p className="text-gray-500 text-center py-4">
+                         No ratings available for this event.
+                       </p>
+                     )}
+                   </div>
+       
+                   <div className="mt-4 pt-3 border-t">
+                     <button
+                       onClick={closeRatingsListModal}
+                       className="w-full px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors"
+                     >
+                       Close
+                     </button>
+                   </div>
+                 </div>
+               </div>
+             )}
+    </div>
     </div>
   );
 }
