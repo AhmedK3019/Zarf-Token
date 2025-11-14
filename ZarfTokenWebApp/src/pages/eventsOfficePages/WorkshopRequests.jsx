@@ -42,6 +42,11 @@ const statusConfig = {
     badge:
       "bg-[#C14953] text-white border border-[#a63e47]/60 shadow-[0_2px_6px_rgba(193,73,83,0.35)]",
   },
+  // Added this for the toast message on request edits
+  Flagged: {
+    color: COLORS.info,
+    icon: Flag,
+  },
 };
 
 const statusButtonConfig = [
@@ -282,7 +287,9 @@ function WorkshopCard({ workshop, onView }) {
 function WorkshopModal({
   workshop,
   onClose,
-  onStatusUpdate,
+  // MODIFIED: Split props for clarity
+  onApprove,
+  onReject,
   comment,
   setComment,
   commentError,
@@ -294,6 +301,14 @@ function WorkshopModal({
   const [requestError, setRequestError] = useState("");
   const [isSubmittingRequest, setIsSubmittingRequest] = useState(false);
 
+  // --- NEW STATE for the approval process ---
+  const [isApproving, setIsApproving] = useState(false);
+  const [allowedUsers, setAllowedUsers] = useState([]);
+  const [approvalError, setApprovalError] = useState("");
+  // Define your user groups here
+  const USER_GROUPS = ["Student", "Professor", "TA", "Staff"];
+  // --- END OF NEW STATE ---
+
   const workshopId = workshop._id || workshop.id;
 
   useEffect(() => {
@@ -301,10 +316,14 @@ function WorkshopModal({
   }, []);
 
   useEffect(() => {
+    // Reset all local forms when workshop changes
     setShowRequestForm(false);
     setRequestMessage("");
     setRequestError("");
     setIsSubmittingRequest(false);
+    setIsApproving(false);
+    setAllowedUsers([]);
+    setApprovalError("");
   }, [workshopId]);
 
   const handleBackdropClick = (e) => {
@@ -319,6 +338,22 @@ function WorkshopModal({
     document.addEventListener("keydown", handleKeyDown);
     return () => document.removeEventListener("keydown", handleKeyDown);
   }, []);
+
+  // --- NEW HANDLER for user group checkboxes ---
+  const handleAllowedUsersChange = (e) => {
+    const { value, checked } = e.target;
+    let updatedUsers = [...allowedUsers];
+
+    if (checked) {
+      updatedUsers.push(value);
+    } else {
+      updatedUsers = updatedUsers.filter((user) => user !== value);
+    }
+
+    setAllowedUsers(updatedUsers);
+    setApprovalError(""); // Clear error on change
+  };
+  // --- END OF NEW HANDLER ---
 
   const handleToggleRequestForm = () => {
     setShowRequestForm((prev) => !prev);
@@ -426,6 +461,7 @@ function WorkshopModal({
           </div>
 
           <div className="px-8 py-8 space-y-8 max-h-[calc(100vh-200px)] overflow-y-auto">
+            {/* ... (Overview, Agenda, Location, Capacity, Funding, Info Grid sections are all unchanged) ... */}
             {/* Overview Section */}
             <section
               className="space-y-3 animate-fade-in"
@@ -572,7 +608,7 @@ function WorkshopModal({
               </div>
             </div>
 
-            {/* Status Update Section */}
+            {/* --- THIS IS THE MODIFIED STATUS UPDATE SECTION --- */}
             <section
               className="space-y-4 pt-4 border-t border-gray-200 animate-fade-in"
               style={{ animationDelay: "500ms" }}
@@ -583,15 +619,30 @@ function WorkshopModal({
                   Update Status
                 </h3>
               </div>
-              {workshop.status === "Pending" && (
+
+              {/* Show default buttons ONLY if status is Pending and we are NOT approving */}
+              {!isApproving && workshop.status === "Pending" && (
                 <div className="grid gap-3 sm:grid-cols-3">
                   {statusButtonConfig.map((config) => {
                     const Icon = config.icon;
+
+                    // This handler now routes the click
+                    const handleClick = () => {
+                      if (config.status === "Approved") {
+                        // Don't submit yet, show the user selection form
+                        setIsApproving(true);
+                        setApprovalError("");
+                      } else if (config.status === "Rejected") {
+                        // Reject immediately
+                        onReject(config.status);
+                      }
+                    };
+
                     return (
                       <button
                         key={config.status}
                         type="button"
-                        onClick={() => onStatusUpdate(config.status)}
+                        onClick={handleClick} // Use the new local handler
                         className={classNames(
                           BUTTON_BASE,
                           BUTTON_VARIANTS[config.variant] ??
@@ -605,7 +656,84 @@ function WorkshopModal({
                   })}
                 </div>
               )}
+
+              {/* --- NEW: Show this form when 'isApproving' is true --- */}
+              {isApproving && (
+                <div className="rounded-2xl border border-[#736CED]/30 bg-gradient-to-br from-white via-white to-[#736CED]/10 px-6 py-5 shadow-[0_4px_12px_rgba(115,108,237,0.15)] space-y-4">
+                  <p className="text-base font-bold text-[#736CED]">
+                    Who can view this workshop?
+                  </p>
+                  <p className="text-sm text-gray-600">
+                    Select all user groups that should be able to see and
+                    register for this workshop.
+                  </p>
+
+                  <div className="grid grid-cols-2 gap-3">
+                    {USER_GROUPS.map((group) => (
+                      <label
+                        key={group}
+                        className="flex items-center gap-2 p-3 rounded-lg bg-white border border-gray-200 cursor-pointer hover:bg-gray-50 transition-colors"
+                      >
+                        <input
+                          type="checkbox"
+                          value={group}
+                          onChange={handleAllowedUsersChange}
+                          checked={allowedUsers.includes(group)}
+                          className="rounded text-[#736CED] focus:ring-[#736CED]/50"
+                        />
+                        <span className="text-sm font-semibold text-gray-700">
+                          {group}
+                        </span>
+                      </label>
+                    ))}
+                  </div>
+
+                  {approvalError && (
+                    <p className="text-xs font-semibold text-rose-600 flex items-center gap-1">
+                      <XCircle className="w-3.5 h-3.5" />
+                      {approvalError}
+                    </p>
+                  )}
+
+                  <div className="flex flex-wrap items-center gap-3 pt-2">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        if (allowedUsers.length === 0) {
+                          setApprovalError(
+                            "Please select at least one user group."
+                          );
+                          return;
+                        }
+                        // Now call the onApprove prop with the new data
+                        onApprove("Approved", allowedUsers);
+                      }}
+                      className={classNames(
+                        BUTTON_BASE,
+                        BUTTON_VARIANTS.primary,
+                        "w-full sm:w-auto"
+                      )}
+                    >
+                      Confirm & Publish
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setIsApproving(false)} // Go back
+                      className={classNames(
+                        BUTTON_BASE,
+                        BUTTON_VARIANTS.secondary,
+                        "w-full sm:w-auto"
+                      )}
+                    >
+                      Cancel
+                    </button>
+                  </div>
+                </div>
+              )}
+
+              {/* Show Request Edits button ONLY if Pending and NOT approving */}
               {workshop.status === "Pending" &&
+                !isApproving &&
                 workshop.raw.currentMessage.awaitingResponseFrom !==
                   "Professor" && (
                   <button
@@ -621,12 +749,16 @@ function WorkshopModal({
                     {requestButtonText}
                   </button>
                 )}
+
+              {/* Show this if workshop is already decided */}
               {workshop.status !== "Pending" && (
                 <p className="text-sm text-gray-700">
                   This workshop has been{" "}
                   <span className="font-semibold">{workshop.status}</span>.
                 </p>
               )}
+
+              {/* Show this if awaiting professor */}
               {workshop.raw.currentMessage.awaitingResponseFrom ===
                 "Professor" && (
                 <p className="text-xs text-gray-500 italic">
@@ -634,6 +766,7 @@ function WorkshopModal({
                 </p>
               )}
 
+              {/* The "Request Edits" form itself */}
               {showRequestForm && (
                 <div className="rounded-2xl border border-[#54C6EB]/30 bg-gradient-to-br from-white via-white to-[#54C6EB]/10 px-6 py-5 shadow-[0_4px_12px_rgba(84,198,235,0.15)] space-y-4">
                   <label className="block">
@@ -788,13 +921,59 @@ export default function WorkshopRequests() {
     });
   }, [workshops, statusFilter]);
 
-  const hasActiveFilters = statusFilter !== "All";
+  const hasActivefilters = statusFilter !== "All";
 
   const resetFilters = () => {
     setStatusFilter("All");
   };
 
-  const handleStatusUpdate = async (nextStatus) => {
+  // --- MODIFIED: Split handleStatusUpdate into two functions ---
+
+  // Handles the "Approve" flow, now including allowedUsers
+  const handleApproveWorkshop = async (nextStatus, allowedUsers) => {
+    if (!selectedWorkshop) return;
+
+    try {
+      // Send the new allowedUsers data to the backend
+      await api.patch(
+        `/workshops/updateWorkshopStatus/${selectedWorkshop.id}`,
+        {
+          status: nextStatus,
+          allowedUsers: allowedUsers, // <-- HERE is the new data
+        }
+      );
+
+      // Optimistic update in local state
+      setWorkshops((prev) =>
+        prev.map((item) =>
+          item.id === selectedWorkshop.id
+            ? {
+                ...item,
+                status: nextStatus,
+                // Also update the 'raw' data if you use it
+                raw: { ...item.raw, allowedUsers: allowedUsers },
+                lastUpdatedAt: new Date().toISOString(),
+              }
+            : item
+        )
+      );
+
+      setFeedback({
+        tone: "Approved",
+        message: "Workshop accepted and published successfully!",
+      });
+      setSelectedWorkshop(null); // Close modal
+    } catch (err) {
+      console.error("Error approving workshop:", err);
+      setFeedback({
+        tone: "Rejected",
+        message: "Failed to approve workshop. Please try again.",
+      });
+    }
+  };
+
+  // Handles the "Reject" flow (and any other simple status change)
+  const handleRejectWorkshop = async (nextStatus) => {
     if (!selectedWorkshop) return;
 
     try {
@@ -817,25 +996,30 @@ export default function WorkshopRequests() {
         )
       );
 
-      const messages = {
-        Approved: "Workshop accepted and published successfully!",
-        Rejected: "Workshop rejected.",
-        Pending: "Workshop status set to pending.",
-      };
-
-      setFeedback({ tone: nextStatus, message: messages[nextStatus] });
-      setSelectedWorkshop(null);
-    } catch (err) {
-      console.error("Error updating workshop:", err);
       setFeedback({
         tone: "Rejected",
-        message: "Failed to update workshop. Please try again.",
+        message: "Workshop rejected.",
+      });
+      setSelectedWorkshop(null); // Close modal
+    } catch (err) {
+      console.error("Error rejecting workshop:", err);
+      setFeedback({
+        tone: "Rejected",
+        message: "Failed to reject workshop. Please try again.",
       });
     }
   };
 
+  // --- END OF MODIFIED FUNCTIONS ---
+
+  // This function was removed from here, as it now lives inside the WorkshopModal
+  // const handleAllowedUsersChange = (e) => { ... }
+
   const handleRequestEditsSuccess = (message = "Edit request sent.") => {
+    // We need to refetch or update the workshop state to show the new "awaiting" message
+    // For simplicity, just show the toast. A full solution might refetch.
     setFeedback({ tone: "Flagged", message });
+    setSelectedWorkshop(null); // Close modal to see changes (or refetch data)
   };
 
   return (
@@ -890,7 +1074,7 @@ export default function WorkshopRequests() {
             </select>
           </label>
 
-          {hasActiveFilters && (
+          {hasActivefilters && (
             <button
               onClick={resetFilters}
               className="flex items-center justify-center gap-2 px-4 py-3 rounded-xl border-2 border-[#C14953]/30 bg-white/80 backdrop-blur-sm text-sm font-bold text-[#C14953] transition-all hover:bg-[#C14953]/10 hover:border-[#C14953]/50 focus:outline-none focus:ring-2 focus:ring-[#C14953]/40 animate-fade-in"
@@ -938,7 +1122,10 @@ export default function WorkshopRequests() {
         <WorkshopModal
           workshop={selectedWorkshop}
           onClose={() => setSelectedWorkshop(null)}
-          onStatusUpdate={handleStatusUpdate}
+          // --- PASS THE NEW HANDLERS ---
+          onApprove={handleApproveWorkshop}
+          onReject={handleRejectWorkshop}
+          // ---
           comment={modalComment}
           setComment={setModalComment}
           commentError={commentError}

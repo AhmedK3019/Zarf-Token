@@ -35,7 +35,6 @@ const workshopSchema = Joi.object({
     awaitingResponseFrom: Joi.string().allow(""),
     message: Joi.string().allow(""),
   }),
-  allowedusers: Joi.array().min(1),
 });
 
 const attendeesSchema = Joi.object({
@@ -197,10 +196,29 @@ const updateWorkshop = async (req, res, next) => {
   }
 };
 
+// const setAllowedRoles = async (req, res, next) => {
+//   try {
+//     const { id } = req.params;
+//     const { allowedusers } = req.body;
+//     if (allowedusers.length == 0 || !allowedusers) {
+//       return res.status().json({ message: "Please select at least one role" });
+//     }
+//     let update = WorkShop.findByIdAndUpdate(
+//       id,
+//       { allowedusers },
+//       { new: true }
+//     );
+//     return res.status(200).json({ message: "done updating", update });
+//   } catch (error) {
+//     next(error);
+//   }
+// };
+
 const updateWorkshopStatus = async (req, res, next) => {
   try {
     const { id } = req.params;
-    const { status } = req.body;
+    const { status, allowedUsers } = req.body;
+    console.log(req.body);
     const updatedStatus = await WorkShop.findByIdAndUpdate(
       id,
       { status },
@@ -214,9 +232,20 @@ const updateWorkshopStatus = async (req, res, next) => {
     await updatedStatus.save();
     let message = "";
     if (updatedStatus.status == "Approved") {
+      if (allowedUsers.length == 0 || !allowedUsers) {
+        return res.json({ message: "Please select at least one role" });
+      }
+      let update = await WorkShop.findByIdAndUpdate(
+        id,
+        { allowedusers: allowedUsers },
+        { new: true }
+      );
       message = `${updatedStatus.workshopname} has been accepted`;
-      const Message = `Check out ${doc.workshopname} — a new workshop is available!`;
-      await User.updateMany({}, { $push: { notifications: { Message } } });
+      const Message = `Check out ${update.workshopname} — a new workshop is available!`;
+      await User.updateMany(
+        {},
+        { $push: { notifications: { message: Message } } }
+      );
     } else {
       message = `${updatedStatus.workshopname} has been rejected`;
     }
@@ -547,4 +576,5 @@ export default {
   acceptEdits,
   rejectEdits,
   payForWorkshop,
+  // setAllowedRoles,
 };
