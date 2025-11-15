@@ -26,28 +26,22 @@ const vendorRequestSchema = new mongoose.Schema(
       enum: ["2x2", "4x4"],
       required: true,
     },
-    location: { type: String }, // location in platform (as coordinates on the platform map)
+    location: { type: String },
     isBazarBooth: { type: Boolean, default: false },
     status: {
       type: String,
       enum: ["Pending", "Approved", "Rejected", "Cancelled"],
       default: "Pending",
     },
+    price: { type: Number },
     paymentStatus: {
       type: String,
       enum: ["unpaid", "paid", "refunded", "cancelled", "overdue"],
       default: "unpaid",
     },
     paymentDueAt: { type: Date },
-    approvedAt: { type: Date },
-    cancelledAt: { type: Date },
-    cancellationReason: { type: String },
-    cancellationSource: {
-      type: String,
-      enum: ["vendor", "system", "admin"],
-    },
-    eventStartAt: { type: Date },
-    eventEndAt: { type: Date },
+    startdate: { type: Date },
+    enddate: { type: Date },
     bazarId: { type: mongoose.Schema.Types.ObjectId, ref: "Bazaar" },
   },
   { timestamps: true }

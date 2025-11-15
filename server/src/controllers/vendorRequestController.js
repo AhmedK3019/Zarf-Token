@@ -50,7 +50,12 @@ const createBazarRequest = async (req, res, next) => {
         .json({ message: "People array is required (1-5 persons)" });
     if (!boothSize)
       return res.status(400).json({ message: "boothSize is required" });
-
+    let price = 0;
+    if (boothSize === "2x2") {
+      price = 100 * duration;
+    } else if (boothSize === "4x4") {
+      price = 180 * duration;
+    }
     const doc = await VendorRequest.create({
       vendorId,
       people,
@@ -58,12 +63,13 @@ const createBazarRequest = async (req, res, next) => {
       boothname,
       isBazarBooth: true,
       duration,
+      price,
       bazarId: req.params.bazarId,
-      eventStartAt: combineDateAndTime(
+      startdate: combineDateAndTime(
         bazar.startdate,
         bazar.starttime || bazar.startTime
       ),
-      eventEndAt: combineDateAndTime(
+      enddate: combineDateAndTime(
         bazar.enddate,
         bazar.endtime || bazar.endTime
       ),
@@ -93,7 +99,15 @@ const createPlatformRequest = async (req, res, next) => {
     if (!vendorId)
       return res.status(401).json({ message: "Authentication required" });
     const vendor = await Vendor.findById(vendorId);
-    const { people, duration, location, boothSize, boothname } = req.body;
+    const {
+      people,
+      duration,
+      location,
+      boothSize,
+      boothname,
+      startdate,
+      enddate,
+    } = req.body;
     if (!people || !Array.isArray(people) || people.length < 1)
       return res
         .status(400)
@@ -104,15 +118,32 @@ const createPlatformRequest = async (req, res, next) => {
       return res.status(400).json({ message: "location is required" });
     if (!boothSize)
       return res.status(400).json({ message: "boothSize is required" });
-
+    let price = 0;
+    switch (location) {
+      case "North West Platform Entrance":
+        price = 100 * duration;
+        break;
+      case "West Platform Entrance":
+        price = 120 * duration;
+        break;
+      case "West Platform Alley":
+        price = 140 * duration;
+        break;
+      case "East Platform Alley":
+        price = 160 * duration;
+        break;
+    }
     const doc = await VendorRequest.create({
       vendorId,
       people,
       duration,
       location,
+      price,
       boothSize,
       boothname,
       isBazarBooth: false,
+      startdate,
+      enddate,
     });
     const notification = {
       message: `A new vendor request by ${vendor.companyname} for a platform booth is pending your approval`,
