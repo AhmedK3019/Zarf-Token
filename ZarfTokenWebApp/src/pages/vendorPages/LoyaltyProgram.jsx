@@ -6,7 +6,6 @@ import {
   Loader2,
   RefreshCcw,
   ShieldCheck,
-  Sparkles,
   X,
 } from "lucide-react";
 import api from "../../services/api";
@@ -223,48 +222,40 @@ const LoyaltyProgram = ({ vendor }) => {
 
   return (
     <div className="space-y-6 p-4 lg:p-6">
+      <div className="space-y-2 text-center">
+        <h1 className="text-3xl font-bold text-[#18122B]">{statusCopy.title}</h1>
+        <p className="text-sm text-gray-600">{statusCopy.message}</p>
+      </div>
       <section className="space-y-5 rounded-3xl border border-gray-100 bg-white/80 p-6 shadow-sm">
-        <div className="flex flex-wrap items-center justify-between gap-4">
-          <div>
-            <p className="text-sm uppercase tracking-wide text-gray-500">
-              GUC Loyalty Program
-            </p>
-            <h1 className="text-3xl font-bold text-[#18122B]">
-              {statusCopy.title}
-            </h1>
-            <p className="text-sm text-gray-600">{statusCopy.message}</p>
-          </div>
-          <div className="flex flex-wrap items-center gap-3">
+        <div className="flex flex-wrap items-center justify-end gap-3">
+          <button
+            onClick={() => setRefreshKey((key) => key + 1)}
+            className="inline-flex items-center gap-2 rounded-full border border-gray-200 px-4 py-2 text-sm font-semibold text-gray-600 hover:bg-gray-50"
+          >
+            <RefreshCcw size={16} />
+            Refresh
+          </button>
+          {primaryCta && (
             <button
-              onClick={() => setRefreshKey((key) => key + 1)}
-              className="inline-flex items-center gap-2 rounded-full border border-gray-200 px-4 py-2 text-sm font-semibold text-gray-600 hover:bg-gray-50"
+              onClick={() => handleNavigate(primaryCta.to)}
+              className={`inline-flex items-center gap-2 rounded-full px-5 py-2 text-sm font-semibold shadow ${
+                primaryCta.variant === "primary"
+                  ? "bg-[#4C3BCF] text-white hover:bg-[#3728a6]"
+                  : "border border-gray-200 text-gray-700 hover:bg-gray-50"
+              }`}
             >
-              <RefreshCcw size={16} />
-              Refresh
+              {primaryCta.label}
             </button>
-            {primaryCta && (
-              <button
-                onClick={() => handleNavigate(primaryCta.to)}
-                className={`inline-flex items-center gap-2 rounded-full px-5 py-2 text-sm font-semibold shadow ${
-                  primaryCta.variant === "primary"
-                    ? "bg-[#4C3BCF] text-white hover:bg-[#3728a6]"
-                    : "border border-gray-200 text-gray-700 hover:bg-gray-50"
-                }`}
-              >
-                <Sparkles size={16} />
-                {primaryCta.label}
-              </button>
-            )}
-            {canCancelParticipation && (
-              <button
-                onClick={openCancelModal}
-                className="inline-flex items-center gap-2 rounded-full border border-rose-200 px-4 py-2 text-sm font-semibold text-rose-600 transition hover:bg-rose-50"
-              >
-                <ShieldCheck size={16} />
-                Cancel Participation
-              </button>
-            )}
-          </div>
+          )}
+          {canCancelParticipation && (
+            <button
+              onClick={openCancelModal}
+              className="inline-flex items-center gap-2 rounded-full border border-rose-200 px-4 py-2 text-sm font-semibold text-rose-600 transition hover:bg-rose-50"
+            >
+              <ShieldCheck size={16} />
+              Cancel Participation
+            </button>
+          )}
         </div>
 
         {loading ? (
@@ -281,7 +272,6 @@ const LoyaltyProgram = ({ vendor }) => {
           <div className="rounded-2xl border border-gray-100 bg-white/70 p-5 shadow-inner">
             <div className="flex flex-wrap items-center justify-between gap-3">
               <div className="flex items-center gap-2 text-sm font-semibold text-[#4C3BCF]">
-                <Sparkles size={16} />
                 Program Status
               </div>
               <StatusBadge status={heroStatus} />
@@ -361,25 +351,6 @@ const LoyaltyProgram = ({ vendor }) => {
           </div>
         )}
       </section>
-
-      {canApply && hasHistory && (
-        <div className="rounded-2xl border border-indigo-200 bg-indigo-50/80 p-4 text-sm text-indigo-900">
-          <div className="flex items-center gap-2 font-semibold">
-            <CheckCircle2 size={16} />
-            Ready to try again?
-          </div>
-          <p className="mt-1">
-            Update your promo details and submit a new application whenever
-            you’re ready.
-          </p>
-          <button
-            onClick={() => handleNavigate("/dashboard/vendor/apply-loyalty")}
-            className="mt-3 inline-flex items-center gap-2 text-sm font-semibold text-[#4C3BCF] hover:text-[#3728a6]"
-          >
-            Apply Again
-          </button>
-        </div>
-      )}
 
       {cancelModalOpen && (
         <div className="fixed inset-0 z-40 flex items-center justify-center bg-black/30 px-4">
