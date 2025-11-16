@@ -3,14 +3,10 @@ import { useNavigate } from "react-router-dom";
 import {
   AlertTriangle,
   CheckCircle2,
-  Clock,
-  FileText,
   Loader2,
-  Percent,
   RefreshCcw,
   ShieldCheck,
   Sparkles,
-  Tag,
   X,
 } from "lucide-react";
 import api from "../../services/api";
@@ -362,88 +358,6 @@ const LoyaltyProgram = ({ vendor }) => {
                 </p>
               </div>
             )}
-          </div>
-        )}
-      </section>
-
-      <section className="rounded-3xl border border-gray-100 bg-white/80 p-6 shadow-sm">
-        <div className="flex flex-wrap items-center justify-between gap-3">
-          <div>
-            <h2 className="text-xl font-semibold text-[#18122B]">
-              Application History
-            </h2>
-            <p className="text-sm text-gray-500">
-              Track every submission and its outcome.
-            </p>
-          </div>
-          <span className="text-xs font-semibold uppercase tracking-wide text-gray-400">
-            {applications.length} total
-          </span>
-        </div>
-
-        {loading ? (
-          <div className="mt-6 flex items-center gap-2 text-sm text-gray-500">
-            <Loader2 className="h-4 w-4 animate-spin" />
-            Loading history...
-          </div>
-        ) : error ? (
-          <div className="mt-6 flex items-center gap-3 rounded-2xl border border-rose-200 bg-rose-50 p-4 text-sm text-rose-700">
-            <AlertTriangle size={16} />
-            <span>{error}</span>
-          </div>
-        ) : !applications.length ? (
-          <div className="mt-6 rounded-2xl border border-dashed border-gray-200 p-6 text-center text-sm text-gray-500">
-            No submissions yet. Your history will show up here after your first
-            application.
-          </div>
-        ) : (
-          <div className="mt-6 space-y-4">
-            {applications.map((app) => (
-              <div
-                key={app._id}
-                className="rounded-2xl border border-gray-100 p-4 shadow-sm transition hover:border-[#736CED]/40"
-              >
-                <div className="flex flex-wrap items-center justify-between gap-3">
-                  <div>
-                    <p className="text-lg font-bold text-[#18122B]">
-                      {app.promoCode}
-                    </p>
-                    <p className="text-xs text-gray-500">
-                      Submitted {formatDate(app.createdAt)}
-                    </p>
-                  </div>
-                  <StatusBadge status={app.status} />
-                </div>
-                <div className="mt-3 grid gap-3 text-sm text-gray-600 sm:grid-cols-3">
-                  <div className="flex items-center gap-2">
-                    <Percent size={14} className="text-gray-400" />
-                    <span>{app.discountRate}% discount</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <Tag size={14} className="text-gray-400" />
-                    <span>Promo {app.promoCode}</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <Clock size={14} className="text-gray-400" />
-                    <span>Updated {formatDate(app.updatedAt || app.createdAt)}</span>
-                  </div>
-                </div>
-                {(app.rejectionReason || app.reviewerNotes) && (
-                  <div
-                    className={`mt-3 inline-flex items-center gap-2 rounded-full px-3 py-1 text-xs ${
-                      app.status === "rejected"
-                        ? "bg-rose-50 text-rose-700"
-                        : "bg-gray-50 text-gray-600"
-                    }`}
-                  >
-                    <FileText size={12} />
-                    <span>
-                      {(app.rejectionReason || app.reviewerNotes || "").trim()}
-                    </span>
-                  </div>
-                )}
-              </div>
-            ))}
           </div>
         )}
       </section>
