@@ -96,6 +96,14 @@ const LoyaltyProgram = ({ vendor }) => {
   const [cancelError, setCancelError] = useState(null);
   const [applyAgainModalOpen, setApplyAgainModalOpen] = useState(false);
   const [toast, setToast] = useState(null);
+  const [cancelRequestModalOpen, setCancelRequestModalOpen] = useState(false);
+  const [cancelRequestReason, setCancelRequestReason] = useState("");
+  const [cancellingRequest, setCancellingRequest] = useState(false);
+  const [cancelRequestError, setCancelRequestError] = useState(null);
+  const [cancelApprovedModalOpen, setCancelApprovedModalOpen] = useState(false);
+  const [cancelApprovedReason, setCancelApprovedReason] = useState("");
+  const [cancellingApproved, setCancellingApproved] = useState(false);
+  const [cancelApprovedError, setCancelApprovedError] = useState(null);
 
   useEffect(() => {
     if (!vendorId) return;
@@ -135,7 +143,7 @@ const LoyaltyProgram = ({ vendor }) => {
   }, [toast]);
 
   const pendingApplication = useMemo(
-    () => applications.find((app) => app.status === "pending"),
+    () => applications.find((app) => app.status?.toLowerCase() === "pending"),
     [applications]
   );
   const latestApplication = useMemo(
@@ -143,12 +151,12 @@ const LoyaltyProgram = ({ vendor }) => {
     [applications]
   );
   const approvedApplication = useMemo(
-    () => applications.find((app) => app.status === "approved"),
+    () => applications.find((app) => app.status?.toLowerCase() === "approved"),
     [applications]
   );
 
   const heroApplication = pendingApplication || latestApplication;
-  const heroStatus = heroApplication?.status || "not_applied";
+  const heroStatus = heroApplication?.status?.toLowerCase() || "not_applied";
   const statusCopy = STATUS_INFO[heroStatus] || STATUS_INFO.not_applied;
   const hasHistory = applications.length > 0;
   const canApply = !pendingApplication;
@@ -182,11 +190,122 @@ const LoyaltyProgram = ({ vendor }) => {
     }
   };
   const canCancelParticipation = Boolean(approvedApplication);
+  const canCancelRequest = Boolean(pendingApplication);
+  // Show cancel button for any application (pending or approved)
+  const hasAnyApplication = applications.length > 0;
 
   const openCancelModal = () => {
     setCancelError(null);
     setCancelReason("");
     setCancelModalOpen(true);
+  };
+
+  const openCancelRequestModal = () => {
+    setCancelRequestError(null);
+    setCancelRequestReason("");
+    setCancelRequestModalOpen(true);
+  };
+
+  const closeCancelRequestModal = () => {
+    if (cancellingRequest) return;
+    setCancelRequestModalOpen(false);
+    setCancelRequestReason("");
+    setCancelRequestError(null);
+  };
+
+  const handleCancelRequest = async () => {
+    const appToCancel = pendingApplication || latestApplication;
+    if (!vendorId || !appToCancel) return;
+    setCancellingRequest(true);
+    setCancelRequestError(null);
+    try {
+      // TODO: Implement backend API call here
+      // await api.delete(`/loyalty/${appToCancel._id}`, {
+      //   data: { reason: cancelRequestReason.trim() },
+      // });
+      
+      // Uncomment below when backend is ready:
+      // setApplications((prev) =>
+      //   prev.filter((app) => app._id !== appToCancel._id)
+      // );
+      // setCancelRequestModalOpen(false);
+      // setCancelRequestReason("");
+      // setToast({
+      //   type: "success",
+      //   message: "Loyalty program request cancelled successfully.",
+      // });
+      // setRefreshKey((key) => key + 1);
+      
+      // For now, show a message that backend needs to be implemented
+      setCancelRequestModalOpen(false);
+      setCancelRequestReason("");
+      setToast({
+        type: "error",
+        message: "will do backend later",
+      });
+    } catch (err) {
+      const message =
+        err?.response?.data?.error ||
+        err?.message ||
+        "Failed to cancel request. Please try again.";
+      setCancelRequestError(message);
+    } finally {
+      setCancellingRequest(false);
+    }
+  };
+
+  const openCancelApprovedModal = () => {
+    setCancelApprovedError(null);
+    setCancelApprovedReason("");
+    setCancelApprovedModalOpen(true);
+  };
+
+  const closeCancelApprovedModal = () => {
+    if (cancellingApproved) return;
+    setCancelApprovedModalOpen(false);
+    setCancelApprovedReason("");
+    setCancelApprovedError(null);
+  };
+
+  const handleCancelApproved = async () => {
+    const appToCancel = approvedApplication || latestApplication;
+    if (!vendorId || !appToCancel) return;
+    setCancellingApproved(true);
+    setCancelApprovedError(null);
+    try {
+      // TODO: Implement backend API call here
+      // await api.delete(`/loyalty/${appToCancel._id}`, {
+      //   data: { reason: cancelApprovedReason.trim() },
+      // });
+      
+      // Uncomment below when backend is ready:
+      // setApplications((prev) =>
+      //   prev.filter((app) => app._id !== appToCancel._id)
+      // );
+      // setCancelApprovedModalOpen(false);
+      // setCancelApprovedReason("");
+      // setToast({
+      //   type: "success",
+      //   message: "Loyalty program cancelled successfully.",
+      // });
+      // setRefreshKey((key) => key + 1);
+      
+      // For now, show a message that backend needs to be implemented
+      setCancelApprovedModalOpen(false);
+      setCancelApprovedReason("");
+      setToast({
+        type: "error",
+        message: "will do backend later",
+      });
+    } catch (err) {
+      const message =
+        err?.response?.data?.error ||
+        err?.message ||
+        "Failed to cancel program. Please try again.";
+      setCancelApprovedError(message);
+    } finally {
+      setCancellingApproved(false);
+    }
   };
 
   const closeCancelModal = () => {
@@ -261,14 +380,52 @@ const LoyaltyProgram = ({ vendor }) => {
               {primaryCta.label}
             </button>
           )}
-          {canCancelParticipation && (
-            <button
-              onClick={openCancelModal}
-              className="inline-flex items-center gap-2 rounded-full border border-rose-200 px-4 py-2 text-sm font-semibold text-rose-600 transition hover:bg-rose-50"
-            >
-              <ShieldCheck size={16} />
-              Cancel Participation
-            </button>
+          {hasAnyApplication && (
+            <>
+              {canCancelRequest && (
+                <button
+                  onClick={openCancelRequestModal}
+                  className="inline-flex items-center gap-2 rounded-full bg-rose-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-rose-700"
+                >
+                  Cancel Request
+                </button>
+              )}
+              {canCancelParticipation && (
+                <>
+                  <button
+                    onClick={openCancelApprovedModal}
+                    className="inline-flex items-center gap-2 rounded-full bg-rose-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-rose-700"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    onClick={openCancelModal}
+                    className="inline-flex items-center gap-2 rounded-full bg-rose-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-rose-700"
+                  >
+                    <ShieldCheck size={16} />
+                    Cancel Participation
+                  </button>
+                </>
+              )}
+              {/* Fallback: show cancel button for any application if status doesn't match pending/approved */}
+              {!canCancelRequest && !canCancelParticipation && latestApplication && (
+                <button
+                  onClick={() => {
+                    // If status is approved (case-insensitive), use approved cancel
+                    const status = latestApplication.status?.toLowerCase();
+                    if (status === "approved") {
+                      openCancelApprovedModal();
+                    } else {
+                      // Otherwise treat as pending request
+                      openCancelRequestModal();
+                    }
+                  }}
+                  className="inline-flex items-center gap-2 rounded-full bg-rose-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-rose-700"
+                >
+                  Cancel
+                </button>
+              )}
+            </>
           )}
         </div>
 
@@ -332,9 +489,17 @@ const LoyaltyProgram = ({ vendor }) => {
 
         {approvedApplication && (
           <div className="rounded-2xl border border-emerald-200 bg-emerald-50/80 p-5 text-emerald-900">
-            <div className="flex items-center gap-2 text-sm font-semibold uppercase tracking-wide">
-              <ShieldCheck size={16} />
-              Active Partnership Details
+            <div className="flex items-center justify-between gap-3">
+              <div className="flex items-center gap-2 text-sm font-semibold uppercase tracking-wide">
+                <ShieldCheck size={16} />
+                Active Partnership Details
+              </div>
+              <button
+                onClick={openCancelApprovedModal}
+                className="inline-flex items-center gap-2 rounded-full bg-rose-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-rose-700"
+              >
+                Cancel
+              </button>
             </div>
             <div className="mt-4 grid gap-4 text-sm sm:grid-cols-3">
               <div>
@@ -427,6 +592,131 @@ const LoyaltyProgram = ({ vendor }) => {
                   <AlertTriangle className="h-4 w-4" />
                 )}
                 Confirm cancel
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {cancelRequestModalOpen && (
+        <div className="fixed inset-0 z-40 flex items-center justify-center bg-black/30 px-4">
+          <div className="w-full max-w-lg rounded-3xl bg-white p-6 shadow-2xl">
+            <div className="flex items-start justify-between gap-3">
+              <div>
+                <h3 className="text-2xl font-bold text-[#18122B]">Cancel Your Application?</h3>
+                <p className="text-sm text-gray-600">
+                  This will cancel your pending loyalty program application. You can submit a new application at any time.
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={closeCancelRequestModal}
+                className="rounded-full p-2 text-gray-400 hover:bg-gray-100"
+                aria-label="Close"
+              >
+                <X className="h-4 w-4" />
+              </button>
+            </div>
+
+            <div className="mt-4">
+              <label className="text-sm font-semibold text-gray-700">
+                Optional reason for cancellation
+              </label>
+              <textarea
+                rows={4}
+                value={cancelRequestReason}
+                onChange={(e) => setCancelRequestReason(e.target.value)}
+                placeholder="Briefly explain why you're cancelling this request."
+                className="mt-2 w-full rounded-2xl border border-gray-200 bg-gray-50 p-3 text-sm focus:border-[#4C3BCF] focus:bg-white focus:outline-none"
+              />
+            </div>
+            {cancelRequestError && (
+              <p className="mt-2 text-sm text-rose-600">{cancelRequestError}</p>
+            )}
+
+            <div className="mt-6 flex flex-wrap justify-end gap-3">
+              <button
+                type="button"
+                onClick={closeCancelRequestModal}
+                disabled={cancellingRequest}
+                className="rounded-full border border-gray-200 px-4 py-2 text-sm font-semibold text-gray-600 hover:bg-gray-50 disabled:cursor-not-allowed"
+              >
+                Keep Request
+              </button>
+              <button
+                type="button"
+                onClick={handleCancelRequest}
+                disabled={cancellingRequest}
+                className="inline-flex items-center gap-2 rounded-full bg-rose-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-rose-700 disabled:cursor-not-allowed disabled:opacity-60"
+              >
+                {cancellingRequest ? (
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                ) : null}
+                Confirm Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {cancelApprovedModalOpen && (
+        <div className="fixed inset-0 z-40 flex items-center justify-center bg-black/30 px-4">
+          <div className="w-full max-w-lg rounded-3xl bg-white p-6 shadow-2xl">
+            <div className="flex items-start justify-between gap-3">
+              <div>
+                <p className="text-xs font-semibold uppercase tracking-wide text-rose-500">
+                  Cancel program
+                </p>
+                <h3 className="text-2xl font-bold text-[#18122B]">Cancel Your Approved Program?</h3>
+                <p className="text-sm text-gray-600">
+                  This will cancel your approved loyalty program. Your promo will be removed from the directory and students will no longer see your offer. You can submit a new application at any time.
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={closeCancelApprovedModal}
+                className="rounded-full p-2 text-gray-400 hover:bg-gray-100"
+                aria-label="Close"
+              >
+                <X className="h-4 w-4" />
+              </button>
+            </div>
+
+            <div className="mt-4">
+              <label className="text-sm font-semibold text-gray-700">
+                Optional reason for cancellation
+              </label>
+              <textarea
+                rows={4}
+                value={cancelApprovedReason}
+                onChange={(e) => setCancelApprovedReason(e.target.value)}
+                placeholder="Briefly explain why you're cancelling this program."
+                className="mt-2 w-full rounded-2xl border border-gray-200 bg-gray-50 p-3 text-sm focus:border-[#4C3BCF] focus:bg-white focus:outline-none"
+              />
+            </div>
+            {cancelApprovedError && (
+              <p className="mt-2 text-sm text-rose-600">{cancelApprovedError}</p>
+            )}
+
+            <div className="mt-6 flex flex-wrap justify-end gap-3">
+              <button
+                type="button"
+                onClick={closeCancelApprovedModal}
+                disabled={cancellingApproved}
+                className="rounded-full border border-gray-200 px-4 py-2 text-sm font-semibold text-gray-600 hover:bg-gray-50 disabled:cursor-not-allowed"
+              >
+                Keep Program
+              </button>
+              <button
+                type="button"
+                onClick={handleCancelApproved}
+                disabled={cancellingApproved}
+                className="inline-flex items-center gap-2 rounded-full bg-rose-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-rose-700 disabled:cursor-not-allowed disabled:opacity-60"
+              >
+                {cancellingApproved ? (
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                ) : null}
+                Confirm Cancel
               </button>
             </div>
           </div>

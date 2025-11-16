@@ -67,7 +67,9 @@ export const createForm = async (req, res) => {
 // Get all Forms
 export const getForms = async (req, res) => {
   try {
-    const forms = await LoyaltyProgramForm.find().populate("vendorId");
+    const { vendorId } = req.query;
+    const query = vendorId ? { vendorId } : {};
+    const forms = await LoyaltyProgramForm.find(query).populate("vendorId");
     res.json(forms);
   } catch (err) {
     res.status(500).json({ error: err.message });
