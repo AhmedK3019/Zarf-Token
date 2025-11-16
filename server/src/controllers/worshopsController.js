@@ -235,14 +235,22 @@ const updateWorkshopStatus = async (req, res, next) => {
       if (allowedUsers.length == 0 || !allowedUsers) {
         return res.json({ message: "Please select at least one role" });
       }
+      const finalArray = Array.from(
+        new Set([...allowedUsers, "Admin", "Event office"])
+      );
       let update = await WorkShop.findByIdAndUpdate(
         id,
-        { allowedusers: allowedUsers },
+        { allowedusers: finalArray },
         { new: true }
       );
       message = `${updatedStatus.workshopname} has been accepted`;
       const Message = `Check out ${update.workshopname} — a new workshop is available!`;
+
       await User.updateMany(
+        { role: { $in: update.allowedusers } },
+        { $push: { notifications: { message: Message } } }
+      );
+      await EventsOffice.updateMany(
         {},
         { $push: { notifications: { message: Message } } }
       );

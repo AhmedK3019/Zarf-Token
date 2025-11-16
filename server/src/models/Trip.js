@@ -61,14 +61,35 @@ const tripSchema = new mongoose.Schema({
   allowedusers: [
     {
       type: String,
-      enum: ["Student", "Professor", "TA", "Staff"],
+      enum: ["Student", "Professor", "TA", "Staff", "Admin", "Event office"],
     },
   ],
+});
+tripSchema.pre("save", function (next) {
+  // Ensure allowedusers is an array
+  if (!Array.isArray(this.allowedusers)) {
+    this.allowedusers = [];
+  }
+
+  // Add required roles if missing
+  const requiredRoles = ["Admin", "Event office"];
+
+  requiredRoles.forEach((role) => {
+    if (!this.allowedusers.includes(role)) {
+      this.allowedusers.push(role);
+    }
+  });
+
+  next();
 });
 tripSchema.post("save", async function (doc, next) {
   try {
     const message = `Check out ${doc.tripname} — a new trip has been created!`;
-    await User.updateMany({}, { $push: { notifications: { message } } });
+    const roles = doc.allowedusers;
+    await User.updateMany(
+      { role: { $in: roles } },
+      { $push: { notifications: { message } } }
+    );
     await EventsOffice.updateMany(
       {},
       { $push: { notifications: { message } } }

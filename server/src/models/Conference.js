@@ -38,12 +38,38 @@ const conferenceSchema = new mongoose.Schema({
   createdAt: { type: Date, default: Date.now },
   type: { type: String, default: "conference" },
   archive: { type: Boolean, default: false },
-  allowedusers: ["Student", "TA", "Professor", "Staff"],
+  allowedusers: [
+    {
+      type: String,
+      enum: ["Student", "Professor", "TA", "Staff", "Admin", "Event office"],
+    },
+  ],
+});
+conferenceSchema.pre("save", function (next) {
+  // Ensure allowedusers is an array
+  if (!Array.isArray(this.allowedusers)) {
+    this.allowedusers = [];
+  }
+
+  // Add required roles if missing
+  const requiredRoles = ["Admin", "Event office"];
+
+  requiredRoles.forEach((role) => {
+    if (!this.allowedusers.includes(role)) {
+      this.allowedusers.push(role);
+    }
+  });
+
+  next();
 });
 conferenceSchema.post("save", async function (doc, next) {
   try {
     const message = `Check out ${doc.conferencename} — a new conference has been created!`;
-    await User.updateMany({}, { $push: { notifications: { message } } });
+    const roles = doc.allowedusers;
+    await User.updateMany(
+      { role: { $in: roles } },
+      { $push: { notifications: { message } } }
+    );
     await EventsOffice.updateMany(
       {},
       { $push: { notifications: { message } } }

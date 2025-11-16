@@ -8,9 +8,12 @@ import User from "../models/User.js";
 import Admin from "../models/Admin.js";
 import EventsOffice from "../models/EventsOffice.js";
 
-const getAllEvents = async (_req, res, next) => {
+const getAllEvents = async (req, res, next) => {
   try {
-    let filter = { archive: false };
+    const role = req.userRole;
+    if (!role)
+      return res.status(401).json({ message: "You are not authorized" });
+    let filter = { archive: false, allowedusers: role };
     const workshops = await Workshop.find(filter)
       .populate("professorsparticipating", "firstname lastname email")
       .populate("createdBy", "firstname lastname email");
@@ -30,9 +33,12 @@ const getAllEvents = async (_req, res, next) => {
 
 const getEventsByType = async (req, res, next) => {
   try {
+    const role = req.userRole;
+    if (!role)
+      return res.status(401).json({ message: "You are not authorized" });
     const { type } = req.params;
     let events;
-    let filter = { archive: false };
+    let filter = { archive: false, allowedusers: role };
     switch (type) {
       case "workshops":
         events = await Workshop.find(filter)

@@ -84,11 +84,10 @@ const workshopSchema = new mongoose.Schema({
   allowedusers: [
     {
       type: String,
-      enum: ["Student", "Professor", "TA", "Staff"],
+      enum: ["Student", "Professor", "TA", "Staff", "Admin", "Event office"],
     },
   ],
 });
 
 const Workshop = mongoose.model("Workshop", workshopSchema);
-
 export default Workshop;

@@ -41,13 +41,40 @@ const bazaarSchema = new mongoose.Schema({
     },
   },
   archive: { type: Boolean, default: false },
-  allowedusers: ["Student", "TA", "Professor", "Staff"],
+  allowedusers: [
+    {
+      type: String,
+      enum: ["Student", "Professor", "TA", "Staff", "Admin", "Event office"],
+    },
+  ],
+});
+
+bazaarSchema.pre("save", function (next) {
+  // Ensure allowedusers is an array
+  if (!Array.isArray(this.allowedusers)) {
+    this.allowedusers = [];
+  }
+
+  // Add required roles if missing
+  const requiredRoles = ["Admin", "Event office"];
+
+  requiredRoles.forEach((role) => {
+    if (!this.allowedusers.includes(role)) {
+      this.allowedusers.push(role);
+    }
+  });
+
+  next();
 });
 
 bazaarSchema.post("save", async function (doc, next) {
   try {
     const message = `Check out ${doc.bazaarname} — a new bazaar is available!`;
-    await User.updateMany({}, { $push: { notifications: { message } } });
+    const roles = doc.allowedusers;
+    await User.updateMany(
+      { role: { $in: roles } },
+      { $push: { notifications: { message } } }
+    );
     await EventsOffice.updateMany(
       {},
       { $push: { notifications: { message } } }
