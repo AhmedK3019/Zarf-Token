@@ -94,6 +94,7 @@ const LoyaltyProgram = ({ vendor }) => {
   const [cancelReason, setCancelReason] = useState("");
   const [cancelling, setCancelling] = useState(false);
   const [cancelError, setCancelError] = useState(null);
+  const [applyAgainModalOpen, setApplyAgainModalOpen] = useState(false);
   const [toast, setToast] = useState(null);
 
   useEffect(() => {
@@ -165,6 +166,7 @@ const LoyaltyProgram = ({ vendor }) => {
       label: hasHistory ? "Apply Again" : "Apply Now",
       to: "/dashboard/vendor/apply-loyalty",
       variant: "primary",
+      requiresReminder: hasHistory,
     };
   }, [
     vendorId,
@@ -173,6 +175,12 @@ const LoyaltyProgram = ({ vendor }) => {
   ]);
 
   const handleNavigate = (to) => navigate(to);
+  const handleApplyAgainProceed = () => {
+    setApplyAgainModalOpen(false);
+    if (primaryCta?.to) {
+      handleNavigate(primaryCta.to);
+    }
+  };
   const canCancelParticipation = Boolean(approvedApplication);
 
   const openCancelModal = () => {
@@ -237,7 +245,13 @@ const LoyaltyProgram = ({ vendor }) => {
           </button>
           {primaryCta && (
             <button
-              onClick={() => handleNavigate(primaryCta.to)}
+              onClick={() => {
+                if (primaryCta.requiresReminder) {
+                  setApplyAgainModalOpen(true);
+                  return;
+                }
+                handleNavigate(primaryCta.to);
+              }}
               className={`inline-flex items-center gap-2 rounded-full px-5 py-2 text-sm font-semibold shadow ${
                 primaryCta.variant === "primary"
                   ? "bg-[#4C3BCF] text-white hover:bg-[#3728a6]"
@@ -413,6 +427,35 @@ const LoyaltyProgram = ({ vendor }) => {
                   <AlertTriangle className="h-4 w-4" />
                 )}
                 Confirm cancel
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {applyAgainModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 px-4">
+          <div className="w-full max-w-lg rounded-3xl bg-white p-6 shadow-2xl">
+            <div className="space-y-3">
+              <h3 className="text-2xl font-bold text-[#18122B]">Before you proceed</h3>
+              <p className="text-sm text-gray-600">
+                Please make sure you do not have any ongoing Loyalty Program partnerships before submitting a new application.
+              </p>
+            </div>
+            <div className="mt-6 flex flex-wrap justify-end gap-3">
+              <button
+                type="button"
+                onClick={() => setApplyAgainModalOpen(false)}
+                className="rounded-full bg-rose-600 px-5 py-2 text-sm font-semibold text-white hover:bg-rose-500"
+              >
+                Close
+              </button>
+              <button
+                type="button"
+                onClick={handleApplyAgainProceed}
+                className="rounded-full bg-emerald-600 px-5 py-2 text-sm font-semibold text-white hover:bg-emerald-500"
+              >
+                Proceed
               </button>
             </div>
           </div>
