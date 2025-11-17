@@ -3,6 +3,7 @@ import mongoose from "mongoose";
 const peopleSchema = new mongoose.Schema({
   name: { type: String, required: true },
   email: { type: String, required: true },
+  DocumentId: { type: mongoose.Schema.Types.ObjectId, ref: "Upload" },
 });
 
 const vendorRequestSchema = new mongoose.Schema(

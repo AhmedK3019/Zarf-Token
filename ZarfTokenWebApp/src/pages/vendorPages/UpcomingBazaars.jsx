@@ -19,7 +19,7 @@ const formatDate = (dateStr) => {
 };
 
 const initialFormState = {
-  attendees: [{ name: "", email: "" }],
+  attendees: [{ name: "", email: "", idDocument: null }],
   boothSize: "2x2",
   boothname: "",
 };
@@ -109,11 +109,17 @@ export default function UpcomingBazars() {
     setApplicationData({ ...applicationData, attendees: newAttendees });
   };
 
+  const handleIdDocumentChange = (index, file) => {
+    const newAttendees = [...applicationData.attendees];
+    newAttendees[index].idDocument = file;
+    setApplicationData({ ...applicationData, attendees: newAttendees });
+  };
+
   const addAttendee = () => {
     if (applicationData.attendees.length < 5) {
       setApplicationData({
         ...applicationData,
-        attendees: [...applicationData.attendees, { name: "", email: "" }],
+        attendees: [...applicationData.attendees, { name: "", email: "", idDocument: null }],
       });
     }
   };
@@ -133,12 +139,12 @@ export default function UpcomingBazars() {
   const handleSubmitApplication = async (e) => {
     e.preventDefault();
 
-    const payload = {
-      people: applicationData.attendees,
-      boothSize: applicationData.boothSize,
-      boothname: applicationData.boothname,
-      vendorId: user._id,
-    };
+    // Validate that all attendees have ID documents uploaded
+    const missingIds = applicationData.attendees.filter(attendee => !attendee.idDocument);
+    if (missingIds.length > 0) {
+      alert(`Please upload ID documents for all attendees. ${missingIds.length} attendee(s) missing ID documents.`);
+      return;
+    }
 
     try {
       const token = localStorage.getItem("token");
@@ -148,6 +154,36 @@ export default function UpcomingBazars() {
         );
         return;
       }
+
+      // Upload ID documents for each attendee
+      const attendeesWithUploadedIds = await Promise.all(
+        applicationData.attendees.map(async (attendee) => {
+          if (attendee.idDocument) {
+            const idFormData = new FormData();
+            idFormData.append('file', attendee.idDocument);
+            
+            const uploadResponse = await api.post('/uploads', idFormData, {
+              headers: {
+                'Content-Type': 'multipart/form-data',
+              },
+            });
+            
+            return {
+              name: attendee.name,
+              email: attendee.email,
+              DocumentId: uploadResponse.data._id, // Reference to uploaded file
+            };
+          }
+          return attendee;
+        })
+      );
+
+      const payload = {
+        people: attendeesWithUploadedIds,
+        boothSize: applicationData.boothSize,
+        boothname: applicationData.boothname,
+        vendorId: user._id,
+      };
 
       const url = `/vendorRequests/bazar/${selectedBazaar._id}`;
       await api.post(url, payload);
@@ -344,36 +380,84 @@ export default function UpcomingBazars() {
                 </label>
                 <div className="space-y-4">
                   {applicationData.attendees.map((attendee, index) => (
-                    <div key={index} className="flex items-center gap-4">
-                      <input
-                        type="text"
-                        placeholder={`Attendee ${index + 1} Name`}
-                        value={attendee.name}
-                        onChange={(e) =>
-                          handleAttendeeChange(index, "name", e.target.value)
-                        }
-                        className="flex-1 rounded-lg border-2 border-gray-200 shadow-sm focus:border-[#736CED] focus:ring-[#736CED] text-[#312A68]"
-                        required
-                      />
-                      <input
-                        type="email"
-                        placeholder={`Attendee ${index + 1} Email`}
-                        value={attendee.email}
-                        onChange={(e) =>
-                          handleAttendeeChange(index, "email", e.target.value)
-                        }
-                        className="flex-1 rounded-lg border-2 border-gray-200 shadow-sm focus:border-[#736CED] focus:ring-[#736CED] text-[#312A68]"
-                        required
-                      />
-                      {applicationData.attendees.length > 1 && (
-                        <button
-                          type="button"
-                          onClick={() => removeAttendee(index)}
-                          className="text-red-500 hover:text-red-700 font-bold p-1 rounded-full transition-colors"
-                        >
-                          <X size={18} />
-                        </button>
-                      )}
+                    <div key={index} className="space-y-2">
+                      <div className="flex items-center gap-4">
+                        <input
+                          type="text"
+                          placeholder={`Attendee ${index + 1} Name`}
+                          value={attendee.name}
+                          onChange={(e) =>
+                            handleAttendeeChange(index, "name", e.target.value)
+                          }
+                          className="flex-1 rounded-lg border-2 border-gray-200 shadow-sm focus:border-[#736CED] focus:ring-[#736CED] text-[#312A68]"
+                          required
+                        />
+                        <input
+                          type="email"
+                          placeholder={`Attendee ${index + 1} Email`}
+                          value={attendee.email}
+                          onChange={(e) =>
+                            handleAttendeeChange(index, "email", e.target.value)
+                          }
+                          className="flex-1 rounded-lg border-2 border-gray-200 shadow-sm focus:border-[#736CED] focus:ring-[#736CED] text-[#312A68]"
+                          required
+                        />
+                        {applicationData.attendees.length > 1 && (
+                          <button
+                            type="button"
+                            onClick={() => removeAttendee(index)}
+                            className="text-red-500 hover:text-red-700 font-bold p-1 rounded-full transition-colors"
+                          >
+                            <X size={18} />
+                          </button>
+                        )}
+                      </div>
+                      <div className="ml-4">
+                        <div className="relative">
+                          <input
+                            type="file"
+                            accept="image/*,.pdf"
+                            onChange={(e) => handleIdDocumentChange(index, e.target.files[0])}
+                            className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                            required
+                            id={`id-upload-${index}`}
+                          />
+                          <label
+                            htmlFor={`id-upload-${index}`}
+                            className="flex items-center gap-3 px-4 py-2 bg-gradient-to-r from-[#EEE9FF] to-[#F8F6FF] border-2 border-dashed border-[#736CED]/30 hover:border-[#736CED]/50 rounded-lg cursor-pointer transition-all hover:shadow-md group"
+                          >
+                            <div className="flex items-center justify-center w-8 h-8 bg-[#736CED]/10 rounded-full group-hover:bg-[#736CED]/20 transition-colors">
+                              <svg className="w-4 h-4 text-[#736CED]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+                              </svg>
+                            </div>
+                            <div className="flex-1">
+                              <div className="text-sm font-medium text-[#4C3BCF]">
+                                {attendee.idDocument ? 'Change ID Document' : 'Upload ID Document'}
+                              </div>
+                              <div className="text-xs text-[#312A68]/70">
+                                PNG, JPG, PDF • Max 10MB
+                              </div>
+                            </div>
+                            {attendee.idDocument && (
+                              <div className="flex items-center gap-1 text-green-600">
+                                <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                                  <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                                </svg>
+                                <span className="text-xs font-medium">Uploaded</span>
+                              </div>
+                            )}
+                          </label>
+                        </div>
+                        {attendee.idDocument && (
+                          <div className="mt-2 ml-4 text-xs text-green-600 font-medium flex items-center gap-1">
+                            <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
+                              <path fillRule="evenodd" d="M4 4a2 2 0 00-2 2v8a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2H4zm0 2h12v8H4V6z" clipRule="evenodd" />
+                            </svg>
+                            {attendee.idDocument.name}
+                          </div>
+                        )}
+                      </div>
                     </div>
                   ))}
                 </div>
