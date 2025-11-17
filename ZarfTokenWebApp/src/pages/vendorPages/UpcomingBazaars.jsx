@@ -104,16 +104,24 @@ export default function UpcomingBazars() {
   };
 
   const handleAttendeeChange = (index, field, value) => {
-    const newAttendees = [...applicationData.attendees];
-    newAttendees[index][field] = value;
+    const newAttendees = applicationData.attendees.map((attendee, i) => {
+      if (i === index) {
+        return { ...attendee, [field]: value };
+      }
+      return attendee;
+    });
     setApplicationData({ ...applicationData, attendees: newAttendees });
   };
 
   const handleIdDocumentChange = (index, file) => {
-    const newAttendees = [...applicationData.attendees];
-    newAttendees[index].idDocument = file;
-    setApplicationData({ ...applicationData, attendees: newAttendees });
-  };
+  const newAttendees = applicationData.attendees.map((attendee, i) => {
+    if (i === index) {
+      return { ...attendee, idDocument: file };
+    }
+    return attendee;
+  });
+  setApplicationData({ ...applicationData, attendees: newAttendees });
+};
 
   const addAttendee = () => {
     if (applicationData.attendees.length < 5) {
@@ -412,7 +420,7 @@ export default function UpcomingBazars() {
                           </button>
                         )}
                       </div>
-                      <div className="ml-4">
+                      <div>
                         <div className="relative">
                           <input
                             type="file"
