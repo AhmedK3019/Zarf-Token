@@ -224,20 +224,8 @@ const acceptRequest = async (req, res, next) => {
     const vendor = await Vendor.findById(request.vendorId);
     const approvedAt = new Date();
     request.status = "Approved";
-    request.approvedAt = approvedAt;
     request.paymentStatus = "unpaid";
     request.paymentDueAt = computePaymentDueDate(approvedAt);
-    if (
-      request.isBazarBooth &&
-      request.bazarId &&
-      !request.eventStartAt &&
-      request.bazarId.startdate
-    ) {
-      request.eventStartAt = combineDateAndTime(
-        request.bazarId.startdate,
-        request.bazarId.starttime
-      );
-    }
     await request.save();
     await incrementBazaarParticipation(request);
     const booth = await Booth.create({
