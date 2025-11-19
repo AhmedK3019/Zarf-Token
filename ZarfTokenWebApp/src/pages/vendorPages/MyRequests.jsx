@@ -509,11 +509,6 @@ export default function MyRequests() {
     });
   }, [requests, statusTab, viewFilter]);
 
-  const breadcrumbLabel =
-    selectedRequest?.boothname ||
-    selectedRequest?.bazarId?.bazaarname ||
-    STATUS_TABS.find((tab) => tab.key === statusTab)?.label;
-
   const emitAnalyticsEvent = (payload) => {
     try {
       if (window?.dataLayer) {
@@ -599,25 +594,6 @@ export default function MyRequests() {
       <div className="min-h-screen w-full bg-muted text-[#1F1B3B] font-sans">
         <main className="flex w-full flex-1 flex-col items-center px-4 sm:px-6 py-8">
           <div className="w-full max-w-6xl">
-            <div className="flex flex-wrap items-center gap-2 text-sm text-gray-500 mb-4">
-              <span className="font-semibold text-gray-700">Dashboard</span>
-              <ChevronRight className="h-3 w-3" />
-              <span className="font-semibold text-gray-700">
-                My Participations
-              </span>
-              <ChevronRight className="h-3 w-3" />
-              <span>{breadcrumbLabel}</span>
-            </div>
-
-            <div className="mb-8 text-center">
-              <h1 className="text-4xl font-bold text-[#736CED]">
-                My Participation Requests
-              </h1>
-              <p className="text-md text-[#312A68] mt-2">
-                Track statuses, payment deadlines, and cancellation eligibility in one place.
-              </p>
-            </div>
-
             <div className="flex flex-wrap justify-center gap-3 mb-6">
               {STATUS_TABS.map((tab) => (
                 <button

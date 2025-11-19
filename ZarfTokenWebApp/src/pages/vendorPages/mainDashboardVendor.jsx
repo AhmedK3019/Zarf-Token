@@ -15,6 +15,7 @@ const MainDashboardVendor = ({ vendor }) => {
                                     location.pathname === "/dashboard/vendor/" ||
                                     location.pathname === "/dashboard/vendor/upcoming-bazaars";
   const isApplyBoothPage = location.pathname === "/dashboard/vendor/apply-booth";
+  const isMyRequestsPage = location.pathname === "/dashboard/vendor/my-requests";
 
   return (
     <div>
@@ -45,7 +46,20 @@ const MainDashboardVendor = ({ vendor }) => {
           </div>
         </div>
       )}
-      <main className={`w-full px-4 ${(isBazaarOpportunitiesPage || isApplyBoothPage) ? 'mt-8' : 'mt-6'}`}>
+      {/* Dashboard Container with My Requests Section */}
+      {isMyRequestsPage && (
+        <div className="w-full bg-[#001233] text-white px-6 py-8">
+          <div className="max-w-7xl mx-auto text-center">
+            <h1 className="text-4xl font-bold sm:text-5xl mb-4">
+              My Participation Requests
+            </h1>
+            <p className="text-lg max-w-2xl mx-auto opacity-90">
+              Track statuses, payment deadlines, and cancellation eligibility in one place.
+            </p>
+          </div>
+        </div>
+      )}
+      <main className={`w-full px-4 ${(isBazaarOpportunitiesPage || isApplyBoothPage || isMyRequestsPage) ? 'mt-8' : 'mt-6'}`}>
         <Routes>
           <Route index element={<UpcomingBazaars />} />
           <Route path="/upcoming-bazaars" element={<UpcomingBazaars />} />
