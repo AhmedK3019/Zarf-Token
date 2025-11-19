@@ -7,7 +7,7 @@ import { sendCommentDeletionNotification } from "../utils/mailer.js";
 import User from "../models/User.js";
 import Admin from "../models/Admin.js";
 import EventsOffice from "../models/EventsOffice.js";
-
+import userController from "./userController.js";
 const getAllEvents = async (req, res, next) => {
   try {
     const role = req.userRole;
@@ -541,6 +541,130 @@ const unArchiveEvent = async (req, res, next) => {
     next(error);
   }
 };
+
+const notifyOneDayPrior = async () => {
+  try {
+    const now = new Date();
+    const startOfToday = new Date(
+      now.getFullYear(),
+      now.getMonth(),
+      now.getDate()
+    );
+    const ONE_DAY_MS = 24 * 60 * 60 * 1000;
+    const startOfTomorrow = new Date(startOfToday.getTime() + ONE_DAY_MS);
+    const endOfTomorrow = new Date(startOfTomorrow.getTime() + ONE_DAY_MS);
+
+    const query = {
+      archive: false,
+      startdate: {
+        $gte: startOfTomorrow,
+        $lt: endOfTomorrow,
+      },
+    };
+    const [workshops, trips] = await Promise.all([
+      Workshop.find(query).select("workshopname attendees registered"),
+      Trip.find(query).select("tripname attendees registered"),
+    ]);
+
+    const events = [...workshops, ...trips];
+
+    for (const event of events) {
+      const eventName = event.workshopname || event.tripname;
+      const message = `${eventName} is starting in one day.`;
+      const attendeeIds = (event.attendees || []).map((a) => a.userId);
+      const registeredIds = (event.registered || []).map((r) => r.userId);
+      const uniqueUserIds = new Set([...attendeeIds, ...registeredIds]);
+      for (const userId of uniqueUserIds) {
+        if (!userId) continue;
+
+        try {
+          await userController.updateNotifications(userId, message);
+        } catch (notificationError) {
+          console.error(
+            `Error notifying user ${userId} for event ${eventName}:`,
+            notificationError.message
+          );
+        }
+      }
+    }
+  } catch (error) {
+    console.error(
+      "The notifyOneDayPrior cron job failed:",
+      error.message || error
+    );
+  }
+};
+
+// NOTE: Assuming ONE_HOUR_MS is defined in a scope accessible to this function.
+// For example: const ONE_HOUR_MS = 60 * 60 * 1000;
+
+const notifyOneHourPrior = async () => {
+  // Define constants within the function scope if they aren't global
+  const ONE_HOUR_MS = 60 * 60 * 1000;
+  const ONE_DAY_MS = 24 * 60 * 60 * 1000;
+  const TOLERANCE_MS = 1000 * 60 * 5; // 5 minutes tolerance
+
+  try {
+    const now = new Date().getTime();
+    const minTimeMs = now + ONE_HOUR_MS - TOLERANCE_MS;
+    const maxTimeMs = now + ONE_HOUR_MS + TOLERANCE_MS;
+    const startOfToday = new Date(new Date().setHours(0, 0, 0, 0));
+    const twoDaysFromNow = new Date(startOfToday.getTime() + 2 * ONE_DAY_MS);
+
+    const preliminaryQuery = {
+      archive: false,
+      startdate: {
+        $gte: startOfToday,
+        $lt: twoDaysFromNow,
+      },
+    };
+    const [workshops, trips] = await Promise.all([
+      Workshop.find(preliminaryQuery).select(
+        "startdate starttime workshopname attendees registered"
+      ),
+      Trip.find(preliminaryQuery).select(
+        "startdate starttime tripname attendees registered"
+      ),
+    ]);
+
+    const allEvents = [...workshops, ...trips];
+    const eventsOneHourPrior = allEvents.filter((event) => {
+      const startDate = new Date(event.startdate);
+      const [hours, minutes] = (event.starttime || "00:00")
+        .split(":")
+        .map(Number);
+      startDate.setHours(hours, minutes, 0, 0);
+      const eventTimeMs = startDate.getTime();
+      return eventTimeMs >= minTimeMs && eventTimeMs <= maxTimeMs;
+    });
+
+    for (const event of eventsOneHourPrior) {
+      const eventName = event.workshopname || event.tripname;
+      const message = `${eventName} is starting in one hour.`;
+      const attendeeIds = (event.attendees || []).map((a) => a.userId);
+      const registeredIds = (event.registered || []).map((r) => r.userId);
+      const uniqueUserIds = new Set([...attendeeIds, ...registeredIds]);
+      for (const userId of uniqueUserIds) {
+        if (!userId) continue;
+
+        try {
+          await userController.updateNotifications(userId, message);
+        } catch (notificationError) {
+          console.error(
+            `Error notifying user ${userId} for event ${eventName}:`,
+            notificationError.message
+          );
+        }
+      }
+    }
+  } catch (error) {
+    console.error(
+      "The notifyOneHourPrior cron job failed:",
+      error.message || error
+    );
+  }
+};
+
 export default {
   getAllEvents,
   getEventsByType,
@@ -554,4 +678,6 @@ export default {
   archiveEvent,
   getArchivedEvents,
   unArchiveEvent,
+  notifyOneDayPrior,
+  notifyOneHourPrior,
 };

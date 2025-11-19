@@ -197,6 +197,22 @@ cron.schedule("*/30 * * * *", async () => {
   }
 });
 
+cron.schedule("0 0 * * * ", async () => {
+  try {
+    await notifyOneDayPrior();
+  } catch (error) {
+    console.error("Failed to notify", err?.message || err);
+  }
+});
+
+cron.schedule("*/5 * * * *", async () => {
+  try {
+    await notifyOneHourPrior();
+  } catch (error) {
+    console.error("Failed to notify", err?.message || err);
+  }
+});
+
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 
 // Attach token-only auth middleware globally so every request has req.user (or null)
