@@ -9,7 +9,7 @@ import {
   registerUser,
   getSessionsByMonth,
   unregisterUser,
-  deleteMonthSessions,
+  // deleteMonthSessions,
 } from "../controllers/gymSessionController.js";
 
 const router = express.Router();
@@ -19,7 +19,7 @@ router.get("/", getSessions);
 router.get("/:id", getSessionById);
 router.put("/:id", authMiddleware, updateSession); // Events Office only
 router.get("/month/:month", getSessionsByMonth);
-router.delete("/month/:month", authMiddleware, deleteMonthSessions); // Delete all sessions for a month - Events Office only
+// router.delete("/month/:month", authMiddleware, deleteMonthSessions);
 router.delete("/:id", authMiddleware, deleteSession); // Events Office only
 
 // Register/unregister user (Student, Staff, Events Office, TA, Professor) - require authentication
