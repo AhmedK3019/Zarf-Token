@@ -17,6 +17,7 @@ const MainDashboardVendor = ({ vendor }) => {
   const isApplyBoothPage = location.pathname === "/dashboard/vendor/apply-booth";
   const isMyRequestsPage = location.pathname === "/dashboard/vendor/my-requests";
   const isAcceptedBoothsPage = location.pathname === "/dashboard/vendor/accepted-booths";
+  const isLoyaltyProgramPage = location.pathname === "/dashboard/vendor/loyalty-program";
 
   return (
     <div>
@@ -73,7 +74,20 @@ const MainDashboardVendor = ({ vendor }) => {
           </div>
         </div>
       )}
-      <main className={`w-full px-4 ${(isBazaarOpportunitiesPage || isApplyBoothPage || isMyRequestsPage || isAcceptedBoothsPage) ? 'mt-8' : 'mt-6'}`}>
+      {/* Dashboard Container with Loyalty Program Section */}
+      {isLoyaltyProgramPage && (
+        <div className="w-full bg-[#001233] text-white px-6 py-8">
+          <div className="max-w-7xl mx-auto text-center">
+            <h1 className="text-4xl font-bold sm:text-5xl mb-4">
+              Join the GUC Loyalty Program
+            </h1>
+            <p className="text-lg max-w-2xl mx-auto opacity-90">
+              Apply now to offer exclusive discounts to the GUC community.
+            </p>
+          </div>
+        </div>
+      )}
+      <main className={`w-full px-4 ${(isBazaarOpportunitiesPage || isApplyBoothPage || isMyRequestsPage || isAcceptedBoothsPage || isLoyaltyProgramPage) ? 'mt-8' : 'mt-6'}`}>
         <Routes>
           <Route index element={<UpcomingBazaars />} />
           <Route path="/upcoming-bazaars" element={<UpcomingBazaars />} />
