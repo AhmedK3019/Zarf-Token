@@ -1,4 +1,4 @@
-import { Routes, Route } from "react-router-dom";
+import { Routes, Route, useLocation } from "react-router-dom";
 import NavbarUser from "./navbarUser";
 import { useAuthUser } from "../../hooks/auth";
 
@@ -15,11 +15,23 @@ import NotFound from "../NotFoundPage";
 
 const mainDashboardUser = () => {
   const { user } = useAuthUser();
+  const location = useLocation();
+  const isFavouriteEventsPage = location.pathname === "/dashboard/user/favourite-events";
 
   return (
     <div>
       <NavbarUser />
-      <main className="w-full mt-6 px-4">
+      {/* Dashboard Container with My Favorites Section */}
+      {isFavouriteEventsPage && (
+        <div className="w-full bg-[#001233] text-white px-6 py-8">
+          <div className="max-w-7xl mx-auto text-center">
+            <h1 className="text-4xl font-bold sm:text-5xl mb-4">
+              My Favorites
+            </h1>
+          </div>
+        </div>
+      )}
+      <main className={`w-full px-4 ${isFavouriteEventsPage ? 'mt-8' : 'mt-6'}`}>
         <Routes>
           <Route index element={<AllEvents />} />
           <Route path="/all-events" element={<AllEvents />} />
