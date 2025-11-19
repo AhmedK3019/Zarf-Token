@@ -150,6 +150,21 @@ const NavbarEventsOffice = () => {
                         Events Sales Report
                       </span>
                     </NavLink>
+                    <NavLink
+                      to="/dashboard/eventsOffice/event-attendees-report"
+                      className={({ isActive }) =>
+                        `flex items-center gap-3 px-4 py-3 text-gray-800 hover:bg-primary/5 hover:text-primary transition-colors border-t border-gray-200 ${
+                          isActive
+                            ? "bg-primary/10 text-primary font-semibold"
+                            : ""
+                        }`
+                      }
+                    >
+                      <span className="flex items-center gap-2">
+                        <FileText className="h-4 w-4" />
+                        Event Attendees Report
+                      </span>
+                    </NavLink>
                   </div>
                 )}
               </div>

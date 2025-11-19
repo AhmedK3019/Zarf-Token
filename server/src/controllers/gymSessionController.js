@@ -334,6 +334,7 @@ export const unregisterUser = async (req, res) => {
 };
 
 // Delete all gym sessions for a specific month
+/* 
 export const deleteMonthSessions = async (req, res) => {
   try {
     const userId = req.userId;
@@ -385,3 +386,4 @@ export const deleteMonthSessions = async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 };
+*/

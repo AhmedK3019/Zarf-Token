@@ -383,6 +383,7 @@ export default function GymSchedule() {
     }
   };
 
+  /*
   const handleDeleteMonthSessions = async () => {
     if (window.confirm(`Are you sure you want to delete all sessions for ${MONTHS[currentMonth]} ${currentYear}? This action cannot be undone.`)) {
       setLoading(true);
@@ -399,6 +400,7 @@ export default function GymSchedule() {
       }
     }
   };
+  */
 
   const handleRegister = async (sessionId) => {
     if (!user) {
@@ -540,6 +542,7 @@ export default function GymSchedule() {
                 <Plus size={16} />
                 Create Session
               </button>
+              {/*
               {sessions.length > 0 && (
                 <button
                   onClick={handleDeleteMonthSessions}
@@ -550,6 +553,7 @@ export default function GymSchedule() {
                   Delete All Sessions
                 </button>
               )}
+              */}
             </div>
           )}
         </div>
