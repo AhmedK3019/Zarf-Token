@@ -14,6 +14,7 @@ const MainDashboardVendor = ({ vendor }) => {
   const isBazaarOpportunitiesPage = location.pathname === "/dashboard/vendor" || 
                                     location.pathname === "/dashboard/vendor/" ||
                                     location.pathname === "/dashboard/vendor/upcoming-bazaars";
+  const isApplyBoothPage = location.pathname === "/dashboard/vendor/apply-booth";
 
   return (
     <div>
@@ -31,7 +32,20 @@ const MainDashboardVendor = ({ vendor }) => {
           </div>
         </div>
       )}
-      <main className={`w-full px-4 ${isBazaarOpportunitiesPage ? 'mt-8' : 'mt-6'}`}>
+      {/* Dashboard Container with Apply Booth Section */}
+      {isApplyBoothPage && (
+        <div className="w-full bg-[#001233] text-white px-6 py-8">
+          <div className="max-w-7xl mx-auto text-center">
+            <h1 className="text-4xl font-bold sm:text-5xl mb-4">
+              Request a Platform Booth
+            </h1>
+            <p className="text-lg max-w-2xl mx-auto opacity-90">
+              Apply for a standalone booth in the main student activity area by selecting a location on the map.
+            </p>
+          </div>
+        </div>
+      )}
+      <main className={`w-full px-4 ${(isBazaarOpportunitiesPage || isApplyBoothPage) ? 'mt-8' : 'mt-6'}`}>
         <Routes>
           <Route index element={<UpcomingBazaars />} />
           <Route path="/upcoming-bazaars" element={<UpcomingBazaars />} />
