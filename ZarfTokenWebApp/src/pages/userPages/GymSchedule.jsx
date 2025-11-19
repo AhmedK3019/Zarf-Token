@@ -511,8 +511,7 @@ export default function GymSchedule() {
       <div className="max-w-6xl mx-auto">
         {/* Header */}
         <div className="bg-white rounded-2xl shadow-lg p-6 mb-6">
-          <div className="flex items-center justify-between mb-4">
-            <h1 className="text-3xl font-bold text-[#4C3BCF]">Gym Schedule</h1>
+          <div className="flex items-center justify-end mb-4">
             <div className="flex items-center gap-4">
               <button
                 onClick={() => navigateMonth(-1)}

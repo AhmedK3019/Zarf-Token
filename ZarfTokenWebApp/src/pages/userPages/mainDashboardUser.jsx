@@ -18,6 +18,7 @@ const mainDashboardUser = () => {
   const location = useLocation();
   const isFavouriteEventsPage = location.pathname === "/dashboard/user/favourite-events";
   const isRegisteredEventsPage = location.pathname === "/dashboard/user/registered-events";
+  const isGymSchedulePage = location.pathname === "/dashboard/user/gym-schedule";
 
   return (
     <div>
@@ -45,7 +46,17 @@ const mainDashboardUser = () => {
           </div>
         </div>
       )}
-      <main className={`w-full px-4 ${(isFavouriteEventsPage || isRegisteredEventsPage) ? 'mt-8' : 'mt-6'}`}>
+      {/* Dashboard Container with Gym Schedule Section */}
+      {isGymSchedulePage && (
+        <div className="w-full bg-[#001233] text-white px-6 py-8">
+          <div className="max-w-7xl mx-auto text-center">
+            <h1 className="text-4xl font-bold sm:text-5xl mb-4">
+              Gym Schedule
+            </h1>
+          </div>
+        </div>
+      )}
+      <main className={`w-full px-4 ${(isFavouriteEventsPage || isRegisteredEventsPage || isGymSchedulePage) ? 'mt-8' : 'mt-6'}`}>
         <Routes>
           <Route index element={<AllEvents />} />
           <Route path="/all-events" element={<AllEvents />} />
