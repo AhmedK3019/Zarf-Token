@@ -14,6 +14,7 @@ import GymSchedule from "../userPages/GymSchedule";
 import NotFound from "../NotFoundPage";
 import EditEvent from "./EditEvents";
 import EventsSalesReport from "../adminPages/EventsSalesReport";
+import EventAttendeesReport from "../adminPages/EventAttendeesReport";
 const mainDashboardEventsOffice = () => {
   return (
     <div>
@@ -23,6 +24,7 @@ const mainDashboardEventsOffice = () => {
           <Route index element={<AllEvents />} />
           <Route path="all-events" element={<AllEvents />} />
           <Route path="events-sales-report" element={<EventsSalesReport />} />
+          <Route path="event-attendees-report" element={<EventAttendeesReport />} />
           <Route path="create-event" element={<CreateEvent />} />
           <Route path="workshop-requests" element={<WorkshopRequests />} />
           <Route path="archived-events" element={<ArchivedEvents />} />

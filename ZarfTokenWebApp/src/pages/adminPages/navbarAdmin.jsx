@@ -163,6 +163,26 @@ const NavbarAdmin = () => {
                       />
                       <span className="font-medium">Events Sales Report</span>
                     </NavLink>
+                    <NavLink
+                      to="/dashboard/admin/event-attendees-report"
+                      onClick={() => setEventsDropdownOpen(false)}
+                      className={({ isActive }) =>
+                        `flex items-center gap-3 px-4 py-3 text-gray-800 hover:bg-primary/5 hover:text-primary transition-colors border-t border-gray-200 ${
+                          isActive
+                            ? "bg-primary/10 text-primary font-semibold"
+                            : ""
+                        }`
+                      }
+                    >
+                      <FileText
+                        className={`h-4 w-4 ${
+                          location.pathname.includes("/event-attendees-report")
+                            ? "text-primary"
+                            : "text-gray-600"
+                        }`}
+                      />
+                      <span className="font-medium">Event Attendees Report</span>
+                    </NavLink>
                   </div>
                 )}
               </div>

@@ -9,6 +9,7 @@ import AllUsers from "./AllUsers";
 import AddAdmin from "./AddAdminOrEventsOffice";
 import AllAdmins from "./AllAdminsAndOfficers";
 import EventsSalesReport from "./EventsSalesReport";
+import EventAttendeesReport from "./EventAttendeesReport";
 import NotFound from "../NotFoundPage";
 
 const mainDashboardAdmin = () => {
@@ -20,6 +21,7 @@ const mainDashboardAdmin = () => {
           <Route index element={<AllEvents />} />
           <Route path="/all-events" element={<AllEvents />} />
           <Route path="/events-sales-report" element={<EventsSalesReport />} />
+          <Route path="/event-attendees-report" element={<EventAttendeesReport />} />
           <Route path="/signup-requests" element={<SignUpRequests />} />
           <Route path="/vendor-requests" element={<VendorRequests />} />
           <Route path="/loyalty-vendors" element={<LoyaltyVendors />} />
