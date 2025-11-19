@@ -17,6 +17,7 @@ const mainDashboardUser = () => {
   const { user } = useAuthUser();
   const location = useLocation();
   const isFavouriteEventsPage = location.pathname === "/dashboard/user/favourite-events";
+  const isRegisteredEventsPage = location.pathname === "/dashboard/user/registered-events";
 
   return (
     <div>
@@ -31,7 +32,20 @@ const mainDashboardUser = () => {
           </div>
         </div>
       )}
-      <main className={`w-full px-4 ${isFavouriteEventsPage ? 'mt-8' : 'mt-6'}`}>
+      {/* Dashboard Container with My Registered Events Section */}
+      {isRegisteredEventsPage && (
+        <div className="w-full bg-[#001233] text-white px-6 py-8">
+          <div className="max-w-7xl mx-auto text-center">
+            <h1 className="text-4xl font-bold sm:text-5xl mb-4">
+              My Registered Events
+            </h1>
+            <p className="text-sm max-w-2xl mx-auto opacity-90">
+              Here are the workshops and trips you signed up for.
+            </p>
+          </div>
+        </div>
+      )}
+      <main className={`w-full px-4 ${(isFavouriteEventsPage || isRegisteredEventsPage) ? 'mt-8' : 'mt-6'}`}>
         <Routes>
           <Route index element={<AllEvents />} />
           <Route path="/all-events" element={<AllEvents />} />
