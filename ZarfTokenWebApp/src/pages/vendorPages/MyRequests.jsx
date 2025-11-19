@@ -749,7 +749,7 @@ export default function MyRequests() {
                         <div className="mt-auto pt-4 flex items-center justify-between gap-3">
                           <button
                             onClick={() => setSelectedRequest(request)}
-                            className="text-sm font-semibold text-[#736CED] hover:text-[#4C3BCF]"
+                            className="px-4 py-2 rounded-full text-sm font-semibold bg-[#736CED] text-white hover:bg-[#5A4BBA] transition-all inline-flex items-center gap-2"
                           >
                             View Details
                           </button>
@@ -761,10 +761,10 @@ export default function MyRequests() {
                                 ? "Cancel request"
                                 : cancellationState.reason
                             }
-                            className={`text-sm font-semibold px-4 py-2 rounded-lg border transition inline-flex items-center gap-2 ${
+                            className={`px-4 py-2 rounded-lg text-sm font-semibold transition inline-flex items-center gap-2 ${
                               cancellationState.canCancel
-                                ? "text-rose-600 border-rose-200 hover:bg-rose-50"
-                                : "text-gray-400 border-gray-200 cursor-not-allowed"
+                                ? "bg-red-600 text-white hover:bg-red-700"
+                                : "bg-gray-300 text-gray-500 cursor-not-allowed"
                             }`}
                           >
                             {isCancelling && (

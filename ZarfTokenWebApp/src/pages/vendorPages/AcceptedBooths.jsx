@@ -304,13 +304,6 @@ export default function AcceptedBooths() {
       <div className="min-h-screen w-full bg-muted text-[#1F1B3B] font-sans">
         <main className="flex w-full flex-1 flex-col items-center px-4 sm:px-6 py-8">
           <div className="w-full">
-            <div className="mb-8 text-center">
-              <h1 className="text-4xl font-bold text-[#736CED]">My Booths</h1>
-              <p className="text-md text-[#312A68] mt-2">
-                Manage your accepted booths and platform storefronts.
-              </p>
-            </div>
-
             <div className="mb-6 flex justify-center bg-white/50 p-1 rounded-full w-fit mx-auto shadow-inner">
               <button
                 onClick={() => setView("bazaar")}
