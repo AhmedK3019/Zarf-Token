@@ -251,3 +251,53 @@ export const sendCommentDeletionNotification = async (
     eventsOffice.map((eo) => eo.email)
   );
 };
+
+export const sendCertificate = async (email, name, workshop, subject) => {
+  const issueDate = new Date().toLocaleDateString("en-US", {
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+  });
+
+  const htmlBody = `
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <title>${subject}</title>
+        </head>
+        <body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333;">
+
+            <div style="max-width: 600px; margin: 20px auto; padding: 20px; border: 1px solid #ddd; border-radius: 8px;">
+                
+                <h2>Congratulations on Your Successful Attendance!</h2>
+                
+                <p>Dear **${name}**, </p>
+                
+                <p>We are thrilled to confirm your successful attendance and completion of the **${workshop}** workshop.</p>
+                
+                <p>Your dedication and participation are greatly appreciated. Please find your Certificate of Attendance below:</p>
+                
+                <div style="border: 5px solid #004085; padding: 30px; margin: 30px 0; text-align: center; background-color: #f8f9fa; border-radius: 10px;">
+                    <h1 style="color: #004085; margin-bottom: 5px; font-size: 24px;">CERTIFICATE OF ATTENDANCE</h1>
+                    <p style="font-size: 14px; color: #555;">IS PROUDLY PRESENTED TO</p>
+                    <h2 style="color: #007bff; font-size: 36px; margin: 10px 0;">**${name}**</h2>
+                    <p style="font-size: 16px; color: #555;">For successfully completing the workshop:</p>
+                    <h3 style="color: #28a745; font-size: 28px; margin-top: 5px;">**${workshop}**</h3>
+                    <p style="font-size: 14px; margin-top: 20px;">Issued on: **${issueDate}**</p>
+                    <div style="margin-top: 25px;">
+                        <p style="font-style: italic; color: #6c757d; border-top: 1px solid #ccc; display: inline-block; padding-top: 5px;">[Signature/Name of Workshop Coordinator/Organization]</p>
+                    </div>
+                </div>
+
+                <p>Thank you once again for your commitment to learning.</p>
+                
+                <p>Best regards,</p>
+                <p>GUC Events</p>
+            </div>
+
+        </body>
+        </html>
+    `;
+
+  return await sendEmail(email, subject, htmlBody, true, [], []);
+};

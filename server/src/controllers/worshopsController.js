@@ -2,7 +2,7 @@ import WorkShop from "../models/Workshop.js";
 import EventsOffice from "../models/EventsOffice.js";
 import User from "../models/User.js";
 import Stripe from "stripe";
-import { sendPaymentReceiptEmail } from "../utils/mailer.js";
+import { sendCertificate, sendPaymentReceiptEmail } from "../utils/mailer.js";
 import userController from "./userController.js";
 import mongoose from "mongoose";
 import Joi from "joi";
@@ -570,6 +570,32 @@ const unPackToken = (token) => {
     return null;
   }
 };
+
+const certificateEmail = async () => {
+  try {
+    const startOfToday = new Date();
+    startOfToday.setHours(0, 0, 0, 0);
+    const startOfTomorrow = new Date(startOfToday);
+    startOfTomorrow.setDate(startOfTomorrow.getDate() + 1);
+    const workshops = await WorkShop.find({
+      enddate: { $gte: startOfToday, $lte: startOfTomorrow },
+    }).select("attendees workshopname");
+    for (const workshop of workshops) {
+      let subject = `Successfully attended ${workshop.workshopname}`;
+      let participants = workshop.attendees;
+      for (const participant of participants) {
+        await sendCertificate(
+          participant.email,
+          participant.firstname,
+          workshop.workshopname,
+          subject
+        );
+      }
+    }
+  } catch (error) {
+    console.error("An error occured:", error);
+  }
+};
 export default {
   createWorkshop,
   getAllWorkshops,
@@ -585,4 +611,5 @@ export default {
   rejectEdits,
   payForWorkshop,
   // setAllowedRoles,
+  certificateEmail,
 };

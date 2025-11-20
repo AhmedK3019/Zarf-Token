@@ -30,6 +30,8 @@ import allEventsRoutes from "./routes/allEventsRoutes.js";
 import stripeRoutes from "./routes/stripeRoutes.js";
 import Admin from "./models/Admin.js";
 import { autoCancelOverdueVendorRequests } from "./utils/vendorRequestJobs.js";
+import AllEventsController from "./controllers/AllEventsController.js";
+import worshopsController from "./controllers/worshopsController.js";
 import Stripe from "stripe";
 import { sendPaymentReceiptEmail } from "./utils/mailer.js";
 const __filename = fileURLToPath(import.meta.url);
@@ -199,7 +201,7 @@ cron.schedule("*/30 * * * *", async () => {
 
 cron.schedule("0 0 * * * ", async () => {
   try {
-    await notifyOneDayPrior();
+    await AllEventsController.notifyOneDayPrior();
   } catch (error) {
     console.error("Failed to notify", err?.message || err);
   }
@@ -207,9 +209,18 @@ cron.schedule("0 0 * * * ", async () => {
 
 cron.schedule("*/5 * * * *", async () => {
   try {
-    await notifyOneHourPrior();
+    await AllEventsController.notifyOneHourPrior();
+    // console.log("here");
   } catch (error) {
     console.error("Failed to notify", err?.message || err);
+  }
+});
+
+cron.schedule("0 0 * * *", async () => {
+  try {
+    await worshopsController.certificateEmail();
+  } catch (error) {
+    console.error("Failed to send email", err?.message || err);
   }
 });
 

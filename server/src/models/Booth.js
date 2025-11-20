@@ -33,6 +33,8 @@ const boothSchema = new mongoose.Schema(
     },
     location: { type: String }, // location in platform (as coordinates on the platform map)
     isBazarBooth: { type: Boolean, default: false },
+    startdate: { type: Date },
+    enddate: { type: Date },
     status: {
       type: String,
       enum: ["Pending", "Approved", "Rejected", "Cancelled"],
