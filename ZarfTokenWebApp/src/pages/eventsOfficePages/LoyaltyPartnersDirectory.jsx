@@ -3,11 +3,10 @@ import LoyaltyPartnersShowcase from "../../components/loyalty/LoyaltyPartnersSho
 
 export default function LoyaltyPartnersDirectory() {
   return (
-    <div className="pb-10">
-      <LoyaltyPartnersShowcase
-        eyebrow="Operations view · Loyalty partners"
-        description="Give Students, Staff, TAs, Professors, Admin, and the Events Office a single source of truth for every active loyalty vendor, their promo codes, and redemption terms."
-      />
+    <div className="min-h-screen w-full bg-gradient-to-br from-[#f5f7ff] via-white to-[#eef2ff] px-4 py-6 lg:px-6 lg:py-8">
+      <div className="mx-auto w-full max-w-7xl">
+        <LoyaltyPartnersShowcase />
+      </div>
     </div>
   );
 }

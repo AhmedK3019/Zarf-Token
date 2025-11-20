@@ -1,51 +1,27 @@
 import React, { useEffect, useMemo, useState } from "react";
-import { Filter, RefreshCcw, Search, ShieldCheck } from "lucide-react";
+import { Calendar, Percent, RefreshCcw, Search, ShieldCheck, Tag } from "lucide-react";
 import api from "../../services/api";
 import CopyButton from "../CopyButton.jsx";
 import { useAuthUser } from "../../hooks/auth";
 import NotFound from "../../pages/NotFoundPage.jsx";
 
-const DISCOUNT_FILTERS = [
-  { key: "all", label: "All discounts", hint: "Full partner list" },
-  {
-    key: "starter",
-    label: "Up to 10%",
-    hint: "Quick treats",
-    match: (rate) => rate <= 10,
-  },
-  {
-    key: "core",
-    label: "11% - 20%",
-    hint: "Everyday savings",
-    match: (rate) => rate >= 11 && rate <= 20,
-  },
-  {
-    key: "premium",
-    label: "21% - 35%",
-    hint: "Premium perks",
-    match: (rate) => rate >= 21 && rate <= 35,
-  },
-  {
-    key: "elite",
-    label: "36%+",
-    hint: "Hero boosts",
-    match: (rate) => rate >= 36,
-  },
+const STATUS_FILTERS = [
+  { key: "all", label: "All" },
+  { key: "pending", label: "Pending" },
+  { key: "approved", label: "Approved" },
+  { key: "active", label: "Active" },
+  { key: "rejected", label: "Rejected" },
+  { key: "inactive", label: "Inactive" },
+  { key: "cancelled", label: "Cancelled" },
 ];
 
-const SORTING = {
-  recent: {
-    label: "Most recent",
-    sorter: (a, b) => (b.createdAt || 0) - (a.createdAt || 0),
-  },
-  discount: {
-    label: "Highest discount",
-    sorter: (a, b) => b.discountRate - a.discountRate,
-  },
-  name: {
-    label: "A → Z",
-    sorter: (a, b) => a.vendorLabel.localeCompare(b.vendorLabel),
-  },
+const STATUS_STYLES = {
+  active: { badge: "bg-emerald-50 text-emerald-700 border-emerald-200", dot: "bg-emerald-500" },
+  approved: { badge: "bg-emerald-50 text-emerald-700 border-emerald-200", dot: "bg-emerald-500" },
+  pending: { badge: "bg-amber-50 text-amber-700 border-amber-200", dot: "bg-amber-500" },
+  rejected: { badge: "bg-rose-50 text-rose-700 border-rose-200", dot: "bg-rose-500" },
+  inactive: { badge: "bg-gray-50 text-gray-600 border-gray-200", dot: "bg-gray-400" },
+  cancelled: { badge: "bg-gray-50 text-gray-600 border-gray-200", dot: "bg-gray-400" },
 };
 
 const formatDate = (value) => {
@@ -89,9 +65,21 @@ const ALLOWED_ROLES = new Set([
   "admin",
 ]);
 
+const StatusChip = ({ status }) => {
+  const key = String(status || "active").toLowerCase();
+  const styles = STATUS_STYLES[key] || STATUS_STYLES.active;
+  return (
+    <span
+      className={`inline-flex items-center gap-2 rounded-full border px-3 py-1 text-[11px] font-semibold uppercase tracking-wide shadow-sm ${styles.badge}`}
+    >
+      <span className={`h-2 w-2 rounded-full ${styles.dot}`} />
+      {key.charAt(0).toUpperCase() + key.slice(1)}
+    </span>
+  );
+};
+
 export default function LoyaltyPartnersShowcase({
   title = "GUC Loyalty Program Partners",
-  eyebrow,
   description = "Explore every active vendor in the GUC loyalty program.",
 } = {}) {
   const { user } = useAuthUser();
@@ -99,16 +87,15 @@ export default function LoyaltyPartnersShowcase({
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [search, setSearch] = useState("");
-  const [discountFilter, setDiscountFilter] = useState("all");
-  const [sortKey, setSortKey] = useState("recent");
+  const [statusFilter, setStatusFilter] = useState("all");
   const [expanded, setExpanded] = useState(() => new Set());
-  const [lastLoadedAt, setLastLoadedAt] = useState(null);
   const hasToken =
     typeof window !== "undefined"
       ? Boolean(localStorage.getItem("token"))
       : false;
   const normalizedRole = normalizeRole(user?.role || "");
   const canView = normalizedRole ? ALLOWED_ROLES.has(normalizedRole) : false;
+  const hasActiveFilters = search.trim().length > 0 || statusFilter !== "all";
 
   const fetchPartners = async () => {
     setLoading(true);
@@ -140,22 +127,23 @@ export default function LoyaltyPartnersShowcase({
           const logoUrl = logoFileId
             ? `${apiBase}/uploads/fileId/${logoFileId}`
             : "";
-          console.log(logoUrl);
           return {
             id: row._id,
             vendorLabel,
             vendorEmail: vendor.email || "",
-            vendorStatus: vendor.status || "Active",
+            vendorStatus: vendor.status || row.status || "active",
             logo: logoUrl,
             promoCode: row.promoCode,
             discountRate: Number(row.discountRate) || 0,
             termsAndConditions: row.termsAndConditions || "",
+            reviewedAt: row.reviewedAt || null,
             referenceDate,
+            createdAt: row.createdAt || null,
           };
         })
-        .filter((partner) => partner.vendorStatus !== "Blocked");
+        .filter((partner) => partner.vendorStatus !== "Blocked")
+        .sort((a, b) => (b.referenceDate || 0) - (a.referenceDate || 0));
       setPartners(normalized);
-      setLastLoadedAt(Date.now());
     } catch (err) {
       const message =
         err?.response?.data?.error ||
@@ -172,54 +160,45 @@ export default function LoyaltyPartnersShowcase({
     fetchPartners();
   }, []);
 
+  const resetFilters = () => {
+    setSearch("");
+    setStatusFilter("all");
+  };
+
   const searchTerm = search.trim().toLowerCase();
 
   const filteredPartners = useMemo(() => {
-    const range = DISCOUNT_FILTERS.find(
-      (filter) => filter.key === discountFilter
-    );
-    return partners
-      .filter((partner) => {
-        if (!searchTerm) return true;
-        return (
-          partner.vendorLabel.toLowerCase().includes(searchTerm) ||
-          partner.promoCode?.toLowerCase().includes(searchTerm)
-        );
-      })
-      .filter((partner) => {
-        if (!range || range.key === "all" || !range.match) return true;
-        return range.match(partner.discountRate);
-      })
-      .sort(SORTING[sortKey]?.sorter || SORTING.recent.sorter);
-  }, [partners, searchTerm, discountFilter, sortKey]);
-
-  const stats = useMemo(() => {
-    if (!partners.length) {
-      return {
-        total: 0,
-        average: 0,
-        top: 0,
-        newThisMonth: 0,
-      };
-    }
-    const total = partners.length;
-    const average =
-      partners.reduce((sum, partner) => sum + partner.discountRate, 0) / total;
-    const top = partners.reduce(
-      (max, partner) =>
-        partner.discountRate > max ? partner.discountRate : max,
-      0
-    );
-    const now = new Date();
-    const newThisMonth = partners.filter((partner) => {
-      if (!partner.referenceDate) return false;
-      const date = new Date(partner.referenceDate);
+    return partners.filter((partner) => {
+      const statusKey = String(partner.vendorStatus || "active").toLowerCase();
+      const statusMatch =
+        statusFilter === "all" || statusKey === statusFilter;
+      if (!statusMatch) return false;
+      if (!searchTerm) return true;
       return (
-        date.getFullYear() === now.getFullYear() &&
-        date.getMonth() === now.getMonth()
+        partner.vendorLabel.toLowerCase().includes(searchTerm) ||
+        partner.promoCode?.toLowerCase().includes(searchTerm)
       );
-    }).length;
-    return { total, average, top, newThisMonth };
+    });
+  }, [partners, searchTerm, statusFilter]);
+
+  const statusCounts = useMemo(() => {
+    return partners.reduce(
+      (acc, partner) => {
+        const key = String(partner.vendorStatus || "active").toLowerCase();
+        acc[key] = (acc[key] || 0) + 1;
+        acc.total += 1;
+        return acc;
+      },
+      {
+        total: 0,
+        pending: 0,
+        approved: 0,
+        active: 0,
+        rejected: 0,
+        inactive: 0,
+        cancelled: 0,
+      }
+    );
   }, [partners]);
 
   if (!user && !hasToken) {
@@ -243,125 +222,106 @@ export default function LoyaltyPartnersShowcase({
   };
 
   return (
-    <div className="w-full bg-gradient-to-b from-[#FDFBFF] via-white to-[#F2F0FF] text-[#1F1B3B]">
-      <div className="mx-auto flex w-full max-w-6xl flex-col gap-10 px-4 py-10 sm:px-6 lg:px-8">
-        <section className="rounded-[32px] border border-white/60 bg-gradient-to-br from-white/90 via-white to-[#F4F1FF] p-8 shadow-2xl shadow-[#4C3BCF]/10">
-          {eyebrow && (
-            <p className="text-xs font-semibold uppercase tracking-[0.3em] text-[#978FE0]">
-              {eyebrow}
-            </p>
-          )}
-          {title && (
-            <h1 className="mt-3 text-3xl font-bold text-[#251E53] sm:text-4xl lg:text-5xl">
-              {title}
-            </h1>
-          )}
-          {description && (
-            <p className="mt-4 max-w-3xl text-base text-[#4B4470] sm:text-lg">
-              {description}
-            </p>
-          )}
-          <div
-            className={`flex flex-col gap-3 text-sm font-medium text-[#4B4470] ${
-              title || description ? "mt-6" : ""
-            } sm:flex-row sm:items-center sm:justify-between`}
-          >
-            <div className="flex flex-wrap items-center gap-3">
-              {lastLoadedAt && (
-                <span className="inline-flex rounded-full border border-[#E4E0FF] px-4 py-2 text-[#6B64A8]">
-                  Updated {formatDate(lastLoadedAt)}
-                </span>
-              )}
-            </div>
-            <button
-              onClick={fetchPartners}
-              className="inline-flex items-center gap-2 self-start rounded-full border border-[#D4CEFF] px-4 py-2 text-[#4C3BCF] transition hover:bg-[#4C3BCF] hover:text-white sm:self-auto"
-            >
-              <RefreshCcw className="h-4 w-4" />
-              Refresh
-            </button>
-          </div>
+    <div className="w-full text-[#1F1B3B]">
+      <section className="space-y-6">
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          <StatCard
+            label="Total"
+            value={statusCounts.total}
+            helper="Partners in directory"
+            accent="text-[#001233]"
+          />
+          <StatCard
+            label="Pending"
+            value={statusCounts.pending}
+            helper="Awaiting review"
+            accent="text-amber-700"
+          />
+          <StatCard
+            label="Approved"
+            value={statusCounts.approved || statusCounts.active}
+            helper="Live partner offers"
+            accent="text-emerald-700"
+          />
+          <StatCard
+            label="Rejected"
+            value={statusCounts.rejected}
+            helper="Declined submissions"
+            accent="text-rose-700"
+          />
+        </div>
 
-          <div className="mt-8 grid gap-4 md:grid-cols-4">
-            <StatBadge
-              label="Active partners"
-              value={stats.total}
-              accent="text-[#4C3BCF]"
-            />
-            <StatBadge
-              label="Average discount"
-              value={stats.average ? `${stats.average.toFixed(1)}%` : "—"}
-              accent="text-[#E85CFF]"
-            />
-            <StatBadge
-              label="Top savings"
-              value={stats.top ? `${stats.top}%` : "—"}
-              accent="text-[#1CB5E0]"
-            />
-            <StatBadge
-              label="New this month"
-              value={stats.newThisMonth}
-              accent="text-[#FF8A65]"
-            />
-          </div>
-        </section>
-
-        <section className="space-y-5 rounded-[28px] border border-white/60 bg-white/90 p-6 shadow-xl shadow-[#4C3BCF]/10">
-          <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
-            <div className="flex flex-1 flex-wrap gap-3">
-              <div className="relative flex-1 min-w-[220px]">
-                <Search className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-[#8C84C4]" />
-                <input
-                  type="text"
-                  value={search}
-                  onChange={(e) => setSearch(e.target.value)}
-                  placeholder="Search by vendor or promo code"
-                  className="w-full rounded-2xl border border-[#E4E0FF] bg-white py-3 pl-10 pr-4 text-sm text-[#312A68] placeholder:text-[#B3AEDE] focus:border-[#736CED] focus:outline-none"
-                />
-              </div>
-              <div className="flex items-center gap-2 rounded-2xl border border-dashed border-[#E4E0FF] px-4 py-3 text-sm text-[#4B4470]">
-                <Filter className="h-4 w-4 text-[#736CED]" />
-                {filteredPartners.length} partners visible
-              </div>
+        <div className="rounded-3xl border border-gray-100 bg-white/80 p-5 shadow-sm">
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <div className="space-y-1">
+              <p className="text-xs font-semibold uppercase tracking-wide text-gray-500">
+                Filters
+              </p>
+              <p className="text-sm text-gray-600">
+                Cohesive controls for quick partner reviews.
+              </p>
             </div>
-            <div className="flex items-center gap-2">
-              {Object.entries(SORTING).map(([key, option]) => (
+            <div className="flex flex-wrap items-center gap-2">
+              {hasActiveFilters ? (
                 <button
-                  key={key}
-                  type="button"
-                  onClick={() => setSortKey(key)}
-                  className={`rounded-2xl px-4 py-2 text-sm font-semibold transition ${
-                    sortKey === key
-                      ? "bg-[#4C3BCF] text-white shadow-lg shadow-[#4C3BCF]/30"
-                      : "bg-[#F4F1FF] text-[#4C3BCF] hover:bg-[#E4DEFF]"
-                  }`}
+                  onClick={resetFilters}
+                  className="inline-flex items-center gap-2 rounded-full border border-gray-200 bg-white px-4 py-2.5 text-sm font-semibold text-gray-700 shadow-sm transition hover:bg-gray-50"
                 >
-                  {option.label}
+                  <RefreshCcw className="h-4 w-4 text-gray-500" />
+                  Clear filters
                 </button>
-              ))}
+              ) : null}
+              <button
+                onClick={fetchPartners}
+                className="inline-flex items-center gap-2 rounded-full border border-[#4C3BCF] bg-[#4C3BCF] px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-[#3728a6] hover:border-[#3728a6]"
+              >
+                <RefreshCcw className="h-4 w-4" />
+                Refresh
+              </button>
             </div>
           </div>
 
-          <div className="flex flex-wrap gap-3">
-            {DISCOUNT_FILTERS.map((filter) => (
-              <button
-                key={filter.key}
-                type="button"
-                onClick={() => setDiscountFilter(filter.key)}
-                className={`flex flex-col rounded-2xl border px-4 py-3 text-left text-sm transition ${
-                  discountFilter === filter.key
-                    ? "border-[#4C3BCF] bg-[#F6F4FF] text-[#251E53]"
-                    : "border-[#E4E0FF] bg-white text-[#514A7E] hover:border-[#D4CEFF]"
-                }`}
-              >
-                <span className="font-semibold">{filter.label}</span>
-                <span className="text-xs text-[#867FB8]">{filter.hint}</span>
-              </button>
-            ))}
+          <div className="mt-4 flex flex-col gap-3 rounded-2xl border border-gray-100 bg-white/70 p-4 shadow-inner">
+            <div className="flex flex-col gap-3 lg:flex-row lg:items-end">
+              <label className="relative flex-1 min-w-[220px]">
+                <span className="mb-2 block text-sm font-semibold text-gray-800">
+                  Search
+                </span>
+                <div className="relative">
+                  <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
+                  <input
+                    type="text"
+                    value={search}
+                    onChange={(e) => setSearch(e.target.value)}
+                    placeholder="Search by vendor or promo code"
+                    className="h-12 w-full rounded-2xl border border-gray-200 bg-white pl-10 pr-4 text-sm font-semibold text-gray-900 shadow-sm transition focus:border-[#4C3BCF] focus:outline-none focus:ring-2 focus:ring-[#d7d1ff]"
+                  />
+                </div>
+              </label>
+              <label className="w-full lg:w-64">
+                <span className="mb-2 block text-sm font-semibold text-gray-800">
+                  Status
+                </span>
+                <select
+                  value={statusFilter}
+                  onChange={(e) => setStatusFilter(e.target.value)}
+                  className="h-12 w-full rounded-2xl border border-gray-200 bg-white px-4 text-sm font-semibold text-gray-900 shadow-sm transition focus:border-[#4C3BCF] focus:outline-none focus:ring-2 focus:ring-[#d7d1ff]"
+                >
+                  {STATUS_FILTERS.map((filter) => (
+                    <option key={filter.key} value={filter.key}>
+                      {filter.label}
+                      {filter.key !== "all" && statusCounts[filter.key]
+                        ? ` (${statusCounts[filter.key]})`
+                        : ""}
+                    </option>
+                  ))}
+                </select>
+              </label>
+            </div>
           </div>
-        </section>
+        </div>
 
-        <section className="space-y-6">
+        <div className="space-y-6">
           {loading && (
             <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
               {[...Array(3)].map((_, idx) => (
@@ -390,15 +350,14 @@ export default function LoyaltyPartnersShowcase({
                 No partners match your filters
               </h3>
               <p className="text-sm text-[#4B4470]">
-                Try resetting the discount filter or searching for another
-                partner or promo code.
+                Try resetting the filters or searching for another partner or
+                promo code.
               </p>
               <button
                 type="button"
                 onClick={() => {
                   setSearch("");
-                  setDiscountFilter("all");
-                  setSortKey("recent");
+                  setStatusFilter("all");
                 }}
                 className="inline-flex items-center gap-2 rounded-full border border-[#4C3BCF] px-4 py-2 text-sm font-semibold text-[#4C3BCF] transition hover:bg-[#4C3BCF] hover:text-white"
               >
@@ -417,57 +376,54 @@ export default function LoyaltyPartnersShowcase({
                 const logoSrc = partner.logo
                   ? partner.logo
                   : "/unknownicon.png";
+                const statusKey = partner.vendorStatus || "Active";
                 return (
                   <article
                     key={partner.id}
-                    className="flex h-full flex-col rounded-[30px] border border-white/70 bg-white/95 p-6 shadow-xl shadow-[#4C3BCF]/10"
+                    className="relative flex h-full flex-col overflow-hidden rounded-3xl border border-gray-100 bg-white/95 p-6 shadow-sm ring-1 ring-black/5 transition hover:-translate-y-0.5 hover:shadow-md"
                   >
+                    <div className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-[#4C3BCF] via-[#E11D48] to-[#001233]" />
                     <div className="flex items-start justify-between gap-4">
                       <div className="flex gap-4">
-                        <div className="h-16 w-16 overflow-hidden rounded-2xl border border-[#E4E0FF] bg-white p-1 flex items-center justify-center">
+                        <div className="flex h-16 w-16 items-center justify-center overflow-hidden rounded-2xl border border-[#E4E0FF] bg-white p-1">
                           <img
                             src={logoSrc}
                             alt={`${partner.vendorLabel} logo`}
                             className="max-h-full max-w-full object-contain"
                             loading="lazy"
                             onError={(e) => {
-                              if (
-                                e.currentTarget.src.endsWith("/unknownicon.png")
-                              )
-                                return;
+                              if (e.currentTarget.src.endsWith("/unknownicon.png")) return;
                               e.currentTarget.src = "/unknownicon.png";
                             }}
                           />
                         </div>
-                        <div>
-                          <div className="flex flex-wrap items-center gap-2 text-xs font-semibold uppercase tracking-wide text-[#B0AADF]">
-                            <p>Approved partner</p>
-                            {readableDate && (
-                              <span className="rounded-full bg-[#EDEBFF] px-3 py-1 text-[0.65rem] font-semibold text-[#4C3BCF]">
-                                Updated {readableDate}
-                              </span>
-                            )}
-                          </div>
-                          <h3 className="mt-1 text-2xl font-bold text-[#251E53]">
+                        <div className="space-y-1">
+                          <p className="text-xs font-semibold uppercase tracking-wide text-gray-500">
+                            Loyalty partner
+                          </p>
+                          <h3 className="text-2xl font-bold text-[#001233]">
                             {partner.vendorLabel}
                           </h3>
                           {partner.vendorEmail && (
-                            <p className="text-sm text-[#6B64A8]">
-                              {partner.vendorEmail}
-                            </p>
+                            <p className="text-sm text-gray-500">{partner.vendorEmail}</p>
+                          )}
+                          <div className="flex flex-wrap items-center gap-2 text-xs font-semibold">
+                            <span className="inline-flex items-center gap-2 rounded-full bg-[#4C3BCF]/10 px-3 py-1 text-[#2c1f74]">
+                              <Tag size={14} className="text-[#4C3BCF]" />
+                              Promo {partner.promoCode}
+                            </span>
+                            <span className="inline-flex items-center gap-2 rounded-full bg-emerald-50 px-3 py-1 text-emerald-700">
+                              <Percent size={14} className="text-emerald-600" />
+                              {partner.discountRate}% OFF
+                            </span>
+                          </div>
+                          {readableDate && (
+                            <p className="text-xs text-gray-500">Updated {readableDate}</p>
                           )}
                         </div>
                       </div>
                       <div className="flex flex-col items-end gap-2 text-right">
-                        <span className="inline-flex rounded-full bg-[#F2EDFF] px-3 py-1 text-sm font-semibold text-[#4C3BCF]">
-                          {partner.discountRate}% off
-                        </span>
-                        <p className="mt-5 text-xs font-semibold uppercase tracking-wide text-[#B0AADF]">
-                          Promo code
-                        </p>
-                        <span className="mt+5 text-lg font-semibold text-[#251E53]">
-                          {partner.promoCode}
-                        </span>
+                        <StatusChip status={statusKey} />
                         <CopyButton
                           value={partner.promoCode}
                           className="mt-1"
@@ -476,53 +432,75 @@ export default function LoyaltyPartnersShowcase({
                       </div>
                     </div>
 
-                    <div className="mt-5 rounded-2xl bg-[#F7F5FF] p-4">
-                      <p className="text-xs font-semibold uppercase tracking-wide text-[#8F88BF]">
-                        Terms &amp; conditions
-                      </p>
-                      <p
-                        className={`mt-2 text-sm text-[#312A68] ${
-                          isExpanded ? "" : "line-clamp-3"
-                        }`}
-                      >
-                        {partner.termsAndConditions}
-                      </p>
-                      {partner.termsAndConditions?.length > 180 && (
-                        <button
-                          type="button"
-                          onClick={() => toggleExpanded(partner.id)}
-                          className="mt-3 inline-flex text-sm font-semibold text-[#4C3BCF] transition hover:text-[#2E1CFF]"
-                        >
-                          {isExpanded ? "Show less" : "Expand terms"}
-                        </button>
-                      )}
-                      <div className="mt-4 flex justify-end">
-                        <button
-                          type="button"
-                          className="inline-flex items-center justify-center rounded-2xl border border-[#4C3BCF] px-4 py-2 text-sm font-semibold text-[#4C3BCF] transition hover:bg-[#4C3BCF] hover:text-white"
-                        >
-                          View Details
-                        </button>
+                    <div className="mt-5 grid gap-3 text-sm text-gray-700 sm:grid-cols-3">
+                      <div className="flex items-center gap-2 rounded-2xl bg-gray-50 px-3 py-2 font-semibold text-gray-700">
+                        <Calendar size={16} className="text-[#4C3BCF]" />
+                        {readableDate ? `Reviewed ${readableDate}` : "Awaiting review"}
                       </div>
+                      <div className="flex items-center gap-2 rounded-2xl bg-gray-50 px-3 py-2 font-semibold text-gray-700">
+                        <Percent size={16} className="text-[#4C3BCF]" />
+                        Discount {partner.discountRate}%
+                      </div>
+                      <div className="flex items-center gap-2 rounded-2xl bg-gray-50 px-3 py-2 font-semibold text-gray-700">
+                        <ShieldCheck size={16} className="text-[#4C3BCF]" />
+                        Status {String(statusKey).toUpperCase()}
+                      </div>
+                    </div>
+
+                    {partner.termsAndConditions && (
+                      <div className="mt-4 rounded-2xl border border-gray-100 bg-gray-50/80 p-4">
+                        <div className="flex items-center justify-between gap-2 text-xs font-semibold uppercase tracking-wide text-gray-500">
+                          <span>Terms &amp; conditions</span>
+                          {partner.termsAndConditions?.length > 180 && (
+                            <button
+                              type="button"
+                              onClick={() => toggleExpanded(partner.id)}
+                              className="text-[#4C3BCF] hover:text-[#3728a6]"
+                            >
+                              {isExpanded ? "Show less" : "Read more"}
+                            </button>
+                          )}
+                        </div>
+                        <p
+                          className={`mt-2 text-sm leading-relaxed text-gray-700 ${
+                            isExpanded ? "" : "line-clamp-3"
+                          }`}
+                        >
+                          {partner.termsAndConditions}
+                        </p>
+                      </div>
+                    )}
+
+                    <div className="mt-5 flex flex-wrap items-center gap-3">
+                      <button
+                        type="button"
+                        className="inline-flex items-center justify-center rounded-full border border-[#4C3BCF] bg-[#4C3BCF] px-4 py-2 text-sm font-semibold text-white transition hover:bg-[#3728a6] hover:border-[#3728a6]"
+                      >
+                        View Details
+                      </button>
+                      <span className="text-xs font-semibold uppercase tracking-wide text-gray-500">
+                        Promo: {partner.promoCode}
+                      </span>
                     </div>
                   </article>
                 );
               })}
             </div>
           )}
-        </section>
-      </div>
+        </div>
+      </section>
     </div>
   );
 }
 
-const StatBadge = ({ label, value, accent }) => (
-  <div className="rounded-2xl border border-white/60 bg-white/80 p-4">
-    <p className="text-xs font-semibold uppercase tracking-wide text-[#A199D8]">
+const StatCard = ({ label, value, helper, accent }) => (
+  <div className="rounded-2xl border border-gray-100 bg-white/80 p-4 shadow-sm">
+    <p className="text-xs font-semibold uppercase tracking-wide text-gray-500">
       {label}
     </p>
-    <p className={`text-2xl font-bold ${accent || "text-[#251E53]"}`}>
-      {value}
-    </p>
+    <p className={`text-2xl font-bold ${accent || "text-[#001233]"}`}>{value}</p>
+    {helper ? (
+      <p className="text-xs text-gray-500">{helper}</p>
+    ) : null}
   </div>
 );
