@@ -16,11 +16,18 @@ import NotFound from "../NotFoundPage";
 const mainDashboardUser = () => {
   const { user } = useAuthUser();
   const location = useLocation();
-  const isFavouriteEventsPage = location.pathname === "/dashboard/user/favourite-events";
-  const isRegisteredEventsPage = location.pathname === "/dashboard/user/registered-events";
-  const isGymSchedulePage = location.pathname === "/dashboard/user/gym-schedule";
-  const isLoyaltyProgramPage = location.pathname === "/dashboard/user/loyalty-program";
-  const isVendorsPollPage = location.pathname === "/dashboard/user/vendors-poll";
+  const isFavouriteEventsPage =
+    location.pathname === "/dashboard/user/favourite-events";
+  const isRegisteredEventsPage =
+    location.pathname === "/dashboard/user/registered-events";
+  const isGymSchedulePage =
+    location.pathname === "/dashboard/user/gym-schedule";
+  const isLoyaltyProgramPage =
+    location.pathname === "/dashboard/user/loyalty-program";
+  const isVendorsPollPage =
+    location.pathname === "/dashboard/user/vendors-poll";
+  const isCourtsPage = location.pathname === "/dashboard/user/courts";
+  const isCampusEventsPage = location.pathname === "/dashboard/user/all-events";
 
   return (
     <div>
@@ -30,8 +37,11 @@ const mainDashboardUser = () => {
         <div className="w-full bg-[#001233] text-white px-6 py-8">
           <div className="max-w-7xl mx-auto text-center">
             <h1 className="text-4xl font-bold sm:text-5xl mb-4">
-              My Favorites
+              My Favourites
             </h1>
+            <p className="text-sm max-w-2xl mx-auto opacity-90">
+              Here are your favourite events.
+            </p>
           </div>
         </div>
       )}
@@ -83,7 +93,42 @@ const mainDashboardUser = () => {
           </div>
         </div>
       )}
-      <main className={`w-full px-4 ${(isFavouriteEventsPage || isRegisteredEventsPage || isGymSchedulePage || isLoyaltyProgramPage || isVendorsPollPage) ? 'mt-8' : 'mt-6'}`}>
+      {isCourtsPage && (
+        <div className="w-full bg-[#001233] text-white px-6 py-8">
+          <div className="max-w-7xl mx-auto text-center">
+            <h1 className="text-4xl font-bold sm:text-5xl mb-3">
+              Campus Courts
+            </h1>
+            <p className="text-lg max-w-2xl mx-auto opacity-90">
+              Discover available court times for your sports activities. Filter
+              by court type to find exactly what you're looking for.
+            </p>
+          </div>
+        </div>
+      )}
+      {isCampusEventsPage && (
+        <div className="w-full bg-[#001233] text-white px-6 py-8">
+          <div className="max-w-7xl mx-auto text-center">
+            <h1 className="text-4xl font-bold sm:text-5xl mb-4">
+              Campus Events
+            </h1>
+            <p className="text-sm max-w-2xl mx-auto opacity-90">
+              Explore all upcoming events happening on campus.
+            </p>
+          </div>
+        </div>
+      )}
+      <main
+        className={`w-full px-4 ${
+          isFavouriteEventsPage ||
+          isRegisteredEventsPage ||
+          isGymSchedulePage ||
+          isLoyaltyProgramPage ||
+          isVendorsPollPage
+            ? "mt-8"
+            : "mt-6"
+        }`}
+      >
         <Routes>
           <Route index element={<AllEvents />} />
           <Route path="/all-events" element={<AllEvents />} />

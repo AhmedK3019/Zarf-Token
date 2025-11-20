@@ -1,6 +1,5 @@
-import { useState, useEffect } from 'react';
-import api from '../../services/api';
-
+import { useState, useEffect } from "react";
+import api from "../../services/api";
 
 const Courts = () => {
   const [courts, setCourts] = useState([]);
@@ -13,7 +12,7 @@ const Courts = () => {
   const [showSlotsModal, setShowSlotsModal] = useState(false);
   const [selectedSlot, setSelectedSlot] = useState(null);
   const [bookingLoading, setBookingLoading] = useState(false);
-  const [bookingMessage, setBookingMessage] = useState('');
+  const [bookingMessage, setBookingMessage] = useState("");
 
   const courtCategories = [
     { id: "all", name: "All Courts" },
@@ -27,37 +26,37 @@ const Courts = () => {
   const formatDateTime = (isoString) => {
     const date = new Date(isoString);
     const options = {
-      weekday: 'short',
-      month: 'short',
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit',
+      weekday: "short",
+      month: "short",
+      day: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
     };
-    return date.toLocaleDateString('en-US', options);
+    return date.toLocaleDateString("en-US", options);
   };
 
   const formatFullDateTime = (isoString) => {
     const date = new Date(isoString);
     const options = {
-      weekday: 'long',
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit',
+      weekday: "long",
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
     };
-    return date.toLocaleDateString('en-US', options);
+    return date.toLocaleDateString("en-US", options);
   };
 
   const fetchCourts = async () => {
     setLoading(true);
     setError(null);
     try {
-      const response = await api.get('/courts');
+      const response = await api.get("/courts");
       setCourts(response.data);
       setFilteredCourts(response.data);
     } catch (err) {
-      setError('Failed to fetch courts. Please try again later.');
+      setError("Failed to fetch courts. Please try again later.");
       console.error(err);
     } finally {
       setLoading(false);
@@ -72,15 +71,16 @@ const Courts = () => {
   useEffect(() => {
     let filtered = courts;
     if (selectedCategory !== "all") {
-      filtered = courts.filter(court =>
-        court.type?.toLowerCase() === selectedCategory.toLowerCase()
+      filtered = courts.filter(
+        (court) => court.type?.toLowerCase() === selectedCategory.toLowerCase()
       );
     }
     if (searchTerm.trim()) {
       const searchLower = searchTerm.toLowerCase();
-      filtered = filtered.filter(court =>
-        court.name?.toLowerCase().includes(searchLower) ||
-        court.type?.toLowerCase().includes(searchLower)
+      filtered = filtered.filter(
+        (court) =>
+          court.name?.toLowerCase().includes(searchLower) ||
+          court.type?.toLowerCase().includes(searchLower)
       );
     }
     setFilteredCourts(filtered);
@@ -94,15 +94,17 @@ const Courts = () => {
   const clearSearch = () => setSearchTerm("");
 
   const getAvailableSlots = (court) => {
-    return court.freeSlots?.filter(slot =>
-      !slot.isReserved && new Date(slot.dateTime) > new Date()
-    ) || [];
+    return (
+      court.freeSlots?.filter(
+        (slot) => !slot.isReserved && new Date(slot.dateTime) > new Date()
+      ) || []
+    );
   };
 
   const handleViewAllSlots = (court) => {
     setSelectedCourt(court);
     setSelectedSlot(null);
-    setBookingMessage('');
+    setBookingMessage("");
     setShowSlotsModal(true);
   };
 
@@ -110,20 +112,20 @@ const Courts = () => {
     setShowSlotsModal(false);
     setSelectedCourt(null);
     setSelectedSlot(null);
-    setBookingMessage('');
+    setBookingMessage("");
   };
 
   const handleSlotSelect = (slot) => {
     if (slot.isReserved) return;
     setSelectedSlot(slot);
-    setBookingMessage('');
+    setBookingMessage("");
   };
 
   // ✅ FIXED BOOKING FUNCTION
   const handleBookSlot = async () => {
     if (!selectedSlot || !selectedCourt) return;
     setBookingLoading(true);
-    setBookingMessage('');
+    setBookingMessage("");
 
     try {
       const studentData = {
@@ -144,27 +146,29 @@ const Courts = () => {
       console.log("📤 Sending booking payload:", payload);
 
       // Post to backend route (no need for /:id since controller uses req.body.courtId)
-      const response =await api.post(`/courts/${selectedCourt._id}/reserve`, payload);
-
+      const response = await api.post(
+        `/courts/${selectedCourt._id}/reserve`,
+        payload
+      );
 
       console.log("✅ Booking success:", response.data);
 
       // Update slot locally
-      const updatedSlots = selectedCourt.freeSlots.map(slot =>
+      const updatedSlots = selectedCourt.freeSlots.map((slot) =>
         slot._id === selectedSlot._id ? { ...slot, isReserved: true } : slot
       );
 
       const updatedCourt = { ...selectedCourt, freeSlots: updatedSlots };
 
-      setCourts(prev =>
-        prev.map(court =>
+      setCourts((prev) =>
+        prev.map((court) =>
           court._id === updatedCourt._id ? updatedCourt : court
         )
       );
 
       setSelectedCourt(updatedCourt);
       setSelectedSlot(null);
-      setBookingMessage('✅ Slot successfully booked!');
+      setBookingMessage("✅ Slot successfully booked!");
     } catch (err) {
       console.error("❌ Booking failed:", err.response?.data || err.message);
       setBookingMessage(
@@ -181,17 +185,6 @@ const Courts = () => {
       <div className="relative flex min-h-screen w-full flex-col items-center">
         <main className="relative z-10 flex w-full flex-1 flex-col items-center px-6 py-8">
           <div className="w-full">
-            {/* Header */}
-            <div className="mb-12 text-center">
-              <h1 className="text-4xl font-bold text-[#736CED] sm:text-5xl mb-4">
-                Campus Courts
-              </h1>
-              <p className="text-lg text-[#312A68] max-w-2xl mx-auto">
-                Discover available court times for your sports activities.
-                Filter by court type to find exactly what you're looking for.
-              </p>
-            </div>
-
             {/* Category Filter */}
             <div className="flex flex-wrap justify-center gap-4 mb-8">
               {courtCategories.map((cat) => (
@@ -221,7 +214,8 @@ const Courts = () => {
                 />
                 {searchTerm && (
                   <p className="text-sm text-[#312A68]/70 mt-2 text-center">
-                    Found {filteredCourts.length} result{filteredCourts.length !== 1 ? "s" : ""} for "{searchTerm}"
+                    Found {filteredCourts.length} result
+                    {filteredCourts.length !== 1 ? "s" : ""} for "{searchTerm}"
                   </p>
                 )}
               </div>
@@ -255,7 +249,11 @@ const Courts = () => {
                       <span className="text-[#736CED] text-4xl">🏟️</span>
                     </div>
                     <p className="text-[#312A68] text-lg mb-2">
-                      No {selectedCategory === "all" ? "courts" : selectedCategory + " courts"} found.
+                      No{" "}
+                      {selectedCategory === "all"
+                        ? "courts"
+                        : selectedCategory + " courts"}{" "}
+                      found.
                     </p>
                     <p className="text-[#312A68]/70">
                       Check back later for available court bookings.
@@ -274,27 +272,40 @@ const Courts = () => {
                     >
                       <div className="inline-flex items-center gap-2 rounded-full bg-[#EEE9FF] px-3 py-1 text-xs font-medium text-[#5A4BBA] mb-4">
                         <span className="h-2 w-2 rounded-full bg-[#6DD3CE]" />
-                        <span className="capitalize">{court.type || 'Court'}</span>
+                        <span className="capitalize">
+                          {court.type || "Court"}
+                        </span>
                       </div>
-                      <h3 className="text-xl font-bold text-[#4C3BCF] mb-3">{court.name}</h3>
+                      <h3 className="text-xl font-bold text-[#4C3BCF] mb-3">
+                        {court.name}
+                      </h3>
                       <div className="mb-4">
                         <p className="flex items-center gap-2 text-sm text-[#312A68]">
                           <span>📅</span>
-                          {availableSlots.length} available slot{availableSlots.length !== 1 ? 's' : ''}
+                          {availableSlots.length} available slot
+                          {availableSlots.length !== 1 ? "s" : ""}
                         </p>
                       </div>
                       <div className="space-y-2">
-                        <h4 className="text-sm font-semibold text-[#312A68] mb-3">Upcoming Available Times:</h4>
+                        <h4 className="text-sm font-semibold text-[#312A68] mb-3">
+                          Upcoming Available Times:
+                        </h4>
                         {availableSlots.length > 0 ? (
                           <div className="max-h-48 overflow-y-auto space-y-2">
                             {availableSlots.slice(0, 5).map((slot) => (
-                              <div key={slot._id} className="bg-[#F8F6FF] p-3 rounded-lg text-xs text-[#312A68] border border-[#E7E1FF] hover:bg-[#EEE9FF] transition-colors">
-                                <span className="font-medium">{formatDateTime(slot.dateTime)}</span>
+                              <div
+                                key={slot._id}
+                                className="bg-[#F8F6FF] p-3 rounded-lg text-xs text-[#312A68] border border-[#E7E1FF] hover:bg-[#EEE9FF] transition-colors"
+                              >
+                                <span className="font-medium">
+                                  {formatDateTime(slot.dateTime)}
+                                </span>
                               </div>
                             ))}
                             {availableSlots.length > 5 && (
                               <p className="text-xs text-[#312A68]/70 text-center pt-2">
-                                +{availableSlots.length - 5} more slots available
+                                +{availableSlots.length - 5} more slots
+                                available
                               </p>
                             )}
                           </div>
@@ -303,13 +314,15 @@ const Courts = () => {
                             <div className="w-12 h-12 bg-muted/30 rounded-full flex items-center justify-center mx-auto mb-2">
                               <span className="text-[#736CED] text-lg">📅</span>
                             </div>
-                            <p className="text-[#312A68]/70 text-xs">No available slots at the moment</p>
+                            <p className="text-[#312A68]/70 text-xs">
+                              No available slots at the moment
+                            </p>
                           </div>
                         )}
                       </div>
                       {availableSlots.length > 0 && (
                         <div className="mt-4 pt-4 border-t border-gray-100">
-                          <button 
+                          <button
                             onClick={() => handleViewAllSlots(court)}
                             className="w-full text-xs bg-[#736CED] text-white px-4 py-2 rounded-full hover:bg-[#5A4BBA] transition-colors"
                           >
@@ -339,15 +352,32 @@ const Courts = () => {
             <div className="p-6 border-b border-gray-200 flex-shrink-0">
               <div className="flex items-center justify-between">
                 <div>
-                  <h2 className="text-2xl font-bold text-[#4C3BCF]">{selectedCourt.name}</h2>
+                  <h2 className="text-2xl font-bold text-[#4C3BCF]">
+                    {selectedCourt.name}
+                  </h2>
                   <div className="inline-flex items-center gap-2 mt-2">
                     <span className="h-2 w-2 rounded-full bg-[#6DD3CE]" />
-                    <span className="text-sm text-[#5A4BBA] capitalize font-medium">{selectedCourt.type || 'Court'}</span>
+                    <span className="text-sm text-[#5A4BBA] capitalize font-medium">
+                      {selectedCourt.type || "Court"}
+                    </span>
                   </div>
                 </div>
-                <button onClick={closeSlotsModal} className="text-gray-400 hover:text-gray-600 transition-colors">
-                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                <button
+                  onClick={closeSlotsModal}
+                  className="text-gray-400 hover:text-gray-600 transition-colors"
+                >
+                  <svg
+                    className="w-6 h-6"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M6 18L18 6M6 6l12 12"
+                    />
                   </svg>
                 </button>
               </div>
@@ -355,8 +385,12 @@ const Courts = () => {
 
             <div className="p-6 overflow-y-auto flex-1 min-h-0">
               <div className="mb-4">
-                <h3 className="text-lg font-semibold text-[#312A68] mb-4">All Available Time Slots</h3>
-                <p className="text-sm text-[#312A68]/70 mb-6">{getAvailableSlots(selectedCourt).length} available slots</p>
+                <h3 className="text-lg font-semibold text-[#312A68] mb-4">
+                  All Available Time Slots
+                </h3>
+                <p className="text-sm text-[#312A68]/70 mb-6">
+                  {getAvailableSlots(selectedCourt).length} available slots
+                </p>
               </div>
 
               {getAvailableSlots(selectedCourt).length > 0 ? (
@@ -368,8 +402,12 @@ const Courts = () => {
                         key={slot._id}
                         onClick={() => handleSlotSelect(slot)}
                         className={`bg-[#F8F6FF] p-4 rounded-xl border transition-all cursor-pointer group ${
-                          isSelected ? 'border-[#736CED] bg-[#EEE9FF]' : 'border-[#E7E1FF]'
-                        } ${slot.isReserved ? 'opacity-50 cursor-not-allowed' : ''}`}
+                          isSelected
+                            ? "border-[#736CED] bg-[#EEE9FF]"
+                            : "border-[#E7E1FF]"
+                        } ${
+                          slot.isReserved ? "opacity-50 cursor-not-allowed" : ""
+                        }`}
                       >
                         <div className="flex items-center gap-3">
                           <div className="w-3 h-3 bg-[#6DD3CE] rounded-full flex-shrink-0"></div>
@@ -388,15 +426,21 @@ const Courts = () => {
                   <div className="w-16 h-16 bg-muted/30 rounded-full flex items-center justify-center mx-auto mb-4">
                     <span className="text-[#736CED] text-2xl">📅</span>
                   </div>
-                  <p className="text-[#312A68] text-lg mb-2">No Available Slots</p>
-                  <p className="text-[#312A68]/70 text-sm">All slots are currently reserved or unavailable.</p>
+                  <p className="text-[#312A68] text-lg mb-2">
+                    No Available Slots
+                  </p>
+                  <p className="text-[#312A68]/70 text-sm">
+                    All slots are currently reserved or unavailable.
+                  </p>
                 </div>
               )}
 
               {bookingMessage && (
                 <p
                   className={`mt-4 text-center font-medium ${
-                    bookingMessage.includes('❌') ? 'text-red-500' : 'text-green-600'
+                    bookingMessage.includes("❌")
+                      ? "text-red-500"
+                      : "text-green-600"
                   }`}
                 >
                   {bookingMessage}
@@ -415,10 +459,12 @@ const Courts = () => {
                 onClick={handleBookSlot}
                 disabled={!selectedSlot || bookingLoading}
                 className={`px-6 py-2 bg-[#736CED] text-white rounded-full transition-colors ${
-                  !selectedSlot || bookingLoading ? 'opacity-50 cursor-not-allowed' : 'hover:bg-[#5A4BBA]'
+                  !selectedSlot || bookingLoading
+                    ? "opacity-50 cursor-not-allowed"
+                    : "hover:bg-[#5A4BBA]"
                 }`}
               >
-                {bookingLoading ? 'Booking...' : 'Book Slot'}
+                {bookingLoading ? "Booking..." : "Book Slot"}
               </button>
             </div>
           </div>
