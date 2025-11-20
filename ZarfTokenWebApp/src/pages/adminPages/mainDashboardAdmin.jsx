@@ -6,8 +6,6 @@ import VendorRequests from "./VendorRequests";
 import LoyaltyVendors from "./LoyaltyVendors";
 import LoyaltyPartnersDirectory from "./LoyaltyPartnersDirectory";
 import AllUsers from "./AllUsers";
-import AddAdmin from "./AddAdminOrEventsOffice";
-import AllAdmins from "./AllAdminsAndOfficers";
 import EventsSalesReport from "./EventsSalesReport";
 import EventAttendeesReport from "./EventAttendeesReport";
 import NotFound from "../NotFoundPage";
@@ -26,9 +24,7 @@ const mainDashboardAdmin = () => {
           <Route path="/vendor-requests" element={<VendorRequests />} />
           <Route path="/loyalty-vendors" element={<LoyaltyVendors />} />
           <Route path="/loyalty-program" element={<LoyaltyPartnersDirectory />} />
-          <Route path="/all-users" element={<AllUsers />} />
-          <Route path="/add-admin" element={<AddAdmin />} />
-          <Route path="/all-admins" element={<AllAdmins />} />
+          <Route path="/users" element={<AllUsers />} />
           <Route path="*" element={<NotFound />}></Route>
         </Routes>
       </main>

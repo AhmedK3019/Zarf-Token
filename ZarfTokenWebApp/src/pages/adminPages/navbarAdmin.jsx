@@ -5,8 +5,6 @@ import {
   LogOut,
   Calendar,
   Users,
-  UserPlus,
-  ShieldUser,
   Bell,
   Store,
   Star,
@@ -22,20 +20,12 @@ const NavbarAdmin = () => {
   const { user, logout } = useAuthUser();
   const [eventsDropdownOpen, setEventsDropdownOpen] = useState(false);
   const eventsDropdownRef = useRef(null);
-  const [usersDropdownOpen, setUsersDropdownOpen] = useState(false);
   const [requestsDropdownOpen, setRequestsDropdownOpen] = useState(false);
-  const usersDropdownRef = useRef(null);
   const requestsDropdownRef = useRef(null);
 
   // Close dropdowns when clicking outside
   useEffect(() => {
     const handleClickOutside = (event) => {
-      if (
-        usersDropdownRef.current &&
-        !usersDropdownRef.current.contains(event.target)
-      ) {
-        setUsersDropdownOpen(false);
-      }
       if (
         requestsDropdownRef.current &&
         !requestsDropdownRef.current.contains(event.target)
@@ -58,7 +48,6 @@ const NavbarAdmin = () => {
 
   // Close dropdowns when route changes
   useEffect(() => {
-    setUsersDropdownOpen(false);
     setRequestsDropdownOpen(false);
     setEventsDropdownOpen(false);
   }, [location.pathname]);
@@ -71,10 +60,7 @@ const NavbarAdmin = () => {
   };
 
   // Check if any user-related route is active
-  const isUsersActive =
-    location.pathname.includes("/all-users") ||
-    location.pathname.includes("/all-admins") ||
-    location.pathname.includes("/add-admin");
+  const isUsersActive = location.pathname.includes("/users");
 
   // Check if any request-related route is active
   const isRequestsActive =
@@ -110,7 +96,6 @@ const NavbarAdmin = () => {
                   <button
                     onClick={() => {
                       setEventsDropdownOpen(!eventsDropdownOpen);
-                      setUsersDropdownOpen(false);
                       setRequestsDropdownOpen(false);
                     }}
                     className={`px-4 py-2 rounded-full transition-all flex items-center gap-2 ${
@@ -203,7 +188,6 @@ const NavbarAdmin = () => {
                   <button
                     onClick={() => {
                       setRequestsDropdownOpen(!requestsDropdownOpen);
-                      setUsersDropdownOpen(false);
                     }}
                     className={`px-4 py-2 rounded-full transition-all flex items-center gap-2 ${
                       isRequestsActive
@@ -292,91 +276,17 @@ const NavbarAdmin = () => {
                 </NavLink>
 
                 {/* Users Dropdown */}
-                <div className="relative" ref={usersDropdownRef}>
-                  <button
-                    onClick={() => {
-                    setUsersDropdownOpen(!usersDropdownOpen);
-                    setRequestsDropdownOpen(false);
-                    }}
-                    className={`px-4 py-2 rounded-full transition-all flex items-center gap-2 ${
-                      isUsersActive
-                        ? "bg-white/15 text-white font-semibold shadow-sm"
-                        : "text-white/90 hover:text-white hover:bg-white/10"
-                    }`}
-                  >
-                    <Users className="h-4 w-4" />
-                    Users
-                    <ChevronDown
-                      className={`h-4 w-4 transition-transform ${
-                        usersDropdownOpen ? "rotate-180" : ""
-                      }`}
-                    />
-                  </button>
-                  {usersDropdownOpen && (
-                    <div className="absolute top-full left-0 mt-2 w-64 bg-white rounded-lg shadow-xl border border-gray-200 overflow-hidden z-50">
-                      <NavLink
-                        to="/dashboard/admin/all-users"
-                        onClick={() => setUsersDropdownOpen(false)}
-                        className={({ isActive }) =>
-                          `flex items-center gap-3 px-4 py-3 text-gray-800 hover:bg-primary/5 hover:text-primary transition-colors ${
-                            isActive
-                              ? "bg-primary/10 text-primary font-semibold"
-                              : ""
-                          }`
-                        }
-                      >
-                        <Users
-                          className={`h-4 w-4 ${
-                            location.pathname.includes("/all-users")
-                              ? "text-primary"
-                              : "text-gray-600"
-                          }`}
-                        />
-                        <span className="font-medium">All Users</span>
-                      </NavLink>
-                      <NavLink
-                        to="/dashboard/admin/all-admins"
-                        onClick={() => setUsersDropdownOpen(false)}
-                        className={({ isActive }) =>
-                          `flex items-center gap-3 px-4 py-3 text-gray-800 hover:bg-primary/5 hover:text-primary transition-colors border-t border-gray-200 ${
-                            isActive
-                              ? "bg-primary/10 text-primary font-semibold"
-                              : ""
-                          }`
-                        }
-                      >
-                        <ShieldUser
-                          className={`h-4 w-4 ${
-                            location.pathname.includes("/all-admins")
-                              ? "text-primary"
-                              : "text-gray-600"
-                          }`}
-                        />
-                        <span className="font-medium">Admins & Officers</span>
-                      </NavLink>
-                      <NavLink
-                        to="/dashboard/admin/add-admin"
-                        onClick={() => setUsersDropdownOpen(false)}
-                        className={({ isActive }) =>
-                          `flex items-center gap-3 px-4 py-3 text-gray-800 hover:bg-primary/5 hover:text-primary transition-colors border-t border-gray-200 ${
-                            isActive
-                              ? "bg-primary/10 text-primary font-semibold"
-                              : ""
-                          }`
-                        }
-                      >
-                        <UserPlus
-                          className={`h-4 w-4 ${
-                            location.pathname.includes("/add-admin")
-                              ? "text-primary"
-                              : "text-gray-600"
-                          }`}
-                        />
-                        <span className="font-medium">Add Admin/Officer</span>
-                      </NavLink>
-                    </div>
-                  )}
-                </div>
+                <NavLink
+                  to="/dashboard/admin/users"
+                  className={({ isActive }) =>
+                    isActive || isUsersActive
+                      ? "px-4 py-2 rounded-full bg-white/15 text-white font-semibold transition-all flex items-center gap-2 shadow-sm"
+                      : "px-4 py-2 rounded-full text-white/90 hover:text-white hover:bg-white/10 transition-all flex items-center gap-2"
+                  }
+                >
+                  <Users className="h-4 w-4" />
+                  Users
+                </NavLink>
               </div>
             </div>
 
@@ -408,14 +318,10 @@ const NavbarAdmin = () => {
             headerTitle = "Vendor Participation Requests";
             headerSubtitle =
               "Review all pending vendor participation requests below.";
-          } else if (path.includes("/all-users")) {
-            headerTitle = "All Users";
+          } else if (path.includes("/users")) {
+            headerTitle = "Users & Roles";
             headerSubtitle =
-              "Manage all registered users below. You can search, view, block/unblock, or delete users. Admins cannot be blocked.";
-          } else if (path.includes("/all-admins")) {
-            headerTitle = "Admins & Officers";
-            headerSubtitle =
-              "View and manage admin and events office users. Use the delete action to remove an account.";
+              "Filter by role, status, or search; manage accounts and create new admins or officers without leaving the page.";
           }
 
           return (
