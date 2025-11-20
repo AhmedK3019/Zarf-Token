@@ -96,82 +96,6 @@ const NavbarUser = () => {
 
             {/* Center - Links with dropdowns */}
             <div className="hidden lg:flex items-center gap-4 text-sm font-medium text-white">
-              {/* Events dropdown: All / Favourites / Registered */}
-              <div className="relative" ref={eventsRef}>
-                <button
-                  onClick={() => {
-                    setEventsDropdownOpen(!eventsDropdownOpen);
-                    setGymDropdownOpen(false);
-                    setWorkshopsDropdownOpen(false);
-                  }}
-                  className={`px-4 py-2 rounded-lg transition-all flex items-center gap-2 ${
-                    location.pathname.includes("/dashboard/user/all-events") ||
-                    location.pathname.includes(
-                      "/dashboard/user/favourite-events"
-                    ) ||
-                    location.pathname.includes(
-                      "/dashboard/user/registered-events"
-                    )
-                      ? "bg-white/10 text-white font-semibold"
-                      : "text-white/90 hover:text-white hover:bg-white/5"
-                  }`}
-                >
-                  <Calendar className="h-4 w-4" />
-                  Events
-                  <ChevronDown
-                    className={`h-4 w-4 ${
-                      eventsDropdownOpen ? "rotate-180" : ""
-                    }`}
-                  />
-                </button>
-                {eventsDropdownOpen && (
-                  <div className="absolute top-full left-0 mt-2 w-56 bg-white rounded-lg shadow-xl border border-gray-200 overflow-hidden z-50">
-                    <NavLink
-                      to="/dashboard/user/all-events"
-                      className={({ isActive }) =>
-                        `flex items-center gap-3 px-4 py-3 text-gray-800 hover:bg-primary/5 hover:text-primary transition-colors ${
-                          isActive
-                            ? "bg-primary/10 text-primary font-semibold"
-                            : ""
-                        }`
-                      }
-                      onClick={() => setEventsDropdownOpen(false)}
-                    >
-                      <Calendar className="h-4 w-4" />
-                      <span className="font-medium">All Events</span>
-                    </NavLink>
-                    <NavLink
-                      to="/dashboard/user/favourite-events"
-                      className={({ isActive }) =>
-                        `flex items-center gap-3 px-4 py-3 text-gray-800 hover:bg-primary/5 hover:text-primary transition-colors border-t border-gray-200 ${
-                          isActive
-                            ? "bg-primary/10 text-primary font-semibold"
-                            : ""
-                        }`
-                      }
-                      onClick={() => setEventsDropdownOpen(false)}
-                    >
-                      <Heart className="h-4 w-4" />
-                      <span className="font-medium">Favourites</span>
-                    </NavLink>
-                    <NavLink
-                      to="/dashboard/user/registered-events"
-                      className={({ isActive }) =>
-                        `flex items-center gap-3 px-4 py-3 text-gray-800 hover:bg-primary/5 hover:text-primary transition-colors border-t border-gray-200 ${
-                          isActive
-                            ? "bg-primary/10 text-primary font-semibold"
-                            : ""
-                        }`
-                      }
-                      onClick={() => setEventsDropdownOpen(false)}
-                    >
-                      <CheckSquare className="h-4 w-4" />
-                      <span className="font-medium">Registered</span>
-                    </NavLink>
-                  </div>
-                )}
-              </div>
-
               {/* Workshops dropdown (Professors only): Create / My Workshops */}
               {user.role === "Professor" && (
                 <div className="relative" ref={workshopsRef}>
@@ -231,47 +155,54 @@ const NavbarUser = () => {
                 </div>
               )}
 
-              {/* Gym & Courts dropdown: Gym + Courts (show Courts for Students) */}
-              <div className="relative" ref={gymRef}>
-                <button
-                  onClick={() => {
-                    setGymDropdownOpen(!gymDropdownOpen);
-                    setEventsDropdownOpen(false);
-                    setWorkshopsDropdownOpen(false);
-                  }}
-                  className={`px-4 py-2 rounded-lg transition-all flex items-center gap-2 ${
-                    location.pathname.includes("/gym-schedule") ||
-                    location.pathname.includes("/courts")
-                      ? "bg-white/10 text-white font-semibold"
-                      : "text-white/90 hover:text-white hover:bg-white/5"
-                  }`}
-                >
-                  <Clock className="h-4 w-4" />
-                  Activities
-                  <ChevronDown
-                    className={`h-4 w-4 ${gymDropdownOpen ? "rotate-180" : ""}`}
-                  />
-                </button>
-                {gymDropdownOpen && (
-                  <div className="absolute top-full left-0 mt-2 w-44 bg-white rounded-lg shadow-xl border border-gray-200 overflow-hidden z-50">
-                    <NavLink
-                      to="/dashboard/user/gym-schedule"
-                      onClick={() => setGymDropdownOpen(false)}
-                      className={({ isActive }) =>
-                        `flex items-center gap-3 px-4 py-3 text-gray-800 hover:bg-primary/5 hover:text-primary transition-colors ${
-                          isActive
-                            ? "bg-primary/10 text-primary font-semibold"
-                            : ""
-                        }`
-                      }
-                    >
-                      <Clock className="h-4 w-4" />
-                      <span className="font-medium">Gym Schedule</span>
-                    </NavLink>
-                    {user.role === "Student" && (
+              {/* Pill control for the main navigation items */}
+              <div className="flex items-center gap-1 rounded-full bg-white/5 px-2 py-1 shadow-[0_10px_30px_rgba(0,0,0,0.22)] border border-white/10">
+                {/* Events dropdown: All / Favourites / Registered */}
+                <div className="relative" ref={eventsRef}>
+                  <button
+                    onClick={() => {
+                      setEventsDropdownOpen(!eventsDropdownOpen);
+                      setGymDropdownOpen(false);
+                      setWorkshopsDropdownOpen(false);
+                    }}
+                    className={`px-4 py-2 rounded-full transition-all flex items-center gap-2 ${
+                      location.pathname.includes("/dashboard/user/all-events") ||
+                      location.pathname.includes(
+                        "/dashboard/user/favourite-events"
+                      ) ||
+                      location.pathname.includes(
+                        "/dashboard/user/registered-events"
+                      )
+                        ? "bg-white/15 text-white font-semibold shadow-sm"
+                        : "text-white/90 hover:text-white hover:bg-white/10"
+                    }`}
+                  >
+                    <Calendar className="h-4 w-4" />
+                    Events
+                    <ChevronDown
+                      className={`h-4 w-4 ${
+                        eventsDropdownOpen ? "rotate-180" : ""
+                      }`}
+                    />
+                  </button>
+                  {eventsDropdownOpen && (
+                    <div className="absolute top-full left-0 mt-2 w-56 bg-white rounded-lg shadow-xl border border-gray-200 overflow-hidden z-50">
                       <NavLink
-                        to="/dashboard/user/courts"
-                        onClick={() => setGymDropdownOpen(false)}
+                        to="/dashboard/user/all-events"
+                        className={({ isActive }) =>
+                          `flex items-center gap-3 px-4 py-3 text-gray-800 hover:bg-primary/5 hover:text-primary transition-colors ${
+                            isActive
+                              ? "bg-primary/10 text-primary font-semibold"
+                              : ""
+                          }`
+                        }
+                        onClick={() => setEventsDropdownOpen(false)}
+                      >
+                        <Calendar className="h-4 w-4" />
+                        <span className="font-medium">All Events</span>
+                      </NavLink>
+                      <NavLink
+                        to="/dashboard/user/favourite-events"
                         className={({ isActive }) =>
                           `flex items-center gap-3 px-4 py-3 text-gray-800 hover:bg-primary/5 hover:text-primary transition-colors border-t border-gray-200 ${
                             isActive
@@ -279,38 +210,112 @@ const NavbarUser = () => {
                               : ""
                           }`
                         }
+                        onClick={() => setEventsDropdownOpen(false)}
                       >
-                        <Volleyball className="h-4 w-4" />
-                        <span className="font-medium">Courts</span>
+                        <Heart className="h-4 w-4" />
+                        <span className="font-medium">Favourites</span>
                       </NavLink>
-                    )}
-                  </div>
-                )}
-              </div>
+                      <NavLink
+                        to="/dashboard/user/registered-events"
+                        className={({ isActive }) =>
+                          `flex items-center gap-3 px-4 py-3 text-gray-800 hover:bg-primary/5 hover:text-primary transition-colors border-t border-gray-200 ${
+                            isActive
+                              ? "bg-primary/10 text-primary font-semibold"
+                              : ""
+                          }`
+                        }
+                        onClick={() => setEventsDropdownOpen(false)}
+                      >
+                        <CheckSquare className="h-4 w-4" />
+                        <span className="font-medium">Registered</span>
+                      </NavLink>
+                    </div>
+                  )}
+                </div>
 
-              {/* Loyalty Program and Polls remain as standalone links */}
-              <NavLink
-                to="/dashboard/user/loyalty-program"
-                className={({ isActive }) =>
-                  isActive
-                    ? "px-4 py-2 rounded-lg bg-white/15 text-white font-semibold transition-all flex items-center gap-2"
-                    : "px-4 py-2 rounded-lg text-white/90 hover:text-white hover:bg-white/8 transition-all flex items-center gap-2"
-                }
-              >
-                <Star className="h-4 w-4" />
-                Loyalty Partners
-              </NavLink>
-              <NavLink
-                to="/dashboard/user/vendors-poll"
-                className={({ isActive }) =>
-                  isActive
-                    ? "px-4 py-2 rounded-lg bg-white/15 text-white font-semibold transition-all flex items-center gap-2"
-                    : "px-4 py-2 rounded-lg text-white/90 hover:text-white hover:bg-white/8 transition-all flex items-center gap-2"
-                }
-              >
-                <Vote className="h-4 w-4" />
-                Polls
-              </NavLink>
+                {/* Gym & Courts dropdown: Gym + Courts (show Courts for Students) */}
+                <div className="relative" ref={gymRef}>
+                  <button
+                    onClick={() => {
+                      setGymDropdownOpen(!gymDropdownOpen);
+                      setEventsDropdownOpen(false);
+                      setWorkshopsDropdownOpen(false);
+                    }}
+                    className={`px-4 py-2 rounded-full transition-all flex items-center gap-2 ${
+                      location.pathname.includes("/gym-schedule") ||
+                      location.pathname.includes("/courts")
+                        ? "bg-white/15 text-white font-semibold shadow-sm"
+                        : "text-white/90 hover:text-white hover:bg-white/10"
+                    }`}
+                  >
+                    <Clock className="h-4 w-4" />
+                    Activities
+                    <ChevronDown
+                      className={`h-4 w-4 ${
+                        gymDropdownOpen ? "rotate-180" : ""
+                      }`}
+                    />
+                  </button>
+                  {gymDropdownOpen && (
+                    <div className="absolute top-full left-0 mt-2 w-44 bg-white rounded-lg shadow-xl border border-gray-200 overflow-hidden z-50">
+                      <NavLink
+                        to="/dashboard/user/gym-schedule"
+                        onClick={() => setGymDropdownOpen(false)}
+                        className={({ isActive }) =>
+                          `flex items-center gap-3 px-4 py-3 text-gray-800 hover:bg-primary/5 hover:text-primary transition-colors ${
+                            isActive
+                              ? "bg-primary/10 text-primary font-semibold"
+                              : ""
+                          }`
+                        }
+                      >
+                        <Clock className="h-4 w-4" />
+                        <span className="font-medium">Gym Schedule</span>
+                      </NavLink>
+                      {user.role === "Student" && (
+                        <NavLink
+                          to="/dashboard/user/courts"
+                          onClick={() => setGymDropdownOpen(false)}
+                          className={({ isActive }) =>
+                            `flex items-center gap-3 px-4 py-3 text-gray-800 hover:bg-primary/5 hover:text-primary transition-colors border-t border-gray-200 ${
+                              isActive
+                                ? "bg-primary/10 text-primary font-semibold"
+                                : ""
+                            }`
+                          }
+                        >
+                          <Volleyball className="h-4 w-4" />
+                          <span className="font-medium">Courts</span>
+                        </NavLink>
+                      )}
+                    </div>
+                  )}
+                </div>
+
+                {/* Loyalty Program and Polls inside the pill */}
+                <NavLink
+                  to="/dashboard/user/loyalty-program"
+                  className={({ isActive }) =>
+                    isActive
+                      ? "px-4 py-2 rounded-full bg-white/15 text-white font-semibold transition-all flex items-center gap-2 shadow-sm"
+                      : "px-4 py-2 rounded-full text-white/90 hover:text-white hover:bg-white/10 transition-all flex items-center gap-2"
+                  }
+                >
+                  <Star className="h-4 w-4" />
+                  Partners
+                </NavLink>
+                <NavLink
+                  to="/dashboard/user/vendors-poll"
+                  className={({ isActive }) =>
+                    isActive
+                      ? "px-4 py-2 rounded-full bg-white/15 text-white font-semibold transition-all flex items-center gap-2 shadow-sm"
+                      : "px-4 py-2 rounded-full text-white/90 hover:text-white hover:bg-white/10 transition-all flex items-center gap-2"
+                  }
+                >
+                  <Vote className="h-4 w-4" />
+                  Polls
+                </NavLink>
+              </div>
             </div>
 
             {/* Right - Wallet + Logout */}

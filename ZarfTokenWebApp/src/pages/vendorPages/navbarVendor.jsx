@@ -43,61 +43,63 @@ const NavbarVendor = ({ vendor }) => {
 
             {/* Center - Links */}
             <div className="hidden lg:flex items-center gap-4 text-sm font-medium text-white">
-              <NavLink
-                to="/dashboard/vendor/upcoming-bazaars"
-                className={({ isActive }) =>
-                  isActive
-                    ? "px-4 py-2 rounded-lg bg-white/15 text-white font-semibold transition-all flex items-center gap-2"
-                    : "px-4 py-2 rounded-lg text-white/90 hover:text-white hover:bg-white/8 transition-all flex items-center gap-2"
-                }
-              >
-                <Calendar className="h-4 w-4" />
-                Bazaars
-              </NavLink>
-              <NavLink
-                to="/dashboard/vendor/apply-booth"
-                className={({ isActive }) =>
-                  isActive
-                    ? "px-4 py-2 rounded-lg bg-white/15 text-white font-semibold transition-all flex items-center gap-2"
-                    : "px-4 py-2 rounded-lg text-white/90 hover:text-white hover:bg-white/8 transition-all flex items-center gap-2"
-                }
-              >
-                <SquarePlus className="h-4 w-4" />
-                Apply Booth
-              </NavLink>
-              <NavLink
-                to="/dashboard/vendor/my-requests"
-                className={({ isActive }) =>
-                  isActive
-                    ? "px-4 py-2 rounded-lg bg-white/15 text-white font-semibold transition-all flex items-center gap-2"
-                    : "px-4 py-2 rounded-lg text-white/90 hover:text-white hover:bg-white/8 transition-all flex items-center gap-2"
-                }
-              >
-                <List className="h-4 w-4" />
-                Requests
-              </NavLink>
-              <NavLink
-                to="/dashboard/vendor/accepted-booths"
-                className={({ isActive }) =>
-                  isActive
-                    ? "px-4 py-2 rounded-lg bg-white/15 text-white font-semibold transition-all flex items-center gap-2"
-                    : "px-4 py-2 rounded-lg text-white/90 hover:text-white hover:bg-white/8 transition-all flex items-center gap-2"
-                }
-              >
-                <CheckSquare className="h-4 w-4" />
-                Accepted
-              </NavLink>
-              <NavLink
-                to="/dashboard/vendor/loyalty-program"
-                className={({ isActive }) =>
-                  isActive
-                    ? "px-4 py-2 rounded-lg bg-white/15 text-white font-semibold transition-all flex items-center gap-2"
-                    : "px-4 py-2 rounded-lg text-white/90 hover:text-white hover:bg-white/8 transition-all flex items-center gap-2"
-                }
-              >
-                <Star className="h-4 w-4" />
-                Loyalty
-              </NavLink>
+              <div className="flex items-center gap-1 rounded-full bg-white/5 px-2 py-1 shadow-[0_10px_30px_rgba(0,0,0,0.22)] border border-white/10">
+                <NavLink
+                  to="/dashboard/vendor/upcoming-bazaars"
+                  className={({ isActive }) =>
+                    isActive
+                      ? "px-4 py-2 rounded-full bg-white/15 text-white font-semibold transition-all flex items-center gap-2 shadow-sm"
+                      : "px-4 py-2 rounded-full text-white/90 hover:text-white hover:bg-white/10 transition-all flex items-center gap-2"
+                  }
+                >
+                  <Calendar className="h-4 w-4" />
+                  Bazaars
+                </NavLink>
+                <NavLink
+                  to="/dashboard/vendor/apply-booth"
+                  className={({ isActive }) =>
+                    isActive
+                      ? "px-4 py-2 rounded-full bg-white/15 text-white font-semibold transition-all flex items-center gap-2 shadow-sm"
+                      : "px-4 py-2 rounded-full text-white/90 hover:text-white hover:bg-white/10 transition-all flex items-center gap-2"
+                  }
+                >
+                  <SquarePlus className="h-4 w-4" />
+                  Apply Booth
+                </NavLink>
+                <NavLink
+                  to="/dashboard/vendor/my-requests"
+                  className={({ isActive }) =>
+                    isActive
+                      ? "px-4 py-2 rounded-full bg-white/15 text-white font-semibold transition-all flex items-center gap-2 shadow-sm"
+                      : "px-4 py-2 rounded-full text-white/90 hover:text-white hover:bg-white/10 transition-all flex items-center gap-2"
+                  }
+                >
+                  <List className="h-4 w-4" />
+                  Requests
+                </NavLink>
+                <NavLink
+                  to="/dashboard/vendor/accepted-booths"
+                  className={({ isActive }) =>
+                    isActive
+                      ? "px-4 py-2 rounded-full bg-white/15 text-white font-semibold transition-all flex items-center gap-2 shadow-sm"
+                      : "px-4 py-2 rounded-full text-white/90 hover:text-white hover:bg-white/10 transition-all flex items-center gap-2"
+                  }
+                >
+                  <CheckSquare className="h-4 w-4" />
+                  Accepted
+                </NavLink>
+                <NavLink
+                  to="/dashboard/vendor/loyalty-program"
+                  className={({ isActive }) =>
+                    isActive
+                      ? "px-4 py-2 rounded-full bg-white/15 text-white font-semibold transition-all flex items-center gap-2 shadow-sm"
+                      : "px-4 py-2 rounded-full text-white/90 hover:text-white hover:bg-white/10 transition-all flex items-center gap-2"
+                  }
+                >
+                  <Star className="h-4 w-4" />
+                  Loyalty
+                </NavLink>
+              </div>
             </div>
 
             {/* Right - Logout */}
