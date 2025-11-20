@@ -53,19 +53,19 @@ const Hero = () => {
     if (user && user.role) {
       switch (String(user.role)) {
         case "Admin":
-          navigate("/dashboard/admin");
+          navigate("/dashboard/admin/all-events");
           break;
         case "Vendor":
-          navigate("/dashboard/vendor");
+          navigate("/dashboard/vendor/upcoming-bazaars");
           break;
         case "Event office":
-          navigate("/dashboard/eventsOffice");
+          navigate("/dashboard/eventsOffice/all-events");
           break;
         case "Student":
         case "Professor":
         case "TA":
         case "staff":
-          navigate("/dashboard/user");
+          navigate("/dashboard/user/all-events");
           break;
         default:
           break;
