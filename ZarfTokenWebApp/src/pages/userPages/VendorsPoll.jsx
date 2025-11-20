@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState } from "react";
-import { CheckCircle2, MapPin, Send, TrendingUp, X } from "lucide-react";
+import { CheckCircle2, MapPin, Send, X } from "lucide-react";
 
 const STORAGE_KEY = "vendors-poll-selection";
 
@@ -114,11 +114,6 @@ export default function VendorsPoll() {
     }
   };
 
-  const topOption = useMemo(() => {
-    if (!options.length) return null;
-    return [...options].sort((a, b) => b.votes - a.votes)[0];
-  }, [options]);
-
   const handleSubmitSuggestion = (e) => {
     e.preventDefault();
     if (!suggestion.trim()) {
@@ -132,34 +127,6 @@ export default function VendorsPoll() {
   return (
     <div className="w-full bg-[#F8FAFC] text-[#0F172A]">
       <div className="mx-auto flex w-full max-w-6xl flex-col gap-8 px-4 py-10 sm:px-6 lg:px-8">
-        <header className="rounded-3xl border border-gray-100 bg-white p-6 shadow-sm">
-          <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-            <div className="space-y-2">
-              <h1 className="text-3xl font-bold leading-tight text-[#1F2937] sm:text-4xl">
-                Vote for the next on-campus vendor
-              </h1>
-              <p className="max-w-2xl text-sm text-gray-600">
-                Tell us which vendor you want to see at the next bazaar. We will prioritize the top picks and share the winning choice with the Events Office.
-              </p>
-            </div>
-            {topOption && (
-              <div className="inline-flex items-center gap-3 rounded-2xl border border-indigo-100 bg-indigo-50 px-4 py-3 text-sm font-semibold text-[#4338CA]">
-                Leading pick: {topOption.name}
-              </div>
-            )}
-          </div>
-          <div className="mt-4 flex flex-wrap items-center gap-3 text-xs text-gray-600">
-            <span className="inline-flex items-center gap-2 rounded-full bg-gray-100 px-3 py-1">
-              <TrendingUp className="h-4 w-4 text-emerald-500" />
-              Live count: {totalVotes} votes
-            </span>
-            <span className="inline-flex items-center gap-2 rounded-full bg-gray-100 px-3 py-1">
-              <CheckCircle2 className="h-4 w-4 text-emerald-500" />
-              One vote per user (per device)
-            </span>
-          </div>
-        </header>
-
         <section className="grid gap-6 lg:grid-cols-[2fr,1.05fr]">
           <div className="space-y-4">
             {options.map((option) => {
@@ -236,9 +203,6 @@ export default function VendorsPoll() {
 
           <aside className="space-y-4 rounded-3xl border border-gray-100 bg-white p-5 shadow-sm">
             <div className="space-y-2">
-              <p className="rounded-full bg-indigo-50 px-3 py-1 text-xs font-semibold uppercase tracking-[0.25em] text-[#4C3BCF]">
-                Suggest a vendor
-              </p>
               <h2 className="text-xl font-bold text-[#1F2937]">Have a vendor in mind?</h2>
               <p className="text-sm text-gray-600">
                 Drop a name or link. We will shortlist suggestions that get repeated and invite them to the next bazaar round.
