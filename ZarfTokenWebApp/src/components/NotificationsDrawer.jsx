@@ -85,7 +85,6 @@ export default function NotificationsDrawer() {
         title="Notifications"
       >
         <Bell className="h-5 w-5" />
-        <span className="hidden sm:inline">Notifications</span>
         {unreadCount > 0 && (
           <span className="absolute -top-1 -right-1 inline-flex items-center justify-center px-2 py-0.5 text-xs font-bold leading-none text-white bg-red-600 rounded-full">
             {unreadCount}

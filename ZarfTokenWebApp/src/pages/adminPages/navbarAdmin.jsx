@@ -93,7 +93,12 @@ const NavbarAdmin = () => {
         <nav className="max-w-7xl mx-auto px-6 py-4">
           <div className="grid grid-cols-3 items-center">
             {/* Left side - Notifications */}
-            <div className="flex items-center gap-4 justify-self-start">
+            <div className="flex items-center gap-3 justify-self-start">
+              <img
+                src="/ztcirc1.png"
+                alt="ZarfToken logo"
+                className="h-9 w-9 rounded-full object-cover"
+              />
               <NotificationsDrawer />
             </div>
 

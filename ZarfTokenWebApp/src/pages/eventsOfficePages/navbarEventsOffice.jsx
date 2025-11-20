@@ -77,7 +77,12 @@ const NavbarEventsOffice = () => {
         <nav className="max-w-7xl mx-auto px-6 py-4">
           <div className="flex items-center justify-between">
             {/* Left - Notifications */}
-            <div className="flex items-center gap-4">
+            <div className="flex items-center gap-3">
+              <img
+                src="/ztcirc1.png"
+                alt="ZarfToken logo"
+                className="h-9 w-9 rounded-full object-cover"
+              />
               <NotificationsDrawer />
             </div>
 
