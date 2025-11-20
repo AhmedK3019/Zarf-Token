@@ -157,7 +157,7 @@ const LoyaltyProgram = ({ vendor }) => {
 
   const heroApplication = pendingApplication || latestApplication;
   const heroStatus = heroApplication?.status?.toLowerCase() || "not_applied";
-  const statusCopy = STATUS_INFO[heroStatus] || STATUS_INFO.not_applied;
+  const statusCopy = STATUS_INFO[heroStatus] || STATUS_INFO.not_applied; // eslint-disable-line no-unused-vars
   const hasHistory = applications.length > 0;
   const canApply = !pendingApplication;
 

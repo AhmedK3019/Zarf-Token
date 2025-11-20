@@ -13,34 +13,30 @@ import {
   MapPin,
   HandCoins,
 } from "lucide-react";
-import App from "../../App";
 
 const COLORS = {
-  primary: "#736CED",
-  secondary: "#6DD3CE",
+  primary: "#3B82F6",
+  secondary: "#0EA5E9",
   accent: "#C14953",
   muted: "#f5f5f7",
-  info: "#54C6EB",
+  info: "#64748B",
 };
 
 const statusConfig = {
   Pending: {
     color: COLORS.info,
     icon: Clock,
-    badge:
-      "bg-[#54C6EB] text-white border border-[#2f9ec8]/60 shadow-[0_2px_6px_rgba(84,198,235,0.35)]",
+    badge: "bg-gray-100 text-gray-700 border border-gray-200",
   },
   Approved: {
     color: COLORS.secondary,
     icon: CheckCircle,
-    badge:
-      "bg-[#6DD3CE] text-slate-900 border border-[#36a69f]/50 shadow-[0_2px_6px_rgba(109,211,206,0.35)]",
+    badge: "bg-emerald-50 text-emerald-700 border border-emerald-200",
   },
   Rejected: {
     color: COLORS.accent,
     icon: XCircle,
-    badge:
-      "bg-[#C14953] text-white border border-[#a63e47]/60 shadow-[0_2px_6px_rgba(193,73,83,0.35)]",
+    badge: "bg-rose-50 text-rose-700 border border-rose-200",
   },
   // Added this for the toast message on request edits
   Flagged: {
@@ -64,19 +60,17 @@ const statusButtonConfig = [
   },
 ];
 
-const requiresComment = new Set(["Rejected"]);
-
 const BUTTON_BASE =
   "inline-flex items-center justify-center gap-2 rounded-full px-6 py-3.5 text-base font-semibold transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2";
 
 const BUTTON_VARIANTS = {
   primary:
-    "bg-gradient-to-r from-[#736CED] to-[#6DD3CE] text-white shadow-[0_6px_15px_rgba(115,108,237,0.35)] hover:-translate-y-0.5 hover:shadow-[0_10px_24px_rgba(115,108,237,0.4)] hover:brightness-110 focus-visible:ring-[#736CED]/40",
+    "border border-sky-200 bg-sky-50 text-sky-700 hover:bg-sky-100 focus-visible:ring-sky-200",
   secondary:
-    "bg-white text-[#736CED] border-2 border-[#736CED]/40 shadow-sm hover:-translate-y-0.5 hover:bg-[#736CED]/10 hover:text-[#4f4ac1] focus-visible:ring-[#736CED]/30",
-  info: "bg-white text-[#54C6EB] border-2 border-[#54C6EB]/40 shadow-sm hover:-translate-y-0.5 hover:bg-[#54C6EB]/10 hover:text-[#2a8db0] focus-visible:ring-[#54C6EB]/30",
+    "border border-gray-200 bg-white text-gray-700 hover:bg-gray-50 focus-visible:ring-gray-200",
+  info: "border border-sky-200 bg-sky-50 text-sky-700 hover:bg-sky-100 focus-visible:ring-sky-200",
   danger:
-    "bg-[#C14953] text-white shadow-[0_6px_15px_rgba(193,73,83,0.35)] hover:-translate-y-0.5 hover:bg-[#a63e47] focus-visible:ring-[#C14953]/40",
+    "border border-rose-200 bg-rose-50 text-rose-700 hover:bg-rose-100 focus-visible:ring-rose-200",
 };
 
 function formatDateRange(dateISO, durationDays) {
@@ -197,46 +191,25 @@ function SkeletonCard() {
 
 // Workshop Card Component
 function WorkshopCard({ workshop, onView }) {
-  const [isHovered, setIsHovered] = useState(false);
-  const accentColor = COLORS.primary;
-
   return (
     <article
-      className="relative overflow-hidden rounded-2xl bg-[#FDFBFF] backdrop-blur-sm border border-white/40 shadow-lg transition-all duration-300 hover:scale-[1.02] hover:shadow-2xl animate-fade-in"
-      style={{
-        animationDelay: `${Math.random() * 200}ms`,
-        borderLeftWidth: "4px",
-        borderLeftColor: accentColor,
-      }}
-      onMouseEnter={() => setIsHovered(true)}
-      onMouseLeave={() => setIsHovered(false)}
+      className="relative overflow-hidden rounded-2xl bg-white border border-gray-100 shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md animate-fade-in"
+      style={{ animationDelay: `${Math.random() * 200}ms` }}
     >
-      <div className="relative bg-gradient-to-r from-[#736CED] via-[#736CED]/90 to-[#6DD3CE] px-6 py-5 text-white overflow-hidden">
-        <div
-          className="absolute inset-0 bg-gradient-to-br from-white/10 to-transparent opacity-0 transition-opacity duration-300"
-          style={{ opacity: isHovered ? 1 : 0 }}
-        ></div>
-        <div className="relative flex items-start justify-between gap-4">
-          <div className="flex-1">
-            <p className="text-xs uppercase tracking-wider text-white/70 font-semibold">
-              {new Date(workshop.raw.startdate).toLocaleDateString()} -{" "}
-              {new Date(workshop.raw.enddate).toLocaleDateString()}
-            </p>
-            <h3 className="text-lg font-bold mt-1">{workshop.professorName}</h3>
-            <p className="text-sm text-white/80 mt-0.5">
-              {workshop.department}
-            </p>
+      <div className="px-6 py-6 space-y-4">
+        <div className="flex items-start justify-between gap-3">
+          <div className="inline-flex items-center gap-2 rounded-full bg-sky-50 px-3 py-1 text-xs font-semibold text-sky-700">
+            <span className="h-2 w-2 rounded-full bg-sky-500" />
+            Workshop
           </div>
           <StatusBadge status={workshop.status} />
         </div>
-      </div>
 
-      <div className="px-6 py-6 space-y-4">
         <div className="flex items-start justify-between gap-3">
-          <h4 className="text-xl font-bold text-[#736CED] flex-1 leading-tight">
+          <h4 className="text-xl font-bold text-gray-900 flex-1 leading-tight">
             {workshop.title}
           </h4>
-          <span className="px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wide shadow-[0_2px_6px_rgba(0,0,0,0.15)] whitespace-nowrap bg-[#736CED] text-white">
+          <span className="px-3 py-1 rounded-full text-xs font-semibold uppercase tracking-wide bg-sky-50 text-sky-700 border border-sky-100">
             {workshop.location}
           </span>
         </div>
@@ -260,7 +233,7 @@ function WorkshopCard({ workshop, onView }) {
 
         <div className="flex items-center justify-between gap-4 pt-2">
           <div className="flex items-center gap-2 text-sm font-medium text-gray-600">
-            <Calendar className="w-4 h-4 text-[#736CED]" />
+            <Calendar className="w-4 h-4 text-sky-600" />
             <span>
               {formatDateRange(workshop.dateISO, workshop.durationDays)}
             </span>
@@ -290,9 +263,6 @@ function WorkshopModal({
   // MODIFIED: Split props for clarity
   onApprove,
   onReject,
-  comment,
-  setComment,
-  commentError,
   onRequestEditsSuccess,
 }) {
   const [animateIn, setAnimateIn] = useState(false);
@@ -330,14 +300,13 @@ function WorkshopModal({
     if (e.target === e.currentTarget) onClose();
   };
 
-  const handleKeyDown = (e) => {
-    if (e.key === "Escape") onClose();
-  };
-
   useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (e.key === "Escape") onClose();
+    };
     document.addEventListener("keydown", handleKeyDown);
     return () => document.removeEventListener("keydown", handleKeyDown);
-  }, []);
+  }, [onClose]);
 
   // --- NEW HANDLER for user group checkboxes ---
   const handleAllowedUsersChange = (e) => {
@@ -440,7 +409,7 @@ function WorkshopModal({
           </div>
 
           {/* Header */}
-          <div className="relative bg-gradient-to-r from-[#736CED] via-[#736CED]/90 to-[#6DD3CE] px-8 py-6 text-white">
+          <div className="relative bg-[#001233] px-8 py-6 text-white">
             <button
               onClick={onClose}
               className="absolute top-6 right-6 p-2 rounded-full bg-white/20 hover:bg-white/30 transition-colors"
@@ -468,8 +437,8 @@ function WorkshopModal({
               style={{ animationDelay: "100ms" }}
             >
               <div className="flex items-center gap-2">
-                <FileText className="w-5 h-5 text-[#736CED]" />
-                <h3 className="text-lg font-bold text-[#736CED]">
+                <FileText className="w-5 h-5 text-sky-600" />
+                <h3 className="text-lg font-bold text-gray-900">
                   Workshop Overview
                 </h3>
               </div>
@@ -484,8 +453,8 @@ function WorkshopModal({
               style={{ animationDelay: "200ms" }}
             >
               <div className="flex items-center gap-2">
-                <CheckCircle className="w-5 h-5 text-[#736CED]" />
-                <h3 className="text-lg font-bold text-[#736CED]">
+                <CheckCircle className="w-5 h-5 text-sky-600" />
+                <h3 className="text-lg font-bold text-gray-900">
                   Full Agenda
                 </h3>
               </div>
@@ -501,8 +470,8 @@ function WorkshopModal({
               style={{ animationDelay: "250ms" }}
             >
               <div className="flex items-center gap-2">
-                <MapPin className="w-5 h-5 text-[#736CED]" />
-                <h3 className="text-lg font-bold text-[#736CED]">Location</h3>
+                <MapPin className="w-5 h-5 text-sky-600" />
+                <h3 className="text-lg font-bold text-gray-900">Location</h3>
               </div>
               <p className="text-sm leading-relaxed text-gray-700 pl-7">
                 {workshop.location || "No location provided by the professor."}
@@ -514,8 +483,8 @@ function WorkshopModal({
               style={{ animationDelay: "250ms" }}
             >
               <div className="flex items-center gap-2">
-                <Users className="w-4 h-4 text-[#736CED]" />
-                <h3 className="text-lg font-bold text-[#736CED]">Capacity</h3>
+                <Users className="w-4 h-4 text-sky-600" />
+                <h3 className="text-lg font-bold text-gray-900">Capacity</h3>
               </div>
               <p className="text-sm leading-relaxed text-gray-700 pl-7">
                 {workshop.raw.capacity ||
@@ -529,8 +498,8 @@ function WorkshopModal({
               style={{ animationDelay: "250ms" }}
             >
               <div className="flex items-center gap-2">
-                <HandCoins className="w-4 h-4 text-[#736CED]" />
-                <h3 className="text-lg font-bold text-[#736CED]">Funding</h3>
+                <HandCoins className="w-4 h-4 text-sky-600" />
+                <h3 className="text-lg font-bold text-gray-900">Funding</h3>
               </div>
               <p className="text-sm leading-relaxed text-gray-700 pl-7">
                 {workshop.raw.fundingsource === "GUC"
@@ -554,10 +523,10 @@ function WorkshopModal({
               className="grid gap-4 sm:grid-cols-3 animate-fade-in"
               style={{ animationDelay: "300ms" }}
             >
-              <div className="rounded-2xl border border-[#736CED]/20 bg-gradient-to-br from-[#736CED]/5 to-[#6DD3CE]/5 backdrop-blur-sm px-6 py-4">
+              <div className="rounded-2xl border border-gray-200 bg-white px-6 py-4 shadow-sm">
                 <div className="flex items-center gap-2 mb-2">
-                  <Users className="w-4 h-4 text-[#736CED]" />
-                  <p className="font-bold text-[#736CED] text-sm">
+                  <Users className="w-4 h-4 text-sky-600" />
+                  <p className="font-bold text-gray-900 text-sm">
                     Professors Participating
                   </p>
                 </div>
@@ -569,10 +538,10 @@ function WorkshopModal({
                   ))}
                 </p>
               </div>
-              <div className="rounded-2xl border border-[#736CED]/20 bg-gradient-to-br from-[#6DD3CE]/5 to-[#736CED]/5 backdrop-blur-sm px-6 py-4">
+              <div className="rounded-2xl border border-gray-200 bg-white px-6 py-4 shadow-sm">
                 <div className="flex items-center gap-2 mb-2">
-                  <Calendar className="w-4 h-4 text-[#736CED]" />
-                  <p className="font-bold text-[#736CED] text-sm">
+                  <Calendar className="w-4 h-4 text-sky-600" />
+                  <p className="font-bold text-gray-900 text-sm">
                     Proposed Schedule
                   </p>
                 </div>
@@ -614,8 +583,8 @@ function WorkshopModal({
               style={{ animationDelay: "500ms" }}
             >
               <div className="flex items-center gap-2">
-                <RefreshCw className="w-5 h-5 text-[#736CED]" />
-                <h3 className="text-lg font-bold text-[#736CED]">
+                <RefreshCw className="w-5 h-5 text-sky-600" />
+                <h3 className="text-lg font-bold text-gray-900">
                   Update Status
                 </h3>
               </div>
@@ -659,8 +628,8 @@ function WorkshopModal({
 
               {/* --- NEW: Show this form when 'isApproving' is true --- */}
               {isApproving && (
-                <div className="rounded-2xl border border-[#736CED]/30 bg-gradient-to-br from-white via-white to-[#736CED]/10 px-6 py-5 shadow-[0_4px_12px_rgba(115,108,237,0.15)] space-y-4">
-                  <p className="text-base font-bold text-[#736CED]">
+                <div className="rounded-2xl border border-gray-200 bg-white px-6 py-5 shadow-sm space-y-4">
+                  <p className="text-base font-bold text-gray-900">
                     Who can view this workshop?
                   </p>
                   <p className="text-sm text-gray-600">
@@ -672,14 +641,14 @@ function WorkshopModal({
                     {USER_GROUPS.map((group) => (
                       <label
                         key={group}
-                        className="flex items-center gap-2 p-3 rounded-lg bg-white border border-gray-200 cursor-pointer hover:bg-gray-50 transition-colors"
+                        className="flex items-center gap-2 p-3 rounded-lg bg-gray-50 border border-gray-200 cursor-pointer hover:bg-gray-100 transition-colors"
                       >
                         <input
                           type="checkbox"
                           value={group}
                           onChange={handleAllowedUsersChange}
                           checked={allowedUsers.includes(group)}
-                          className="rounded text-[#736CED] focus:ring-[#736CED]/50"
+                        className="rounded text-sky-600 focus:ring-sky-500"
                         />
                         <span className="text-sm font-semibold text-gray-700">
                           {group}
@@ -768,9 +737,9 @@ function WorkshopModal({
 
               {/* The "Request Edits" form itself */}
               {showRequestForm && (
-                <div className="rounded-2xl border border-[#54C6EB]/30 bg-gradient-to-br from-white via-white to-[#54C6EB]/10 px-6 py-5 shadow-[0_4px_12px_rgba(84,198,235,0.15)] space-y-4">
+                <div className="rounded-2xl border border-gray-200 bg-white px-6 py-5 shadow-sm space-y-4">
                   <label className="block">
-                    <span className="text-sm font-semibold text-[#2a8db0]">
+                    <span className="text-sm font-semibold text-gray-900">
                       Share the edits you'd like the professor to make
                     </span>
                     <textarea
@@ -778,7 +747,7 @@ function WorkshopModal({
                       onChange={(e) => setRequestMessage(e.target.value)}
                       rows={4}
                       placeholder="Highlight what needs to change before approval..."
-                      className="mt-2 w-full rounded-2xl border border-[#54C6EB]/40 bg-white/90 px-4 py-3 text-sm text-gray-700 shadow-inner focus:outline-none focus:ring-2 focus:ring-[#54C6EB]/40"
+                      className="mt-2 w-full rounded-2xl border border-gray-200 bg-white px-4 py-3 text-sm text-gray-700 shadow-inner focus:outline-none focus:ring-2 focus:ring-[#001233]/40"
                     />
                   </label>
                   {requestError && (
@@ -871,7 +840,6 @@ export default function WorkshopRequests() {
   const [workshops, setWorkshops] = useState([]);
   const [selectedWorkshop, setSelectedWorkshop] = useState(null);
   const [modalComment, setModalComment] = useState("");
-  const [commentError, setCommentError] = useState("");
   const [feedback, setFeedback] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -905,12 +873,10 @@ export default function WorkshopRequests() {
   useEffect(() => {
     if (!selectedWorkshop) {
       setModalComment("");
-      setCommentError("");
       return;
     }
     const current = workshops.find((item) => item.id === selectedWorkshop.id);
     setModalComment(current?.lastActionComment ?? "");
-    setCommentError("");
   }, [selectedWorkshop, workshops]);
 
   const filteredWorkshops = useMemo(() => {
@@ -1028,43 +994,15 @@ export default function WorkshopRequests() {
       style={{ backgroundColor: COLORS.muted }}
     >
       <div className="w-full">
-        {/* Hero Header */}
-        <header className="text-center space-y-3 mb-12 animate-fade-in">
-          <h1 className="text-5xl sm:text-6xl font-black leading-tight">
-            <span className="text-[#736CED]">Workshops & Approvals.</span>
-            <br />
-            <span
-              className="bg-clip-text text-transparent"
-              style={{
-                backgroundImage: `linear-gradient(135deg, ${COLORS.primary}, ${COLORS.secondary})`,
-              }}
-            >
-              Streamlined.
-            </span>
-          </h1>
-          <div
-            className="h-1 w-32 mx-auto rounded-full animate-pulse"
-            style={{
-              background: `linear-gradient(90deg, ${COLORS.primary}, ${COLORS.secondary})`,
-            }}
-          ></div>
-          <p className="text-base text-gray-600 max-w-2xl mx-auto leading-relaxed pt-2">
-            <span className="font-semibold text-[#736CED]">
-              Review, approve, or reject workshops in one place.
-              <br />
-              Fast. Organized. Effortless.
-            </span>
-          </p>
-        </header>
 
         {/* Filters */}
         <section className="mb-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           <label className="flex flex-col gap-2">
-            <span className="text-sm font-bold text-[#736CED]">Status</span>
+            <span className="text-sm font-bold text-gray-900">Status</span>
             <select
               value={statusFilter}
               onChange={(e) => setStatusFilter(e.target.value)}
-              className="w-full rounded-xl border-2 border-[#736CED]/20 bg-white/80 backdrop-blur-sm px-4 py-3 text-sm font-semibold text-[#736CED] shadow-sm transition-all focus:border-[#736CED]/50 focus:outline-none focus:ring-2 focus:ring-[#736CED]/30 hover:border-[#736CED]/40"
+              className="w-full rounded-xl border-2 border-gray-200 bg-white px-4 py-3 text-sm font-semibold text-gray-900 shadow-sm transition-all focus:border-sky-200 focus:outline-none focus:ring-2 focus:ring-sky-200 hover:border-sky-200"
             >
               {["All", "Pending", "Approved", "Rejected"].map((status) => (
                 <option key={status} value={status}>
@@ -1077,7 +1015,7 @@ export default function WorkshopRequests() {
           {hasActivefilters && (
             <button
               onClick={resetFilters}
-              className="flex items-center justify-center gap-2 px-4 py-3 rounded-xl border-2 border-[#C14953]/30 bg-white/80 backdrop-blur-sm text-sm font-bold text-[#C14953] transition-all hover:bg-[#C14953]/10 hover:border-[#C14953]/50 focus:outline-none focus:ring-2 focus:ring-[#C14953]/40 animate-fade-in"
+              className="flex items-center justify-center gap-2 px-4 py-3 rounded-xl border-2 border-sky-200 bg-white text-sm font-bold text-gray-900 transition-all hover:bg-sky-50 hover:border-sky-200 focus:outline-none focus:ring-2 focus:ring-sky-200 animate-fade-in"
             >
               <RefreshCw className="w-4 h-4" />
               Reset Filters
@@ -1102,10 +1040,10 @@ export default function WorkshopRequests() {
               />
             ))
           ) : (
-            <div className="col-span-full rounded-3xl border-2 border-dashed border-[#736CED]/30 bg-[#FDFBFF] backdrop-blur-sm px-8 py-16 text-center">
+            <div className="col-span-full rounded-3xl border-2 border-dashed border-[#001233]/30 bg-white px-8 py-16 text-center shadow-sm">
               <div className="flex flex-col items-center gap-3">
-                <FileText className="w-16 h-16 text-[#736CED]/30" />
-                <p className="text-lg font-semibold text-[#736CED]/70">
+                <FileText className="w-16 h-16 text-sky-600/30" />
+                <p className="text-lg font-semibold text-sky-700/70">
                   No workshops match the current filters
                 </p>
                 <p className="text-sm text-gray-500">
@@ -1126,9 +1064,6 @@ export default function WorkshopRequests() {
           onApprove={handleApproveWorkshop}
           onReject={handleRejectWorkshop}
           // ---
-          comment={modalComment}
-          setComment={setModalComment}
-          commentError={commentError}
           onRequestEditsSuccess={handleRequestEditsSuccess}
         />
       )}

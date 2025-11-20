@@ -15,7 +15,7 @@ import NotFound from "../NotFoundPage";
 import EditEvent from "./EditEvents";
 import EventsSalesReport from "../adminPages/EventsSalesReport";
 import EventAttendeesReport from "../adminPages/EventAttendeesReport";
-const mainDashboardEventsOffice = () => {
+const MainDashboardEventsOffice = () => {
   const location = useLocation();
   const isCreateEventPage =
     location.pathname === "/dashboard/eventsOffice/create-event";
@@ -23,6 +23,8 @@ const mainDashboardEventsOffice = () => {
     location.pathname === "/dashboard/eventsOffice/events-sales-report";
   const isEventAttendeesReportPage =
     location.pathname === "/dashboard/eventsOffice/event-attendees-report";
+  const isWorkshopRequestsPage =
+    location.pathname === "/dashboard/eventsOffice/workshop-requests";
   return (
     <div>
       <NavbarEventsOffice />
@@ -53,11 +55,27 @@ const mainDashboardEventsOffice = () => {
           </div>
         </div>
       )}
+      {isWorkshopRequestsPage && (
+        <div className="w-full bg-[#001233] text-white px-6 py-8">
+          <div className="max-w-7xl mx-auto text-center">
+            <h1 className="text-4xl font-bold sm:text-5xl mb-2">
+              Workshops & Approvals
+            </h1>
+            <p className="text-sm max-w-2xl mx-auto opacity-90">
+              Review, approve, or reject workshops in one place.
+            </p>
+            <p className="text-sm max-w-2xl mx-auto opacity-90">
+              Streamlined. Fast. Organized. Effortless.
+            </p>
+          </div>
+        </div>
+      )}
       <main
         className={`w-full px-4 ${
           isCreateEventPage ||
           isEventsSalesReportPage ||
-          isEventAttendeesReportPage
+          isEventAttendeesReportPage ||
+          isWorkshopRequestsPage
             ? "mt-8"
             : "mt-6"
         }`}
@@ -84,4 +102,4 @@ const mainDashboardEventsOffice = () => {
   );
 };
 
-export default mainDashboardEventsOffice;
+export default MainDashboardEventsOffice;
