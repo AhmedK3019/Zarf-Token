@@ -38,7 +38,7 @@ const RegistrationModal = ({
             onClick={onClose}
             className="text-gray-500 hover:text-gray-700 text-2xl"
           >
-            ×
+            X
           </button>
         </div>
         {regError && <p className="text-sm text-red-500 mb-2">{regError}</p>}
@@ -105,7 +105,7 @@ const BoothsModalContent = ({
               onClick={onClose}
               className="text-gray-500 hover:text-gray-700 text-2xl"
             >
-              ×
+              X
             </button>
           </div>
 
@@ -144,7 +144,7 @@ const BoothsModalContent = ({
                       <ul className="text-[#312A68] text-sm ml-2 space-y-1">
                         {booth.people.map((person, index) => (
                           <li key={index}>
-                            •{" "}
+                            -{" "}
                             {typeof person === "string" ? person : person.name}
                           </li>
                         ))}
@@ -179,16 +179,12 @@ const AllEvents = () => {
   const [events, setEvents] = useState([]);
   const [filteredEvents, setFilteredEvents] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
-  const [filterLocation, setFilterLocation] = useState("");
-  const [filterProfessor, setFilterProfessor] = useState("");
-  const [filterDate, setFilterDate] = useState("");
-  const [startDateFilter, setStartDateFilter] = useState("");
-  const [endDateFilter, setEndDateFilter] = useState("");
-  const [dateSort, setDateSort] = useState(""); // "newest", "oldest"
+  const [statusFilter, setStatusFilter] = useState("");
+  const [regFilter, setRegFilter] = useState("");
+  const [sortBy, setSortBy] = useState("date_added_desc");
   // UI State
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
-  const [showFilters, setShowFilters] = useState(false);
 
   // Modal State
   const [selectedBazaar, setSelectedBazaar] = useState(null);
@@ -234,7 +230,7 @@ const AllEvents = () => {
 
   // ===== CONSTANTS =====
   const eventCategories = [
-    { id: "all", name: "All Events" },
+    { id: "all", name: "All Types" },
     { id: "workshops", name: "Workshops" },
     { id: "bazaars", name: "Bazaars" },
     { id: "trips", name: "Trips" },
@@ -242,15 +238,26 @@ const AllEvents = () => {
     { id: "booths", name: "Platform Booths" },
   ];
 
-  const filterableLocations = [
-    "Cairo",
-    "Alexandria",
-    "Gouna",
-    "Berlin",
-    "Online",
+  const statusOptions = [
+    { id: "", name: "All Status" },
+    { id: "upcoming", name: "Upcoming" },
+    { id: "past", name: "Past" },
   ];
 
-  const filterableProfessors = ["Dr Mo salah", "Dr Marck", "Catherine"];
+  const regOptions = [
+    { id: "", name: "All Registrations" },
+    { id: "registered", name: "Registered" },
+    { id: "not_registered", name: "Not Registered" },
+  ];
+
+  const sortOptions = [
+    { id: "date_added_desc", name: "Date Added (Newest)" },
+    { id: "date_added_asc", name: "Date Added (Oldest)" },
+    { id: "event_date_asc", name: "Event Date (Upcoming)" },
+    { id: "event_date_desc", name: "Event Date (Latest)" },
+    { id: "alpha_asc", name: "Alphabetical (A-Z)" },
+    { id: "alpha_desc", name: "Alphabetical (Z-A)" },
+  ];
 
   const userIsPrivileged =
     user?.role?.toLowerCase().includes("admin") ||
@@ -331,36 +338,19 @@ const AllEvents = () => {
     setSearchTerm("");
   }, [selectedCategory, fetchEventsByCategory]);
 
-  // Search, Filtering and Sorting logic
+  // Search, Filtering and Sorting (Favourite Events style)
   useEffect(() => {
-    // 1. Get all filter values
     const lowercasedSearch = searchTerm.toLowerCase().trim();
-    const hasSearch = lowercasedSearch !== "";
+    const now = new Date();
 
-    const lowercasedLocation = filterLocation.toLowerCase();
-    const hasLocationFilter = lowercasedLocation !== "";
+    const filtered = events
+      .filter((rawEvent) => {
+        const event = getEventDetails(rawEvent);
 
-    const hasProfessorFilter = filterProfessor.toLowerCase() !== "";
-    const lowercasedProfessor = filterProfessor.toLowerCase();
-
-    const hasDateFilter = filterDate.trim() !== "";
-    const hasStartDateFilter = startDateFilter.trim() !== "";
-    const hasEndDateFilter = endDateFilter.trim() !== "";
-
-    // 2. Apply all filters
-    let filtered = events.filter((rawEvent) => {
-      const event = getEventDetails(rawEvent);
-
-      // Filter 1: Main Search Bar (Name, general text, etc.)
-      let matchesSearch = true;
-      if (hasSearch) {
-        let searchtype = "";
-        if (event.type === "booth") {
-          searchtype = "platform booth";
-        }
-        matchesSearch =
+        const matchesSearch =
+          !lowercasedSearch ||
           event.name?.toLowerCase().includes(lowercasedSearch) ||
-          `${event.createdBy?.firstname} ${event.createdBy?.lastname}`
+          `${event.createdBy?.firstname || ""} ${event.createdBy?.lastname || ""}`
             .toLowerCase()
             .includes(lowercasedSearch) ||
           event.professors?.some((prof) =>
@@ -369,125 +359,70 @@ const AllEvents = () => {
               .includes(lowercasedSearch)
           ) ||
           event.type?.toLowerCase().includes(lowercasedSearch) ||
-          searchtype.toLowerCase().includes(lowercasedSearch) ||
           event.location?.toLowerCase().includes(lowercasedSearch) ||
           event.vendor?.toLowerCase().includes(lowercasedSearch) ||
           event.original?.vendorId?.companyname
             ?.toLowerCase()
             .includes(lowercasedSearch);
-      }
 
-      // Filter 2: Dedicated Location Filter
-      const matchesLocation =
-        !hasLocationFilter ||
-        event.location?.toLowerCase().includes(lowercasedLocation);
+        const eventStatus = event.startDate
+          ? event.startDate > now
+            ? "upcoming"
+            : "past"
+          : "unknown";
+        const matchesStatus =
+          !statusFilter || statusFilter === eventStatus;
 
-      // Filter 3: Professor Filter
-      let matchesProfessor = true;
-      if (hasProfessorFilter) {
-        if (event.type === "workshop" || event.type === "conference") {
-          const conferenceProfMatch =
-            event.type === "conference" &&
-            event.professorname?.toLowerCase().includes(lowercasedProfessor);
+        const isRegistered =
+          Array.isArray(event.attendees) &&
+          event.attendees.some(
+            (attendee) =>
+              attendee?.userId === user?._id ||
+              attendee?._id === user?._id ||
+              attendee?.userId?._id === user?._id
+          );
+        const matchesReg =
+          !regFilter ||
+          (regFilter === "registered" ? isRegistered : !isRegistered);
 
-          const workshopProfMatch =
-            event.type === "workshop" &&
-            event.professors?.some((prof) =>
-              `${prof.firstname} ${prof.lastname}`
-                .toLowerCase()
-                .includes(lowercasedProfessor)
-            );
-
-          matchesProfessor = conferenceProfMatch || workshopProfMatch;
-        } else {
-          matchesProfessor = false;
-        }
-      }
-
-      // Filter 4: Specific Date Filter (exact match)
-      let matchesDate = true;
-      if (hasDateFilter && event.startDate) {
-        const filterParts = filterDate.split("-").map(Number);
-        const filterYear = filterParts[0];
-        const filterMonth = filterParts[1] - 1;
-        const filterDay = filterParts[2];
-
-        const eventStartDate = new Date(event.startDate);
-        const eventYear = eventStartDate.getFullYear();
-        const eventMonth = eventStartDate.getMonth();
-        const eventDay = eventStartDate.getDate();
-
-        matchesDate =
-          eventYear === filterYear &&
-          eventMonth === filterMonth &&
-          eventDay === filterDay;
-      }
-
-      // Filter 5: Start Date Range Filter (INCLUSIVE - events on or after start date)
-      let matchesStartDate = true;
-      if (hasStartDateFilter && event.startDate) {
-        const filterStartDate = new Date(startDateFilter);
-        const eventStartDate = new Date(event.startDate);
-        // Set both dates to midnight for proper inclusive comparison
-        filterStartDate.setHours(0, 0, 0, 0);
-        eventStartDate.setHours(0, 0, 0, 0);
-        matchesStartDate = eventStartDate >= filterStartDate;
-      }
-
-      // Filter 6: End Date Range Filter (INCLUSIVE - events on or before end date)
-      let matchesEndDate = true;
-      if (hasEndDateFilter && event.startDate) {
-        const filterEndDate = new Date(endDateFilter);
-        const eventStartDate = new Date(event.startDate);
-        // Set both dates to midnight for proper inclusive comparison
-        filterEndDate.setHours(0, 0, 0, 0);
-        eventStartDate.setHours(0, 0, 0, 0);
-        matchesEndDate = eventStartDate <= filterEndDate;
-      }
-      // Must match ALL active filters
-      return (
-        matchesSearch &&
-        matchesLocation &&
-        matchesProfessor &&
-        matchesDate &&
-        matchesStartDate &&
-        matchesEndDate
-      );
-    });
-
-    // 3. Apply Date Sorting
-    if (dateSort) {
-      filtered = filtered.sort((a, b) => {
+        return matchesSearch && matchesStatus && matchesReg;
+      })
+      .sort((a, b) => {
         const eventA = getEventDetails(a);
         const eventB = getEventDetails(b);
 
-        const dateA = eventA.startDate
-          ? new Date(eventA.startDate)
-          : new Date(0);
-        const dateB = eventB.startDate
-          ? new Date(eventB.startDate)
-          : new Date(0);
+        const addedTime = (evt) =>
+          new Date(
+            evt.createdAt ||
+              evt.created_at ||
+              evt.original?.createdAt ||
+              evt.original?.created_at ||
+              evt.startDate ||
+              0
+          ).getTime();
 
-        if (dateSort === "newest") {
-          return dateB - dateA; // Most recent first
-        } else if (dateSort === "oldest") {
-          return dateA - dateB; // Oldest first
+        const eventDate = (evt) =>
+          evt.startDate ? new Date(evt.startDate).getTime() : 0;
+
+        switch (sortBy) {
+          case "date_added_asc":
+            return addedTime(eventA) - addedTime(eventB);
+          case "event_date_asc":
+            return eventDate(eventA) - eventDate(eventB);
+          case "event_date_desc":
+            return eventDate(eventB) - eventDate(eventA);
+          case "alpha_asc":
+            return (eventA.name || "").localeCompare(eventB.name || "");
+          case "alpha_desc":
+            return (eventB.name || "").localeCompare(eventA.name || "");
+          case "date_added_desc":
+          default:
+            return addedTime(eventB) - addedTime(eventA);
         }
-        return 0;
       });
-    }
 
     setFilteredEvents(filtered);
-  }, [
-    searchTerm,
-    events,
-    filterLocation,
-    filterProfessor,
-    filterDate,
-    startDateFilter,
-    endDateFilter,
-    dateSort,
-  ]);
+  }, [events, searchTerm, statusFilter, regFilter, sortBy, user?._id]);
   // ===== EVENT HANDLERS =====
 
   const handleToggleFavourite = async (raw) => {
@@ -875,264 +810,76 @@ const AllEvents = () => {
   return (
     <div className="min-h-screen w-full bg-muted text-gray-800">
       <main className="w-full px-6 py-8">
-        {/* Category Filters - Pill-shaped buttons */}
-        <div className="flex flex-wrap justify-center gap-3 mb-8">
-          {eventCategories.map((cat) => (
-            <button
-              key={cat.id}
-              onClick={() => setSelectedCategory(cat.id)}
-              className={`px-6 py-2.5 rounded-full font-medium text-sm transition-all ${
-                selectedCategory === cat.id
-                  ? "bg-[#4a4ae6] text-white shadow-md hover:bg-[#3d3dd4]"
-                  : "bg-white text-gray-700 border-2 border-[#4a4ae6] hover:bg-gray-50"
-              }`}
+        <div className="w-full max-w-7xl mx-auto space-y-4 mb-8">
+          <div className="relative">
+            <input
+              type="text"
+              placeholder="Search by event name, professor, vendor, or location..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="w-full rounded-lg border border-gray-200 bg-white px-5 py-3 pr-12 text-[#312A68] placeholder-gray-500 shadow-sm focus:border-[#736CED] focus:outline-none focus:ring-2 focus:ring-[#736CED]/20"
+            />
+            <svg
+              className="absolute right-4 top-1/2 h-5 w-5 -translate-y-1/2 text-[#736CED]"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
             >
-              {cat.name}
-            </button>
-          ))}
-        </div>
-
-        {/* Search Bar with Filter Button */}
-        <div className="mb-8">
-          <div className="relative max-w-3xl mx-auto flex gap-2">
-            <div className="relative flex-1">
-              <input
-                type="text"
-                placeholder="Search by event name, professor name, vendor, or location..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full px-6 py-4 pr-14 rounded-lg border border-gray-300 bg-white focus:outline-none focus:ring-2 focus:ring-[#4a4ae6] focus:border-transparent shadow-sm"
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth="2"
+                d="M21 21l-4.35-4.35M11 19a8 8 0 100-16 8 8 0 000 16z"
               />
-              <svg
-                className="absolute right-4 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
-                />
-              </svg>
-            </div>
-
-            {/* Filter Button */}
-            <button
-              onClick={() => setShowFilters(!showFilters)}
-              className="px-4 py-4 rounded-lg border border-gray-300 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-[#4a4ae6] focus:border-transparent shadow-sm flex items-center gap-2"
-            >
-              <svg
-                className="h-5 w-5 text-gray-600"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"
-                />
-              </svg>
-              <span className="hidden sm:inline">
-                {showFilters ? "Hide Filters" : "Filters"}
-              </span>
-            </button>
+            </svg>
           </div>
 
-          {/* Filters Dropdown */}
-          {showFilters && (
-            <div className="max-w-3xl mx-auto mt-4 p-6 bg-white rounded-lg shadow-lg border border-gray-200">
-              <div className="flex justify-between items-center mb-4">
-                <h3 className="text-lg font-semibold text-gray-800">
-                  Filter & Sort Events
-                </h3>
-                <button
-                  onClick={() => setShowFilters(false)}
-                  className="text-gray-500 hover:text-gray-700"
-                >
-                  <svg
-                    className="h-6 w-6"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M6 18L18 6M6 6l12 12"
-                    />
-                  </svg>
-                </button>
-              </div>
-
-              {/* Basic Filters */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
-                {/* Location Filter */}
-                <div>
-                  <label
-                    htmlFor="filter-location"
-                    className="block text-sm font-medium text-gray-700 mb-1"
-                  >
-                    Location
-                  </label>
-                  <select
-                    id="filter-location"
-                    value={filterLocation}
-                    onChange={(e) => setFilterLocation(e.target.value)}
-                    className="w-full px-4 py-2 rounded-lg border border-gray-300 bg-white focus:outline-none focus:ring-2 focus:ring-[#4a4ae6] focus:border-transparent"
-                  >
-                    <option value="">All Locations</option>
-                    {filterableLocations.map((loc) => (
-                      <option key={loc} value={loc}>
-                        {loc}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-
-                {/* Professor Filter */}
-                <div>
-                  <label
-                    htmlFor="filter-professor"
-                    className="block text-sm font-medium text-gray-700 mb-1"
-                  >
-                    Professor
-                  </label>
-                  <select
-                    id="filter-professor"
-                    value={filterProfessor}
-                    onChange={(e) => setFilterProfessor(e.target.value)}
-                    className="w-full px-4 py-2 rounded-lg border border-gray-300 bg-white focus:outline-none focus:ring-2 focus:ring-[#4a4ae6] focus:border-transparent"
-                  >
-                    <option value="">All Professors</option>
-                    {filterableProfessors.map((prof) => (
-                      <option key={prof} value={prof}>
-                        {prof}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-              </div>
-
-              {/* Date Filtering & Sorting Section */}
-              <div className="border-t pt-4">
-                <h4 className="text-md font-medium text-gray-800 mb-4">
-                  Date Options
-                </h4>
-
-                <div className="space-y-4">
-                  {/* Row 1: Filter Options */}
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    {/* Specific Date Filter */}
-                    <div>
-                      <label
-                        htmlFor="filter-date"
-                        className="block text-sm font-medium text-gray-700 mb-2"
-                      >
-                        Filter by Specific Date
-                      </label>
-                      <div className="relative max-w-xs">
-                        <input
-                          type="date"
-                          id="filter-date"
-                          value={filterDate}
-                          onChange={(e) => setFilterDate(e.target.value)}
-                          className="w-full px-4 py-2.5 rounded-lg border border-gray-300 bg-white focus:outline-none focus:ring-2 focus:ring-[#4a4ae6] focus:border-transparent"
-                        />
-                        {filterDate && (
-                          <button
-                            onClick={() => setFilterDate("")}
-                            className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
-                            title="Clear specific date"
-                          >
-                            <span className="text-xl">×</span>
-                          </button>
-                        )}
-                      </div>
-                    </div>
-
-                    {/* Date Sorting */}
-                    <div>
-                      <label
-                        htmlFor="date-sort"
-                        className="block text-sm font-medium text-gray-700 mb-2"
-                      >
-                        Sort Events by Date
-                      </label>
-                      <div className="max-w-xs">
-                        <select
-                          id="date-sort"
-                          value={dateSort}
-                          onChange={(e) => setDateSort(e.target.value)}
-                          className="w-full px-4 py-2.5 rounded-lg border border-gray-300 bg-white focus:outline-none focus:ring-2 focus:ring-[#4a4ae6] focus:border-transparent"
-                        >
-                          <option value="">No Date Sorting</option>
-                          <option value="newest">Newest First</option>
-                          <option value="oldest">Oldest First</option>
-                        </select>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Row 2: Date Range Filter */}
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Filter by Date Range
-                    </label>
-                    <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3 max-w-md">
-                      <div className="relative flex-1 min-w-[150px]">
-                        <input
-                          type="date"
-                          value={startDateFilter}
-                          onChange={(e) => setStartDateFilter(e.target.value)}
-                          className="w-full px-4 py-2.5 rounded-lg border border-gray-300 bg-white focus:outline-none focus:ring-2 focus:ring-[#4a4ae6] focus:border-transparent"
-                          placeholder="Start date"
-                        />
-                      </div>
-
-                      <div className="hidden sm:block text-gray-500 font-medium">
-                        to
-                      </div>
-
-                      <div className="relative flex-1 min-w-[150px]">
-                        <input
-                          type="date"
-                          value={endDateFilter}
-                          onChange={(e) => setEndDateFilter(e.target.value)}
-                          className="w-full px-4 py-2.5 rounded-lg border border-gray-300 bg-white focus:outline-none focus:ring-2 focus:ring-[#4a4ae6] focus:border-transparent"
-                          placeholder="End date"
-                        />
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-              {/* Clear Filters Button */}
-              <div className="mt-6 flex justify-between items-center">
-                <div className="text-sm text-gray-600">
-                  {filteredEvents.length} event
-                  {filteredEvents.length !== 1 ? "s" : ""} found
-                </div>
-                <button
-                  onClick={() => {
-                    setFilterLocation("");
-                    setFilterProfessor("");
-                    setFilterDate("");
-                    setStartDateFilter("");
-                    setEndDateFilter("");
-                    setDateSort("");
-                  }}
-                  className="px-4 py-2 text-sm text-gray-600 hover:text-gray-800 underline"
-                >
-                  Clear all filters
-                </button>
-              </div>
-            </div>
-          )}
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
+            <select
+              className="w-full rounded-lg border border-gray-200 bg-white px-4 py-3 text-sm text-[#312A68] shadow-sm focus:border-[#736CED] focus:outline-none focus:ring-2 focus:ring-[#736CED]/20"
+              value={selectedCategory}
+              onChange={(e) => setSelectedCategory(e.target.value)}
+            >
+              {eventCategories.map((o) => (
+                <option key={o.id} value={o.id}>
+                  {o.name}
+                </option>
+              ))}
+            </select>
+            <select
+              className="w-full rounded-lg border border-gray-200 bg-white px-4 py-3 text-sm text-[#312A68] shadow-sm focus:border-[#736CED] focus:outline-none focus:ring-2 focus:ring-[#736CED]/20"
+              value={statusFilter}
+              onChange={(e) => setStatusFilter(e.target.value)}
+            >
+              {statusOptions.map((o) => (
+                <option key={o.id} value={o.id}>
+                  {o.name}
+                </option>
+              ))}
+            </select>
+            <select
+              className="w-full rounded-lg border border-gray-200 bg-white px-4 py-3 text-sm text-[#312A68] shadow-sm focus:border-[#736CED] focus:outline-none focus:ring-2 focus:ring-[#736CED]/20"
+              value={regFilter}
+              onChange={(e) => setRegFilter(e.target.value)}
+            >
+              {regOptions.map((o) => (
+                <option key={o.id} value={o.id}>
+                  {o.name}
+                </option>
+              ))}
+            </select>
+            <select
+              className="w-full rounded-lg border border-gray-200 bg-white px-4 py-3 text-sm text-[#312A68] shadow-sm focus:border-[#736CED] focus:outline-none focus:ring-2 focus:ring-[#736CED]/20"
+              value={sortBy}
+              onChange={(e) => setSortBy(e.target.value)}
+            >
+              {sortOptions.map((o) => (
+                <option key={o.id} value={o.id}>
+                  {o.name}
+                </option>
+              ))}
+            </select>
+          </div>
         </div>
 
         {/* Events Grid */}
@@ -1425,7 +1172,7 @@ const AllEvents = () => {
                 onClick={closeRatingsListModal}
                 className="text-gray-500 hover:text-gray-700"
               >
-                ✕
+                X
               </button>
             </div>
 
@@ -1455,7 +1202,7 @@ const AllEvents = () => {
                                 : "text-gray-300"
                             }`}
                           >
-                            ★
+                            *
                           </span>
                         ))}
                       </div>
@@ -1490,3 +1237,5 @@ const AllEvents = () => {
 };
 
 export default AllEvents;
+
+
