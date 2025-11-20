@@ -25,6 +25,11 @@ const MainDashboardEventsOffice = () => {
     location.pathname === "/dashboard/eventsOffice/event-attendees-report";
   const isWorkshopRequestsPage =
     location.pathname === "/dashboard/eventsOffice/workshop-requests";
+  const isVendorRequestsPage =
+    location.pathname === "/dashboard/eventsOffice/vendor-requests";
+  const isAllEventsPage =
+    location.pathname === "/dashboard/eventsOffice/all-events" ||
+    location.pathname === "/dashboard/eventsOffice";
   return (
     <div>
       <NavbarEventsOffice />
@@ -70,12 +75,32 @@ const MainDashboardEventsOffice = () => {
           </div>
         </div>
       )}
+      {isVendorRequestsPage && (
+        <div className="w-full bg-[#001233] text-white px-6 py-8">
+          <div className="max-w-7xl mx-auto text-center">
+            <h1 className="text-4xl font-bold sm:text-5xl mb-4">
+              Vendor Requests
+            </h1>
+          </div>
+        </div>
+      )}
+      {isAllEventsPage && (
+        <div className="w-full bg-[#001233] text-white px-6 py-8">
+          <div className="max-w-7xl mx-auto text-center">
+            <h1 className="text-4xl font-bold sm:text-5xl mb-4">
+              All Events
+            </h1>
+          </div>
+        </div>
+      )}
       <main
         className={`w-full px-4 ${
           isCreateEventPage ||
           isEventsSalesReportPage ||
           isEventAttendeesReportPage ||
-          isWorkshopRequestsPage
+          isWorkshopRequestsPage ||
+          isVendorRequestsPage ||
+          isAllEventsPage
             ? "mt-8"
             : "mt-6"
         }`}
