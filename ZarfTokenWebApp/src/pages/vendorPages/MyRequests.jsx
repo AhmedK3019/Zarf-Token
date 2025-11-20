@@ -10,6 +10,8 @@ import {
   Info,
   Loader2,
   MapPin,
+  RefreshCcw,
+  Search,
   Square,
   Users,
   X,
@@ -425,7 +427,18 @@ function CancellationDialog({
   );
 }
 
+const StatCard = ({ label, value, helper, accent }) => (
+  <div className="rounded-2xl border border-gray-100 bg-white/80 p-4 shadow-sm">
+    <p className="text-xs font-semibold uppercase tracking-wide text-gray-500">
+      {label}
+    </p>
+    <p className={`text-2xl font-bold ${accent || "text-[#001233]"}`}>{value}</p>
+    {helper ? <p className="text-xs text-gray-500">{helper}</p> : null}
+  </div>
+);
+
 const emptyMessages = {
+  all: "No participation requests found.",
   pending: "No pending participation requests right now.",
   accepted: "No accepted requests are awaiting payment.",
   rejected: "You have no rejected requests.",
@@ -437,8 +450,9 @@ export default function MyRequests() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [selectedRequest, setSelectedRequest] = useState(null);
-  const [statusTab, setStatusTab] = useState("pending");
+  const [statusTab, setStatusTab] = useState("all");
   const [viewFilter, setViewFilter] = useState("all");
+  const [search, setSearch] = useState("");
   const [nowMs, setNowMs] = useState(Date.now());
   const [cancelDialog, setCancelDialog] = useState({
     open: false,
@@ -448,6 +462,7 @@ export default function MyRequests() {
   const [cancellingId, setCancellingId] = useState(null);
   const [toast, setToast] = useState(null);
   const [successPulse, setSuccessPulse] = useState(false);
+  const [refreshKey, setRefreshKey] = useState(0);
   const navigate = useNavigate();
   const { user } = useAuthUser();
 
@@ -487,27 +502,42 @@ export default function MyRequests() {
     return () => {
       active = false;
     };
-  }, [user]);
+  }, [user, refreshKey]);
 
   const statusCounts = useMemo(() => {
     return requests.reduce(
       (acc, request) => {
         const key = mapStatusToTabKey(request.status);
         acc[key] = (acc[key] || 0) + 1;
+        acc.total += 1;
         return acc;
       },
-      { pending: 0, accepted: 0, rejected: 0, cancelled: 0 }
+      { total: 0, pending: 0, accepted: 0, rejected: 0, cancelled: 0 }
     );
   }, [requests]);
 
   const filteredRequests = useMemo(() => {
+    const term = search.trim().toLowerCase();
     return requests.filter((request) => {
-      if (mapStatusToTabKey(request.status) !== statusTab) return false;
+      if (statusTab !== "all" && mapStatusToTabKey(request.status) !== statusTab)
+        return false;
       if (viewFilter === "bazaar" && !request.isBazarBooth) return false;
       if (viewFilter === "platform" && request.isBazarBooth) return false;
+      if (term) {
+        const haystack = [
+          request.boothname,
+          request.bazarId?.bazaarname,
+          request.location,
+          request.bazarId?.location,
+        ]
+          .filter(Boolean)
+          .join(" ")
+          .toLowerCase();
+        if (!haystack.includes(term)) return false;
+      }
       return true;
     });
-  }, [requests, statusTab, viewFilter]);
+  }, [requests, statusTab, viewFilter, search]);
 
   const emitAnalyticsEvent = (payload) => {
     try {
@@ -581,6 +611,14 @@ export default function MyRequests() {
     return () => clearTimeout(timer);
   }, [toast]);
 
+  const handleRefresh = () => setRefreshKey((key) => key + 1);
+
+  const resetFilters = () => {
+    setStatusTab("all");
+    setViewFilter("all");
+    setSearch("");
+  };
+
   return (
     <>
       <style>{`
@@ -591,58 +629,150 @@ export default function MyRequests() {
         .animate-slide-up { animation: slide-up 0.4s ease-out forwards; }
         .animate-pop { animation: pop 1.2s ease-out forwards; }
       `}</style>
-      <div className="min-h-screen w-full bg-muted text-[#1F1B3B] font-sans">
-        <main className="flex w-full flex-1 flex-col items-center px-4 sm:px-6 py-8">
-          <div className="w-full max-w-6xl">
-            <div className="flex flex-wrap justify-center gap-3 mb-6">
-              {STATUS_TABS.map((tab) => (
+      <div className="min-h-screen w-full bg-gradient-to-br from-[#f5f7ff] via-white to-[#eef2ff] text-[#1F1B3B] font-sans px-4 py-8 lg:px-6 lg:py-10">
+        <main className="mx-auto flex w-full max-w-7xl flex-1 flex-col gap-6">
+          <section className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            <StatCard
+              label="Total"
+              value={statusCounts.total}
+              helper="Requests submitted"
+              accent="text-[#001233]"
+            />
+            <StatCard
+              label="Pending"
+              value={statusCounts.pending}
+              helper="Awaiting review"
+              accent="text-amber-700"
+            />
+            <StatCard
+              label="Accepted"
+              value={statusCounts.accepted}
+              helper="Awaiting payment or live"
+              accent="text-emerald-700"
+            />
+            <StatCard
+              label="Rejected"
+              value={statusCounts.rejected}
+              helper="Declined submissions"
+              accent="text-rose-700"
+            />
+          </section>
+
+          <section className="rounded-3xl border border-gray-100 bg-white/80 p-5 shadow-sm">
+            <div className="flex flex-wrap items-center justify-between gap-3">
+              <div className="space-y-1">
+                <p className="text-xs font-semibold uppercase tracking-wide text-gray-500">
+                  Filters
+                </p>
+                <p className="text-sm text-gray-600">
+                  Search and filter your booth and platform requests.
+                </p>
+              </div>
+              <div className="flex flex-wrap items-center gap-2">
+                { (statusTab !== "all" || viewFilter !== "all" || search.trim().length > 0) ? (
+                  <button
+                    onClick={resetFilters}
+                    className="inline-flex items-center gap-2 rounded-full border border-gray-200 bg-white px-4 py-2.5 text-sm font-semibold text-gray-700 shadow-sm transition hover:bg-gray-50"
+                  >
+                    <RefreshCcw className="h-4 w-4 text-gray-500" />
+                    Clear filters
+                  </button>
+                ) : null}
                 <button
-                  key={tab.key}
-                  onClick={() => setStatusTab(tab.key)}
-                  className={`px-5 py-2 rounded-full text-sm font-semibold transition-all border ${
-                    statusTab === tab.key
-                      ? "bg-[#736CED] text-white border-transparent shadow"
-                      : "bg-white text-[#312A68] border-gray-200 hover:border-[#736CED]/40"
-                  }`}
+                  onClick={handleRefresh}
+                  className="inline-flex items-center gap-2 rounded-full border border-[#4C3BCF] bg-[#4C3BCF] px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-[#3728a6] hover:border-[#3728a6]"
                 >
-                  {tab.label}
-                  <span className="ml-2 text-xs opacity-80">
-                    ({statusCounts[tab.key] || 0})
+                  <RefreshCcw className="h-4 w-4" />
+                  Refresh
+                </button>
+              </div>
+            </div>
+
+            <div className="mt-4 flex flex-col gap-3 rounded-2xl border border-gray-100 bg-white/70 p-4 shadow-inner">
+              <div className="flex flex-col gap-3 lg:flex-row lg:items-end">
+                <label className="relative flex-1 min-w-[220px]">
+                  <span className="mb-2 block text-sm font-semibold text-gray-800">
+                    Search
                   </span>
-                </button>
-              ))}
+                  <div className="relative">
+                    <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
+                    <input
+                      type="text"
+                      value={search}
+                      onChange={(e) => setSearch(e.target.value)}
+                      placeholder="Search by booth name or bazaar"
+                      className="h-12 w-full rounded-2xl border border-gray-200 bg-white pl-10 pr-4 text-sm font-semibold text-gray-900 shadow-sm transition focus:border-[#4C3BCF] focus:outline-none focus:ring-2 focus:ring-[#d7d1ff]"
+                    />
+                  </div>
+                </label>
+                <label className="w-full lg:w-48">
+                  <span className="mb-2 block text-sm font-semibold text-gray-800">
+                    Status
+                  </span>
+                  <select
+                    value={statusTab}
+                    onChange={(e) => setStatusTab(e.target.value)}
+                    className="h-12 w-full rounded-2xl border border-gray-200 bg-white px-4 text-sm font-semibold text-gray-900 shadow-sm transition focus:border-[#4C3BCF] focus:outline-none focus:ring-2 focus:ring-[#d7d1ff]"
+                  >
+                    <option value="all">All</option>
+                    {STATUS_TABS.map((tab) => (
+                      <option key={tab.key} value={tab.key}>
+                        {tab.label}
+                        {statusCounts[tab.key] ? ` (${statusCounts[tab.key]})` : ""}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+                <label className="w-full lg:w-48">
+                  <span className="mb-2 block text-sm font-semibold text-gray-800">
+                    Type
+                  </span>
+                  <select
+                    value={viewFilter}
+                    onChange={(e) => setViewFilter(e.target.value)}
+                    className="h-12 w-full rounded-2xl border border-gray-200 bg-white px-4 text-sm font-semibold text-gray-900 shadow-sm transition focus:border-[#4C3BCF] focus:outline-none focus:ring-2 focus:ring-[#d7d1ff]"
+                  >
+                    {VIEW_FILTERS.map((filter) => (
+                      <option key={filter.key} value={filter.key}>
+                        {filter.label}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+              </div>
             </div>
+          </section>
 
-            <div className="mb-8 flex justify-center flex-wrap gap-3 bg-white/70 p-2 rounded-full shadow-inner">
-              {VIEW_FILTERS.map((filter) => (
-                <button
-                  key={filter.key}
-                  onClick={() => setViewFilter(filter.key)}
-                  className={`px-5 py-2 rounded-full text-sm font-semibold transition-colors ${
-                    viewFilter === filter.key
-                      ? "bg-[#4C3BCF] text-white shadow"
-                      : "text-[#312A68] hover:bg-white"
-                  }`}
-                >
-                  {filter.label}
-                </button>
-              ))}
-            </div>
-
+          <section className="space-y-6">
             {loading ? (
-              <div className="text-center py-20">
+              <div className="flex flex-col items-center gap-4 rounded-3xl border border-gray-100 bg-white/80 px-6 py-12 text-center shadow-sm">
                 <div className="inline-block h-12 w-12 border-4 border-[#736CED] border-t-transparent rounded-full animate-spin"></div>
-                <p className="mt-4 text-[#312A68]">Loading your requests...</p>
+                <p className="text-sm text-gray-600">Loading your requests...</p>
               </div>
             ) : error ? (
-              <div className="text-center py-12 text-red-500 bg-white rounded-2xl border border-red-100">
-                <p>{error}</p>
+              <div className="flex flex-col items-center gap-3 rounded-3xl border border-rose-200 bg-rose-50 px-6 py-10 text-center text-rose-700">
+                <p className="text-lg font-semibold">{error}</p>
+                <button
+                  type="button"
+                  onClick={handleRefresh}
+                  className="inline-flex items-center gap-2 rounded-full bg-rose-600 px-5 py-2 text-sm font-semibold text-white shadow-lg shadow-rose-300 transition hover:bg-rose-700"
+                >
+                  <RefreshCcw className="h-4 w-4" />
+                  Try again
+                </button>
               </div>
             ) : filteredRequests.length === 0 ? (
-              <div className="text-center py-16 bg-white/70 rounded-2xl border border-dashed border-gray-200">
-                <p className="text-lg text-[#312A68]">
-                  {emptyMessages[statusTab]}
+              <div className="flex flex-col items-center gap-3 rounded-3xl border border-dashed border-gray-200 bg-white/80 px-8 py-16 text-center shadow-sm">
+                <p className="text-lg font-semibold text-[#001233]">
+                  {emptyMessages[statusTab] || emptyMessages.all}
                 </p>
+                <button
+                  type="button"
+                  onClick={resetFilters}
+                  className="inline-flex items-center gap-2 rounded-full border border-[#4C3BCF] px-4 py-2 text-sm font-semibold text-[#4C3BCF] transition hover:bg-[#4C3BCF] hover:text-white"
+                >
+                  Reset filters
+                </button>
               </div>
             ) : (
               <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
@@ -662,17 +792,15 @@ export default function MyRequests() {
                   return (
                     <div
                       key={request._id}
-                      className={`bg-white rounded-2xl p-6 flex flex-col min-h-[280px] border transition hover:shadow-lg ${
-                        isCancelled
-                          ? "border-dashed border-gray-200 opacity-80"
-                          : cancellationState.canCancel
-                          ? "border-emerald-200 shadow-emerald-100"
-                          : "border-gray-100"
-                      }`}
+                      className="relative flex h-full flex-col overflow-hidden rounded-3xl border border-gray-100 bg-white/95 p-6 shadow-sm ring-1 ring-black/5 transition hover:-translate-y-0.5 hover:shadow-md"
                     >
-                      <div className="flex items-start justify-between mb-2">
-                        <div>
-                          <h3 className="text-xl font-bold text-[#4C3BCF]">
+                      <div className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-[#4C3BCF] via-[#E11D48] to-[#001233]" />
+                      <div className="flex items-start justify-between gap-3">
+                        <div className="space-y-1">
+                          <p className="text-xs font-semibold uppercase tracking-wide text-gray-500">
+                            {request.isBazarBooth ? "Bazaar participation" : "Platform booth"}
+                          </p>
+                          <h3 className="text-xl font-bold text-[#001233]">
                             {request.boothname ||
                               (request.isBazarBooth
                                 ? "Bazaar Booth Request"
@@ -687,36 +815,36 @@ export default function MyRequests() {
                         <StatusBadge status={request.status} />
                       </div>
 
-                      <div className={`flex flex-wrap gap-4 text-sm ${textMuted}`}>
-                        <span className="flex items-center gap-1">
+                      <div className={`mt-4 flex flex-wrap gap-3 text-sm ${textMuted}`}>
+                        <span className="inline-flex items-center gap-1 rounded-full bg-gray-50 px-3 py-1 font-semibold">
                           <Square size={14} />
                           {request.boothSize}
                         </span>
                         {request.duration && !request.isBazarBooth && (
-                          <span className="flex items-center gap-1">
+                          <span className="inline-flex items-center gap-1 rounded-full bg-gray-50 px-3 py-1 font-semibold">
                             <Clock size={14} />
                             {request.duration} weeks
                           </span>
                         )}
-                        <span className="flex items-center gap-1">
+                        <span className="inline-flex items-center gap-1 rounded-full bg-gray-50 px-3 py-1 font-semibold">
                           <Users size={14} />
                           {request.people?.length || 0}
                         </span>
                       </div>
 
                       {request.bazarId?.location && (
-                        <div className={`flex items-center gap-2 mt-2 text-sm ${textMuted}`}>
+                        <div className={`mt-3 flex items-center gap-2 text-sm ${textMuted}`}>
                           <MapPin size={14} />
                           {request.bazarId.location}
                         </div>
                       )}
                       {request.location && !request.isBazarBooth && (
-                        <div className={`flex items-center gap-2 mt-2 text-sm ${textMuted}`}>
+                        <div className={`mt-3 flex items-center gap-2 text-sm ${textMuted}`}>
                           <MapPin size={14} />
                           {request.location}
                         </div>
                       )}
-                      <div className={`flex items-center gap-2 mt-2 text-sm ${textMuted}`}>
+                      <div className={`mt-3 flex items-center gap-2 text-sm ${textMuted}`}>
                         <Calendar size={14} />
                         Submitted {formatDate(request.createdAt)}
                       </div>
@@ -779,7 +907,7 @@ export default function MyRequests() {
                 })}
               </div>
             )}
-          </div>
+          </section>
         </main>
       </div>
 

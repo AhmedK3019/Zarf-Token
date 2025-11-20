@@ -52,6 +52,9 @@ const getEventStartDate = (event) => {
     : "N/A";
 };
 
+// Palette pulled from the dashboard's deep blue theme
+const chartPalette = ["#001233", "#33415c", "#5c677d", "#7d8597", "#c0d6df"];
+
 // --- Main Report Component ---
 
 export default function EventsSalesReport() {
@@ -240,6 +243,37 @@ export default function EventsSalesReport() {
   }
 
   // --- Main Render ---
+
+  const barChartData = reportData.eventsWithRevenue.map((event, index) => ({
+    id: event._id || index,
+    label: getEventName(event),
+    value: event.parsedRevenue,
+    color: chartPalette[index % chartPalette.length],
+  }));
+
+  const maxBarValue = Math.max(...barChartData.map((item) => item.value), 0);
+
+  let cumulative = 0;
+  const pieChartSegments = reportData.eventsWithRevenue.map((event, index) => {
+    const percent = reportData.totalRevenue
+      ? (event.parsedRevenue / reportData.totalRevenue) * 100
+      : 0;
+    const segment = {
+      id: event._id || index,
+      label: getEventName(event),
+      value: event.parsedRevenue,
+      percent,
+      start: cumulative,
+      end: cumulative + percent,
+      color: chartPalette[index % chartPalette.length],
+    };
+    cumulative += percent;
+    return segment;
+  });
+
+  const pieBackground = pieChartSegments
+    .map((segment) => `${segment.color} ${segment.start}% ${segment.end}%`)
+    .join(", ");
 
   return (
     <div className="p-8 bg-gray-50 min-h-screen">
@@ -468,6 +502,135 @@ export default function EventsSalesReport() {
               </tr>
             </tfoot>
           </table>
+        </div>
+      </div>
+
+      {/* --- Analytics Charts --- */}
+      <div className="grid grid-cols-1 xl:grid-cols-2 gap-6 mt-6">
+        {/* Bar Chart */}
+        <div className="bg-white rounded-lg shadow-lg border border-gray-200 p-6">
+          <div className="flex justify-between items-center">
+            <div>
+              <h3 className="text-lg font-semibold text-[#001233]">
+                Revenue by Event
+              </h3>
+              <p className="text-sm text-gray-500">
+                Based on filtered events in the table
+              </p>
+            </div>
+            <span className="text-xs text-gray-400 uppercase tracking-wide">
+              Bar Chart
+            </span>
+          </div>
+
+          {barChartData.length > 0 ? (
+            <div className="mt-6 h-72 overflow-x-auto">
+              <div className="flex items-end h-full gap-4 min-w-full">
+                {barChartData.map((item) => {
+                  const heightPercent = maxBarValue
+                    ? (item.value / maxBarValue) * 100
+                    : 0;
+                  return (
+                    <div
+                      key={item.id}
+                      className="flex flex-col items-center justify-end min-w-[120px]"
+                    >
+                      <div className="flex items-end h-48 w-full">
+                        <div
+                          className="w-full rounded-t-md transition-transform duration-200 hover:scale-[1.02]"
+                          style={{
+                            height: `${heightPercent}%`,
+                            background: item.color,
+                          }}
+                          title={`${item.label}: ${formatCurrency(item.value)}`}
+                        />
+                      </div>
+                      <div className="mt-2 text-center">
+                        <div className="text-sm font-semibold text-[#001233]">
+                          {formatCurrency(item.value)}
+                        </div>
+                        <div className="text-xs text-gray-500 truncate max-w-[110px]">
+                          {item.label}
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          ) : (
+            <div className="mt-8 text-center text-gray-500 text-sm">
+              No chart data available. Adjust filters to see insights.
+            </div>
+          )}
+        </div>
+
+        {/* Pie Chart */}
+        <div className="bg-white rounded-lg shadow-lg border border-gray-200 p-6">
+          <div className="flex justify-between items-center">
+            <div>
+              <h3 className="text-lg font-semibold text-[#001233]">
+                Revenue Contribution
+              </h3>
+              <p className="text-sm text-gray-500">
+                Share of total revenue per event
+              </p>
+            </div>
+            <span className="text-xs text-gray-400 uppercase tracking-wide">
+              Pie Chart
+            </span>
+          </div>
+
+          {pieChartSegments.length > 0 ? (
+            <div className="mt-6 grid grid-cols-1 md:grid-cols-[240px_1fr] gap-6 items-center">
+              <div className="flex justify-center">
+                <div className="relative w-48 h-48">
+                  <div
+                    className="w-48 h-48 rounded-full shadow-inner"
+                    style={{
+                      background: `conic-gradient(${pieBackground})`,
+                    }}
+                  />
+                  <div className="absolute inset-8 bg-white rounded-full flex flex-col items-center justify-center text-center shadow">
+                    <p className="text-xs text-gray-500">Total Revenue</p>
+                    <p className="text-base font-semibold text-[#001233] mt-1">
+                      {formatCurrency(reportData.totalRevenue)}
+                    </p>
+                  </div>
+                </div>
+              </div>
+              <div className="space-y-3">
+                {pieChartSegments.map((segment) => (
+                  <div
+                    key={segment.id}
+                    className="flex items-center justify-between gap-3 border border-gray-100 rounded-lg px-3 py-2"
+                  >
+                    <div className="flex items-center gap-3 min-w-0">
+                      <span
+                        className="w-3 h-3 rounded-sm flex-shrink-0"
+                        style={{ backgroundColor: segment.color }}
+                      ></span>
+                      <div className="min-w-0">
+                        <p className="text-sm font-medium text-[#001233] truncate">
+                          {segment.label}
+                        </p>
+                        <p className="text-xs text-gray-500">
+                          {formatCurrency(segment.value)}
+                        </p>
+                      </div>
+                    </div>
+                    <div className="text-sm font-semibold text-[#001233]">
+                      {segment.percent.toFixed(1)}%
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          ) : (
+            <div className="mt-8 text-center text-gray-500 text-sm">
+              No pie data available. Adjust filters to see insights.
+            </div>
+          )}
         </div>
       </div>
     </div>

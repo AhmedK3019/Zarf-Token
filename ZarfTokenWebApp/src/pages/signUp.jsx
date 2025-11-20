@@ -424,7 +424,7 @@ export default function SignUp() {
         <div className="grid w-full max-w-6xl gap-12 lg:grid-cols-[1.05fr_1fr]">
           <div className="space-y-6 self-center">
             <h2 className="text-4xl font-bold text-primary sm:text-5xl lg:text-6xl">
-              Become a Tokener
+              Become a Tokener!
             </h2>
             <p className="text-base text-primary/80 sm:text-lg">
               Whether you're a GUCian ready to discover events or a company

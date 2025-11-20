@@ -123,7 +123,7 @@ const Hero = () => {
             One place.
           </h1>
           <h1 className="text-4xl font-bold text-[#001233] sm:text-5xl lg:text-6xl">
-            GUC x Zarf Token
+            GUC x Zarf Token.
           </h1>
           <p className="text-base text-[#001233] sm:text-lg">
             From planning to participation, Zarf Token keeps your community
