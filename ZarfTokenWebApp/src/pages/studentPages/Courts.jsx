@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useEffect, useRef, useState } from "react";
 import api from "../../services/api";
 
 const Courts = () => {
@@ -13,6 +13,8 @@ const Courts = () => {
   const [selectedSlot, setSelectedSlot] = useState(null);
   const [bookingLoading, setBookingLoading] = useState(false);
   const [bookingMessage, setBookingMessage] = useState("");
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const dropdownRef = useRef(null);
 
   const courtCategories = [
     { id: "all", name: "All Courts" },
@@ -67,6 +69,17 @@ const Courts = () => {
     fetchCourts();
   }, []);
 
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+        setIsDropdownOpen(false);
+      }
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
   // Filter by category and search
   useEffect(() => {
     let filtered = courts;
@@ -88,6 +101,7 @@ const Courts = () => {
 
   const handleCategoryClick = (categoryId) => {
     setSelectedCategory(categoryId);
+    setIsDropdownOpen(false);
   };
 
   const handleSearch = (value) => setSearchTerm(value);
@@ -121,7 +135,7 @@ const Courts = () => {
     setBookingMessage("");
   };
 
-  // ✅ FIXED BOOKING FUNCTION
+  // Booking flow
   const handleBookSlot = async () => {
     if (!selectedSlot || !selectedCourt) return;
     setBookingLoading(true);
@@ -143,7 +157,7 @@ const Courts = () => {
         ...studentData,
       };
 
-      console.log("📤 Sending booking payload:", payload);
+      console.log("Sending booking payload:", payload);
 
       // Post to backend route (no need for /:id since controller uses req.body.courtId)
       const response = await api.post(
@@ -151,7 +165,7 @@ const Courts = () => {
         payload
       );
 
-      console.log("✅ Booking success:", response.data);
+      console.log("Booking success:", response.data);
 
       // Update slot locally
       const updatedSlots = selectedCourt.freeSlots.map((slot) =>
@@ -168,11 +182,11 @@ const Courts = () => {
 
       setSelectedCourt(updatedCourt);
       setSelectedSlot(null);
-      setBookingMessage("✅ Slot successfully booked!");
+      setBookingMessage("Slot successfully booked!");
     } catch (err) {
-      console.error("❌ Booking failed:", err.response?.data || err.message);
+      console.error("Booking failed:", err.response?.data || err.message);
       setBookingMessage(
-        `❌ Booking failed: ${err.response?.data?.error || err.message}`
+        `Booking failed: ${err.response?.data?.error || err.message}`
       );
     } finally {
       setBookingLoading(false);
@@ -185,35 +199,99 @@ const Courts = () => {
       <div className="relative flex min-h-screen w-full flex-col items-center">
         <main className="relative z-10 flex w-full flex-1 flex-col items-center px-6 py-8">
           <div className="w-full">
-            {/* Category Filter */}
-            <div className="flex flex-wrap justify-center gap-4 mb-8">
-              {courtCategories.map((cat) => (
-                <button
-                  key={cat.id}
-                  onClick={() => handleCategoryClick(cat.id)}
-                  className={`px-6 py-3 rounded-full font-semibold transition-all ${
-                    selectedCategory === cat.id
-                      ? "bg-[#736CED] text-white shadow-[0_10px_25px_rgba(115,108,237,0.3)]"
-                      : "bg-white/70 text-[#736CED] border border-[#736CED] hover:bg-[#E7E1FF]"
-                  }`}
-                >
-                  {cat.name}
-                </button>
-              ))}
-            </div>
+            {/* Filters */}
+            <div className="w-full flex justify-center mb-12">
+              <div className="w-full max-w-5xl">
+                <div className="flex flex-col items-stretch gap-4 md:flex-row md:items-center">
+                  {/* Court Type Dropdown */}
+                  <div
+                    ref={dropdownRef}
+                    className="relative md:w-[260px] w-full"
+                  >
+                    <button
+                      onClick={() => setIsDropdownOpen((prev) => !prev)}
+                      className="flex w-full items-center justify-between gap-3 rounded-full border border-[#dcd9ff] bg-white/80 px-5 py-3 text-left font-semibold text-[#312A68] shadow-[0_8px_20px_rgba(115,108,237,0.12)] transition-all hover:border-[#b7b1ff] hover:shadow-[0_12px_28px_rgba(115,108,237,0.18)] focus:outline-none focus:ring-2 focus:ring-[#736CED]/40"
+                    >
+                      <span>
+                        {
+                          courtCategories.find(
+                            (category) => category.id === selectedCategory
+                          )?.name
+                        }
+                      </span>
+                      <svg
+                        className={`h-5 w-5 text-[#736CED] transition-transform duration-200 ${
+                          isDropdownOpen ? "rotate-180" : "rotate-0"
+                        }`}
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth="2"
+                          d="M19 9l-7 7-7-7"
+                        />
+                      </svg>
+                    </button>
+                    <div
+                      className={`absolute left-0 right-0 z-20 mt-2 origin-top rounded-2xl border border-[#e7e3ff] bg-white/95 shadow-[0_14px_30px_rgba(115,108,237,0.18)] transition-all duration-200 ease-out ${
+                        isDropdownOpen
+                          ? "opacity-100 translate-y-0 scale-100"
+                          : "pointer-events-none -translate-y-1 scale-95 opacity-0"
+                      }`}
+                    >
+                      <ul className="py-2">
+                        {courtCategories.map((cat) => (
+                          <li key={cat.id}>
+                            <button
+                              onClick={() => handleCategoryClick(cat.id)}
+                              className={`flex w-full items-center justify-between px-5 py-3 text-sm font-semibold text-[#312A68] transition-colors ${
+                                selectedCategory === cat.id
+                                  ? "bg-[#F3F1FF] text-[#4C3BCF]"
+                                  : "hover:bg-[#F8F6FF]"
+                              }`}
+                            >
+                              <span>{cat.name}</span>
+                              {selectedCategory === cat.id && (
+                                <span className="h-2.5 w-2.5 rounded-full bg-[#736CED]" />
+                              )}
+                            </button>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  </div>
 
-            {/* Search Bar */}
-            <div className="mb-12">
-              <div className="relative max-w-2xl mx-auto">
-                <input
-                  type="text"
-                  placeholder="Search by court name or type..."
-                  value={searchTerm}
-                  onChange={(e) => handleSearch(e.target.value)}
-                  className="w-full px-6 py-4 pr-12 rounded-full border border-[#736CED] bg-white/70 text-[#312A68] placeholder-[#312A68]/60 focus:outline-none focus:ring-2 focus:ring-[#736CED] focus:border-transparent shadow-sm"
-                />
+                  {/* Search Bar */}
+                  <div className="flex-1">
+                    <div className="relative w-full">
+                      <input
+                        type="text"
+                        placeholder="Search by court name or type..."
+                        value={searchTerm}
+                        onChange={(e) => handleSearch(e.target.value)}
+                        className="w-full rounded-full border border-[#dcd9ff] bg-white/80 px-6 py-3 pr-12 text-[#312A68] placeholder-[#312A68]/60 shadow-[0_8px_20px_rgba(115,108,237,0.12)] transition-all focus:border-[#b7b1ff] focus:outline-none focus:ring-2 focus:ring-[#736CED]/40 hover:shadow-[0_12px_28px_rgba(115,108,237,0.18)]"
+                      />
+                      <svg
+                        className="pointer-events-none absolute right-4 top-1/2 h-5 w-5 -translate-y-1/2 text-[#736CED]"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth="2"
+                          d="M21 21l-4.35-4.35M11 19a8 8 0 100-16 8 8 0 000 16z"
+                        />
+                      </svg>
+                    </div>
+                  </div>
+                </div>
                 {searchTerm && (
-                  <p className="text-sm text-[#312A68]/70 mt-2 text-center">
+                  <p className="mt-3 text-center text-sm text-[#312A68]/70">
                     Found {filteredCourts.length} result
                     {filteredCourts.length !== 1 ? "s" : ""} for "{searchTerm}"
                   </p>
@@ -245,9 +323,7 @@ const Courts = () => {
                   </div>
                 ) : (
                   <div>
-                    <div className="w-24 h-24 bg-muted/30 rounded-full flex items-center justify-center mx-auto mb-6">
-                      <span className="text-[#736CED] text-4xl">🏟️</span>
-                    </div>
+                    <div className="w-24 h-24 bg-muted/30 rounded-full flex items-center justify-center mx-auto mb-6" />
                     <p className="text-[#312A68] text-lg mb-2">
                       No{" "}
                       {selectedCategory === "all"
@@ -281,7 +357,7 @@ const Courts = () => {
                       </h3>
                       <div className="mb-4">
                         <p className="flex items-center gap-2 text-sm text-[#312A68]">
-                          <span>📅</span>
+                          <span className="inline-block h-1.5 w-1.5 rounded-full bg-[#6DD3CE]" />
                           {availableSlots.length} available slot
                           {availableSlots.length !== 1 ? "s" : ""}
                         </p>
@@ -312,7 +388,7 @@ const Courts = () => {
                         ) : (
                           <div className="text-center py-4">
                             <div className="w-12 h-12 bg-muted/30 rounded-full flex items-center justify-center mx-auto mb-2">
-                              <span className="text-[#736CED] text-lg">📅</span>
+                              <span className="h-2 w-2 rounded-full bg-[#6DD3CE] inline-block" />
                             </div>
                             <p className="text-[#312A68]/70 text-xs">
                               No available slots at the moment
@@ -424,7 +500,7 @@ const Courts = () => {
               ) : (
                 <div className="text-center py-12">
                   <div className="w-16 h-16 bg-muted/30 rounded-full flex items-center justify-center mx-auto mb-4">
-                    <span className="text-[#736CED] text-2xl">📅</span>
+                    <span className="text-[#736CED] text-2xl"></span>
                   </div>
                   <p className="text-[#312A68] text-lg mb-2">
                     No Available Slots
@@ -438,7 +514,7 @@ const Courts = () => {
               {bookingMessage && (
                 <p
                   className={`mt-4 text-center font-medium ${
-                    bookingMessage.includes("❌")
+                    bookingMessage.includes("")
                       ? "text-red-500"
                       : "text-green-600"
                   }`}
