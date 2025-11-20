@@ -507,104 +507,98 @@ export default function GymSchedule() {
   };
 
   return (
-    <div className="min-h-screen bg-muted p-4">
-      <div className="max-w-6xl mx-auto">
+    <div className="min-h-screen bg-gradient-to-br from-[#f7f8fb] via-[#eef1f8] to-white px-4 py-6 sm:px-6 lg:px-8">
+      <div className="max-w-6xl mx-auto space-y-6">
         {/* Header */}
-        <div className="bg-white rounded-2xl shadow-lg p-6 mb-6">
-          <div className="flex items-center justify-center mb-4">
-            <div className="flex items-center gap-4">
-              <button
-                onClick={() => navigateMonth(-1)}
-                className="p-2 rounded-full bg-[#736CED] text-white hover:bg-[#4C3BCF] transition-colors"
-              >
-                <ChevronLeft size={20} />
-              </button>
-              <h2 className="text-xl font-semibold text-[#312A68] min-w-[180px] text-center">
-                {MONTHS[currentMonth]} {currentYear}
-              </h2>
-              <button
-                onClick={() => navigateMonth(1)}
-                className="p-2 rounded-full bg-[#736CED] text-white hover:bg-[#4C3BCF] transition-colors"
-              >
-                <ChevronRight size={20} />
-              </button>
+        <div className="bg-white/90 backdrop-blur-md rounded-3xl shadow-2xl ring-1 ring-gray-100 overflow-hidden">
+          <div className="bg-gradient-to-r from-[#001233] via-[#1d2f64] to-[#312A68] px-4 py-5 sm:px-6">
+            <div className="grid grid-cols-3 items-center gap-3">
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={() => navigateMonth(-1)}
+                  className="h-10 w-10 rounded-full bg-white/15 text-white hover:bg-white/25 transition-all shadow-md flex items-center justify-center"
+                >
+                  <ChevronLeft size={18} />
+                </button>
+                <button
+                  onClick={() => navigateMonth(1)}
+                  className="h-10 w-10 rounded-full bg-white/15 text-white hover:bg-white/25 transition-all shadow-md flex items-center justify-center"
+                >
+                  <ChevronRight size={18} />
+                </button>
+              </div>
+              <div className="text-center">
+                <p className="text-xs uppercase tracking-[0.2em] text-white/70 font-semibold">Gym Sessions</p>
+                <h2 className="text-2xl sm:text-3xl font-bold text-white drop-shadow-sm">
+                  {MONTHS[currentMonth]} {currentYear}
+                </h2>
+              </div>
+              <div className="flex justify-end">
+                {isEventsOffice && (
+                  <button
+                    onClick={() => setShowCreateModal(true)}
+                    className="inline-flex items-center gap-2 px-4 py-2.5 bg-white text-[#1d225a] rounded-xl font-semibold shadow-lg hover:-translate-y-0.5 hover:shadow-xl transition-all"
+                  >
+                    <Plus size={16} />
+                    Create Session
+                  </button>
+                )}
+              </div>
             </div>
           </div>
-
-          {/* Events Office Controls */}
-          {isEventsOffice && (
-            <div className="flex gap-3 mb-4">
-              <button
-                onClick={() => setShowCreateModal(true)}
-                className="px-4 py-2 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors flex items-center gap-2"
-              >
-                <Plus size={16} />
-                Create Session
-              </button>
-              {/*
-              {sessions.length > 0 && (
-                <button
-                  onClick={handleDeleteMonthSessions}
-                  disabled={loading}
-                  className="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors flex items-center gap-2 disabled:opacity-50"
-                >
-                  <Trash2 size={16} />
-                  Delete All Sessions
-                </button>
-              )}
-              */}
-            </div>
-          )}
         </div>
 
         {/* Calendar */}
         {loading ? (
-          <div className="bg-white rounded-2xl shadow-lg p-8 text-center">
-            <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-[#736CED] mb-4"></div>
-            <p className="text-[#312A68]">Loading schedule...</p>
+          <div className="bg-white/90 backdrop-blur rounded-3xl shadow-xl ring-1 ring-gray-100 p-10 text-center">
+            <div className="inline-block animate-spin rounded-full h-10 w-10 border-2 border-[#736CED] border-t-transparent mb-4"></div>
+            <p className="text-[#312A68] font-medium">Loading schedule...</p>
           </div>
         ) : error ? (
-          <div className="bg-white rounded-2xl shadow-lg p-8 text-center">
-            <p className="text-red-500 mb-4">{error}</p>
+          <div className="bg-white/90 backdrop-blur rounded-3xl shadow-xl ring-1 ring-gray-100 p-10 text-center space-y-4">
+            <p className="text-red-600 font-semibold">{error}</p>
             <button
               onClick={fetchMonthSessions}
-              className="px-4 py-2 bg-[#736CED] text-white rounded-lg hover:bg-[#4C3BCF] transition-colors"
+              className="px-4 py-2.5 bg-[#736CED] text-white rounded-xl shadow-md hover:bg-[#4C3BCF] transition-colors"
             >
               Retry
             </button>
           </div>
         ) : (
-          <div className="bg-white rounded-2xl shadow-lg overflow-hidden">
-            <div className="grid grid-cols-7 bg-[#736CED]">
+          <div className="bg-white/90 backdrop-blur-md rounded-3xl shadow-2xl ring-1 ring-gray-100 p-4 sm:p-6 space-y-4">
+            <div className="grid grid-cols-7 gap-2 text-center">
               {['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'].map(day => (
-                <div key={day} className="p-4 text-center text-white font-semibold">
+                <div key={day} className="rounded-xl bg-gray-50 text-gray-700 font-semibold py-3 text-xs uppercase tracking-wide shadow-inner">
                   {day}
                 </div>
               ))}
             </div>
 
-            <div className="grid grid-cols-7">
+            <div className="grid grid-cols-7 gap-3">
               {getDaysInMonth().map((day, index) => {
                 const daySessions = getSessionsForDate(day);
                 const isToday = day && 
                   new Date().getDate() === day && 
                   new Date().getMonth() === currentMonth && 
                   new Date().getFullYear() === currentYear;
+                const isWeekend = day && ((index % 7 === 0) || (index % 7 === 6));
                 
                 return (
                   <div
                     key={index}
-                    className={`min-h-[120px] border-r border-b border-gray-200 p-2 transition-colors duration-150
-                      ${!day ? 'bg-gray-50' : ''}
-                      ${isToday ? 'ring-2 ring-[#4C3BCF] ring-inset' : ''}`}
+                    className={`min-h-[140px] rounded-2xl border border-gray-100 p-3 transition-all duration-200
+                      ${!day ? 'bg-gray-50/70 border-dashed text-gray-400' : 'bg-white shadow-[0_8px_24px_rgba(0,0,0,0.04)] hover:-translate-y-1 hover:shadow-[0_16px_36px_rgba(76,59,207,0.12)]'}
+                      ${isToday ? 'ring-2 ring-offset-2 ring-[#4C3BCF] ring-offset-white' : ''}
+                      ${isWeekend && day ? 'bg-indigo-50/40' : ''}`}
                   >
                     {day && (
                       <>
-                        <div className="text-sm font-semibold mb-2 text-gray-800">
-                          {day}
+                        <div className="flex items-center justify-between mb-3">
+                          <span className="text-sm font-semibold text-gray-800">{day}</span>
+                          {isToday && <span className="text-[11px] font-bold text-[#4C3BCF] bg-[#efeafb] px-2 py-0.5 rounded-full">Today</span>}
                         </div>
                         
-                        <div className="space-y-1">
+                        <div className="space-y-2">
                           {daySessions.map((session, sessionIndex) => {
                             const isRegistered = isUserRegistered(session);
                             const sessionDate = new Date(session.date);
@@ -617,18 +611,25 @@ export default function GymSchedule() {
                               <div
                                 key={sessionIndex}
                                 onClick={() => !isPast && setSelectedSession(session)}
-                                className={`p-2 rounded text-xs transition-all ${isPast ? 'opacity-60 cursor-not-allowed' : 'cursor-pointer'} ${
+                                className={`p-3 rounded-xl text-xs transition-all border border-white/70 shadow-sm ${isPast ? 'opacity-60 cursor-not-allowed' : 'cursor-pointer hover:shadow-md'} ${
                                   isRegistered 
-                                    ? `bg-green-200 text-green-900 font-bold` 
-                                    : `${sessionColor} hover:shadow-sm`
+                                    ? 'bg-green-100 text-green-900 font-semibold'
+                                    : `${sessionColor}`
                                 }`}
                               >
-                                <div className="font-medium">
-                                  {formatTime(session.time)} ({session.duration} min) - {session.type}
+                                <div className="font-semibold">
+                                  {formatTime(session.time)} - {session.type}
                                 </div>
+                                <div className="text-[11px] opacity-80">{session.duration} min - {session.maxParticipants} max</div>
                               </div>
                             );
                           })}
+
+                          {daySessions.length === 0 && (
+                            <div className="text-xs text-gray-400 italic text-center py-4 border border-dashed border-gray-200 rounded-xl">
+                              No sessions
+                            </div>
+                          )}
                         </div>
                       </>
                     )}

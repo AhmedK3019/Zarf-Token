@@ -36,6 +36,8 @@ const MainDashboardEventsOffice = () => {
     location.pathname === "/dashboard/eventsOffice";
   const isGenerateQrPage =
     location.pathname === "/dashboard/eventsOffice/generate-qr";
+  const isGymSchedulePage =
+    location.pathname === "/dashboard/eventsOffice/gym-schedule";
   return (
     <div>
       <NavbarEventsOffice />
@@ -129,6 +131,15 @@ const MainDashboardEventsOffice = () => {
           </div>
         </div>
       )}
+      {isGymSchedulePage && (
+        <div className="w-full bg-[#001233] text-white px-6 py-8">
+          <div className="max-w-7xl mx-auto text-center">
+            <h1 className="text-4xl font-bold sm:text-5xl mb-4">
+              Gym Sessions
+            </h1>
+          </div>
+        </div>
+      )}
       <main
         className={`w-full px-4 ${
           isCreateEventPage ||
@@ -139,7 +150,8 @@ const MainDashboardEventsOffice = () => {
           isVendorRequestsPage ||
           isLoyaltyVendorsPage ||
           isAllEventsPage ||
-          isGenerateQrPage
+          isGenerateQrPage ||
+          isGymSchedulePage
             ? "mt-8"
             : "mt-6"
         }`}
