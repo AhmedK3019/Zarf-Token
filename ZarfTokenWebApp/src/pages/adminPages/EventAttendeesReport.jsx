@@ -186,7 +186,7 @@ export default function EventAttendeesReport() {
   if (loading) {
     return (
       <div className="flex justify-center items-center h-64">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#4a4ae6]"></div>
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#001233]"></div>
         <p className="ml-4 text-gray-600">Loading attendees report...</p>
       </div>
     );
@@ -204,19 +204,16 @@ export default function EventAttendeesReport() {
 
   return (
     <div className="p-8 bg-gray-50 min-h-screen">
-      <h1 className="text-3xl font-bold text-[#4C3BCF] mb-8">
-        Event Attendees Report
-      </h1>
       {/* --- Detailed Attendees Table --- */}
       <div className="bg-white rounded-lg shadow-lg border border-gray-200 overflow-hidden">
         {/* --- Table header with title and filter button --- */}
         <div className="flex flex-col sm:flex-row justify-between sm:items-center p-6 border-b gap-4">
-          <h2 className="text-xl font-semibold text-[#4C3BCF]">
+          <h2 className="text-xl font-semibold text-[#001233]">
             Attendee Breakdown per Event
           </h2>
           <button
             onClick={() => setShowFilters(!showFilters)}
-            className="px-4 py-2 rounded-lg border border-gray-300 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-[#4a4ae6] focus:border-transparent shadow-sm flex items-center justify-center gap-2 text-sm font-medium"
+            className="px-4 py-2 rounded-lg border border-[#001233] text-[#001233] bg-white hover:bg-[#001233] hover:text-white focus:outline-none focus:ring-2 focus:ring-[#001233] focus:border-transparent shadow-sm flex items-center justify-center gap-2 text-sm font-medium transition-colors"
           >
             <svg
               className="h-5 w-5 text-gray-600"
@@ -252,7 +249,7 @@ export default function EventAttendeesReport() {
                   id="filter-type"
                   value={filterType}
                   onChange={(e) => setFilterType(e.target.value)}
-                  className="w-full px-4 py-2 rounded-lg border border-gray-300 bg-white focus:outline-none focus:ring-2 focus:ring-[#4a4ae6] focus:border-transparent"
+                  className="w-full px-4 py-2 rounded-lg border border-gray-300 bg-white focus:outline-none focus:ring-2 focus:ring-[#001233] focus:border-transparent"
                 >
                   <option value="">All Types</option>
                   <option value="trip">Trip</option>
@@ -274,7 +271,7 @@ export default function EventAttendeesReport() {
                   value={filterName}
                   onChange={(e) => setFilterName(e.target.value)}
                   placeholder="Search by event name..."
-                  className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-[#4a4ae6] focus:border-transparent"
+                  className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-[#001233] focus:border-transparent"
                 />
               </div>
 
@@ -291,7 +288,7 @@ export default function EventAttendeesReport() {
                   id="filter-date"
                   value={filterDate}
                   onChange={(e) => setFilterDate(e.target.value)}
-                  className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-[#4a4ae6] focus:border-transparent"
+                  className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-[#001233] focus:border-transparent"
                 />
               </div>
 
@@ -312,7 +309,7 @@ export default function EventAttendeesReport() {
                           setEndDateFilter("");
                         }
                       }}
-                      className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-[#4a4ae6] focus:border-transparent"
+                      className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-[#001233] focus:border-transparent"
                       placeholder="Start"
                     />
                   </div>
@@ -325,7 +322,7 @@ export default function EventAttendeesReport() {
                       value={endDateFilter}
                       min={startDateFilter || undefined}
                       onChange={(e) => setEndDateFilter(e.target.value)}
-                      className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-[#4a4ae6] focus:border-transparent"
+                      className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-[#001233] focus:border-transparent"
                       placeholder="End"
                     />
                   </div>
@@ -430,7 +427,7 @@ export default function EventAttendeesReport() {
                     Total:
                   </span>
                   
-                  <span className="text-[#4C3BCF] text-lg">
+                  <span className="text-[#001233] text-lg">
                     {reportData.totalAttendees}
                   </span>
                 </td>

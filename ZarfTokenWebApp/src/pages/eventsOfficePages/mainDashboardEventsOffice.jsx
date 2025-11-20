@@ -21,6 +21,8 @@ const mainDashboardEventsOffice = () => {
     location.pathname === "/dashboard/eventsOffice/create-event";
   const isEventsSalesReportPage =
     location.pathname === "/dashboard/eventsOffice/events-sales-report";
+  const isEventAttendeesReportPage =
+    location.pathname === "/dashboard/eventsOffice/event-attendees-report";
   return (
     <div>
       <NavbarEventsOffice />
@@ -42,9 +44,22 @@ const mainDashboardEventsOffice = () => {
           </div>
         </div>
       )}
+      {isEventAttendeesReportPage && (
+        <div className="w-full bg-[#001233] text-white px-6 py-8">
+          <div className="max-w-7xl mx-auto text-center">
+            <h1 className="text-4xl font-bold sm:text-5xl mb-4">
+              Event Attendees Report
+            </h1>
+          </div>
+        </div>
+      )}
       <main
         className={`w-full px-4 ${
-          isCreateEventPage || isEventsSalesReportPage ? "mt-8" : "mt-6"
+          isCreateEventPage ||
+          isEventsSalesReportPage ||
+          isEventAttendeesReportPage
+            ? "mt-8"
+            : "mt-6"
         }`}
       >
         <Routes>
