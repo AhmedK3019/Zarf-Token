@@ -3,11 +3,10 @@ import LoyaltyApplicationsBoard from "../../components/loyalty/LoyaltyApplicatio
 
 export default function LoyaltyVendors() {
   return (
-    <div className="p-4 lg:p-6">
-      <LoyaltyApplicationsBoard
-        title="Vendor Loyalty Applications"
-        subtitle="Review submissions, verify promo codes, and keep track of partner status."
-      />
+    <div className="min-h-screen w-full bg-gradient-to-br from-[#f5f7ff] via-white to-[#eef2ff] px-4 py-6 lg:px-6 lg:py-8">
+      <div className="mx-auto w-full max-w-7xl">
+        <LoyaltyApplicationsBoard />
+      </div>
     </div>
   );
 }

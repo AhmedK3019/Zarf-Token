@@ -15,11 +15,11 @@ import {
 } from "lucide-react";
 
 const COLORS = {
-  primary: "#3B82F6",
-  secondary: "#0EA5E9",
-  accent: "#C14953",
-  muted: "#f5f5f7",
-  info: "#64748B",
+  primary: "#4C3BCF",
+  secondary: "#001233",
+  accent: "#E11D48",
+  muted: "#f6f7ff",
+  info: "#475569",
 };
 
 const statusConfig = {
@@ -65,10 +65,10 @@ const BUTTON_BASE =
 
 const BUTTON_VARIANTS = {
   primary:
-    "border border-sky-200 bg-sky-50 text-sky-700 hover:bg-sky-100 focus-visible:ring-sky-200",
+    "border border-[#4C3BCF] bg-[#4C3BCF] text-white hover:bg-[#3728a6] hover:border-[#3728a6] focus-visible:ring-[#d7d1ff]",
   secondary:
     "border border-gray-200 bg-white text-gray-700 hover:bg-gray-50 focus-visible:ring-gray-200",
-  info: "border border-sky-200 bg-sky-50 text-sky-700 hover:bg-sky-100 focus-visible:ring-sky-200",
+  info: "border border-[#4C3BCF]/20 bg-[#4C3BCF]/10 text-[#2c1f74] hover:bg-[#4C3BCF]/15 focus-visible:ring-[#d7d1ff]",
   danger:
     "border border-rose-200 bg-rose-50 text-rose-700 hover:bg-rose-100 focus-visible:ring-rose-200",
 };
@@ -83,7 +83,7 @@ function formatDateRange(dateISO, durationDays) {
   const durationLabel = `${durationDays} ${
     durationDays === 1 ? "day" : "days"
   }`;
-  return `${formattedDate} • ${durationLabel}`;
+  return `${formattedDate} - ${durationLabel}`;
 }
 
 function formatSubmittedAt(dateISO) {
@@ -144,7 +144,7 @@ function StatusBadge({ status }) {
   return (
     <span
       className={classNames(
-        "inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-bold uppercase tracking-wide shadow-[0_2px_6px_rgba(0,0,0,0.15)]",
+        "inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-[11px] font-semibold uppercase tracking-wide shadow-sm",
         config.badge
       )}
     >
@@ -157,32 +157,32 @@ function StatusBadge({ status }) {
 // Skeleton Card Component (Missing Component)
 function SkeletonCard() {
   return (
-    <div className="relative overflow-hidden rounded-2xl bg-[#FDFBFF] backdrop-blur-sm border border-white/40 shadow-lg animate-pulse">
-      <div className="bg-gray-300 px-6 py-5 overflow-hidden">
+    <div className="relative overflow-hidden rounded-2xl border border-gray-100 bg-white/80 shadow-sm ring-1 ring-black/5 animate-pulse">
+      <div className="overflow-hidden bg-gray-200 px-6 py-5">
         <div className="flex items-start justify-between gap-4">
           <div className="flex-1 space-y-2">
-            <div className="h-4 bg-gray-400 rounded w-1/4"></div>
-            <div className="h-6 bg-gray-400 rounded w-3/4"></div>
-            <div className="h-4 bg-gray-400 rounded w-1/2"></div>
+            <div className="h-4 w-1/4 rounded bg-gray-300"></div>
+            <div className="h-6 w-3/4 rounded bg-gray-300"></div>
+            <div className="h-4 w-1/2 rounded bg-gray-300"></div>
           </div>
-          <div className="h-6 bg-gray-400 rounded-full w-20"></div>
+          <div className="h-6 w-20 rounded-full bg-gray-300"></div>
         </div>
       </div>
 
       <div className="px-6 py-6 space-y-4">
         <div className="flex items-start justify-between gap-3">
-          <div className="h-7 bg-gray-300 rounded w-3/4"></div>
-          <div className="h-6 bg-gray-300 rounded-full w-16"></div>
+          <div className="h-7 w-3/4 rounded bg-gray-200"></div>
+          <div className="h-6 w-16 rounded-full bg-gray-200"></div>
         </div>
 
         <div className="space-y-2">
-          <div className="h-4 bg-gray-200 rounded w-full"></div>
-          <div className="h-4 bg-gray-200 rounded w-5/6"></div>
+          <div className="h-4 w-full rounded bg-gray-100"></div>
+          <div className="h-4 w-5/6 rounded bg-gray-100"></div>
         </div>
 
         <div className="flex items-center justify-between gap-4 pt-2">
-          <div className="h-4 bg-gray-300 rounded w-1/3"></div>
-          <div className="h-10 bg-gray-300 rounded-full w-28"></div>
+          <div className="h-4 w-1/3 rounded bg-gray-200"></div>
+          <div className="h-10 w-28 rounded-full bg-gray-200"></div>
         </div>
       </div>
     </div>
@@ -191,51 +191,54 @@ function SkeletonCard() {
 
 // Workshop Card Component
 function WorkshopCard({ workshop, onView }) {
+  const awaitingFrom = workshop?.raw?.currentMessage?.awaitingResponseFrom;
+  const awaitingCopy = workshop?.raw?.currentMessage?.message;
+
   return (
     <article
-      className="relative overflow-hidden rounded-2xl bg-white border border-gray-100 shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md animate-fade-in"
+      className="relative overflow-hidden rounded-2xl border border-gray-100 bg-white/90 shadow-sm ring-1 ring-black/5 transition-all duration-200 hover:-translate-y-1 hover:shadow-md animate-fade-in"
       style={{ animationDelay: `${Math.random() * 200}ms` }}
     >
       <div className="px-6 py-6 space-y-4">
         <div className="flex items-start justify-between gap-3">
-          <div className="inline-flex items-center gap-2 rounded-full bg-sky-50 px-3 py-1 text-xs font-semibold text-sky-700">
-            <span className="h-2 w-2 rounded-full bg-sky-500" />
+          <div className="inline-flex items-center gap-2 rounded-full border border-[#dfe5ff] bg-[#E6ECFF] px-3 py-1 text-xs font-semibold uppercase tracking-wide text-[#001233]">
+            <span className="h-2 w-2 rounded-full bg-[#4C3BCF]" />
             Workshop
           </div>
           <StatusBadge status={workshop.status} />
         </div>
 
         <div className="flex items-start justify-between gap-3">
-          <h4 className="text-xl font-bold text-gray-900 flex-1 leading-tight">
+          <h4 className="flex-1 text-xl font-bold leading-tight text-[#001233]">
             {workshop.title}
           </h4>
-          <span className="px-3 py-1 rounded-full text-xs font-semibold uppercase tracking-wide bg-sky-50 text-sky-700 border border-sky-100">
+          <span className="rounded-full border border-[#dfe5ff] bg-[#E6ECFF] px-3 py-1 text-xs font-semibold uppercase tracking-wide text-[#001233]">
             {workshop.location}
           </span>
         </div>
 
-        <p className="text-sm leading-relaxed text-gray-700 line-clamp-2">
+        <p className="text-sm leading-relaxed text-gray-600 line-clamp-2">
           {workshop.description}
         </p>
 
-        {workshop.raw.currentMessage.awaitingResponseFrom === "Professor" && (
-          <p className="text-xs text-gray-500 italic">
-            Awaiting response from Professor On requested edits
+        {awaitingFrom === "Professor" && (
+          <p className="text-xs font-semibold text-amber-700">
+            Awaiting professor response on requested edits
           </p>
         )}
 
-        {workshop.raw.currentMessage.awaitingResponseFrom ===
-          "Event office" && (
-          <p className="text-xs text-gray-500 italic">
-            {workshop.raw.currentMessage.message}
-          </p>
+        {awaitingFrom === "Event office" && awaitingCopy && (
+          <p className="text-xs text-gray-500 italic">{awaitingCopy}</p>
         )}
 
         <div className="flex items-center justify-between gap-4 pt-2">
-          <div className="flex items-center gap-2 text-sm font-medium text-gray-600">
-            <Calendar className="w-4 h-4 text-sky-600" />
-            <span>
+          <div className="flex flex-wrap items-center gap-3 text-sm font-medium text-gray-600">
+            <span className="inline-flex items-center gap-2 rounded-full bg-gray-50 px-3 py-1 text-xs font-semibold text-gray-700">
+              <Calendar className="h-4 w-4 text-[#4C3BCF]" />
               {formatDateRange(workshop.dateISO, workshop.durationDays)}
+            </span>
+            <span className="text-xs text-gray-500">
+              Submitted {formatSubmittedAt(workshop.submittedAt)}
             </span>
           </div>
           <button
@@ -280,6 +283,7 @@ function WorkshopModal({
   // --- END OF NEW STATE ---
 
   const workshopId = workshop._id || workshop.id;
+  const awaitingResponse = workshop.raw?.currentMessage?.awaitingResponseFrom;
 
   useEffect(() => {
     setAnimateIn(true);
@@ -437,7 +441,7 @@ function WorkshopModal({
               style={{ animationDelay: "100ms" }}
             >
               <div className="flex items-center gap-2">
-                <FileText className="w-5 h-5 text-sky-600" />
+                <FileText className="w-5 h-5 text-[#4C3BCF]" />
                 <h3 className="text-lg font-bold text-gray-900">
                   Workshop Overview
                 </h3>
@@ -453,7 +457,7 @@ function WorkshopModal({
               style={{ animationDelay: "200ms" }}
             >
               <div className="flex items-center gap-2">
-                <CheckCircle className="w-5 h-5 text-sky-600" />
+                <CheckCircle className="w-5 h-5 text-[#4C3BCF]" />
                 <h3 className="text-lg font-bold text-gray-900">
                   Full Agenda
                 </h3>
@@ -470,7 +474,7 @@ function WorkshopModal({
               style={{ animationDelay: "250ms" }}
             >
               <div className="flex items-center gap-2">
-                <MapPin className="w-5 h-5 text-sky-600" />
+                <MapPin className="w-5 h-5 text-[#4C3BCF]" />
                 <h3 className="text-lg font-bold text-gray-900">Location</h3>
               </div>
               <p className="text-sm leading-relaxed text-gray-700 pl-7">
@@ -483,7 +487,7 @@ function WorkshopModal({
               style={{ animationDelay: "250ms" }}
             >
               <div className="flex items-center gap-2">
-                <Users className="w-4 h-4 text-sky-600" />
+                <Users className="w-4 h-4 text-[#4C3BCF]" />
                 <h3 className="text-lg font-bold text-gray-900">Capacity</h3>
               </div>
               <p className="text-sm leading-relaxed text-gray-700 pl-7">
@@ -498,7 +502,7 @@ function WorkshopModal({
               style={{ animationDelay: "250ms" }}
             >
               <div className="flex items-center gap-2">
-                <HandCoins className="w-4 h-4 text-sky-600" />
+                <HandCoins className="w-4 h-4 text-[#4C3BCF]" />
                 <h3 className="text-lg font-bold text-gray-900">Funding</h3>
               </div>
               <p className="text-sm leading-relaxed text-gray-700 pl-7">
@@ -525,7 +529,7 @@ function WorkshopModal({
             >
               <div className="rounded-2xl border border-gray-200 bg-white px-6 py-4 shadow-sm">
                 <div className="flex items-center gap-2 mb-2">
-                  <Users className="w-4 h-4 text-sky-600" />
+                  <Users className="w-4 h-4 text-[#4C3BCF]" />
                   <p className="font-bold text-gray-900 text-sm">
                     Professors Participating
                   </p>
@@ -540,7 +544,7 @@ function WorkshopModal({
               </div>
               <div className="rounded-2xl border border-gray-200 bg-white px-6 py-4 shadow-sm">
                 <div className="flex items-center gap-2 mb-2">
-                  <Calendar className="w-4 h-4 text-sky-600" />
+                  <Calendar className="w-4 h-4 text-[#4C3BCF]" />
                   <p className="font-bold text-gray-900 text-sm">
                     Proposed Schedule
                   </p>
@@ -583,7 +587,7 @@ function WorkshopModal({
               style={{ animationDelay: "500ms" }}
             >
               <div className="flex items-center gap-2">
-                <RefreshCw className="w-5 h-5 text-sky-600" />
+                <RefreshCw className="w-5 h-5 text-[#4C3BCF]" />
                 <h3 className="text-lg font-bold text-gray-900">
                   Update Status
                 </h3>
@@ -648,7 +652,7 @@ function WorkshopModal({
                           value={group}
                           onChange={handleAllowedUsersChange}
                           checked={allowedUsers.includes(group)}
-                        className="rounded text-sky-600 focus:ring-sky-500"
+                        className="rounded text-[#4C3BCF] focus:ring-[#4C3BCF]"
                         />
                         <span className="text-sm font-semibold text-gray-700">
                           {group}
@@ -703,8 +707,7 @@ function WorkshopModal({
               {/* Show Request Edits button ONLY if Pending and NOT approving */}
               {workshop.status === "Pending" &&
                 !isApproving &&
-                workshop.raw.currentMessage.awaitingResponseFrom !==
-                  "Professor" && (
+                awaitingResponse !== "Professor" && (
                   <button
                     type="button"
                     onClick={handleToggleRequestForm}
@@ -728,10 +731,9 @@ function WorkshopModal({
               )}
 
               {/* Show this if awaiting professor */}
-              {workshop.raw.currentMessage.awaitingResponseFrom ===
-                "Professor" && (
+              {awaitingResponse === "Professor" && (
                 <p className="text-xs text-gray-500 italic">
-                  Awaiting response from Professor On requested edits
+                  Awaiting response from Professor on requested edits
                 </p>
               )}
 
@@ -842,6 +844,7 @@ export default function WorkshopRequests() {
   const [modalComment, setModalComment] = useState("");
   const [feedback, setFeedback] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [refreshKey, setRefreshKey] = useState(0);
 
   // Fetch workshops from backend
   useEffect(() => {
@@ -868,7 +871,7 @@ export default function WorkshopRequests() {
     };
 
     fetchWorkshops();
-  }, []);
+  }, [refreshKey]);
 
   useEffect(() => {
     if (!selectedWorkshop) {
@@ -887,11 +890,26 @@ export default function WorkshopRequests() {
     });
   }, [workshops, statusFilter]);
 
-  const hasActivefilters = statusFilter !== "All";
+  const hasActiveFilters = statusFilter !== "All";
+
+  const statusCounts = useMemo(() => {
+    return workshops.reduce(
+      (acc, item) => {
+        const key = String(item.status || "pending");
+        const normalized = key.charAt(0).toUpperCase() + key.slice(1);
+        acc[normalized] = (acc[normalized] || 0) + 1;
+        acc.total += 1;
+        return acc;
+      },
+      { Pending: 0, Approved: 0, Rejected: 0, total: 0 }
+    );
+  }, [workshops]);
 
   const resetFilters = () => {
     setStatusFilter("All");
   };
+
+  const handleRefresh = () => setRefreshKey((key) => key + 1);
 
   // --- MODIFIED: Split handleStatusUpdate into two functions ---
 
@@ -989,42 +1007,95 @@ export default function WorkshopRequests() {
   };
 
   return (
-    <div
-      className="min-h-screen w-full px-6 py-10"
-      style={{ backgroundColor: COLORS.muted }}
-    >
-      <div className="w-full">
-
-        {/* Filters */}
-        <section className="mb-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          <label className="flex flex-col gap-2">
-            <span className="text-sm font-bold text-gray-900">Status</span>
-            <select
-              value={statusFilter}
-              onChange={(e) => setStatusFilter(e.target.value)}
-              className="w-full rounded-xl border-2 border-gray-200 bg-white px-4 py-3 text-sm font-semibold text-gray-900 shadow-sm transition-all focus:border-sky-200 focus:outline-none focus:ring-2 focus:ring-sky-200 hover:border-sky-200"
-            >
-              {["All", "Pending", "Approved", "Rejected"].map((status) => (
-                <option key={status} value={status}>
-                  {status}
-                </option>
-              ))}
-            </select>
-          </label>
-
-          {hasActivefilters && (
-            <button
-              onClick={resetFilters}
-              className="flex items-center justify-center gap-2 px-4 py-3 rounded-xl border-2 border-sky-200 bg-white text-sm font-bold text-gray-900 transition-all hover:bg-sky-50 hover:border-sky-200 focus:outline-none focus:ring-2 focus:ring-sky-200 animate-fade-in"
-            >
-              <RefreshCw className="w-4 h-4" />
-              Reset Filters
-            </button>
-          )}
+    <div className="min-h-screen w-full bg-gradient-to-br from-[#f5f7ff] via-white to-[#eef2ff] px-4 py-6 lg:px-6 lg:py-8">
+      <div className="mx-auto w-full max-w-7xl space-y-6">
+        <section className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          <div className="rounded-2xl border border-gray-100 bg-white/80 p-4 shadow-sm">
+            <p className="text-xs font-semibold uppercase tracking-wide text-gray-500">
+              Total
+            </p>
+            <p className="text-2xl font-bold text-[#001233]">
+              {statusCounts.total}
+            </p>
+            <p className="text-xs text-gray-500">Workshops in the queue</p>
+          </div>
+          <div className="rounded-2xl border border-gray-100 bg-white/80 p-4 shadow-sm">
+            <p className="text-xs font-semibold uppercase tracking-wide text-gray-500">
+              Pending
+            </p>
+            <p className="text-2xl font-bold text-amber-700">
+              {statusCounts.Pending}
+            </p>
+            <p className="text-xs text-gray-500">Awaiting review</p>
+          </div>
+          <div className="rounded-2xl border border-gray-100 bg-white/80 p-4 shadow-sm">
+            <p className="text-xs font-semibold uppercase tracking-wide text-gray-500">
+              Approved
+            </p>
+            <p className="text-2xl font-bold text-emerald-700">
+              {statusCounts.Approved}
+            </p>
+            <p className="text-xs text-gray-500">Published to viewers</p>
+          </div>
+          <div className="rounded-2xl border border-gray-100 bg-white/80 p-4 shadow-sm">
+            <p className="text-xs font-semibold uppercase tracking-wide text-gray-500">
+              Rejected
+            </p>
+            <p className="text-2xl font-bold text-rose-700">
+              {statusCounts.Rejected}
+            </p>
+            <p className="text-xs text-gray-500">Sent back to requesters</p>
+          </div>
         </section>
 
-        {/* Workshop Cards */}
-        <section className="grid gap-6 lg:grid-cols-3">
+        <section className="rounded-3xl border border-gray-100 bg-white/80 p-5 shadow-sm">
+          <div className="flex flex-wrap items-center justify-between gap-3">
+            <div className="space-y-1">
+              <p className="text-xs font-semibold uppercase tracking-wide text-gray-500">
+                Filters
+              </p>
+              <p className="text-sm text-gray-600">
+                Stay aligned with the approval flow using familiar controls.
+              </p>
+            </div>
+            <div className="flex flex-wrap items-center gap-2">
+              {hasActiveFilters ? (
+                <button
+                  onClick={resetFilters}
+                  className="inline-flex items-center gap-2 rounded-full border border-gray-200 bg-white px-4 py-2.5 text-sm font-semibold text-gray-700 shadow-sm transition hover:bg-gray-50"
+                >
+                  <RefreshCw className="h-4 w-4 text-gray-500" />
+                  Clear filters
+                </button>
+              ) : null}
+              <button
+                onClick={handleRefresh}
+                className="inline-flex items-center gap-2 rounded-full border border-[#4C3BCF] bg-[#4C3BCF] px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-[#3728a6] hover:border-[#3728a6]"
+              >
+                <RefreshCw className="h-4 w-4" />
+                Refresh
+              </button>
+            </div>
+          </div>
+          <div className="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            <label className="flex flex-col gap-2">
+              <span className="text-sm font-semibold text-gray-800">Status</span>
+              <select
+                value={statusFilter}
+                onChange={(e) => setStatusFilter(e.target.value)}
+                className="w-full rounded-2xl border border-gray-200 bg-white px-4 py-3 text-sm font-semibold text-gray-900 shadow-sm transition focus:border-[#4C3BCF] focus:outline-none focus:ring-2 focus:ring-[#d7d1ff]"
+              >
+                {["All", "Pending", "Approved", "Rejected"].map((status) => (
+                  <option key={status} value={status}>
+                    {status}
+                  </option>
+                ))}
+              </select>
+            </label>
+          </div>
+        </section>
+
+        <section className="grid gap-5 lg:grid-cols-3">
           {isLoading ? (
             <>
               <SkeletonCard />
@@ -1040,14 +1111,14 @@ export default function WorkshopRequests() {
               />
             ))
           ) : (
-            <div className="col-span-full rounded-3xl border-2 border-dashed border-[#001233]/30 bg-white px-8 py-16 text-center shadow-sm">
+            <div className="col-span-full rounded-3xl border border-dashed border-gray-200 bg-white px-8 py-16 text-center shadow-sm">
               <div className="flex flex-col items-center gap-3">
-                <FileText className="w-16 h-16 text-sky-600/30" />
-                <p className="text-lg font-semibold text-sky-700/70">
+                <FileText className="h-12 w-12 text-[#4C3BCF]/30" />
+                <p className="text-lg font-semibold text-[#001233]/80">
                   No workshops match the current filters
                 </p>
                 <p className="text-sm text-gray-500">
-                  Try adjusting your search criteria
+                  Try adjusting the status or refresh to see new submissions.
                 </p>
               </div>
             </div>

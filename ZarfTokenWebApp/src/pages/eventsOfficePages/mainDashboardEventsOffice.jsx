@@ -27,9 +27,13 @@ const MainDashboardEventsOffice = () => {
     location.pathname === "/dashboard/eventsOffice/workshop-requests";
   const isVendorRequestsPage =
     location.pathname === "/dashboard/eventsOffice/vendor-requests";
+  const isLoyaltyVendorsPage =
+    location.pathname === "/dashboard/eventsOffice/loyalty-vendors";
   const isAllEventsPage =
     location.pathname === "/dashboard/eventsOffice/all-events" ||
     location.pathname === "/dashboard/eventsOffice";
+  const isGenerateQrPage =
+    location.pathname === "/dashboard/eventsOffice/generate-qr";
   return (
     <div>
       <NavbarEventsOffice />
@@ -84,12 +88,33 @@ const MainDashboardEventsOffice = () => {
           </div>
         </div>
       )}
+      {isLoyaltyVendorsPage && (
+        <div className="w-full bg-[#001233] text-white px-6 py-8">
+          <div className="max-w-7xl mx-auto text-center">
+            <h1 className="text-4xl font-bold sm:text-5xl mb-4">
+              Vendor Loyalty Applications
+            </h1>
+          </div>
+        </div>
+      )}
       {isAllEventsPage && (
         <div className="w-full bg-[#001233] text-white px-6 py-8">
           <div className="max-w-7xl mx-auto text-center">
             <h1 className="text-4xl font-bold sm:text-5xl mb-4">
               All Events
             </h1>
+          </div>
+        </div>
+      )}
+      {isGenerateQrPage && (
+        <div className="w-full bg-[#001233] text-white px-6 py-8">
+          <div className="max-w-7xl mx-auto text-center">
+            <h1 className="text-4xl font-bold sm:text-5xl mb-2">
+              Generate QR Code
+            </h1>
+            <p className="text-sm max-w-2xl mx-auto opacity-90">
+              Create downloadable QR codes for vendors or reps.
+            </p>
           </div>
         </div>
       )}
@@ -100,7 +125,9 @@ const MainDashboardEventsOffice = () => {
           isEventAttendeesReportPage ||
           isWorkshopRequestsPage ||
           isVendorRequestsPage ||
-          isAllEventsPage
+          isLoyaltyVendorsPage ||
+          isAllEventsPage ||
+          isGenerateQrPage
             ? "mt-8"
             : "mt-6"
         }`}

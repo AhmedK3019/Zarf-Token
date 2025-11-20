@@ -49,17 +49,8 @@ export default function GenerateQR() {
   };
 
   return (
-    <div className="w-full max-w-5xl">
-      <header className="mb-6 flex items-center justify-between">
-        <h2 className="text-3xl font-extrabold text-[#4C3BCF]">
-          Generate QR Code
-        </h2>
-        <p className="text-sm text-[#312A68]">
-          Create downloadable QR codes for vendors or reps.
-        </p>
-      </header>
-
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+    <div className="w-full max-w-3xl mx-auto px-4 space-y-6">
+      <div className="grid grid-cols-1 gap-6">
         {/* Form */}
         <div className="bg-white rounded-2xl p-6 shadow-md">
           <label className="block text-sm font-medium text-gray-700">
