@@ -251,21 +251,31 @@ export default function LoyaltyPartnersShowcase({
               {eyebrow}
             </p>
           )}
-          <h1 className="mt-3 text-3xl font-bold text-[#251E53] sm:text-4xl lg:text-5xl">
-            {title}
-          </h1>
-          <p className="mt-4 max-w-3xl text-base text-[#4B4470] sm:text-lg">
-            {description}
-          </p>
-          <div className="mt-6 flex flex-wrap items-center gap-4 text-sm font-medium text-[#4B4470]">
-            {lastLoadedAt && (
-              <span className="inline-flex rounded-full border border-[#E4E0FF] px-4 py-2 text-[#6B64A8]">
-                Updated {formatDate(lastLoadedAt)}
-              </span>
-            )}
+          {title && (
+            <h1 className="mt-3 text-3xl font-bold text-[#251E53] sm:text-4xl lg:text-5xl">
+              {title}
+            </h1>
+          )}
+          {description && (
+            <p className="mt-4 max-w-3xl text-base text-[#4B4470] sm:text-lg">
+              {description}
+            </p>
+          )}
+          <div
+            className={`flex flex-col gap-3 text-sm font-medium text-[#4B4470] ${
+              title || description ? "mt-6" : ""
+            } sm:flex-row sm:items-center sm:justify-between`}
+          >
+            <div className="flex flex-wrap items-center gap-3">
+              {lastLoadedAt && (
+                <span className="inline-flex rounded-full border border-[#E4E0FF] px-4 py-2 text-[#6B64A8]">
+                  Updated {formatDate(lastLoadedAt)}
+                </span>
+              )}
+            </div>
             <button
               onClick={fetchPartners}
-              className="inline-flex items-center gap-2 rounded-full border border-[#D4CEFF] px-4 py-2 text-[#4C3BCF] transition hover:bg-[#4C3BCF] hover:text-white"
+              className="inline-flex items-center gap-2 self-start rounded-full border border-[#D4CEFF] px-4 py-2 text-[#4C3BCF] transition hover:bg-[#4C3BCF] hover:text-white sm:self-auto"
             >
               <RefreshCcw className="h-4 w-4" />
               Refresh

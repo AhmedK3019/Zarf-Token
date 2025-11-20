@@ -180,17 +180,6 @@ export default function ApplyBooth() {
       <div className="relative flex min-h-screen w-full flex-col items-center">
         <main className="relative z-10 flex w-full flex-1 flex-col items-center px-6 py-8">
           <div className="w-full max-w-4xl">
-            {/* Header */}
-            <div className="mb-12 text-center">
-              <h1 className="text-4xl font-bold text-[#736CED] sm:text-5xl mb-4">
-                Request a Platform Booth
-              </h1>
-              <p className="text-lg text-[#312A68] max-w-2xl mx-auto">
-                Apply for a standalone booth in the main student activity area
-                by selecting a location on the map.
-              </p>
-            </div>
-
             {/* Form Container */}
             <div className="bg-white rounded-2xl p-8 shadow-[0_25px_50px_rgba(115,108,237,0.3)] border border-white/50">
               <form onSubmit={handleSubmit}>

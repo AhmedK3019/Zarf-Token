@@ -513,20 +513,13 @@ export default function RegisteredEvents() {
       <div className="relative flex min-h-screen w-full flex-col items-center">
         <main className="relative z-10 flex w-full flex-1 flex-col items-center px-6 py-8">
           <div className="w-full">
-            <div className="mb-8 text-center">
-              <h2 className="text-3xl font-bold text-[#736CED] sm:text-4xl mb-2">
-                My Registered Events
-              </h2>
-              {error ? (
+            {error && (
+              <div className="mb-8 text-center">
                 <p className="max-w-2xl mx-auto text-[#9F2D20] bg-[#FEE2E2] border border-[#FCA5A5] rounded-lg px-4 py-2">
                   {error}
                 </p>
-              ) : (
-                <p className="text-[#312A68] opacity-80">
-                  Here are the workshops and trips you signed up for.
-                </p>
-              )}
-            </div>
+              </div>
+            )}
 
             {events.length === 0 ? (
               <div className="text-center text-[#312A68]/70 py-16 bg-white/50 rounded-3xl">

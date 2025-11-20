@@ -332,10 +332,9 @@ export default function FavouriteEvents() {
 
   return (
     <div className="p-6 w-full">
-      <div className="flex items-center justify-between mb-6">
-        <h2 className="text-2xl font-bold text-[#4C3BCF]">My Favorites</h2>
+      {/* <div className="flex items-center justify-end mb-6">
         <div className="text-sm text-gray-600">You have {totalCount} events in favorites</div>
-      </div>
+      </div> */}
 
       {/* Filters & Sorting */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-3 mb-6 max-w-7xl mx-auto">

@@ -1,4 +1,4 @@
-import { Routes, Route } from "react-router-dom";
+import { Routes, Route, useLocation } from "react-router-dom";
 import NavbarUser from "./navbarUser";
 import { useAuthUser } from "../../hooks/auth";
 
@@ -15,11 +15,75 @@ import NotFound from "../NotFoundPage";
 
 const mainDashboardUser = () => {
   const { user } = useAuthUser();
+  const location = useLocation();
+  const isFavouriteEventsPage = location.pathname === "/dashboard/user/favourite-events";
+  const isRegisteredEventsPage = location.pathname === "/dashboard/user/registered-events";
+  const isGymSchedulePage = location.pathname === "/dashboard/user/gym-schedule";
+  const isLoyaltyProgramPage = location.pathname === "/dashboard/user/loyalty-program";
+  const isVendorsPollPage = location.pathname === "/dashboard/user/vendors-poll";
 
   return (
     <div>
       <NavbarUser />
-      <main className="w-full mt-6 px-4">
+      {/* Dashboard Container with My Favorites Section */}
+      {isFavouriteEventsPage && (
+        <div className="w-full bg-[#001233] text-white px-6 py-8">
+          <div className="max-w-7xl mx-auto text-center">
+            <h1 className="text-4xl font-bold sm:text-5xl mb-4">
+              My Favorites
+            </h1>
+          </div>
+        </div>
+      )}
+      {/* Dashboard Container with My Registered Events Section */}
+      {isRegisteredEventsPage && (
+        <div className="w-full bg-[#001233] text-white px-6 py-8">
+          <div className="max-w-7xl mx-auto text-center">
+            <h1 className="text-4xl font-bold sm:text-5xl mb-4">
+              My Registered Events
+            </h1>
+            <p className="text-sm max-w-2xl mx-auto opacity-90">
+              Here are the workshops and trips you signed up for.
+            </p>
+          </div>
+        </div>
+      )}
+      {/* Dashboard Container with Gym Schedule Section */}
+      {isGymSchedulePage && (
+        <div className="w-full bg-[#001233] text-white px-6 py-8">
+          <div className="max-w-7xl mx-auto text-center">
+            <h1 className="text-4xl font-bold sm:text-5xl mb-4">
+              Gym Schedule
+            </h1>
+          </div>
+        </div>
+      )}
+      {/* Dashboard Container with Loyalty Program Section */}
+      {isLoyaltyProgramPage && (
+        <div className="w-full bg-[#001233] text-white px-6 py-8">
+          <div className="max-w-7xl mx-auto text-center">
+            <h1 className="text-4xl font-bold sm:text-5xl mb-4">
+              GUC Loyalty Program Partners
+            </h1>
+            <p className="text-lg max-w-2xl mx-auto opacity-90">
+              Explore every active vendor in the GUC loyalty program.
+            </p>
+          </div>
+        </div>
+      )}
+      {isVendorsPollPage && (
+        <div className="w-full bg-[#001233] text-white px-6 py-8">
+          <div className="max-w-7xl mx-auto text-center">
+            <h1 className="text-4xl font-bold sm:text-5xl mb-3">
+              Vendors Poll
+            </h1>
+            <p className="text-lg max-w-2xl mx-auto opacity-90">
+              Tell us which vendors you want to see next on campus.
+            </p>
+          </div>
+        </div>
+      )}
+      <main className={`w-full px-4 ${(isFavouriteEventsPage || isRegisteredEventsPage || isGymSchedulePage || isLoyaltyProgramPage || isVendorsPollPage) ? 'mt-8' : 'mt-6'}`}>
         <Routes>
           <Route index element={<AllEvents />} />
           <Route path="/all-events" element={<AllEvents />} />

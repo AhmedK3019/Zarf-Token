@@ -221,17 +221,6 @@ export default function UpcomingBazars() {
       <div className="relative flex min-h-screen w-full flex-col items-center">
         <main className="relative z-10 flex w-full flex-1 flex-col items-center px-6 py-8">
           <div className="w-full">
-            {/* Header */}
-            <div className="mb-12 text-center">
-              <h1 className="text-4xl font-bold text-[#736CED] sm:text-5xl mb-4">
-                Bazaar Opportunities
-              </h1>
-              <p className="text-lg text-[#312A68] max-w-2xl mx-auto">
-                Explore upcoming bazaars and find the perfect opportunity for
-                your business.
-              </p>
-            </div>
-
             {/* Bazaars Grid */}
             {loading ? (
               <div className="text-center py-12">

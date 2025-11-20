@@ -349,10 +349,6 @@ const LoyaltyProgram = ({ vendor }) => {
 
   return (
     <div className="space-y-6 p-4 lg:p-6">
-      <div className="space-y-2 text-center">
-        <h1 className="text-3xl font-bold text-[#18122B]">{statusCopy.title}</h1>
-        <p className="text-sm text-gray-600">{statusCopy.message}</p>
-      </div>
       <section className="space-y-5 rounded-3xl border border-gray-100 bg-white/80 p-6 shadow-sm">
         <div className="flex flex-wrap items-center justify-end gap-3">
           <button

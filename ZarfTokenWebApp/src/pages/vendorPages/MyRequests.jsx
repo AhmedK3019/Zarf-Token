@@ -509,11 +509,6 @@ export default function MyRequests() {
     });
   }, [requests, statusTab, viewFilter]);
 
-  const breadcrumbLabel =
-    selectedRequest?.boothname ||
-    selectedRequest?.bazarId?.bazaarname ||
-    STATUS_TABS.find((tab) => tab.key === statusTab)?.label;
-
   const emitAnalyticsEvent = (payload) => {
     try {
       if (window?.dataLayer) {
@@ -599,25 +594,6 @@ export default function MyRequests() {
       <div className="min-h-screen w-full bg-muted text-[#1F1B3B] font-sans">
         <main className="flex w-full flex-1 flex-col items-center px-4 sm:px-6 py-8">
           <div className="w-full max-w-6xl">
-            <div className="flex flex-wrap items-center gap-2 text-sm text-gray-500 mb-4">
-              <span className="font-semibold text-gray-700">Dashboard</span>
-              <ChevronRight className="h-3 w-3" />
-              <span className="font-semibold text-gray-700">
-                My Participations
-              </span>
-              <ChevronRight className="h-3 w-3" />
-              <span>{breadcrumbLabel}</span>
-            </div>
-
-            <div className="mb-8 text-center">
-              <h1 className="text-4xl font-bold text-[#736CED]">
-                My Participation Requests
-              </h1>
-              <p className="text-md text-[#312A68] mt-2">
-                Track statuses, payment deadlines, and cancellation eligibility in one place.
-              </p>
-            </div>
-
             <div className="flex flex-wrap justify-center gap-3 mb-6">
               {STATUS_TABS.map((tab) => (
                 <button
@@ -773,7 +749,7 @@ export default function MyRequests() {
                         <div className="mt-auto pt-4 flex items-center justify-between gap-3">
                           <button
                             onClick={() => setSelectedRequest(request)}
-                            className="text-sm font-semibold text-[#736CED] hover:text-[#4C3BCF]"
+                            className="px-4 py-2 rounded-full text-sm font-semibold bg-[#736CED] text-white hover:bg-[#5A4BBA] transition-all inline-flex items-center gap-2"
                           >
                             View Details
                           </button>
@@ -785,10 +761,10 @@ export default function MyRequests() {
                                 ? "Cancel request"
                                 : cancellationState.reason
                             }
-                            className={`text-sm font-semibold px-4 py-2 rounded-lg border transition inline-flex items-center gap-2 ${
+                            className={`px-4 py-2 rounded-lg text-sm font-semibold transition inline-flex items-center gap-2 ${
                               cancellationState.canCancel
-                                ? "text-rose-600 border-rose-200 hover:bg-rose-50"
-                                : "text-gray-400 border-gray-200 cursor-not-allowed"
+                                ? "bg-red-600 text-white hover:bg-red-700"
+                                : "bg-gray-300 text-gray-500 cursor-not-allowed"
                             }`}
                           >
                             {isCancelling && (
