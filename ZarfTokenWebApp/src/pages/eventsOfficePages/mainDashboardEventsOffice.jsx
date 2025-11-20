@@ -1,4 +1,4 @@
-import { Routes, Route } from "react-router-dom";
+import { Routes, Route, useLocation } from "react-router-dom";
 import NavbarEventsOffice from "./navbarEventsOffice";
 
 import AllEvents from "../AllEvents";
@@ -16,10 +16,24 @@ import EditEvent from "./EditEvents";
 import EventsSalesReport from "../adminPages/EventsSalesReport";
 import EventAttendeesReport from "../adminPages/EventAttendeesReport";
 const mainDashboardEventsOffice = () => {
+  const location = useLocation();
+  const isCreateEventPage =
+    location.pathname === "/dashboard/eventsOffice/create-event";
   return (
     <div>
       <NavbarEventsOffice />
-      <main className="w-full mt-6 px-4">
+      {isCreateEventPage && (
+        <div className="w-full bg-[#001233] text-white px-6 py-8">
+          <div className="max-w-7xl mx-auto text-center">
+            <h1 className="text-4xl font-bold sm:text-5xl mb-4">
+              Create Events
+            </h1>
+          </div>
+        </div>
+      )}
+      <main
+        className={`w-full px-4 ${isCreateEventPage ? "mt-8" : "mt-6"}`}
+      >
         <Routes>
           <Route index element={<AllEvents />} />
           <Route path="all-events" element={<AllEvents />} />

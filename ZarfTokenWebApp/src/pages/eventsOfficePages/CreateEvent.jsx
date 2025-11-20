@@ -39,17 +39,13 @@ export default function CreateEvent() {
   return (
     <div className="min-h-screen flex flex-col items-center bg-transparent">
       <div className="w-full max-w-4xl mx-auto pt-12 px-6">
-        <h2 className="text-4xl md:text-5xl font-extrabold text-center text-purple-600 mb-4">
-          Create Events
-        </h2>
-
         <div className="flex justify-center gap-12 mb-8">
           <button
             onClick={() => setCurrentForm("Trip")}
             className={`${buttonStyle} ${
               currentForm === "Trip"
-                ? "bg-purple-600 text-white border-purple-600"
-                : "bg-white text-purple-600 border-purple-300 hover:border-purple-500"
+                ? "bg-[#001233] text-white border-[#001233]"
+                : "bg-white text-[#001233] border-[#001233] hover:bg-[#001233] hover:text-white"
             }`}
           >
             Create Trip
@@ -59,8 +55,8 @@ export default function CreateEvent() {
             onClick={() => setCurrentForm("Bazaar")}
             className={`${buttonStyle} ${
               currentForm === "Bazaar"
-                ? "bg-purple-600 text-white border-purple-600"
-                : "bg-white text-purple-600 border-purple-300 hover:border-purple-500"
+                ? "bg-[#001233] text-white border-[#001233]"
+                : "bg-white text-[#001233] border-[#001233] hover:bg-[#001233] hover:text-white"
             }`}
           >
             Create Bazaar
@@ -70,8 +66,8 @@ export default function CreateEvent() {
             onClick={() => setCurrentForm("Conference")}
             className={`${buttonStyle} ${
               currentForm === "Conference"
-                ? "bg-purple-600 text-white border-purple-600"
-                : "bg-white text-purple-600 border-purple-300 hover:border-purple-500"
+                ? "bg-[#001233] text-white border-[#001233]"
+                : "bg-white text-[#001233] border-[#001233] hover:bg-[#001233] hover:text-white"
             }`}
           >
             Create Conference
