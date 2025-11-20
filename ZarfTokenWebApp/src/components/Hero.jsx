@@ -133,8 +133,8 @@ const Hero = () => {
         </div>
 
         <div className="relative flex justify-center">
-          <div className="relative w-full max-w-md rounded-[32px] bg-gradient-to-br from-primary via-primary/80 to-secondary p-[1px] shadow-[0_28px_50px_rgba(115,108,237,0.3)]">
-            <div className="relative rounded-[31px] bg-white/90 p-6 backdrop-blur">
+          <div className="relative w-full max-w-md rounded-[20px] border border-primary/15 bg-white shadow-none">
+            <div className="relative rounded-[19px] bg-white/95 p-6 backdrop-blur-none">
               <form className="space-y-6" onSubmit={handleSubmit}>
                 <div className="space-y-4">
                   <div className="space-y-2">
@@ -204,7 +204,7 @@ const Hero = () => {
 
                 <button
                   type="submit"
-                  className="w-full rounded-full border border-primary/40 bg-white px-6 py-4 text-lg font-semibold text-primary tracking-wide shadow-[0_12px_24px_rgba(115,108,237,0.25)] transition-transform hover:-translate-y-0.5 hover:bg-secondary/20 hover:shadow-[0_16px_30px_rgba(115,108,237,0.3)]"
+                  className="w-full rounded-full border border-primary/40 bg-white px-6 py-4 text-lg font-semibold text-primary tracking-wide transition-transform hover:-translate-y-0.5 hover:bg-secondary/15 shadow-none"
                 >
                   Sign in
                 </button>

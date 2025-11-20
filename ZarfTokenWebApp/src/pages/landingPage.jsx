@@ -33,7 +33,7 @@ const LandingPage = () => {
     { type: "microphone", left: "10%", top: "10%", size: 55, rotate: -20 },
     { type: "trophy", left: "3%", top: "30%", size: 50, rotate: 10 },
     { type: "camera", left: "7%", top: "50%", size: 45, rotate: -25 },
-    { type: "musicNote", left: "4%", top: "70%", size: 50, rotate: 15 },
+    { type: "musicNote", left: "40%", top: "70%", size: 50, rotate: 15 },
     { type: "calendar", left: "18%", top: "15%", size: 40, rotate: -10 },
     { type: "locationPin", left: "6%", top: "55%", size: 45, rotate: 5 },
     { type: "balloon", left: "22%", top: "8%", size: 50, rotate: -30 },
@@ -66,10 +66,6 @@ const LandingPage = () => {
   return (
     <div className="min-h-screen w-full overflow-hidden bg-[#D5CFE1] text-primary">
       <div className="relative flex min-h-screen w-full flex-col items-center">
-        <div className="pointer-events-none absolute inset-0 -z-10">
-          <div className="absolute left-1/2 top-[-30%] h-[420px] w-[120%] -translate-x-1/2 rounded-[55%] bg-gradient-to-r from-info/40 via-info/20 to-info/35 blur-3xl" />
-          <div className="absolute bottom-[-22%] left-1/2 h-[360px] w-[110%] -translate-x-1/2 rounded-[50%] bg-gradient-to-br from-info/45 via-info/25 to-info/40 blur-3xl" />
-        </div>
 
         {/* Decorative Icons */}
         <DecorativeIcons icons={landingIcons} iconColor="text-primary/15" />

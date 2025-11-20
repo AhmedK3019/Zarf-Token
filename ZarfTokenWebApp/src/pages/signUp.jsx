@@ -1,8 +1,9 @@
 import React, { useEffect, useRef, useState } from "react";
-import { useNavigate, useSearchParams } from "react-router-dom";
+import { Link, useSearchParams } from "react-router-dom";
 import EyeIcon from "../components/EyeIcon";
 import api from "../services/api";
 import DecorativeIcons from "../components/DecorativeIcons";
+import EventTicker from "../components/EventTicker";
 
 const createInitialFormState = () => ({
   gucian: {
@@ -123,7 +124,6 @@ function PasswordStrengthMeter({ password }) {
 
 export default function SignUp() {
   const [searchParams, setSearchParams] = useSearchParams();
-  const navigate = useNavigate();
   const [formData, setFormData] = useState(() => createInitialFormState());
   const [errors, setErrors] = useState({});
   const [successMessage, setSuccessMessage] = useState("");
@@ -164,11 +164,6 @@ export default function SignUp() {
     setSuccessMessage("");
     setPasswordVisibility({ gucian: false, vendor: false });
     setQueryRole(role);
-  };
-
-  // Provide a quick exit route back to the landing page.
-  const handleGoBack = () => {
-    navigate("/", { replace: true });
   };
 
   const updateField = (field, value) => {
@@ -371,11 +366,11 @@ export default function SignUp() {
     }`;
 
   const baseToggleButtonClasses =
-    "flex-1 rounded-full border border-transparent px-4 py-2 text-sm font-semibold transition-all duration-300 ease-out focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-secondary/60 focus-visible:ring-offset-2 focus-visible:ring-offset-transparent";
+    "flex-1 rounded-full border border-transparent px-4 py-2 text-sm font-semibold transition-all duration-300 ease-out focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-secondary/60 focus-visible:ring-offset-2 focus-visible:ring-offset-transparent shadow-none";
   const activeToggleClasses =
-    "text-primary bg-transparent -translate-y-1 shadow-[0_0_0_2px_rgba(115,108,237,0.4),0_18px_40px_rgba(115,108,237,0.32)] ring-2 ring-secondary/70 ring-offset-[3px] ring-offset-transparent hover:-translate-y-2 hover:shadow-[0_0_0_3px_rgba(115,108,237,0.45),0_26px_52px_rgba(115,108,237,0.45)]";
+    "text-primary bg-transparent -translate-y-1 ring-2 ring-secondary/70 ring-offset-[3px] ring-offset-transparent hover:-translate-y-2 shadow-none";
   const inactiveToggleClasses =
-    "bg-transparent text-primary/90 shadow-none hover:-translate-y-1 hover:shadow-[0_12px_24px_rgba(115,108,237,0.18)]";
+    "bg-transparent text-primary/90 shadow-none hover:-translate-y-1";
 
   // Decorative icons configuration for signup page
   // More icons on left side, fewer on right to balance the form
@@ -398,7 +393,7 @@ export default function SignUp() {
     { type: "waves", left: "29%", top: "75%", size: 75, rotate: -5 },
     { type: "microphone", left: "5%", top: "50%", size: 48, rotate: -10 },
     { type: "trophy", left: "22%", top: "28%", size: 50, rotate: 8 },
-    { type: "camera", left: "21%", top: "58%", size: 45, rotate: -18 },
+    { type: "camera", left: "21%", top: "75%", size: 45, rotate: -18 },
     // Right side - fewer icons, avoiding form area (center-right 50-70%)
     { type: "star", left: "88%", top: "12%", size: 40, rotate: -20 },
     { type: "microphone", left: "92%", top: "28%", size: 50, rotate: 15 },
@@ -410,27 +405,22 @@ export default function SignUp() {
     { type: "star", left: "94%", top: "65%", size: 42, rotate: 22 },
     { type: "calendar", left: "88%", top: "38%", size: 44, rotate: -8 },
     // Top and bottom edges - avoiding center
-    { type: "confetti", left: "30%", top: "3%", size: 50, rotate: 15 },
-    { type: "ticket", left: "70%", top: "5%", size: 45, rotate: -20 },
+    //{ type: "confetti", left: "30%", top: "3%", size: 50, rotate: 15 },
+   // { type: "ticket", left: "70%", top: "5%", size: 45, rotate: -20 },
     { type: "locationPin", left: "25%", top: "86%", size: 48, rotate: 8 },
   ];
 
   return (
-    <div className="relative min-h-screen w-full overflow-hidden bg-[#D5CFE1] text-primary">
-      <div className="pointer-events-none absolute left-1/2 top-[-20%] h-[420px] w-[120%] -translate-x-1/2 rounded-[50%] bg-gradient-to-r from-primary via-info to-secondary opacity-40 blur-3xl" />
-      <div className="pointer-events-none absolute bottom-[-18%] left-1/2 h-[360px] w-[110%] -translate-x-1/2 rounded-[50%] bg-gradient-to-r from-secondary via-primary to-info opacity-40 blur-3xl" />
+    <div className="relative flex min-h-screen w-full flex-col overflow-x-hidden bg-[#D5CFE1] text-primary">
 
       {/* Decorative Icons */}
       <DecorativeIcons icons={signupIcons} iconColor="text-primary/15" />
 
-      <main className="relative z-10 flex min-h-screen items-center justify-center px-6 py-16">
-        <button
-          type="button"
-          onClick={handleGoBack}
-          className="absolute left-6 top-6 inline-flex items-center justify-center rounded-full border border-primary/40 bg-white px-4 py-2 text-sm font-semibold text-primary tracking-wide shadow-[0_8px_18px_rgba(115,108,237,0.2)] transition-transform hover:-translate-y-0.5 hover:bg-secondary/20 hover:shadow-[0_12px_24px_rgba(115,108,237,0.25)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40 focus-visible:ring-offset-2 focus-visible:ring-offset-white sm:left-10 sm:top-10"
-        >
-          Back
-        </button>
+      <div className="relative z-30 w-full">
+        <EventTicker />
+      </div>
+
+      <main className="relative z-10 flex flex-1 items-center justify-center px-6 py-10">
         <div className="grid w-full max-w-6xl gap-12 lg:grid-cols-[1.05fr_1fr]">
           <div className="space-y-6 self-center">
             <h2 className="text-4xl font-bold text-primary sm:text-5xl lg:text-6xl">
@@ -444,8 +434,8 @@ export default function SignUp() {
           </div>
 
           <div className="relative mx-auto w-full max-w-lg">
-            <div className="relative rounded-[32px] bg-gradient-to-br from-primary via-primary/80 to-secondary p-[1px] shadow-[0_28px_50px_rgba(115,108,237,0.3)]">
-              <div className="rounded-[31px] bg-white/95 p-6 backdrop-blur">
+            <div className="relative rounded-[24px] border border-primary/15 bg-white">
+              <div className="rounded-[23px] bg-white p-6">
                 <div className="flex items-center justify-between gap-3 text-sm font-semibold">
                   <button
                     type="button"
@@ -805,12 +795,22 @@ export default function SignUp() {
 
                   <button
                     type="submit"
-                    className="w-full rounded-full border border-primary/40 bg-white px-6 py-4 text-lg font-semibold text-primary tracking-wide shadow-[0_12px_24px_rgba(115,108,237,0.25)] transition-transform hover:-translate-y-0.5 hover:bg-secondary/20 hover:shadow-[0_16px_30px_rgba(115,108,237,0.3)]"
+                    className="w-full rounded-full border border-primary/40 bg-white px-6 py-4 text-lg font-semibold text-primary tracking-wide transition-transform hover:-translate-y-0.5 hover:bg-secondary/15 shadow-none"
                   >
                     {activeRole === "gucian"
                       ? "Create my GUCian account"
                       : "Apply as a company"}
                   </button>
+
+                  <p className="text-center text-sm font-semibold text-primary/80">
+                    Already a member?{" "}
+                    <Link
+                      to="/"
+                      className="text-secondary underline decoration-primary/40 transition hover:text-primary"
+                    >
+                      Sign in
+                    </Link>
+                  </p>
 
                   <p className="text-center text-xs text-primary/70">
                     By continuing you agree to our terms and acknowledge our
