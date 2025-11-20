@@ -19,6 +19,7 @@ const mainDashboardUser = () => {
   const isFavouriteEventsPage = location.pathname === "/dashboard/user/favourite-events";
   const isRegisteredEventsPage = location.pathname === "/dashboard/user/registered-events";
   const isGymSchedulePage = location.pathname === "/dashboard/user/gym-schedule";
+  const isLoyaltyProgramPage = location.pathname === "/dashboard/user/loyalty-program";
 
   return (
     <div>
@@ -56,7 +57,20 @@ const mainDashboardUser = () => {
           </div>
         </div>
       )}
-      <main className={`w-full px-4 ${(isFavouriteEventsPage || isRegisteredEventsPage || isGymSchedulePage) ? 'mt-8' : 'mt-6'}`}>
+      {/* Dashboard Container with Loyalty Program Section */}
+      {isLoyaltyProgramPage && (
+        <div className="w-full bg-[#001233] text-white px-6 py-8">
+          <div className="max-w-7xl mx-auto text-center">
+            <h1 className="text-4xl font-bold sm:text-5xl mb-4">
+              GUC Loyalty Program Partners
+            </h1>
+            <p className="text-lg max-w-2xl mx-auto opacity-90">
+              Explore every active vendor in the GUC loyalty program.
+            </p>
+          </div>
+        </div>
+      )}
+      <main className={`w-full px-4 ${(isFavouriteEventsPage || isRegisteredEventsPage || isGymSchedulePage || isLoyaltyProgramPage) ? 'mt-8' : 'mt-6'}`}>
         <Routes>
           <Route index element={<AllEvents />} />
           <Route path="/all-events" element={<AllEvents />} />

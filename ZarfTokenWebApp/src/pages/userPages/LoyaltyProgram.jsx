@@ -4,7 +4,7 @@ import LoyaltyPartnersShowcase from "../../components/loyalty/LoyaltyPartnersSho
 export default function LoyaltyProgram() {
   return (
     <div className="pb-12">
-      <LoyaltyPartnersShowcase />
+      <LoyaltyPartnersShowcase title="" description="" />
     </div>
   );
 }
