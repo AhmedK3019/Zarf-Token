@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import api from "../../services/api";
-import { Clock, MapPin, Calendar, Users, Info, Square } from "lucide-react";
+import { Clock, MapPin, Calendar, Users, Info, Square, Download, FileText, AlertCircle, User, Eye } from "lucide-react";
 
 // --- ADDED: Utility and Badge Components (copied from MyRequests.jsx) ---
 function formatDate(dateStr) {
@@ -48,6 +48,65 @@ export default function VendorRequests() {
     } catch (err) {
       setError(`Failed to ${action} request`);
       setTimeout(() => setError(null), 2000);
+    }
+  };
+
+  const handleDownloadDocument = async (documentId, personName) => {
+    try {
+      // First, get the file info to get the original filename
+      const fileInfoResponse = await api.get(`/uploads`);
+      const fileInfo = fileInfoResponse.data.find(file => file._id === documentId);
+      
+      const response = await api.get(`/uploads/${documentId}`, {
+        responseType: 'blob'
+      });
+      
+      // Check if we actually received data
+      if (!response.data || response.data.size === 0) {
+        throw new Error('No file data received');
+      }
+      let filename = `${personName}_ID_Document`;
+      if (fileInfo && fileInfo.fileName) {
+        const ext = fileInfo.fileName.split('.').pop();
+        filename = `${personName}_ID_Document.${ext}`;
+      }
+      
+      const blob = new Blob([response.data]);
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.setAttribute('download', filename);
+      link.style.display = 'none';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
+    } catch (err) {
+      console.error('Download error:', err);
+      setError(`Failed to download document: ${err.response?.data?.error || err.message}`);
+      setTimeout(() => setError(null), 3000);
+    }
+  };
+
+  const handleViewDocument = async (documentId) => {
+    try {
+      // First get the file info to get the fileId
+      const fileInfoResponse = await api.get(`/uploads`);
+      const fileInfo = fileInfoResponse.data.find(file => file._id === documentId);
+      
+      if (!fileInfo || !fileInfo.fileId) {
+        throw new Error('File information not found');
+      }
+      
+      const baseUrl = import.meta.env.VITE_API_URL || 'http://localhost:3000/api';
+      const url = `${baseUrl}/uploads/fileId/${fileInfo.fileId}`;
+      
+      // Open in new tab for viewing - this endpoint serves files inline
+      window.open(url, '_blank');
+    } catch (err) {
+      console.error('View error:', err);
+      setError('Failed to view document');
+      setTimeout(() => setError(null), 3000);
     }
   };
 
@@ -164,13 +223,48 @@ export default function VendorRequests() {
                             />
                             <span>
                               <strong>Team Members:</strong> {req.people.length}
-                              <ul className="mt-1 space-y-1 pl-2">
+                              <ul className="mt-2 space-y-2">
                                 {req.people.map((p, i) => (
                                   <li
                                     key={i}
-                                    className="text-xs bg-gray-50 p-1 rounded"
+                                    className="flex items-center gap-3 p-2 rounded-lg bg-gray-50/50 hover:bg-gray-50 transition-colors"
                                   >
-                                    {p.name} - {p.email}
+                                    {/* Avatar */}
+                                    <div className="flex-shrink-0 w-8 h-8 bg-gray-200 rounded-full flex items-center justify-center">
+                                      <User size={14} className="text-gray-500" />
+                                    </div>
+                                    
+                                    {/* Name and Email */}
+                                    <div className="flex-1 min-w-0">
+                                      <div className="text-sm font-medium text-gray-900 truncate">{p.name}</div>
+                                      <div className="text-xs text-gray-500 truncate">{p.email}</div>
+                                    </div>
+                                    
+                                    {/* View and Download Icons */}
+                                    <div className="flex-shrink-0 flex gap-1">
+                                      {p.DocumentId ? (
+                                        <>
+                                          <button
+                                            onClick={() => handleViewDocument(p.DocumentId)}
+                                            className="p-1 text-gray-400 hover:text-green-600 transition-colors rounded"
+                                            title="View ID Document"
+                                          >
+                                            <Eye size={14} />
+                                          </button>
+                                          <button
+                                            onClick={() => handleDownloadDocument(p.DocumentId, p.name)}
+                                            className="p-1 text-gray-400 hover:text-blue-600 transition-colors rounded"
+                                            title="Download ID Document"
+                                          >
+                                            <Download size={14} />
+                                          </button>
+                                        </>
+                                      ) : (
+                                        <div className="p-1 text-red-400" title="No document uploaded">
+                                          <AlertCircle size={14} />
+                                        </div>
+                                      )}
+                                    </div>
                                   </li>
                                 ))}
                               </ul>
@@ -219,13 +313,48 @@ export default function VendorRequests() {
                             />
                             <span>
                               <strong>Team:</strong> {req.people.length}
-                              <ul className="mt-1 space-y-1 pl-2">
+                              <ul className="mt-2 space-y-2">
                                 {req.people.map((p, i) => (
                                   <li
                                     key={i}
-                                    className="text-xs bg-gray-50 p-1 rounded"
+                                    className="flex items-center gap-3 p-2 rounded-lg bg-gray-50/50 hover:bg-gray-50 transition-colors"
                                   >
-                                    {p.name} - {p.email}
+                                    {/* Avatar */}
+                                    <div className="flex-shrink-0 w-8 h-8 bg-gray-200 rounded-full flex items-center justify-center">
+                                      <User size={14} className="text-gray-500" />
+                                    </div>
+                                    
+                                    {/* Name and Email */}
+                                    <div className="flex-1 min-w-0">
+                                      <div className="text-sm font-medium text-gray-900 truncate">{p.name}</div>
+                                      <div className="text-xs text-gray-500 truncate">{p.email}</div>
+                                    </div>
+                                    
+                                    {/* View and Download Icons */}
+                                    <div className="flex-shrink-0 flex gap-1">
+                                      {p.DocumentId ? (
+                                        <>
+                                          <button
+                                            onClick={() => handleViewDocument(p.DocumentId)}
+                                            className="p-1 text-gray-400 hover:text-green-600 transition-colors rounded"
+                                            title="View ID Document"
+                                          >
+                                            <Eye size={14} />
+                                          </button>
+                                          <button
+                                            onClick={() => handleDownloadDocument(p.DocumentId, p.name)}
+                                            className="p-1 text-gray-400 hover:text-blue-600 transition-colors rounded"
+                                            title="Download ID Document"
+                                          >
+                                            <Download size={14} />
+                                          </button>
+                                        </>
+                                      ) : (
+                                        <div className="p-1 text-red-400" title="No document uploaded">
+                                          <AlertCircle size={14} />
+                                        </div>
+                                      )}
+                                    </div>
                                   </li>
                                 ))}
                               </ul>

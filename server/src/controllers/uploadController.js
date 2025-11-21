@@ -57,24 +57,27 @@ export const getFileByFileId = async (req, res) => {
     if (!fs.existsSync(filePath)) {
       return res.status(404).json({ error: "File not found on server" });
     }
-    // Serve inline if it's an image so it can be displayed directly in <img src="..." /> tags
+    
+    // Serve inline for images and PDFs for viewing
     const ext = path.extname(upload.fileId).toLowerCase();
-    const imageTypes = {
+    const inlineTypes = {
       ".png": "image/png",
       ".jpg": "image/jpeg",
       ".jpeg": "image/jpeg",
       ".gif": "image/gif",
       ".webp": "image/webp",
       ".svg": "image/svg+xml",
+      ".pdf": "application/pdf"
     };
-    const contentType = imageTypes[ext];
+    const contentType = inlineTypes[ext];
     if (contentType) {
       res.setHeader("Content-Type", contentType);
-      // Optional caching (tweak max-age as needed)
+      // For PDFs and images, serve inline (not as attachment)
+      res.setHeader("Content-Disposition", "inline");
       res.setHeader("Cache-Control", "public, max-age=3600");
       return res.sendFile(path.resolve(filePath));
     }
-    // Fallback: non-image files still downloaded
+    // Fallback: other file types still downloaded
     res.download(filePath, upload.fileName);
   } catch (err) {
     res.status(400).json({ error: err.message });
