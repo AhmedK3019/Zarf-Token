@@ -6,6 +6,8 @@ import {
   updateCourt,
   deleteCourt,
   reserveCourt,
+  getUserReservations,
+  cancelReservation,
 } from "../controllers/courtController.js";
 
 const router = express.Router();
@@ -18,5 +20,9 @@ router.delete("/:id", deleteCourt);
 
 // Reserve a court (expects { reservationId } in body)
 router.post("/:id/reserve", reserveCourt);
+
+router.get("/my-reservations/:userId", getUserReservations);
+
+router.delete("/:id/cancel-reservation", cancelReservation);
 
 export default router;

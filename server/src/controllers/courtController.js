@@ -90,3 +90,55 @@ export const reserveCourt = async (req, res) => {
     res.status(400).json({ error: err.message });
   }
 };
+
+export const getUserReservations = async (req, res) => {
+  try {
+    const { userId } = req.params;
+    const reservations = await Reservation.find({ studentId: userId }).populate('courtId');
+    const formattedReservations = reservations.map(reservation => ({
+      _id: reservation._id,
+      slotId: reservation._id,
+      courtId: reservation.courtId._id,
+      courtName: reservation.courtId.name,
+      courtType: reservation.courtId.type,
+      dateTime: reservation.dateTime,
+      studentName: reservation.studentName,
+      studentGucId: reservation.studentGucId,
+    }));
+    
+    res.json(formattedReservations);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};
+
+// Cancel a reservation
+export const cancelReservation = async (req, res) => {
+  try {
+    const { id: courtId } = req.params;
+    const { studentId, slotId } = req.body;
+    const reservation = await Reservation.findById(slotId);
+    if (!reservation) {
+      return res.status(404).json({ error: "Reservation not found" });
+    }
+    if (reservation.studentId.toString() !== studentId) {
+      return res.status(403).json({ error: "Unauthorized to cancel this reservation" });
+    }
+    const court = await Court.findById(courtId);
+    if (court) {
+      const slot = court.freeSlots.find(s => 
+        s.reservationId && s.reservationId.toString() === slotId
+      );
+      if (slot) {
+        slot.isReserved = false;
+        slot.reservationId = null;
+        await court.save();
+      }
+    }
+    await Reservation.findByIdAndDelete(slotId);
+    
+    res.json({ message: "Reservation cancelled successfully" });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};
