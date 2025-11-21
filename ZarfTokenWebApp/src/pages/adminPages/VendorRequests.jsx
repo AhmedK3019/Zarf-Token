@@ -1,8 +1,22 @@
 import React, { useState, useEffect } from "react";
 import api from "../../services/api";
-import { Clock, MapPin, Calendar, Users, Info, Square, Download, FileText, AlertCircle, User, Eye } from "lucide-react";
+import {
+  Clock,
+  MapPin,
+  Calendar,
+  Users,
+  Info,
+  Square,
+  Download,
+  AlertCircle,
+  User,
+  Eye,
+  X,
+  CheckSquare,
+  Square as UncheckedSquare,
+} from "lucide-react";
 
-// --- ADDED: Utility and Badge Components (copied from MyRequests.jsx) ---
+// --- Utility: Date Formatter ---
 function formatDate(dateStr) {
   try {
     const d = new Date(dateStr);
@@ -16,12 +30,21 @@ function formatDate(dateStr) {
   }
 }
 
+// --- Constants ---
+const ROLE_OPTIONS = ["Student", "Staff", "TA", "Professor"];
+
 export default function VendorRequests() {
   const [requests, setRequests] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [message, setMessage] = useState(null);
 
+  // --- Modal State (Only for Platform Booths) ---
+  const [showAcceptModal, setShowAcceptModal] = useState(false);
+  const [selectedRequest, setSelectedRequest] = useState(null);
+  const [selectedRoles, setSelectedRoles] = useState([]);
+
+  // --- Fetch Data ---
   const fetchRequests = async () => {
     setError(null);
     try {
@@ -35,101 +58,142 @@ export default function VendorRequests() {
     }
   };
 
+  // --- Handle Actions ---
   const handleAction = async (id, action) => {
-    const confirmMsg = `Are you sure you want to ${action} this request?`;
-    if (!window.confirm(confirmMsg)) return;
+    const requestToProcess = requests.find((r) => r._id === id);
+    if (!requestToProcess) return;
+
+    // REJECT FLOW
+    if (action === "reject") {
+      const confirmMsg = `Are you sure you want to REJECT this request?`;
+      if (!window.confirm(confirmMsg)) return;
+      processRequest(id, "reject");
+      return;
+    }
+
+    // ACCEPT FLOW
+    if (action === "accept") {
+      if (requestToProcess.isBazarBooth) {
+        // CASE 1: BAZAAR BOOTH
+        // Allowed users are already defined in the Bazaar settings.
+        // No need for modal. Just confirm and accept.
+        if (
+          window.confirm(
+            `Accept Bazaar Booth request for ${requestToProcess.vendorId?.companyname}?`
+          )
+        ) {
+          processRequest(id, "accept", []); // No specific roles needed in body
+        }
+      } else {
+        // CASE 2: PLATFORM BOOTH (Not a Bazaar)
+        // Must define allowed users via Modal.
+        setSelectedRequest(requestToProcess);
+        setSelectedRoles([]); // Reset selection
+        setShowAcceptModal(true);
+      }
+    }
+  };
+
+  // --- Modal Checkbox Toggle ---
+  const toggleRole = (role) => {
+    if (selectedRoles.includes(role)) {
+      setSelectedRoles(selectedRoles.filter((r) => r !== role));
+    } else {
+      setSelectedRoles([...selectedRoles, role]);
+    }
+  };
+
+  // --- Submit Acceptance from Modal ---
+  const handleConfirmModalAccept = () => {
+    if (selectedRoles.length === 0) {
+      alert("Please select at least one audience group.");
+      return;
+    }
+    // Process request with the selected roles
+    processRequest(selectedRequest._id, "accept", selectedRoles);
+
+    // Cleanup
+    setShowAcceptModal(false);
+    setSelectedRequest(null);
+  };
+
+  // --- API Logic ---
+  const processRequest = async (id, action, roles = []) => {
     try {
-      if (action === "accept")
-        await api.post(`/vendorRequests/${id}/${action}`);
-      else await api.delete(`/vendorRequests/${id}`);
+      if (action === "accept") {
+        // Send roles in body (only used by backend if it's a platform booth, typically)
+        await api.post(`/vendorRequests/${id}/${action}`, {
+          allowedusers: roles,
+        });
+      } else {
+        await api.delete(`/vendorRequests/${id}`);
+      }
+
       setMessage(`Request ${action}ed successfully`);
       setRequests((prev) => prev.filter((r) => r._id !== id));
       setTimeout(() => setMessage(null), 2000);
     } catch (err) {
+      console.error(err);
       setError(`Failed to ${action} request`);
       setTimeout(() => setError(null), 2000);
     }
   };
 
+  // --- File Handlers ---
   const handleDownloadDocument = async (documentId, personName) => {
     try {
-      // First, get the file info to get the original filename
       const fileInfoResponse = await api.get(`/uploads`);
-      const fileInfo = fileInfoResponse.data.find(file => file._id === documentId);
-      
+      const fileInfo = fileInfoResponse.data.find((f) => f._id === documentId);
       const response = await api.get(`/uploads/${documentId}`, {
-        responseType: 'blob'
+        responseType: "blob",
       });
-      
-      // Check if we actually received data
-      if (!response.data || response.data.size === 0) {
-        throw new Error('No file data received');
+      if (!response.data || response.data.size === 0)
+        throw new Error("No file data");
+
+      let filename = `${personName}_ID`;
+      if (fileInfo?.fileName) {
+        const ext = fileInfo.fileName.split(".").pop();
+        filename += `.${ext}`;
       }
-      let filename = `${personName}_ID_Document`;
-      if (fileInfo && fileInfo.fileName) {
-        const ext = fileInfo.fileName.split('.').pop();
-        filename = `${personName}_ID_Document.${ext}`;
-      }
-      
       const blob = new Blob([response.data]);
       const url = window.URL.createObjectURL(blob);
-      const link = document.createElement('a');
+      const link = document.createElement("a");
       link.href = url;
-      link.setAttribute('download', filename);
-      link.style.display = 'none';
+      link.setAttribute("download", filename);
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
       window.URL.revokeObjectURL(url);
     } catch (err) {
-      console.error('Download error:', err);
-      setError(`Failed to download document: ${err.response?.data?.error || err.message}`);
+      setError("Failed to download document");
       setTimeout(() => setError(null), 3000);
     }
   };
 
   const handleViewDocument = async (documentId) => {
     try {
-      // First get the file info to get the fileId
       const fileInfoResponse = await api.get(`/uploads`);
-      const fileInfo = fileInfoResponse.data.find(file => file._id === documentId);
-      
-      if (!fileInfo || !fileInfo.fileId) {
-        throw new Error('File information not found');
-      }
-      
-      const baseUrl = import.meta.env.VITE_API_URL || 'http://localhost:3000/api';
-      const url = `${baseUrl}/uploads/fileId/${fileInfo.fileId}`;
-      
-      // Open in new tab for viewing - this endpoint serves files inline
-      window.open(url, '_blank');
+      const fileInfo = fileInfoResponse.data.find((f) => f._id === documentId);
+      if (!fileInfo?.fileId) throw new Error("File info not found");
+      const baseUrl =
+        import.meta.env.VITE_API_URL || "http://localhost:3000/api";
+      window.open(`${baseUrl}/uploads/fileId/${fileInfo.fileId}`, "_blank");
     } catch (err) {
-      console.error('View error:', err);
-      setError('Failed to view document');
+      setError("Failed to view document");
       setTimeout(() => setError(null), 3000);
     }
   };
 
-  const ENABLE_POLLING = true;
-  const POLL_MS = 10000;
-
+  // --- Polling Effect ---
   useEffect(() => {
     let mounted = true;
     fetchRequests();
-
-    if (ENABLE_POLLING) {
-      const id = setInterval(() => {
-        if (mounted) fetchRequests();
-      }, POLL_MS);
-      return () => {
-        mounted = false;
-        clearInterval(id);
-      };
-    }
-
-    // cleanup function when polling disabled
+    const id = setInterval(() => {
+      if (mounted) fetchRequests();
+    }, 10000);
     return () => {
       mounted = false;
+      clearInterval(id);
     };
   }, []);
 
@@ -137,9 +201,9 @@ export default function VendorRequests() {
     <div className="min-h-screen w-full overflow-hidden bg-muted text-[#1F1B3B]">
       <div className="relative flex min-h-screen w-full flex-col items-center px-6 py-8">
         <div className="w-full">
-
+          {/* Messages */}
           {message && (
-            <div className="mb-4 text-center bg-green-100 text-green-800 py-2 rounded">
+            <div className="mb-4 text-center bg-green-100 text-green-800 py-2 rounded animate-pulse">
               {message}
             </div>
           )}
@@ -149,7 +213,7 @@ export default function VendorRequests() {
             </div>
           )}
 
-          {/* Loading / Empty / Grid */}
+          {/* Loading / Grid */}
           {loading ? (
             <div className="text-center py-12">
               <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-[#736CED]"></div>
@@ -157,7 +221,7 @@ export default function VendorRequests() {
             </div>
           ) : requests.length === 0 ? (
             <div className="text-center py-12 text-[#312A68]">
-              No vendor requests available.
+              No pending requests found.
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
@@ -171,27 +235,34 @@ export default function VendorRequests() {
                       {req.vendorId?.companyname || "Vendor"}
                     </h3>
                     <p className="text-xs font-semibold text-[#736CED] mb-4">
-                      {" "}
-                      Vendor: {req.vendorId?.email || "N/A"}
+                      {req.vendorId?.email || "No Email"}
                     </p>
 
                     <div className="border-t border-gray-100 pt-4 space-y-3 text-sm">
+                      {/* Type Indicator */}
+                      <div className="flex items-start gap-2">
+                        <Info size={14} className="text-[#736CED] mt-0.5" />
+                        <span
+                          className={`px-2 py-0.5 rounded text-xs font-semibold ${
+                            req.isBazarBooth
+                              ? "bg-purple-100 text-purple-700"
+                              : "bg-blue-100 text-blue-700"
+                          }`}
+                        >
+                          {req.isBazarBooth ? "Bazaar Booth" : "Platform Booth"}
+                        </span>
+                      </div>
+
+                      {/* Details based on Type */}
                       {req.isBazarBooth ? (
                         <>
-                          <div className="flex items-start gap-2">
-                            <Info size={14} className="text-[#736CED] mt-0.5" />
-                            <span>
-                              <strong>Type:</strong> Bazaar Booth
-                            </span>
-                          </div>
                           <div className="flex items-start gap-2">
                             <Calendar
                               size={14}
                               className="text-[#736CED] mt-0.5"
                             />
                             <span>
-                              <strong>Event:</strong>{" "}
-                              {req.bazarId?.bazaarname || "N/A"}
+                              <strong>Event:</strong> {req.bazarId?.bazaarname}
                             </span>
                           </div>
                           <div className="flex items-start gap-2">
@@ -202,92 +273,11 @@ export default function VendorRequests() {
                             <span>
                               <strong>Dates:</strong>{" "}
                               {formatDate(req.bazarId?.startdate)}
-                              {req.bazarId?.enddate
-                                ? ` – ${formatDate(req.bazarId.enddate)}`
-                                : ""}
-                            </span>
-                          </div>
-                          <div className="flex items-start gap-2">
-                            <Square
-                              size={14}
-                              className="text-[#736CED] mt-0.5"
-                            />
-                            <span>
-                              <strong>Size:</strong> {req.boothSize}
-                            </span>
-                          </div>
-                          <div className="flex items-start gap-2">
-                            <Users
-                              size={14}
-                              className="text-[#736CED] mt-0.5"
-                            />
-                            <span>
-                              <strong>Team Members:</strong> {req.people.length}
-                              <ul className="mt-2 space-y-2">
-                                {req.people.map((p, i) => (
-                                  <li
-                                    key={i}
-                                    className="flex items-center gap-3 p-2 rounded-lg bg-gray-50/50 hover:bg-gray-50 transition-colors"
-                                  >
-                                    {/* Avatar */}
-                                    <div className="flex-shrink-0 w-8 h-8 bg-gray-200 rounded-full flex items-center justify-center">
-                                      <User size={14} className="text-gray-500" />
-                                    </div>
-                                    
-                                    {/* Name and Email */}
-                                    <div className="flex-1 min-w-0">
-                                      <div className="text-sm font-medium text-gray-900 truncate">{p.name}</div>
-                                      <div className="text-xs text-gray-500 truncate">{p.email}</div>
-                                    </div>
-                                    
-                                    {/* View and Download Icons */}
-                                    <div className="flex-shrink-0 flex gap-1">
-                                      {p.DocumentId ? (
-                                        <>
-                                          <button
-                                            onClick={() => handleViewDocument(p.DocumentId)}
-                                            className="p-1 text-gray-400 hover:text-green-600 transition-colors rounded"
-                                            title="View ID Document"
-                                          >
-                                            <Eye size={14} />
-                                          </button>
-                                          <button
-                                            onClick={() => handleDownloadDocument(p.DocumentId, p.name)}
-                                            className="p-1 text-gray-400 hover:text-blue-600 transition-colors rounded"
-                                            title="Download ID Document"
-                                          >
-                                            <Download size={14} />
-                                          </button>
-                                        </>
-                                      ) : (
-                                        <div className="p-1 text-red-400" title="No document uploaded">
-                                          <AlertCircle size={14} />
-                                        </div>
-                                      )}
-                                    </div>
-                                  </li>
-                                ))}
-                              </ul>
                             </span>
                           </div>
                         </>
                       ) : (
                         <>
-                          <div className="flex items-start gap-2">
-                            <Info size={14} className="text-[#736CED] mt-0.5" />
-                            <span>
-                              <strong>Type:</strong> Platform Booth
-                            </span>
-                          </div>
-                          <div className="flex items-start gap-2">
-                            <Square
-                              size={14}
-                              className="text-[#736CED] mt-0.5"
-                            />
-                            <span>
-                              <strong>Size:</strong> {req.boothSize}
-                            </span>
-                          </div>
                           <div className="flex items-start gap-2">
                             <MapPin
                               size={14}
@@ -306,80 +296,86 @@ export default function VendorRequests() {
                               <strong>Duration:</strong> {req.duration} weeks
                             </span>
                           </div>
-                          <div className="flex items-start gap-2">
-                            <Users
-                              size={14}
-                              className="text-[#736CED] mt-0.5"
-                            />
-                            <span>
-                              <strong>Team:</strong> {req.people.length}
-                              <ul className="mt-2 space-y-2">
-                                {req.people.map((p, i) => (
-                                  <li
-                                    key={i}
-                                    className="flex items-center gap-3 p-2 rounded-lg bg-gray-50/50 hover:bg-gray-50 transition-colors"
-                                  >
-                                    {/* Avatar */}
-                                    <div className="flex-shrink-0 w-8 h-8 bg-gray-200 rounded-full flex items-center justify-center">
-                                      <User size={14} className="text-gray-500" />
-                                    </div>
-                                    
-                                    {/* Name and Email */}
-                                    <div className="flex-1 min-w-0">
-                                      <div className="text-sm font-medium text-gray-900 truncate">{p.name}</div>
-                                      <div className="text-xs text-gray-500 truncate">{p.email}</div>
-                                    </div>
-                                    
-                                    {/* View and Download Icons */}
-                                    <div className="flex-shrink-0 flex gap-1">
-                                      {p.DocumentId ? (
-                                        <>
-                                          <button
-                                            onClick={() => handleViewDocument(p.DocumentId)}
-                                            className="p-1 text-gray-400 hover:text-green-600 transition-colors rounded"
-                                            title="View ID Document"
-                                          >
-                                            <Eye size={14} />
-                                          </button>
-                                          <button
-                                            onClick={() => handleDownloadDocument(p.DocumentId, p.name)}
-                                            className="p-1 text-gray-400 hover:text-blue-600 transition-colors rounded"
-                                            title="Download ID Document"
-                                          >
-                                            <Download size={14} />
-                                          </button>
-                                        </>
-                                      ) : (
-                                        <div className="p-1 text-red-400" title="No document uploaded">
-                                          <AlertCircle size={14} />
-                                        </div>
-                                      )}
-                                    </div>
-                                  </li>
-                                ))}
-                              </ul>
-                            </span>
-                          </div>
                         </>
                       )}
+
+                      <div className="flex items-start gap-2">
+                        <Square size={14} className="text-[#736CED] mt-0.5" />
+                        <span>
+                          <strong>Size:</strong> {req.boothSize}
+                        </span>
+                      </div>
+
+                      {/* Team */}
+                      <div className="flex items-start gap-2">
+                        <Users size={14} className="text-[#736CED] mt-0.5" />
+                        <div className="w-full">
+                          <strong>Team Members:</strong> {req.people.length}
+                          <ul className="mt-2 space-y-2">
+                            {req.people.map((p, i) => (
+                              <li
+                                key={i}
+                                className="flex items-center gap-2 p-2 rounded bg-gray-50"
+                              >
+                                <div className="w-6 h-6 bg-gray-200 rounded-full flex items-center justify-center">
+                                  <User size={12} className="text-gray-500" />
+                                </div>
+                                <div className="flex-1 min-w-0 overflow-hidden">
+                                  <div className="text-xs font-medium truncate">
+                                    {p.name}
+                                  </div>
+                                </div>
+                                <div className="flex gap-1">
+                                  {p.DocumentId ? (
+                                    <>
+                                      <button
+                                        onClick={() =>
+                                          handleViewDocument(p.DocumentId)
+                                        }
+                                        className="text-gray-400 hover:text-green-600"
+                                      >
+                                        <Eye size={14} />
+                                      </button>
+                                      <button
+                                        onClick={() =>
+                                          handleDownloadDocument(
+                                            p.DocumentId,
+                                            p.name
+                                          )
+                                        }
+                                        className="text-gray-400 hover:text-blue-600"
+                                      >
+                                        <Download size={14} />
+                                      </button>
+                                    </>
+                                  ) : (
+                                    <AlertCircle
+                                      size={14}
+                                      className="text-red-300"
+                                    />
+                                  )}
+                                </div>
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+                      </div>
                     </div>
                   </div>
 
-                  <div className="mt-6 border-t pt-4">
-                    <div className="flex justify-between gap-3">
-                      <button
-                        onClick={() => handleAction(req._id, "accept")}
-                        className="flex-1 bg-[#6DD3CE] text-white font-medium px-4 py-2 rounded-full hover:bg-[#54C6EB] transition-colors"
-                      >
-                        Accept
-                      </button>
-                      <button
-                        onClick={() => handleAction(req._id, "reject")}
-                        className="flex-1 bg-[#C14953] text-white font-medium px-4 py-2 rounded-full hover:bg-red-600 transition-colors"
-                      >
-                        Reject
-                      </button>
-                    </div>
+                  <div className="mt-6 border-t pt-4 flex gap-3">
+                    <button
+                      onClick={() => handleAction(req._id, "accept")}
+                      className="flex-1 bg-[#6DD3CE] text-white font-medium px-4 py-2 rounded-full hover:bg-[#54C6EB] transition-colors shadow-sm"
+                    >
+                      Accept
+                    </button>
+                    <button
+                      onClick={() => handleAction(req._id, "reject")}
+                      className="flex-1 bg-[#C14953] text-white font-medium px-4 py-2 rounded-full hover:bg-red-600 transition-colors shadow-sm"
+                    >
+                      Reject
+                    </button>
                   </div>
                 </div>
               ))}
@@ -387,6 +383,102 @@ export default function VendorRequests() {
           )}
         </div>
       </div>
+
+      {/* --- MODAL: Only shown for Platform Booths --- */}
+      {showAcceptModal && selectedRequest && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 animate-in fade-in duration-200">
+          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden flex flex-col">
+            {/* Header */}
+            <div className="px-6 py-4 bg-[#1F1B3B] text-white flex justify-between items-center">
+              <div>
+                <h3 className="text-lg font-bold">Accept Platform Booth</h3>
+                <p className="text-xs text-gray-300">
+                  {selectedRequest.vendorId?.companyname}
+                </p>
+              </div>
+              <button
+                onClick={() => setShowAcceptModal(false)}
+                className="text-white/80 hover:text-white"
+              >
+                <X size={20} />
+              </button>
+            </div>
+
+            {/* Body */}
+            <div className="p-6">
+              <div className="mb-5 text-sm text-gray-600">
+                <p className="mb-2">
+                  Since this is a standalone <strong>Platform Booth</strong> at{" "}
+                  <span className="font-semibold text-[#4C3BCF]">
+                    {selectedRequest.location}
+                  </span>
+                  , you must define who is allowed to interact with it.
+                </p>
+                <p className="text-xs text-[#C14953] font-semibold">
+                  * Select at least one audience group.
+                </p>
+              </div>
+
+              <div className="space-y-2">
+                {ROLE_OPTIONS.map((role) => {
+                  const isSelected = selectedRoles.includes(role);
+                  return (
+                    <div
+                      key={role}
+                      onClick={() => toggleRole(role)}
+                      className={`flex items-center gap-3 p-3 rounded-lg border cursor-pointer transition-all select-none ${
+                        isSelected
+                          ? "border-[#736CED] bg-[#736CED]/10"
+                          : "border-gray-200 hover:bg-gray-50"
+                      }`}
+                    >
+                      <div
+                        className={
+                          isSelected ? "text-[#736CED]" : "text-gray-300"
+                        }
+                      >
+                        {isSelected ? (
+                          <CheckSquare size={20} />
+                        ) : (
+                          <UncheckedSquare size={20} />
+                        )}
+                      </div>
+                      <span
+                        className={`font-medium ${
+                          isSelected ? "text-[#1F1B3B]" : "text-gray-500"
+                        }`}
+                      >
+                        {role}
+                      </span>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+
+            {/* Footer */}
+            <div className="px-6 py-4 bg-gray-50 border-t border-gray-100 flex justify-end gap-3">
+              <button
+                onClick={() => setShowAcceptModal(false)}
+                className="px-4 py-2 text-gray-600 hover:text-gray-900 font-medium text-sm"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleConfirmModalAccept}
+                disabled={selectedRoles.length === 0}
+                className={`px-6 py-2 rounded-full font-medium text-white shadow-sm transition-all text-sm ${
+                  selectedRoles.length > 0
+                    ? "bg-[#6DD3CE] hover:bg-[#54C6EB]"
+                    : "bg-gray-300 cursor-not-allowed"
+                }`}
+              >
+                Confirm & Save
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

@@ -68,7 +68,10 @@ const boothSchema = new mongoose.Schema(
     },
     archive: { type: Boolean, default: false },
     allowedusers: [
-      { type: String, enum: ["Student", "Professor", "TA", "Staff"] },
+      {
+        type: String,
+        enum: ["Student", "Professor", "TA", "Staff", "Admin", "Event office"],
+      },
     ],
   },
   { timestamps: true }

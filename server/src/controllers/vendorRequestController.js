@@ -4,6 +4,7 @@ import Booth from "../models/Booth.js";
 import Bazaar from "../models/Bazaar.js";
 import Admin from "../models/Admin.js";
 import EventsOffice from "../models/EventsOffice.js";
+import User from "../models/User.js";
 import {
   sendBoothApprovalEmail,
   sendBoothRejectionEmail,
@@ -216,11 +217,21 @@ const updateRequest = async (req, res, next) => {
 
 const acceptRequest = async (req, res, next) => {
   try {
+    const { allowedusers } = req.body;
+    console.log("Allowed users:", allowedusers);
     const request = await VendorRequest.findById(req.params.id).populate(
       "bazarId"
     );
     if (!request)
       return res.status(404).json({ message: "VendorRequest not found" });
+    if (
+      !allowedusers ||
+      (!Array.isArray(allowedusers) && !request.isBazarBooth)
+    )
+      return res
+        .status(400)
+        .json({ message: "please select at least one option" });
+    const finalArray = [...allowedusers, "Admin", "Event office"];
     const vendor = await Vendor.findById(request.vendorId);
     const approvedAt = new Date();
     request.status = "Approved";
@@ -228,7 +239,7 @@ const acceptRequest = async (req, res, next) => {
     request.paymentDueAt = computePaymentDueDate(approvedAt);
     await request.save();
     await incrementBazaarParticipation(request);
-    const booth = await Booth.create({
+    let body = {
       boothname: vendor ? vendor.companyname : "Vendor Booth",
       vendorRequestId: request._id,
       vendorId: request.vendorId,
@@ -240,7 +251,34 @@ const acceptRequest = async (req, res, next) => {
       location: request.location,
       duration: request.duration,
       goLiveAt: request.eventStartAt,
-    });
+    };
+    if (!request.isBazarBooth) {
+      body.allowedusers = finalArray;
+    }
+    const booth = await Booth.create(body);
+    if (!request.isBazarBooth) {
+      await User.updateMany(
+        { role: { $in: finalArray } },
+        {
+          $push: {
+            notifications: {
+              message: `Check out ${vendor.companyname} — a new platform booth has gone live!`,
+            },
+          },
+        }
+      );
+      await EventsOffice.updateMany(
+        {},
+        {
+          $push: {
+            notifications: {
+              message: `Check out ${vendor.companyname} — a new platform booth has gone live!`,
+            },
+          },
+        }
+      );
+    }
+
     try {
       await sendBoothApprovalEmail(vendor, booth);
     } catch (emailErr) {
