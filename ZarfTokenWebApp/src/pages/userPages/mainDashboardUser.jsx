@@ -9,6 +9,7 @@ import LoyaltyProgram from "./LoyaltyProgram";
 import VendorsPoll from "./VendorsPoll";
 import GymSchedule from "./GymSchedule";
 import Courts from "../studentPages/Courts";
+import MyReservations from "../studentPages/MyReservations";
 import CreateWorkshop from "../professorPages/CreateWorkshop";
 import MyWorkshops from "../professorPages/MyWorkshops";
 import NotFound from "../NotFoundPage";
@@ -139,7 +140,10 @@ const mainDashboardUser = () => {
           <Route path="/gym-schedule" element={<GymSchedule />} />
 
           {user && user.role === "Student" && (
-            <Route path="/courts" element={<Courts />} />
+            <>
+              <Route path="/courts" element={<Courts />} />
+              <Route path="/my-reservations" element={<MyReservations />} />
+            </>
           )}
 
           {user && user.role === "Professor" && (

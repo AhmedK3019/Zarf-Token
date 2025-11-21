@@ -1,9 +1,12 @@
 import { useEffect, useRef, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { Calendar } from "lucide-react";
 import api from "../../services/api";
 import { useAuthUser } from "../../hooks/auth";
 
 const Courts = () => {
   const { user } = useAuthUser();
+  const navigate = useNavigate();
   const [courts, setCourts] = useState([]);
   const [filteredCourts, setFilteredCourts] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -15,6 +18,7 @@ const Courts = () => {
   const [selectedSlot, setSelectedSlot] = useState(null);
   const [bookingLoading, setBookingLoading] = useState(false);
   const [bookingMessage, setBookingMessage] = useState("");
+  const [showSuccessToast, setShowSuccessToast] = useState(false);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const dropdownRef = useRef(null);
 
@@ -129,6 +133,7 @@ const Courts = () => {
     setSelectedCourt(null);
     setSelectedSlot(null);
     setBookingMessage("");
+    setShowSuccessToast(false);
   };
 
   const handleSlotSelect = (slot) => {
@@ -184,7 +189,13 @@ const Courts = () => {
 
       setSelectedCourt(updatedCourt);
       setSelectedSlot(null);
-      setBookingMessage("Slot successfully booked!");
+      setBookingMessage("");
+      setShowSuccessToast(true);
+      
+      // Auto-hide success toast after 3 seconds
+      setTimeout(() => {
+        setShowSuccessToast(false);
+      }, 3000);
     } catch (err) {
       console.error("Booking failed:", err.response?.data || err.message);
       setBookingMessage(
@@ -201,9 +212,33 @@ const Courts = () => {
       <div className="relative flex min-h-screen w-full flex-col items-center">
         <main className="relative z-10 flex w-full flex-1 flex-col items-center px-6 py-8">
           <div className="w-full">
+            {/* Header */}
+            <div className="w-full max-w-5xl mx-auto mb-8">
+              <div className="text-center mb-6">
+                <h1 className="text-3xl font-bold text-[#736CED] sm:text-4xl mb-2">
+                  Court Booking
+                </h1>
+                <p className="text-[#312A68] opacity-80">
+                  Reserve basketball, tennis, football and other courts
+                </p>
+              </div>
+            </div>
+
             {/* Filters */}
             <div className="w-full flex justify-center mb-12">
               <div className="w-full max-w-5xl">
+                <div className="flex flex-col items-stretch gap-4 md:flex-row md:items-center mb-4">
+                  <div className="flex justify-end w-full">
+                    <button
+                      onClick={() => navigate('/dashboard/user/my-reservations')}
+                      className="inline-flex items-center justify-center gap-2 rounded-full px-6 py-3 text-sm font-semibold transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 bg-[#4C3BCF] text-white hover:bg-[#3730A3] focus-visible:ring-[#4C3BCF]/50 shadow-[0_4px_14px_0_rgba(76,59,207,0.3)] hover:shadow-[0_6px_20px_0_rgba(76,59,207,0.4)]"
+                    >
+                      <Calendar className="h-4 w-4" />
+                      View My Reservations
+                    </button>
+                  </div>
+                </div>
+                
                 <div className="flex flex-col items-stretch gap-4 md:flex-row md:items-center">
                   {/* Court Type Dropdown */}
                   <div
@@ -548,6 +583,45 @@ const Courts = () => {
           </div>
         </div>
       )}
+
+      {/* Success Toast Notification */}
+      {showSuccessToast && (
+        <div className="fixed top-4 right-4 z-50 animate-slide-in">
+          <div className="bg-green-500 text-white px-6 py-4 rounded-lg shadow-lg flex items-center gap-3 min-w-[300px]">
+            <svg className="w-6 h-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
+            </svg>
+            <div className="flex-1">
+              <h4 className="font-semibold">Booking Successful!</h4>
+              <p className="text-sm opacity-90">Your court slot has been reserved.</p>
+            </div>
+            <button
+              onClick={() => setShowSuccessToast(false)}
+              className="text-white hover:text-gray-200 transition-colors"
+            >
+              <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+          </div>
+        </div>
+      )}
+      
+      <style jsx>{`
+        @keyframes slide-in {
+          from {
+            transform: translateX(100%);
+            opacity: 0;
+          }
+          to {
+            transform: translateX(0);
+            opacity: 1;
+          }
+        }
+        .animate-slide-in {
+          animation: slide-in 0.3s ease-out forwards;
+        }
+      `}</style>
     </div>
   );
 };
