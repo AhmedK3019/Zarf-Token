@@ -1,7 +1,9 @@
 import { useEffect, useRef, useState } from "react";
 import api from "../../services/api";
+import { useAuthUser } from "../../hooks/auth";
 
 const Courts = () => {
+  const { user } = useAuthUser();
   const [courts, setCourts] = useState([]);
   const [filteredCourts, setFilteredCourts] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -137,15 +139,15 @@ const Courts = () => {
 
   // Booking flow
   const handleBookSlot = async () => {
-    if (!selectedSlot || !selectedCourt) return;
+    if (!selectedSlot || !selectedCourt || !user) return;
     setBookingLoading(true);
     setBookingMessage("");
 
     try {
       const studentData = {
-        studentId: "672a4b69a93f8f22b6e0b9a3",
-        studentName: "John Doe",
-        studentGucId: "GUC2025",
+        studentId: user._id,
+        studentName: `${user.firstname} ${user.lastname}`,
+        studentGucId: user.gucid,
       };
 
       // Ensure slot date is a valid ISO string
@@ -533,14 +535,14 @@ const Courts = () => {
               </button>
               <button
                 onClick={handleBookSlot}
-                disabled={!selectedSlot || bookingLoading}
+                disabled={!selectedSlot || bookingLoading || !user}
                 className={`px-6 py-2 bg-[#736CED] text-white rounded-full transition-colors ${
-                  !selectedSlot || bookingLoading
+                  !selectedSlot || bookingLoading || !user
                     ? "opacity-50 cursor-not-allowed"
                     : "hover:bg-[#5A4BBA]"
                 }`}
               >
-                {bookingLoading ? "Booking..." : "Book Slot"}
+                {bookingLoading ? "Booking..." : !user ? "Please log in" : "Book Slot"}
               </button>
             </div>
           </div>
