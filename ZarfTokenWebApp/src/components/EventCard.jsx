@@ -169,12 +169,17 @@ const EventCard = ({
       event.type === "trip") &&
     new Date(event.startDate) > Date.now();
 
+  
+  const isCreator = event.type === "workshop" && event.createdBy && 
+                   (event.createdBy === user?._id || event.createdBy._id === user?._id);
+
   const canRegister =
     userIsEligible &&
     (event.type === "trip" || event.type === "workshop") &&
     event.registrationDeadline &&
     new Date() < new Date(event.registrationDeadline) &&
     !isRegistered &&
+    !isCreator &&
     (event.capacity ? (attendeesArr?.length ?? 0) < event.capacity : true);
 
   const isBazaar = event.type === "bazaar";
@@ -341,10 +346,26 @@ const EventCard = ({
     );
   }
 
+  
+  if (isCreator && userIsEligible) {
+    defaultRegistrationButtons.push(
+      <button
+        key="creator"
+        type="button"
+        disabled
+        className={`${actionButtonBase} border border-dashed border-orange-300 bg-orange-50 text-orange-700 focus-visible:ring-orange-200 cursor-not-allowed`}
+        title="You cannot register for your own workshop"
+      >
+        Workshop Creator
+      </button>
+    );
+  }
+
   if (
     userIsEligible &&
     !canRegister &&
     !isRegistered &&
+    !isCreator &&
     (event.type === "trip" || event.type === "workshop")
   ) {
     defaultRegistrationButtons.push(

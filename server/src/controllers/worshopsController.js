@@ -364,9 +364,18 @@ const registerForWorkshop = async (req, res, next) => {
       capacity: 1,
       attendees: 1,
       registered: 1,
+      createdBy: 1,
     });
     if (!check)
       return res.status(404).json({ message: "Workshop is not found" });
+    
+    // Check if user is the creator of the workshop
+    if (check.createdBy && check.createdBy.toString() === userId.toString()) {
+      return res
+        .status(400)
+        .json({ message: "You cannot register for your own workshop" });
+    }
+    
     if (
       check.attendees.some((a) => a.userId?.toString() === userId.toString()) ||
       check.registered.some((a) => a.userId?.toString() === userId.toString())
