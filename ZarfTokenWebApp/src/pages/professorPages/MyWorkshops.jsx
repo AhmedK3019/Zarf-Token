@@ -441,6 +441,108 @@ export default function MyWorkshops() {
                             </span>
                           ) : null}
                         </div>
+                        {w.status === "Approved" && (
+                          <div className="rounded-2xl border border-slate-200/70 bg-white/60 backdrop-blur-sm p-4 shadow-sm">
+                            <div className="flex items-center gap-2 mb-3">
+                              <Users className="w-4 h-4 text-[#736CED]" />
+                              <h4 className="text-base font-semibold text-slate-800">
+                                Workshop Participants
+                              </h4>
+                            </div>
+                            
+                            {/* Capacity Summary */}
+                            <div className="mb-4 p-3 bg-gradient-to-r from-[#736CED]/10 to-[#6DD3CE]/10 rounded-lg border border-[#736CED]/20">
+                              <div className="flex items-center justify-between text-sm">
+                                <span className="font-medium text-[#312A68]">
+                                  Total Capacity: <span className="text-[#736CED] font-bold">{w.capacity || 0}</span>
+                                </span>
+                                <span className="font-medium text-[#312A68]">
+                                  Registered: <span className="text-[#6DD3CE] font-bold">{(w.registered?.length || 0) + (w.attendees?.length || 0)}</span>
+                                </span>
+                                <span className="font-medium text-[#312A68]">
+                                  Remaining: <span className={`font-bold ${(w.capacity || 0) - ((w.registered?.length || 0) + (w.attendees?.length || 0)) <= 0 ? 'text-[#C14953]' : 'text-[#28a745]'}`}>
+                                    {Math.max(0, (w.capacity || 0) - ((w.registered?.length || 0) + (w.attendees?.length || 0)))}
+                                  </span>
+                                </span>
+                              </div>
+                            </div>
+
+                            
+                            {((w.attendees && w.attendees.length > 0) || (w.registered && w.registered.length > 0)) ? (
+                              <div className="space-y-4">
+                                {/* Paid Attendees */}
+                                {w.attendees && w.attendees.length > 0 && (
+                                  <div>
+                                    <h5 className="text-sm font-semibold text-[#28a745] mb-2 flex items-center gap-1">
+                                      <CheckCircle className="w-3.5 h-3.5" />
+                                      Paid Participants ({w.attendees.length})
+                                    </h5>
+                                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
+                                      {w.attendees.map((attendee, index) => (
+                                        <div
+                                          key={`attendee-${index}`}
+                                          className="flex items-center gap-2 p-2 bg-green-50 border border-green-200 rounded-lg"
+                                        >
+                                          <div className="w-6 h-6 bg-[#28a745] rounded-full flex items-center justify-center flex-shrink-0">
+                                            <CheckCircle className="w-3.5 h-3.5 text-white" />
+                                          </div>
+                                          <div className="min-w-0 flex-1">
+                                            <p className="text-xs font-medium text-gray-900 truncate">
+                                              {attendee.firstname} {attendee.lastname}
+                                            </p>
+                                            <p className="text-xs text-gray-600 truncate">
+                                              {attendee.gucid}
+                                            </p>
+                                          </div>
+                                        </div>
+                                      ))}
+                                    </div>
+                                  </div>
+                                )}
+
+                                {/* Registered (Unpaid) */}
+                                {w.registered && w.registered.length > 0 && (
+                                  <div>
+                                    <h5 className="text-sm font-semibold text-[#54C6EB] mb-2 flex items-center gap-1">
+                                      <Clock className="w-3.5 h-3.5" />
+                                      Registered (Pending Payment) ({w.registered.length})
+                                    </h5>
+                                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
+                                      {w.registered.map((participant, index) => (
+                                        <div
+                                          key={`registered-${index}`}
+                                          className="flex items-center gap-2 p-2 bg-blue-50 border border-blue-200 rounded-lg"
+                                        >
+                                          <div className="w-6 h-6 bg-[#54C6EB] rounded-full flex items-center justify-center flex-shrink-0">
+                                            <Clock className="w-3.5 h-3.5 text-white" />
+                                          </div>
+                                          <div className="min-w-0 flex-1">
+                                            <p className="text-xs font-medium text-gray-900 truncate">
+                                              {participant.firstname} {participant.lastname}
+                                            </p>
+                                            <p className="text-xs text-gray-600 truncate">
+                                              {participant.gucid}
+                                            </p>
+                                          </div>
+                                        </div>
+                                      ))}
+                                    </div>
+                                  </div>
+                                )}
+                              </div>
+                            ) : (
+                              <div className="text-center py-6">
+                                <div className="w-12 h-12 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-3">
+                                  <Users className="w-6 h-6 text-gray-400" />
+                                </div>
+                                <p className="text-sm text-gray-500 mb-1">No participants yet</p>
+                                <p className="text-xs text-gray-400">
+                                  Participants will appear here once they register for your workshop
+                                </p>
+                              </div>
+                            )}
+                          </div>
+                        )}
 
                         {editing === w._id && (
                           <div className="mt-4 p-4 rounded-xl border border-[#736CED]/30 bg-white/70 space-y-3">
