@@ -87,17 +87,6 @@ const NavbarVendor = ({ vendor }) => {
                   Requests
                 </NavLink>
                 <NavLink
-                  to="/dashboard/vendor/accepted-booths"
-                  className={({ isActive }) =>
-                    isActive
-                      ? "px-4 py-2 rounded-full bg-white/15 text-white font-semibold transition-all flex items-center gap-2 shadow-sm"
-                      : "px-4 py-2 rounded-full text-white/90 hover:text-white hover:bg-white/10 transition-all flex items-center gap-2"
-                  }
-                >
-                  <CheckSquare className="h-4 w-4" />
-                  Accepted
-                </NavLink>
-                <NavLink
                   to="/dashboard/vendor/loyalty-program"
                   className={({ isActive }) =>
                     isActive
