@@ -88,7 +88,7 @@ export default function SignUpRequests() {
   return (
     <div className="min-h-screen w-full overflow-hidden bg-muted text-[#1F1B3B]">
       <div className="relative flex min-h-screen w-full flex-col items-center px-6 py-8">
-        <div className="w-full max-w-6xl">
+        <div className="w-full">
 
           {message && (
             <div className="mb-4 text-center bg-green-100 text-green-800 py-2 rounded">
@@ -111,7 +111,7 @@ export default function SignUpRequests() {
               No sign-up requests available.
             </div>
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-12">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
               {requests.map((req) => (
                 <div
                   key={req._id}
@@ -150,13 +150,13 @@ export default function SignUpRequests() {
                   <div className="flex justify-between gap-3">
                     <button
                       onClick={() => handleAccept(req._id)}
-                      className="flex-1 bg-[#6DD3CE] text-white font-medium px-4 py-2 rounded-full hover:bg-[#54C6EB] transition-colors"
+                      className="flex-1 rounded-lg px-4 py-2 text-sm font-semibold text-center transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 border border-green-200 bg-green-50 text-green-700 hover:bg-green-100 focus-visible:ring-green-200"
                     >
                       Accept
                     </button>
                     <button
                       onClick={() => handleReject(req._id)}
-                      className="flex-1 bg-[#C14953] text-white font-medium px-4 py-2 rounded-full hover:bg-red-600 transition-colors"
+                      className="flex-1 rounded-lg px-4 py-2 text-sm font-semibold text-center transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 border border-red-200 bg-red-50 text-red-600 hover:bg-red-100 focus-visible:ring-red-200"
                     >
                       Reject
                     </button>
