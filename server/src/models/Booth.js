@@ -42,13 +42,6 @@ const boothSchema = new mongoose.Schema(
     },
     bazarId: { type: mongoose.Schema.Types.ObjectId, ref: "Bazaar" },
     type: { type: String, default: "booth" },
-    goLiveAt: { type: Date },
-    cancelledAt: { type: Date },
-    cancellationReason: { type: String },
-    cancellationSource: {
-      type: String,
-      enum: ["vendor", "system", "admin"],
-    },
     userComments: {
       type: [
         {

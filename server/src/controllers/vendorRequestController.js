@@ -239,55 +239,89 @@ const acceptRequest = async (req, res, next) => {
     request.paymentDueAt = computePaymentDueDate(approvedAt);
     await request.save();
     await incrementBazaarParticipation(request);
-    let body = {
-      boothname: vendor ? vendor.companyname : "Vendor Booth",
-      vendorRequestId: request._id,
-      vendorId: request.vendorId,
-      isBazarBooth: request.isBazarBooth,
-      status: "Approved",
-      bazarId: request.bazarId?._id || request.bazarId,
-      boothSize: request.boothSize,
-      people: request.people,
-      location: request.location,
-      duration: request.duration,
-      goLiveAt: request.eventStartAt,
-    };
+    // add a field allowedUsers to request if platform booth
     if (!request.isBazarBooth) {
-      body.allowedusers = finalArray;
-    }
-    const booth = await Booth.create(body);
-    if (!request.isBazarBooth) {
-      await User.updateMany(
-        { role: { $in: finalArray } },
-        {
-          $push: {
-            notifications: {
-              message: `Check out ${vendor.companyname} — a new platform booth has gone live!`,
-            },
-          },
-        }
-      );
-      await EventsOffice.updateMany(
-        {},
-        {
-          $push: {
-            notifications: {
-              message: `Check out ${vendor.companyname} — a new platform booth has gone live!`,
-            },
-          },
-        }
-      );
+      request.allowedusers = finalArray;
+      await request.save();
     }
 
     try {
-      await sendBoothApprovalEmail(vendor, booth);
+      await sendBoothApprovalEmail(vendor, request);
     } catch (emailErr) {
       console.error(
         "Failed to send booth approval email:",
         emailErr && emailErr.message ? emailErr.message : emailErr
       );
     }
-    res.json(booth);
+    res.json(request);
+  } catch (err) {
+    next(err);
+  }
+};
+
+const payForBooth = async (req, res, next) => {
+  try {
+    const request = await VendorRequest.findById(req.params.id).populate(
+      "bazarId"
+    );
+    if (!request)
+      return res.status(404).json({ message: "VendorRequest not found" });
+    request.paymentStatus = "paid";
+    await request.save();
+    const vendor = await Vendor.findById(request.vendorId);
+    try {
+      let body = {
+        boothname: request.boothname ? request.boothname : vendor.companyname,
+        vendorRequestId: request._id,
+        vendorId: request.vendorId,
+        isBazarBooth: request.isBazarBooth,
+        status: "Approved",
+        bazarId: request.bazarId?._id || request.bazarId,
+        boothSize: request.boothSize,
+        people: request.people,
+        location: request.location,
+        duration: request.duration,
+        startdate: request.startdate,
+        enddate: request.enddate,
+      };
+      if (!request.isBazarBooth) {
+        body.allowedusers = finalArray;
+      }
+      const booth = await Booth.create(body);
+      if (!request.isBazarBooth) {
+        await User.updateMany(
+          { role: { $in: finalArray } },
+          {
+            $push: {
+              notifications: {
+                message: `Check out ${vendor.companyname} — a new platform booth has gone live!`,
+              },
+            },
+          }
+        );
+        await EventsOffice.updateMany(
+          {},
+          {
+            $push: {
+              notifications: {
+                message: `Check out ${vendor.companyname} — a new platform booth has gone live!`,
+              },
+            },
+          }
+        );
+      }
+      try {
+        await sendBoothPaymentReceiptEmail(vendor, booth);
+      } catch (emailErr) {
+        console.error(
+          "Failed to create booth after payment:",
+          emailErr && emailErr.message ? emailErr.message : emailErr
+        );
+      }
+      res.json(booth);
+    } catch (err) {
+      next(err);
+    }
   } catch (err) {
     next(err);
   }
@@ -370,6 +404,7 @@ export default {
   getRequest,
   updateRequest,
   acceptRequest,
+  payForBooth,
   deleteRequest,
   cancelParticipation,
 };

@@ -50,7 +50,10 @@ export const sendBoothApprovalEmail = async (vendor, booth) => {
   const subject = "Your Booth Request Has Been Approved!";
   let html = `
     <p>Dear ${vendor.companyname || "Vendor"},</p>
-    <p>We are pleased to inform you that your booth request has been approved. Here are the details of your booth:</p>
+    <p>We are pleased to inform you that your booth request has been approved.\n 
+    Cost : ${booth.price} EGP.\n
+    Due date : ${booth.paymentDueAt} \n
+    Here are the details of your booth:</p>
     <ul>
       <li><strong>Booth Size:</strong> ${booth.boothSize}</li>
       ${
@@ -68,6 +71,47 @@ export const sendBoothApprovalEmail = async (vendor, booth) => {
           ? `<li><strong>Duration:</strong> ${booth.duration} weeks</li>`
           : ""
       }
+    </ul>
+  `;
+
+  html += `
+    <p>We look forward to your participation in the event. If you have any questions, please feel free to contact us.</p>
+    <p>Best regards,<br/>GUC Events Team</p>
+  `;
+  return await sendEmail(vendor.email, subject, html, true, []);
+};
+
+export const sendBoothPaymentReceiptEmail = async (vendor, booth) => {
+  if (!vendor || !vendor.email) {
+    throw new Error("Invalid vendor information for sending payment receipt");
+  }
+  if (!booth) {
+    throw new Error("Invalid booth information for sending payment receipt");
+  }
+  const subject = "Payment Receipt for Your Booth Participation";
+  let html = `
+    <p>Dear ${vendor.companyname || "Vendor"},</p>
+    <p>Thank you for your payment for your booth participation. This email confirms that your payment has been received.</p>
+    <p>Here are the details of your booth:</p>
+    <ul>
+      <li><strong>Booth Size:</strong> ${booth.boothSize}</li>
+      ${
+        booth.isBazarBooth && booth.bazarId
+          ? `<li><strong>Bazar ID:</strong> ${booth.bazarId}</li>`
+          : ""
+      }
+      ${
+        booth.location
+          ? `<li><strong>Location:</strong> ${booth.location}</li>`
+          : ""
+      }
+      ${
+        booth.duration
+          ? `<li><strong>Duration:</strong> ${booth.duration} weeks</li>`
+          : ""
+      }
+      <li><strong>Amount Paid:</strong> ${booth.price} EGP</li>
+      <li><strong>Payment Date:</strong> ${new Date().toLocaleDateString()}</li>
     </ul>
     <p>Please find below the QR codes for each of your booth representatives:</p>
   `;
