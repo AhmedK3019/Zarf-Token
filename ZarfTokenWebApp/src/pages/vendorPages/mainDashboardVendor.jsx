@@ -23,6 +23,8 @@ const MainDashboardVendor = ({ vendor }) => {
     location.pathname === "/dashboard/vendor/accepted-booths";
   const isLoyaltyProgramPage =
     location.pathname === "/dashboard/vendor/loyalty-program";
+  const isApplyLoyaltyPage =
+    location.pathname === "/dashboard/vendor/apply-loyalty";
 
   return (
     <div>
@@ -93,13 +95,28 @@ const MainDashboardVendor = ({ vendor }) => {
           </div>
         </div>
       )}
+      {isApplyLoyaltyPage && (
+        <div className="w-full bg-[#001845] text-white px-6 py-8">
+          <div className="max-w-7xl mx-auto text-center">
+            <h1 className="text-4xl font-bold sm:text-5xl mb-4">
+              Submit a New Application
+            </h1>
+            <p className="text-lg max-w-3xl mx-auto opacity-90">
+              One active program is allowed at a time. Cancel your current program
+              before submitting a new application. Rejected vendors can resubmit
+              with updated details.
+            </p>
+          </div>
+        </div>
+      )}
       <main
         className={`w-full px-4 ${
           isBazaarOpportunitiesPage ||
           isApplyBoothPage ||
           isMyRequestsPage ||
           isAcceptedBoothsPage ||
-          isLoyaltyProgramPage
+          isLoyaltyProgramPage ||
+          isApplyLoyaltyPage
             ? "mt-8"
             : "mt-6"
         }`}

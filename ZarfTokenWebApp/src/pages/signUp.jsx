@@ -1,9 +1,10 @@
 import React, { useEffect, useRef, useState } from "react";
-import { Link, useSearchParams } from "react-router-dom";
+import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import EyeIcon from "../components/EyeIcon";
 import api from "../services/api";
 import DecorativeIcons from "../components/DecorativeIcons";
 import EventTicker from "../components/EventTicker";
+import CelebrationModal from "../components/CelebrationModal";
 
 const createInitialFormState = () => ({
   gucian: {
@@ -124,9 +125,11 @@ function PasswordStrengthMeter({ password }) {
 
 export default function SignUp() {
   const [searchParams, setSearchParams] = useSearchParams();
+  const navigate = useNavigate();
   const [formData, setFormData] = useState(() => createInitialFormState());
   const [errors, setErrors] = useState({});
   const [successMessage, setSuccessMessage] = useState("");
+  const [showCelebration, setShowCelebration] = useState(false);
   const [activeRole, setActiveRole] = useState(() => {
     const r = getRoleFromParams(searchParams);
     return r === "vendor" ? "vendor" : "gucian";
@@ -144,6 +147,7 @@ export default function SignUp() {
     setActiveRole(roleFromQuery ?? "gucian");
     setErrors({});
     setSuccessMessage("");
+    setShowCelebration(false);
     setPasswordVisibility({ gucian: false, vendor: false });
   }, [searchParams]);
 
@@ -162,6 +166,7 @@ export default function SignUp() {
     setActiveRole(role);
     setErrors({});
     setSuccessMessage("");
+    setShowCelebration(false);
     setPasswordVisibility({ gucian: false, vendor: false });
     setQueryRole(role);
   };
@@ -251,6 +256,7 @@ export default function SignUp() {
   const handleSubmit = async (event) => {
     setErrors({});
     setSuccessMessage("");
+    setShowCelebration(false);
     event.preventDefault();
 
     const validationErrors = validateForm();
@@ -295,7 +301,7 @@ export default function SignUp() {
       // axios returns the parsed response in res.data
       const data = res?.data;
 
-      // treat any non-2xx status as error — but prefer backend message
+      // Treat any non-2xx status as error, but prefer backend message
       if (res?.status >= 400) {
         const serverMsg =
           data?.message ||
@@ -323,6 +329,7 @@ export default function SignUp() {
       setFormData(createInitialFormState());
       if (logoInputRef.current) logoInputRef.current.value = "";
       if (taxInputRef.current) taxInputRef.current.value = "";
+      setShowCelebration(true);
     } catch (err) {
       console.error("Signup error:", err);
 
@@ -357,6 +364,13 @@ export default function SignUp() {
 
   const selectedTaxName = formData.vendor.tax?.name ?? "";
   const selectedLogoName = formData.vendor.logo?.name ?? "";
+
+  const handleLogin = () => {
+    setShowCelebration(false);
+    navigate("/", { replace: true });
+  };
+
+  const handleCloseCelebration = () => setShowCelebration(false);
 
   const getInputClassName = (field) =>
     `w-full rounded-2xl border px-4 py-3 text-sm text-primary shadow-inner transition focus:outline-none focus:ring-2 ${
@@ -825,6 +839,11 @@ export default function SignUp() {
       <footer className="relative z-10 w-full px-6 py-6 text-center text-sm text-primary/70">
         {new Date().getFullYear()} Zarf Token. All rights reserved.
       </footer>
+      <CelebrationModal
+        open={showCelebration}
+        onClose={handleCloseCelebration}
+        onLogin={handleLogin}
+      />
     </div>
   );
 }

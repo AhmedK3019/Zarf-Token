@@ -575,35 +575,23 @@ export default function ApplyLoyalty() {
   return (
     <>
       <div className="space-y-6 p-6">
-      <header className="flex flex-wrap items-center justify-between gap-4">
-        <div>
-          <h1 className="text-3xl font-bold text-[#18122B]">
-            Submit a New Application
-          </h1>
-          <p className="text-sm text-gray-600">
-            One active program is allowed at a time. Cancel your current program
-            before submitting a new application. Rejected vendors can resubmit
-            with updated details.
-          </p>
-        </div>
-        <div className="flex flex-wrap items-center gap-3">
-          <button
-            type="button"
-            onClick={() => navigate(STATUS_PAGE_PATH)}
-            className="inline-flex items-center gap-2 rounded-full border border-[#736CED]/50 px-4 py-2 text-sm font-semibold text-[#4C3BCF] hover:bg-[#F6F3FF]"
-          >
-            <ShieldCheck size={16} />
-            View status page
-          </button>
-          <button
-            type="button"
-            onClick={fetchApplications}
-            className="inline-flex items-center gap-2 rounded-full border border-gray-200 px-4 py-2 text-sm font-semibold text-gray-600 hover:bg-gray-50"
-          >
-            <RefreshCcw size={16} />
-            Refresh status
-          </button>
-        </div>
+      <header className="flex flex-wrap items-center justify-end gap-3">
+        <button
+          type="button"
+          onClick={() => navigate(STATUS_PAGE_PATH)}
+          className="inline-flex items-center gap-2 rounded-full border border-[#736CED]/50 px-4 py-2 text-sm font-semibold text-[#4C3BCF] hover:bg-[#F6F3FF]"
+        >
+          <ShieldCheck size={16} />
+          View status page
+        </button>
+        <button
+          type="button"
+          onClick={fetchApplications}
+          className="inline-flex items-center gap-2 rounded-full border border-gray-200 px-4 py-2 text-sm font-semibold text-gray-600 hover:bg-gray-50"
+        >
+          <RefreshCcw size={16} />
+          Refresh status
+        </button>
       </header>
 
       {activeApplication && (
