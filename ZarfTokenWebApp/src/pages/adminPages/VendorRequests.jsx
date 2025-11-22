@@ -14,6 +14,8 @@ import {
   X,
   CheckSquare,
   Square as UncheckedSquare,
+  ChevronDown,
+  ChevronUp,
 } from "lucide-react";
 
 // --- Utility: Date Formatter ---
@@ -43,6 +45,9 @@ export default function VendorRequests() {
   const [showAcceptModal, setShowAcceptModal] = useState(false);
   const [selectedRequest, setSelectedRequest] = useState(null);
   const [selectedRoles, setSelectedRoles] = useState([]);
+
+  // --- Expandable Team Members State ---
+  const [expandedTeams, setExpandedTeams] = useState(new Set());
 
   // --- Fetch Data ---
   const fetchRequests = async () => {
@@ -92,6 +97,19 @@ export default function VendorRequests() {
         setShowAcceptModal(true);
       }
     }
+  };
+
+  // --- Toggle Team Members Expansion ---
+  const toggleTeamExpansion = (requestId) => {
+    setExpandedTeams(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(requestId)) {
+        newSet.delete(requestId);
+      } else {
+        newSet.add(requestId);
+      }
+      return newSet;
+    });
   };
 
   // --- Modal Checkbox Toggle ---
@@ -312,9 +330,54 @@ export default function VendorRequests() {
                         <div className="w-full">
                           <strong>Team Members:</strong> {req.people.length}
                           <ul className="mt-2 space-y-2">
-                            {req.people.map((p, i) => (
+                            {/* Always show first member */}
+                            {req.people.length > 0 && (
+                              <li className="flex items-center gap-2 p-2 rounded bg-gray-50">
+                                <div className="w-6 h-6 bg-gray-200 rounded-full flex items-center justify-center">
+                                  <User size={12} className="text-gray-500" />
+                                </div>
+                                <div className="flex-1 min-w-0 overflow-hidden">
+                                  <div className="text-xs font-medium truncate">
+                                    {req.people[0].name}
+                                  </div>
+                                </div>
+                                <div className="flex gap-1">
+                                  {req.people[0].DocumentId ? (
+                                    <>
+                                      <button
+                                        onClick={() =>
+                                          handleViewDocument(req.people[0].DocumentId)
+                                        }
+                                        className="text-gray-400 hover:text-green-600"
+                                      >
+                                        <Eye size={14} />
+                                      </button>
+                                      <button
+                                        onClick={() =>
+                                          handleDownloadDocument(
+                                            req.people[0].DocumentId,
+                                            req.people[0].name
+                                          )
+                                        }
+                                        className="text-gray-400 hover:text-blue-600"
+                                      >
+                                        <Download size={14} />
+                                      </button>
+                                    </>
+                                  ) : (
+                                    <AlertCircle
+                                      size={14}
+                                      className="text-red-300"
+                                    />
+                                  )}
+                                </div>
+                              </li>
+                            )}
+                            
+                            {/* Show remaining members if expanded */}
+                            {expandedTeams.has(req._id) && req.people.slice(1).map((p, i) => (
                               <li
-                                key={i}
+                                key={i + 1}
                                 className="flex items-center gap-2 p-2 rounded bg-gray-50"
                               >
                                 <div className="w-6 h-6 bg-gray-200 rounded-full flex items-center justify-center">
@@ -358,6 +421,26 @@ export default function VendorRequests() {
                               </li>
                             ))}
                           </ul>
+                          
+                          {/* Show more/less button if there are more than 1 member */}
+                          {req.people.length > 1 && (
+                            <button
+                              onClick={() => toggleTeamExpansion(req._id)}
+                              className="mt-2 text-xs text-[#736CED] hover:text-[#4C3BCF] font-medium flex items-center gap-1 transition-colors"
+                            >
+                              {expandedTeams.has(req._id) ? (
+                                <>
+                                  <ChevronUp size={12} />
+                                  Show less
+                                </>
+                              ) : (
+                                <>
+                                  <ChevronDown size={12} />
+                                  Show {req.people.length - 1} more member{req.people.length - 1 !== 1 ? 's' : ''}
+                                </>
+                              )}
+                            </button>
+                          )}
                         </div>
                       </div>
                     </div>
@@ -366,13 +449,13 @@ export default function VendorRequests() {
                   <div className="mt-6 border-t pt-4 flex gap-3">
                     <button
                       onClick={() => handleAction(req._id, "accept")}
-                      className="flex-1 bg-[#6DD3CE] text-white font-medium px-4 py-2 rounded-full hover:bg-[#54C6EB] transition-colors shadow-sm"
+                      className="flex-1 rounded-lg px-4 py-2 text-sm font-semibold text-center transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 border border-green-200 bg-green-50 text-green-700 hover:bg-green-100 focus-visible:ring-green-200"
                     >
                       Accept
                     </button>
                     <button
                       onClick={() => handleAction(req._id, "reject")}
-                      className="flex-1 bg-[#C14953] text-white font-medium px-4 py-2 rounded-full hover:bg-red-600 transition-colors shadow-sm"
+                      className="flex-1 rounded-lg px-4 py-2 text-sm font-semibold text-center transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 border border-red-200 bg-red-50 text-red-600 hover:bg-red-100 focus-visible:ring-red-200"
                     >
                       Reject
                     </button>
