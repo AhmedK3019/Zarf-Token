@@ -98,9 +98,7 @@ const LoyaltyProgram = ({ vendor }) => {
   const [applyAgainModalOpen, setApplyAgainModalOpen] = useState(false);
   const [toast, setToast] = useState(null);
   const [cancelRequestModalOpen, setCancelRequestModalOpen] = useState(false);
-  const [cancelRequestReason, setCancelRequestReason] = useState("");
   const [cancellingRequest, setCancellingRequest] = useState(false);
-  const [cancelRequestError, setCancelRequestError] = useState(null);
   const [cancelApprovedModalOpen, setCancelApprovedModalOpen] = useState(false);
   const [cancelApprovedReason, setCancelApprovedReason] = useState("");
   const [cancellingApproved, setCancellingApproved] = useState(false);
@@ -195,28 +193,21 @@ const LoyaltyProgram = ({ vendor }) => {
   };
 
   const openCancelRequestModal = () => {
-    setCancelRequestError(null);
-    setCancelRequestReason("");
     setCancelRequestModalOpen(true);
   };
 
   const closeCancelRequestModal = () => {
     if (cancellingRequest) return;
     setCancelRequestModalOpen(false);
-    setCancelRequestReason("");
-    setCancelRequestError(null);
   };
 
   const handleCancelRequest = async () => {
     const appToCancel = pendingApplication || latestApplication;
     if (!vendorId || !appToCancel) return;
     setCancellingRequest(true);
-    setCancelRequestError(null);
     try {
       // TODO: Implement backend API call here
-      // await api.delete(`/loyalty/${appToCancel._id}`, {
-      //   data: { reason: cancelRequestReason.trim() },
-      // });
+      // await api.delete(`/loyalty/${appToCancel._id}`);
       
       // Uncomment below when backend is ready:
       // setApplications((prev) =>
@@ -232,7 +223,6 @@ const LoyaltyProgram = ({ vendor }) => {
       
       // For now, show a message that backend needs to be implemented
       setCancelRequestModalOpen(false);
-      setCancelRequestReason("");
       setToast({
         type: "error",
         message: "will do backend later",
@@ -242,7 +232,10 @@ const LoyaltyProgram = ({ vendor }) => {
         err?.response?.data?.error ||
         err?.message ||
         "Failed to cancel request. Please try again.";
-      setCancelRequestError(message);
+      setToast({
+        type: "error",
+        message,
+      });
     } finally {
       setCancellingRequest(false);
     }
@@ -591,45 +584,16 @@ const LoyaltyProgram = ({ vendor }) => {
       {cancelRequestModalOpen && (
         <div className="fixed inset-0 z-40 flex items-center justify-center bg-black/30 px-4">
           <div className="w-full max-w-lg rounded-3xl bg-white p-6 shadow-2xl">
-            <div className="flex items-start justify-between gap-3">
-              <div>
-                <h3 className="text-2xl font-bold text-[#18122B]">Cancel Your Application?</h3>
-                <p className="text-sm text-gray-600">
-                  This will cancel your pending loyalty program application. You can submit a new application at any time.
-                </p>
-              </div>
-              <button
-                type="button"
-                onClick={closeCancelRequestModal}
-                className="rounded-full p-2 text-gray-400 hover:bg-gray-100"
-                aria-label="Close"
-              >
-                <X className="h-4 w-4" />
-              </button>
+            <div className="space-y-3 text-center">
+              <h3 className="text-2xl font-bold text-[#18122B]">Cancel Your Application?</h3>
             </div>
 
-            <div className="mt-4">
-              <label className="text-sm font-semibold text-gray-700">
-                Optional reason for cancellation
-              </label>
-              <textarea
-                rows={4}
-                value={cancelRequestReason}
-                onChange={(e) => setCancelRequestReason(e.target.value)}
-                placeholder="Briefly explain why you're cancelling this request."
-                className="mt-2 w-full rounded-2xl border border-gray-200 bg-gray-50 p-3 text-sm focus:border-[#4C3BCF] focus:bg-white focus:outline-none"
-              />
-            </div>
-            {cancelRequestError && (
-              <p className="mt-2 text-sm text-rose-600">{cancelRequestError}</p>
-            )}
-
-            <div className="mt-6 flex flex-wrap justify-end gap-3">
+            <div className="mt-6 flex flex-wrap items-center justify-between gap-3">
               <button
                 type="button"
                 onClick={closeCancelRequestModal}
                 disabled={cancellingRequest}
-                className="rounded-full border border-gray-200 px-4 py-2 text-sm font-semibold text-gray-600 hover:bg-gray-50 disabled:cursor-not-allowed"
+                className="rounded-full bg-emerald-600 px-5 py-2 text-sm font-semibold text-white transition hover:bg-emerald-500 disabled:cursor-not-allowed disabled:opacity-60"
               >
                 Keep Request
               </button>
