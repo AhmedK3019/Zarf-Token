@@ -28,63 +28,17 @@ export const combineDateAndTime = (date, time) => {
   return parsed;
 };
 
-const resolveId = (docOrId) => {
-  if (!docOrId) return null;
-  if (typeof docOrId === "string") return docOrId;
-  if (docOrId._id) return docOrId._id.toString();
-  if (docOrId.id) return docOrId.id.toString();
-  if (typeof docOrId.toString === "function") return docOrId.toString();
-  return null;
-};
-
-const loadVendorDoc = async (request, vendorDoc) => {
-  if (vendorDoc && vendorDoc.email) return vendorDoc;
-  if (request.vendorId && request.vendorId.email) return request.vendorId;
-  const vendorId = resolveId(request.vendorId);
-  if (!vendorId) return null;
-  return await Vendor.findById(vendorId);
-};
-
-const loadBazaarDoc = async (request) => {
-  if (!request.isBazarBooth || !request.bazarId) return null;
-  if (request.bazarId && request.bazarId.bazaarname) return request.bazarId;
-  const bazaarId = resolveId(request.bazarId);
-  if (!bazaarId) return null;
-  return await Bazaar.findById(bazaarId);
-};
-
-export const hasEventStarted = (request, boothDoc = null, now = new Date()) => {
-  const reference =
-    request.eventStartAt ||
-    (request.isBazarBooth && request.bazarId?.startdate
-      ? combineDateAndTime(
-          request.bazarId.startdate,
-          request.bazarId.starttime || request.bazarId.startTime
-        )
-      : null) ||
-    boothDoc?.goLiveAt;
+export const hasEventStarted = (request) => {
+  const reference = request.startdate;
   if (!reference) return false;
   const start = new Date(reference);
   if (Number.isNaN(start.getTime())) return false;
   return start <= now;
 };
 
-export const getCancellationEligibility = (
-  request,
-  { vendorId, boothDoc = null, now = new Date() } = {}
-) => {
+export const getCancellationEligibility = (request) => {
   if (!request) {
     return { ok: false, message: "Request not found" };
-  }
-  if (vendorId) {
-    const requestVendorId = resolveId(request.vendorId);
-    if (!requestVendorId || requestVendorId !== resolveId(vendorId)) {
-      return {
-        ok: false,
-        code: "NOT_OWNER",
-        message: "You can only cancel your own request",
-      };
-    }
   }
   if (!CANCELLABLE_STATUSES.includes(request.status)) {
     return {
@@ -101,7 +55,7 @@ export const getCancellationEligibility = (
       message: "Cannot cancel - payment already processed",
     };
   }
-  if (hasEventStarted(request, boothDoc, now)) {
+  if (hasEventStarted(request)) {
     return {
       ok: false,
       code: "EVENT_STARTED",
@@ -113,7 +67,7 @@ export const getCancellationEligibility = (
 
 export const incrementBazaarParticipation = async (request) => {
   if (!request.isBazarBooth || !request.bazarId) return;
-  const bazaarId = resolveId(request.bazarId);
+  const bazaarId = request.bazarId._id;
   if (!bazaarId) return;
   try {
     await Bazaar.findByIdAndUpdate(
@@ -122,16 +76,13 @@ export const incrementBazaarParticipation = async (request) => {
       { new: false }
     );
   } catch (err) {
-    console.error(
-      "incrementBazaarParticipation failed:",
-      err?.message || err
-    );
+    console.error("incrementBazaarParticipation failed:", err?.message || err);
   }
 };
 
 export const decrementBazaarParticipation = async (request) => {
   if (!request.isBazarBooth || !request.bazarId) return;
-  const bazaar = await loadBazaarDoc(request);
+  const bazaar = request.bazarId;
   if (!bazaar) return;
   bazaar.vendorParticipationCount = Math.max(
     0,
@@ -149,30 +100,6 @@ const pushStaffNotification = async (message) => {
   ]);
 };
 
-const syncBoothCancellation = async (request, { now, reason, source }) => {
-  let booth = await Booth.findOne({ vendorRequestId: request._id });
-  if (!booth) {
-    const fallbackQuery = {
-      vendorRequestId: { $exists: false },
-      vendorId: resolveId(request.vendorId),
-      status: "Approved",
-    };
-    if (request.isBazarBooth) {
-      fallbackQuery.bazarId = resolveId(request.bazarId);
-    } else {
-      fallbackQuery.isBazarBooth = false;
-    }
-    booth = await Booth.findOne(fallbackQuery).sort({ createdAt: -1 });
-  }
-  if (!booth) return null;
-  booth.status = "Cancelled";
-  booth.cancelledAt = now;
-  booth.cancellationReason = reason;
-  booth.cancellationSource = source;
-  await booth.save();
-  return booth;
-};
-
 const buildStaffCancellationMessage = (request, vendor) => {
   const vendorName =
     vendor?.companyname || vendor?.firstname || vendor?.lastname || "A vendor";
@@ -184,13 +111,10 @@ const buildStaffCancellationMessage = (request, vendor) => {
 
 export const finalizeCancellation = async (
   request,
-  { reason, source = "vendor", vendorDoc, skipEmail = false } = {}
+  { vendorDoc, skipEmail = false } = {}
 ) => {
   const now = new Date();
   request.status = "Cancelled";
-  request.cancelledAt = now;
-  request.cancellationReason = reason;
-  request.cancellationSource = source;
   if (
     !request.paymentStatus ||
     request.paymentStatus === "unpaid" ||
@@ -198,28 +122,21 @@ export const finalizeCancellation = async (
   ) {
     request.paymentStatus = "cancelled";
   }
+  request.cancelledAt = now;
   await request.save();
 
-  const booth = await syncBoothCancellation(request, { now, reason, source });
-  await decrementBazaarParticipation(request);
-
-  const vendor = await loadVendorDoc(request, vendorDoc);
+  const vendor = vendorDoc;
   if (!skipEmail && vendor?.email) {
     try {
       await sendVendorCancellationEmail({
         vendor,
         request,
-        reason,
-        isAuto: source === "system",
       });
     } catch (err) {
-      console.error(
-        "sendVendorCancellationEmail failed:",
-        err?.message || err
-      );
+      console.error("sendVendorCancellationEmail failed:", err?.message || err);
     }
   }
 
   await pushStaffNotification(buildStaffCancellationMessage(request, vendor));
-  return { request, booth };
+  return { request };
 };

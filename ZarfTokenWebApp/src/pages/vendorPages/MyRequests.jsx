@@ -384,64 +384,7 @@ function DetailsModal({ request, onClose, nowMs }) {
   );
 }
 
-function CancellationDialog({
-  open,
-  request,
-  reason,
-  onReasonChange,
-  onClose,
-  onConfirm,
-  loading,
-}) {
-  if (!open || !request) return null;
-  return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-fade-in">
-      <div className="bg-white rounded-2xl w-full max-w-md shadow-2xl p-6 space-y-4 animate-slide-up">
-        <div className="flex items-start gap-3">
-          <AlertCircle className="text-rose-500 mt-1" />
-          <div>
-            <h3 className="text-xl font-semibold text-[#4C3BCF]">
-              Cancel participation?
-            </h3>
-            <p className="text-sm text-gray-600 mt-1">
-              Once cancelled, this request will move to the Cancelled tab. You
-              can apply again at any time.
-            </p>
-          </div>
-        </div>
-        <div>
-          <label className="block text-sm font-medium text-gray-700 mb-2">
-            Cancellation reason (optional)
-          </label>
-          <textarea
-            className="w-full rounded-lg border-2 border-gray-200 focus:border-[#736CED] focus:ring-[#736CED] text-sm p-3"
-            rows={3}
-            placeholder="Helps us understand why you're cancelling..."
-            value={reason}
-            onChange={(e) => onReasonChange(e.target.value)}
-          />
-        </div>
-        <div className="flex justify-end gap-3 pt-2">
-          <button
-            onClick={onClose}
-            className="px-4 py-2 rounded-lg border border-gray-200 text-gray-700 hover:bg-gray-50"
-            disabled={loading}
-          >
-            Keep request
-          </button>
-          <button
-            onClick={onConfirm}
-            disabled={loading}
-            className="px-4 py-2 rounded-lg bg-rose-500 text-white font-semibold hover:bg-rose-600 inline-flex items-center gap-2 disabled:opacity-60 disabled:cursor-not-allowed"
-          >
-            {loading && <Loader2 className="h-4 w-4 animate-spin" />}
-            Cancel participation
-          </button>
-        </div>
-      </div>
-    </div>
-  );
-}
+// CancellationDialog removed (no longer used)
 
 const StatCard = ({ label, value, helper, accent }) => (
   <div className="rounded-2xl border border-gray-100 bg-white/80 p-4 shadow-sm">
@@ -472,11 +415,6 @@ export default function MyRequests() {
   const [viewFilter, setViewFilter] = useState("all");
   const [search, setSearch] = useState("");
   const [nowMs, setNowMs] = useState(Date.now());
-  const [cancelDialog, setCancelDialog] = useState({
-    open: false,
-    request: null,
-    reason: "",
-  });
   const [cancellingId, setCancellingId] = useState(null);
   const [payingId, setPayingId] = useState(null);
   const [toast, setToast] = useState(null);
@@ -573,23 +511,12 @@ export default function MyRequests() {
     }
   };
 
-  const handleOpenCancel = (request) => {
-    setCancelDialog({ open: true, request, reason: "" });
-  };
-
-  const closeCancelDialog = () => {
-    setCancelDialog({ open: false, request: null, reason: "" });
-    setCancellingId(null);
-  };
-
-  const handleConfirmCancel = async () => {
-    if (!cancelDialog.request) return;
-    const target = cancelDialog.request;
+  // Direct cancel handler without reason dialog
+  const handleDirectCancel = async (target) => {
+    if (!target?._id) return;
     setCancellingId(target._id);
     try {
-      await api.delete(`/vendorRequests/${target._id}/cancel`, {
-        data: cancelDialog.reason ? { reason: cancelDialog.reason.trim() } : {},
-      });
+      await api.delete(`/vendorRequests/${target._id}/cancel`);
       setRequests((prev) =>
         prev.map((item) =>
           item._id === target._id
@@ -598,8 +525,7 @@ export default function MyRequests() {
                 status: "Cancelled",
                 paymentStatus: "cancelled",
                 cancelledAt: new Date().toISOString(),
-                cancellationReason:
-                  cancelDialog.reason.trim() || "Cancelled by vendor",
+                cancellationReason: "Cancelled by vendor",
               }
             : item
         )
@@ -622,7 +548,7 @@ export default function MyRequests() {
         "Failed to cancel participation. Please try again.";
       setToast({ type: "error", message });
     } finally {
-      closeCancelDialog();
+      setCancellingId(null);
     }
   };
 
@@ -962,7 +888,7 @@ export default function MyRequests() {
                             View Details
                           </button>
                           <button
-                            onClick={() => handleOpenCancel(request)}
+                            onClick={() => handleDirectCancel(request)}
                             disabled={
                               !cancellationState.canCancel || isCancelling
                             }
@@ -1026,18 +952,6 @@ export default function MyRequests() {
           </div>
         </div>
       )}
-
-      <CancellationDialog
-        open={cancelDialog.open}
-        request={cancelDialog.request}
-        reason={cancelDialog.reason}
-        onReasonChange={(value) =>
-          setCancelDialog((prev) => ({ ...prev, reason: value }))
-        }
-        onClose={closeCancelDialog}
-        onConfirm={handleConfirmCancel}
-        loading={Boolean(cancellingId)}
-      />
 
       <DetailsModal
         request={selectedRequest}

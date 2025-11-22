@@ -8,7 +8,6 @@ export const autoCancelOverdueVendorRequests = async () => {
     status: "Approved",
     paymentStatus: { $in: ["unpaid", "overdue", null] },
     paymentDueAt: { $lte: now },
-    cancelledAt: { $exists: false },
   })
     .populate("vendorId")
     .populate("bazarId");
@@ -17,7 +16,6 @@ export const autoCancelOverdueVendorRequests = async () => {
   for (const request of overdueRequests) {
     try {
       await finalizeCancellation(request, {
-        reason: "Payment deadline missed",
         source: "system",
         vendorDoc: request.vendorId,
       });

@@ -239,7 +239,6 @@ export const sendPaymentReceiptEmail = async (params) => {
 export const sendVendorCancellationEmail = async ({
   vendor,
   request,
-  reason,
   isAuto = false,
 }) => {
   if (!vendor || !vendor.email) {
@@ -257,9 +256,6 @@ export const sendVendorCancellationEmail = async ({
     ? "Participation auto-cancelled due to missed payment deadline"
     : "Your participation request has been cancelled";
 
-  const reasonLine = reason
-    ? `<p><strong>Reason provided:</strong> ${reason}</p>`
-    : "";
   const intro = isAuto
     ? `We did not receive payment before the deadline, so your participation for <strong>${eventLabel}</strong> was automatically cancelled.`
     : `This email confirms that your participation request for <strong>${eventLabel}</strong> has been cancelled as requested.`;

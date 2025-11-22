@@ -239,7 +239,7 @@ const acceptRequest = async (req, res, next) => {
     request.paymentStatus = "unpaid";
     request.paymentDueAt = computePaymentDueDate(approvedAt);
     await request.save();
-    await incrementBazaarParticipation(request);
+
     // add a field allowedUsers to request if platform booth
     if (!request.isBazarBooth) {
       request.allowedusers = finalArray;
@@ -344,6 +344,7 @@ const payForBooth = async (req, res, next) => {
     if (method === "manual") {
       request.paymentStatus = "paid";
       await request.save();
+      await incrementBazaarParticipation(request);
       const vendor = await Vendor.findById(request.vendorId);
       try {
         const body = {
@@ -428,23 +429,12 @@ const cancelParticipation = async (req, res, next) => {
     if (!request)
       return res.status(404).json({ message: "VendorRequest not found" });
 
-    const booth = await Booth.findOne({ vendorRequestId: request._id });
-    const eligibility = getCancellationEligibility(request, {
-      vendorId,
-      boothDoc: booth,
-    });
+    const eligibility = getCancellationEligibility(request);
     if (!eligibility.ok) {
       return res.status(400).json({ message: eligibility.message });
     }
 
-    const reason =
-      typeof req.body?.reason === "string" && req.body.reason.trim().length
-        ? req.body.reason.trim()
-        : "Cancelled by vendor";
-
     const result = await finalizeCancellation(request, {
-      reason,
-      source: "vendor",
       vendorDoc: request.vendorId,
     });
 
