@@ -4,14 +4,11 @@ import mongoose from "mongoose";
 
 export const createPoll = async (req, res) => {
   try {
-    if (await Poll.findOne()) {
-      return res.status(400).json({ error: "A poll already exists." });
-    }
     const { booths, endDate } = req.body;
 
     const poll = new Poll({
       booths,
-      endDate,
+      ended: false,
     });
     await poll.save();
     res.status(201).json(poll);
@@ -22,14 +19,34 @@ export const createPoll = async (req, res) => {
 
 export const getPoll = async (req, res) => {
   try {
-    const poll = await Poll.findOne()
+    const pollId = req.params.pollId;
+    const poll = await Poll.findById(pollId)
       .populate("booths")
-      .populate("votes.user")
-      .populate("votes.booth");
+      .populate("votes.user");
     if (!poll) {
       return res.status(404).json({ error: "No active poll found." });
     }
     res.status(200).json(poll);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
+export const getActivePolls = async (req, res) => {
+  try {
+    const polls = await Poll.find({ ended: false })
+      .populate("booths")
+      .populate("votes.user");
+    res.status(200).json(polls);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
+export const getAllPolls = async (req, res) => {
+  try {
+    const polls = await Poll.find().populate("booths").populate("votes.user");
+    res.status(200).json(polls);
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
@@ -60,6 +77,32 @@ export const voteInPoll = async (req, res) => {
     }
     await poll.save();
     res.status(200).json(poll);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
+export const endPoll = async (req, res) => {
+  try {
+    const poll = await Poll.findById(req.params.pollId);
+    if (!poll) {
+      return res.status(404).json({ error: "Poll not found." });
+    }
+    poll.ended = true;
+    await poll.save();
+    res.status(200).json({ message: "Poll ended successfully." });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+};
+
+export const deletePoll = async (req, res) => {
+  try {
+    const poll = await Poll.findByIdAndDelete(req.params.pollId);
+    if (!poll) {
+      return res.status(404).json({ error: "Poll not found." });
+    }
+    res.status(200).json({ message: "Poll deleted successfully." });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }

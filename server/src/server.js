@@ -28,6 +28,7 @@ import conferenceRoutes from "./routes/conferenceRoutes.js";
 import workshopRoutes from "./routes/workshopRoutes.js";
 import allEventsRoutes from "./routes/allEventsRoutes.js";
 import stripeRoutes from "./routes/stripeRoutes.js";
+import pollRoutes from "./routes/pollRoutes.js";
 import Admin from "./models/Admin.js";
 import { autoCancelOverdueVendorRequests } from "./utils/vendorRequestJobs.js";
 import AllEventsController from "./controllers/AllEventsController.js";
@@ -180,6 +181,7 @@ app.use("/api/conferences", conferenceRoutes);
 app.use("/api/workshops", workshopRoutes);
 app.use("/api/allEvents", allEventsRoutes);
 app.use("/api/stripe", stripeRoutes);
+app.use("/api/polls", pollRoutes);
 cron.schedule("0 0 * * *", () => {
   // runs every day at midnight
   console.log("Updating court slots...");
