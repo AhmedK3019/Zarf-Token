@@ -314,21 +314,17 @@ const NavbarAdmin = () => {
         {(() => {
           const path = location.pathname || "";
           let headerTitle = "Campus Events & Booths";
-          let headerSubtitle =
-            "Discover amazing events and platform booths across campus. Filter by category to find exactly what you're looking for.";
+          let headerSubtitle = "";
 
           if (path.includes("/signup-requests")) {
             headerTitle = "Sign-Up Requests";
-            headerSubtitle =
-              "Review pending registration requests and assign the correct role before approval.";
+            headerSubtitle = "";
           } else if (path.includes("/vendor-requests")) {
             headerTitle = "Vendor Participation Requests";
-            headerSubtitle =
-              "Review all pending vendor participation requests below.";
+            headerSubtitle = "";
           } else if (path.includes("/users")) {
             headerTitle = "Users & Roles";
-            headerSubtitle =
-              "Filter by role, status, or search; manage accounts and create new admins or officers without leaving the page.";
+            headerSubtitle = "";
           }
 
           return (
@@ -336,9 +332,11 @@ const NavbarAdmin = () => {
               <h1 className="text-4xl md:text-5xl font-bold text-white mb-3">
                 {headerTitle}
               </h1>
-              <p className="text-lg text-white/80 max-w-3xl mx-auto">
-                {headerSubtitle}
-              </p>
+              {headerSubtitle && (
+                <p className="text-lg text-white/80 max-w-3xl mx-auto">
+                  {headerSubtitle}
+                </p>
+              )}
             </div>
           );
         })()}
