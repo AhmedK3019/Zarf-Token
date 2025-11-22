@@ -6,7 +6,6 @@ import {
   Calendar,
   Users,
   Bell,
-  Store,
   Star,
   FileText,
   PackageCheck,
@@ -253,22 +252,8 @@ const NavbarAdmin = () => {
                   )}
                 </div>
 
-                {/* Manage Vendors */}
                 <NavLink
-                  to="/dashboard/admin/loyalty-vendors"
-                  className={({ isActive }) =>
-                    isActive
-                      ? "px-4 py-2 rounded-full bg-white/15 text-white font-semibold transition-all flex items-center gap-2 shadow-sm"
-                      : "px-4 py-2 rounded-full text-white/90 hover:text-white hover:bg-white/10 transition-all flex items-center gap-2"
-                  }
-                >
-                  <Store className="h-4 w-4" />
-                  Loyals
-                </NavLink>
-
-                {/* Loyalty Partners */}
-                <NavLink
-                  to="/dashboard/admin/loyalty-program"
+                  to="/dashboard/admin/loyals"
                   className={({ isActive }) =>
                     isActive
                       ? "px-4 py-2 rounded-full bg-white/15 text-white font-semibold transition-all flex items-center gap-2 shadow-sm"
@@ -276,7 +261,7 @@ const NavbarAdmin = () => {
                   }
                 >
                   <Star className="h-4 w-4" />
-                  Partners
+                  Loyals
                 </NavLink>
 
                 {/* Users Dropdown */}

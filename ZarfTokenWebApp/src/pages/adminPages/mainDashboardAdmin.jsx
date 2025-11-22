@@ -3,7 +3,6 @@ import NavbarAdmin from "./navbarAdmin";
 import AllEvents from "../AllEvents";
 import SignUpRequests from "./SignUpRequests";
 import VendorRequests from "./VendorRequests";
-import LoyaltyVendors from "./LoyaltyVendors";
 import LoyaltyPartnersDirectory from "./LoyaltyPartnersDirectory";
 import AllUsers from "./AllUsers";
 import EventsSalesReport from "./EventsSalesReport";
@@ -22,8 +21,8 @@ const mainDashboardAdmin = () => {
           <Route path="/event-attendees-report" element={<EventAttendeesReport />} />
           <Route path="/signup-requests" element={<SignUpRequests />} />
           <Route path="/vendor-requests" element={<VendorRequests />} />
-          <Route path="/loyalty-vendors" element={<LoyaltyVendors />} />
           <Route path="/loyalty-program" element={<LoyaltyPartnersDirectory />} />
+          <Route path="/loyals" element={<LoyaltyPartnersDirectory />} />
           <Route path="/users" element={<AllUsers />} />
           <Route path="*" element={<NotFound />}></Route>
         </Routes>
