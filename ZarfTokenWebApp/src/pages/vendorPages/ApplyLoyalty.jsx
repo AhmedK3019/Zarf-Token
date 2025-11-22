@@ -25,7 +25,7 @@ const DISCOUNT_MAX = 100;
 const TERMS_MIN_CHARS = 50;
 const TERMS_MIN_WORDS = 10;
 const TERMS_MAX_CHARS = 2000;
-const ACTIVE_STATUSES = ["pending"];
+const INACTIVE_STATUSES = ["rejected", "cancelled", "inactive"];
 const STATUS_PAGE_PATH = "/dashboard/vendor/loyalty-program";
 const CONFETTI_COLORS = [
   "#4C3BCF",
@@ -408,10 +408,12 @@ export default function ApplyLoyalty() {
     navigate(STATUS_PAGE_PATH);
   }, [navigate]);
 
-  const activeApplication = useMemo(
-    () => applications.find((app) => ACTIVE_STATUSES.includes(app.status)),
-    [applications]
-  );
+  const activeApplication = useMemo(() => {
+    return applications.find((app) => {
+      const status = String(app.status || "").toLowerCase();
+      return !INACTIVE_STATUSES.includes(status);
+    });
+  }, [applications]);
   const lastRejected = useMemo(
     () => applications.find((app) => app.status === "rejected"),
     [applications]
@@ -575,15 +577,13 @@ export default function ApplyLoyalty() {
       <div className="space-y-6 p-6">
       <header className="flex flex-wrap items-center justify-between gap-4">
         <div>
-          <p className="text-sm uppercase tracking-wide text-gray-500">
-            Vendor Loyalty Program
-          </p>
           <h1 className="text-3xl font-bold text-[#18122B]">
             Submit a New Application
           </h1>
           <p className="text-sm text-gray-600">
-            One active application is allowed at a time. Rejected vendors can
-            resubmit with updated details.
+            One active program is allowed at a time. Cancel your current program
+            before submitting a new application. Rejected vendors can resubmit
+            with updated details.
           </p>
         </div>
         <div className="flex flex-wrap items-center gap-3">
@@ -610,12 +610,12 @@ export default function ApplyLoyalty() {
         <div className="flex items-start gap-3 rounded-2xl border border-amber-200 bg-amber-50/80 p-4 text-amber-900">
           <ShieldCheck className="mt-0.5 h-5 w-5" />
           <div>
-            <p className="font-semibold">Application locked</p>
+            <p className="font-semibold">Application unavailable</p>
             <p className="text-sm">
-              You already have an active application (
+              You already have an active loyalty program (
               {activeApplication.status}) submitted on{" "}
-              {formatDate(activeApplication.createdAt)}. Please wait for review
-              before submitting again.
+              {formatDate(activeApplication.createdAt)}. Cancel your current
+              program from the status page before submitting another one.
             </p>
           </div>
         </div>
@@ -770,13 +770,13 @@ export default function ApplyLoyalty() {
           >
             <span className="inline-flex items-center justify-center gap-2">
               {submitting && <Loader2 className="h-4 w-4 animate-spin" />}
-              {activeApplication ? "Application Locked" : "Submit Application"}
+              {activeApplication ? "Program Active" : "Submit Application"}
             </span>
           </button>
           {!canSubmit && (
             <p className="text-center text-xs text-gray-500">
-              You can submit a new application after the current one is reviewed
-              or cancelled.
+              You can submit a new application only after cancelling your active
+              program or once a pending request is resolved.
             </p>
           )}
         </form>

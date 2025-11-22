@@ -50,6 +50,7 @@ const STATUS_TONE = {
   cancelled: "bg-gray-50 text-gray-600 border-gray-200",
   inactive: "bg-gray-50 text-gray-600 border-gray-200",
 };
+const NON_ACTIVE_STATUSES = ["rejected", "cancelled", "inactive"];
 
 const StatusBadge = ({ status }) => {
   if (!status || status === "not_applied") return null;
@@ -159,28 +160,21 @@ const LoyaltyProgram = ({ vendor }) => {
   const heroStatus = heroApplication?.status?.toLowerCase() || "not_applied";
   const statusCopy = STATUS_INFO[heroStatus] || STATUS_INFO.not_applied; // eslint-disable-line no-unused-vars
   const hasHistory = applications.length > 0;
-  const canApply = !pendingApplication;
+  const hasActiveProgram = applications.some((app) => {
+    const status = String(app.status || "").toLowerCase();
+    return !NON_ACTIVE_STATUSES.includes(status);
+  });
+  const canApply = !hasActiveProgram;
 
   const primaryCta = useMemo(() => {
-    if (!vendorId) return null;
-    if (!canApply) {
-      return {
-        label: "View Submission",
-        to: "/dashboard/vendor/apply-loyalty",
-        variant: "secondary",
-      };
-    }
+    if (!vendorId || !canApply) return null;
     return {
       label: hasHistory ? "Apply Again" : "Apply Now",
       to: "/dashboard/vendor/apply-loyalty",
       variant: "primary",
       requiresReminder: hasHistory,
     };
-  }, [
-    vendorId,
-    canApply,
-    hasHistory,
-  ]);
+  }, [vendorId, canApply, hasHistory]);
 
   const handleNavigate = (to) => navigate(to);
   const handleApplyAgainProceed = () => {
