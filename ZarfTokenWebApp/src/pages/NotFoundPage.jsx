@@ -45,7 +45,7 @@ export default function NotFound() {
 
         <Link
           to={getDashboardPath()}
-          className="inline-block bg-primary text-white px-6 py-2 rounded-full shadow-md transition-all hover:bg-primary/90 hover:scale-105"
+          className="inline-block bg-[#001845] text-white px-6 py-2 rounded-full shadow-md transition-all hover:bg-primary/90 hover:scale-105"
         >
           Go to Dashboard
         </Link>

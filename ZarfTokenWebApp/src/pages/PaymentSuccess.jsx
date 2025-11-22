@@ -1,6 +1,7 @@
 import { useEffect } from "react";
 import { useSearchParams, useNavigate } from "react-router-dom";
 import api from "../services/api";
+import { useAuthUser } from "../hooks/auth";
 
 export default function PaymentSuccess() {
   const [searchParams] = useSearchParams();
@@ -8,6 +9,7 @@ export default function PaymentSuccess() {
   const type = searchParams.get("type");
   const id = searchParams.get("id");
   const sessionId = searchParams.get("session_id");
+  const { user } = useAuthUser();
 
   useEffect(() => {
     let cancelled = false;
@@ -18,14 +20,27 @@ export default function PaymentSuccess() {
       } catch (e) {
         // non-fatal; webhook may still complete
       } finally {
-        if (!cancelled) setTimeout(() => navigate("/dashboard/user"), 1200);
+        if (!cancelled) {
+          const dashboardPath =
+            user.role.toLowerCase() === "vendor"
+              ? `/dashboard/${user.role.toLowerCase()}`
+              : `/dashboard/user`;
+          setTimeout(() => navigate(dashboardPath), 1200);
+        }
       }
     };
     confirm();
     return () => {
       cancelled = true;
     };
-  }, [navigate]);
+  }, [navigate, user]);
+
+  const resolveDashboardPath = () => {
+    if (user.role.toLowerCase() === "vendor") {
+      return `/dashboard/${user.role.toLowerCase()}`;
+    }
+    return `/dashboard/user`;
+  };
 
   return (
     <div className="min-h-screen flex flex-col items-center justify-center bg-muted text-center p-6">
@@ -42,7 +57,7 @@ export default function PaymentSuccess() {
           <p>Session: {sessionId?.slice(0, 12) || "N/A"}...</p>
         </div>
         <button
-          onClick={() => navigate("/dashboard/user")}
+          onClick={() => navigate(resolveDashboardPath())}
           className="px-4 py-2 rounded-lg bg-[#4C3BCF] text-white hover:bg-[#3730A3]"
         >
           Go to Dashboard
