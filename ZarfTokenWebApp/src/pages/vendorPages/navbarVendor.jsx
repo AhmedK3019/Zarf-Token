@@ -35,18 +35,23 @@ const NavbarVendor = ({ vendor }) => {
     <div className="w-full">
       <header className="w-full bg-[#001233] shadow-lg">
         <nav className="max-w-7xl mx-auto px-6 py-4">
-          <div className="flex items-center justify-between">
+          <div className="grid grid-cols-3 items-center h-16">
             {/* Left - Logo */}
             <div className="flex items-center gap-3">
-              <img
-                src="/ztcirc1.png"
-                alt="ZarfToken logo"
-                className="h-9 w-9 rounded-full object-cover"
-              />
+              <div className="relative h-16 overflow-visible">
+                <img
+                  src="/NavbarLogo.png"
+                  alt="ZarfToken logo"
+                  className="h-16 w-auto object-contain"
+                />
+                <p className="text-white ml-2 text-lg font-semibold absolute bottom-0 left-16">
+                  Welcome, Vendor!
+                </p>
+              </div>
             </div>
 
             {/* Center - Links */}
-            <div className="hidden lg:flex items-center gap-4 text-sm font-medium text-white">
+            <div className="hidden lg:flex items-center gap-4 text-sm font-medium text-white justify-self-center">
               <div className="flex items-center gap-1 rounded-full bg-white/5 px-2 py-1 shadow-[0_10px_30px_rgba(0,0,0,0.22)] border border-white/10">
                 <NavLink
                   to="/dashboard/vendor/upcoming-bazaars"
@@ -68,7 +73,7 @@ const NavbarVendor = ({ vendor }) => {
                   }
                 >
                   <SquarePlus className="h-4 w-4" />
-                  Apply Booth
+                  Apply
                 </NavLink>
                 <NavLink
                   to="/dashboard/vendor/my-requests"
@@ -107,7 +112,7 @@ const NavbarVendor = ({ vendor }) => {
             </div>
 
             {/* Right - Notifications + Logout */}
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 justify-self-end">
               <NotificationsDrawer />
               <button
                 onClick={handleLogout}

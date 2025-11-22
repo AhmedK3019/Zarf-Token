@@ -77,14 +77,19 @@ const NavbarAdmin = () => {
       <header className="w-full bg-[#001233] shadow-lg">
         {/* Navigation Bar */}
         <nav className="max-w-7xl mx-auto px-6 py-4">
-          <div className="grid grid-cols-3 items-center">
+          <div className="grid grid-cols-3 items-center h-16">
             {/* Left side - Logo */}
             <div className="flex items-center gap-3 justify-self-start">
-              <img
-                src="/ztcirc1.png"
-                alt="ZarfToken logo"
-                className="h-9 w-9 rounded-full object-cover"
-              />
+              <div className="relative h-16 overflow-visible">
+                <img
+                  src="/NavbarLogo.png"
+                  alt="ZarfToken logo"
+                  className="h-16 w-auto object-contain"
+                />
+                <p className="text-white ml-2 text-lg font-semibold absolute bottom-0 left-16">
+                  Welcome, Admin!
+                </p>
+              </div>
             </div>
 
             {/* Center - Navigation Links inside a pill */}

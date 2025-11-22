@@ -88,18 +88,23 @@ const NavbarUser = () => {
     <div className="w-full">
       <header className="w-full bg-[#001233] shadow-lg">
         <nav className="max-w-7xl mx-auto px-6 py-4">
-          <div className="flex items-center justify-between">
+          <div className="grid grid-cols-3 items-center h-16">
             {/* Left - Logo */}
             <div className="flex items-center gap-3">
-              <img
-                src="/ztcirc1.png"
-                alt="ZarfToken logo"
-                className="h-9 w-9 rounded-full object-cover"
-              />
+              <div className="relative h-16 overflow-visible">
+                <img
+                  src="/NavbarLogo.png"
+                  alt="ZarfToken logo"
+                  className="h-16 w-auto object-contain"
+                />
+                <p className="text-white ml-2 text-lg font-semibold absolute bottom-0 left-16">
+                  Welcome, Tokener!
+                </p>
+              </div>
             </div>
 
             {/* Center - Links with dropdowns */}
-            <div className="hidden lg:flex items-center gap-4 text-sm font-medium text-white">
+            <div className="hidden lg:flex items-center gap-4 text-sm font-medium text-white justify-self-center">
               {/* Workshops dropdown (Professors only): Create / My Workshops */}
               {user.role === "Professor" && (
                 <div className="relative" ref={workshopsRef}>
@@ -325,7 +330,7 @@ const NavbarUser = () => {
             </div>
 
             {/* Right - Wallet + Notifications + Logout */}
-            <div className="flex items-center gap-4">
+            <div className="flex items-center gap-4 justify-self-end">
               <div className="flex items-center gap-2 text-white/90 text-sm">
                 <Wallet className="h-4 w-4" />
                 <span className="font-semibold">

@@ -74,12 +74,6 @@ const MainDashboardEventsOffice = () => {
             <h1 className="text-4xl font-bold sm:text-5xl mb-2">
               Workshops & Approvals
             </h1>
-            <p className="text-sm max-w-2xl mx-auto opacity-90">
-              Review, approve, or reject workshops in one place.
-            </p>
-            <p className="text-sm max-w-2xl mx-auto opacity-90">
-              Streamlined. Fast. Organized. Effortless.
-            </p>
           </div>
         </div>
       )}
@@ -113,9 +107,7 @@ const MainDashboardEventsOffice = () => {
       {isAllEventsPage && (
         <div className="w-full bg-[#001233] text-white px-6 py-8">
           <div className="max-w-7xl mx-auto text-center">
-            <h1 className="text-4xl font-bold sm:text-5xl mb-4">
-              All Events
-            </h1>
+            <h1 className="text-4xl font-bold sm:text-5xl mb-4">All Events</h1>
           </div>
         </div>
       )}
@@ -125,9 +117,6 @@ const MainDashboardEventsOffice = () => {
             <h1 className="text-4xl font-bold sm:text-5xl mb-2">
               Generate QR Code
             </h1>
-            <p className="text-sm max-w-2xl mx-auto opacity-90">
-              Create downloadable QR codes for vendors or reps.
-            </p>
           </div>
         </div>
       )}
@@ -160,13 +149,19 @@ const MainDashboardEventsOffice = () => {
           <Route index element={<AllEvents />} />
           <Route path="all-events" element={<AllEvents />} />
           <Route path="events-sales-report" element={<EventsSalesReport />} />
-          <Route path="event-attendees-report" element={<EventAttendeesReport />} />
+          <Route
+            path="event-attendees-report"
+            element={<EventAttendeesReport />}
+          />
           <Route path="create-event" element={<CreateEvent />} />
           <Route path="workshop-requests" element={<WorkshopRequests />} />
           <Route path="archived-events" element={<ArchivedEvents />} />
           <Route path="generate-qr" element={<GenerateQR />} />
           <Route path="loyalty-vendors" element={<LoyaltyVendors />} />
-          <Route path="loyalty-program" element={<LoyaltyPartnersDirectory />} />
+          <Route
+            path="loyalty-program"
+            element={<LoyaltyPartnersDirectory />}
+          />
           <Route path="vendor-requests" element={<VendorRequests />} />
           <Route path="vendor-poll" element={<VendorPoll />} />
           <Route path="gym-schedule" element={<GymSchedule />} />
