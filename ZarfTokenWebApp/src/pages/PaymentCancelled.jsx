@@ -1,10 +1,19 @@
 import { useNavigate, useSearchParams } from "react-router-dom";
+import { useAuthUser } from "../hooks/auth";
 
 export default function PaymentCancelled() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const type = searchParams.get("type");
   const id = searchParams.get("id");
+  const { user } = useAuthUser();
+
+  const resolveDashboardPath = () => {
+    if (user.role.toLowerCase() === "vendor") {
+      return `/dashboard/${user.role.toLowerCase()}`;
+    }
+    return `/dashboard/user`;
+  };
 
   return (
     <div className="min-h-screen flex flex-col items-center justify-center bg-muted text-center p-6">
@@ -20,7 +29,7 @@ export default function PaymentCancelled() {
           <p>Event id: {id || "N/A"}</p>
         </div>
         <button
-          onClick={() => navigate("/dashboard/user")}
+          onClick={() => navigate(resolveDashboardPath())}
           className="px-4 py-2 rounded-lg bg-gray-100 text-gray-700 hover:bg-gray-200"
         >
           Back to Dashboard

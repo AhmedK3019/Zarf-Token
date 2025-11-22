@@ -478,6 +478,7 @@ export default function MyRequests() {
     reason: "",
   });
   const [cancellingId, setCancellingId] = useState(null);
+  const [payingId, setPayingId] = useState(null);
   const [toast, setToast] = useState(null);
   const [successPulse, setSuccessPulse] = useState(false);
   const [refreshKey, setRefreshKey] = useState(0);
@@ -917,6 +918,43 @@ export default function MyRequests() {
 
                       {!isCancelled && (
                         <div className="mt-auto pt-4 flex items-center justify-between gap-3">
+                          {statusKey === "accepted" &&
+                            request.paymentStatus === "unpaid" &&
+                            request.paymentDueAt &&
+                            new Date(request.paymentDueAt).getTime() >
+                              nowMs && (
+                              <button
+                                onClick={async () => {
+                                  setPayingId(request._id);
+                                  try {
+                                    const resp = await api.post(
+                                      `/vendorRequests/${request._id}/pay`,
+                                      { method: "stripe" }
+                                    );
+                                    if (resp.data?.url) {
+                                      window.location.href = resp.data.url;
+                                    }
+                                  } catch (e) {
+                                    setToast({
+                                      type: "error",
+                                      message:
+                                        e.response?.data?.message ||
+                                        "Failed to start payment",
+                                    });
+                                  } finally {
+                                    setPayingId(null);
+                                  }
+                                }}
+                                disabled={Boolean(payingId) || isCancelling}
+                                className="px-4 py-2 rounded-full text-sm font-semibold bg-emerald-600 text-white hover:bg-emerald-700 transition-all inline-flex items-center gap-2 disabled:opacity-60 disabled:cursor-not-allowed"
+                              >
+                                {payingId === request._id ? (
+                                  <Loader2 className="h-4 w-4 animate-spin" />
+                                ) : (
+                                  <span>Pay {request.price} EGP</span>
+                                )}
+                              </button>
+                            )}
                           <button
                             onClick={() => setSelectedRequest(request)}
                             className="px-4 py-2 rounded-full text-sm font-semibold bg-[#736CED] text-white hover:bg-[#5A4BBA] transition-all inline-flex items-center gap-2"

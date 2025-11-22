@@ -97,7 +97,7 @@ export const sendBoothPaymentReceiptEmail = async (vendor, booth) => {
       <li><strong>Booth Size:</strong> ${booth.boothSize}</li>
       ${
         booth.isBazarBooth && booth.bazarId
-          ? `<li><strong>Bazar ID:</strong> ${booth.bazarId}</li>`
+          ? `<li><strong>Bazar ID:</strong> ${booth.bazarId._id}</li>`
           : ""
       }
       ${
@@ -108,6 +108,20 @@ export const sendBoothPaymentReceiptEmail = async (vendor, booth) => {
       ${
         booth.duration
           ? `<li><strong>Duration:</strong> ${booth.duration} weeks</li>`
+          : ""
+      }
+      ${
+        booth.startdate
+          ? `<li><strong>Start Date:</strong> ${new Date(
+              booth.startdate
+            ).toLocaleDateString()}</li>`
+          : ""
+      }
+      ${
+        booth.enddate
+          ? `<li><strong>End Date:</strong> ${new Date(
+              booth.enddate
+            ).toLocaleDateString()}</li>`
           : ""
       }
       <li><strong>Amount Paid:</strong> ${booth.price} EGP</li>

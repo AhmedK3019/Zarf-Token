@@ -141,6 +141,70 @@ const confirmCheckout = async (req, res) => {
       return res.status(200).json({ message: "Payment confirmed", workshop });
     }
 
+    if (meta.type === "vendorRequest" && meta.vendorRequestId) {
+      const VendorRequest = (await import("../models/VendorRequest.js"))
+        .default;
+      const Vendor = (await import("../models/Vendor.js")).default;
+      const Booth = (await import("../models/Booth.js")).default;
+      const { sendBoothPaymentReceiptEmail } = await import(
+        "../utils/mailer.js"
+      );
+      const vReq = await VendorRequest.findById(meta.vendorRequestId).populate(
+        "bazarId"
+      );
+      if (!vReq)
+        return res.status(404).json({ message: "Vendor request not found" });
+      if (vReq.vendorId.toString() !== userId.toString()) {
+        return res
+          .status(403)
+          .json({ message: "Not authorized for this payment session" });
+      }
+      if (vReq.paymentStatus === "paid") {
+        return res
+          .status(200)
+          .json({ message: "Already confirmed", vendorRequest: vReq });
+      }
+      vReq.paymentStatus = "paid";
+      await vReq.save();
+      const vendor = await Vendor.findById(vReq.vendorId);
+      // Create Booth from request (idempotent check: if exists skip creation)
+      let booth = await Booth.findOne({ vendorRequestId: vReq._id });
+      if (!booth) {
+        const body = {
+          boothname: vReq.boothname || vendor.companyname,
+          vendorRequestId: vReq._id,
+          vendorId: vReq.vendorId,
+          isBazarBooth: vReq.isBazarBooth,
+          status: "Approved",
+          bazarId: vReq.bazarId?._id || vReq.bazarId,
+          boothSize: vReq.boothSize,
+          people: vReq.people,
+          location: vReq.location,
+          duration: vReq.duration,
+          startdate: vReq.startdate,
+          enddate: vReq.enddate,
+        };
+        booth = await Booth.create(body);
+      }
+      try {
+        await sendBoothPaymentReceiptEmail(vendor, {
+          ...booth.toObject(),
+          price: vReq.price,
+          people: vReq.people,
+          isBazarBooth: vReq.isBazarBooth,
+          bazarId: vReq.bazarId,
+        });
+      } catch (mailErr) {
+        console.error(
+          "sendBoothPaymentReceiptEmail vendorRequest confirm error:",
+          mailErr?.message || mailErr
+        );
+      }
+      return res
+        .status(200)
+        .json({ message: "Payment confirmed", vendorRequest: vReq, booth });
+    }
+
     return res.status(400).json({ message: "Unsupported session metadata" });
   } catch (err) {
     console.error("confirmCheckout error:", err?.message || err);

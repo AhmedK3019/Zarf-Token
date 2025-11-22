@@ -64,6 +64,7 @@ const createBazarRequest = async (req, res, next) => {
       boothname,
       isBazarBooth: true,
       duration,
+      location: bazar.location,
       price,
       bazarId: req.params.bazarId,
       startdate: combineDateAndTime(
@@ -260,68 +261,128 @@ const acceptRequest = async (req, res, next) => {
 };
 
 const payForBooth = async (req, res, next) => {
+  // Supports 'stripe' (create checkout) and 'manual' (legacy immediate creation)
   try {
-    const request = await VendorRequest.findById(req.params.id).populate(
-      "bazarId"
-    );
+    const vendorId = req.user?._id || req.user?.id || req.userId;
+    if (!vendorId)
+      return res.status(401).json({ message: "Authentication required" });
+    const { id } = req.params;
+    const method = req.body.method || "stripe"; // default to stripe for new flow
+    const request = await VendorRequest.findById(id).populate("bazarId");
     if (!request)
       return res.status(404).json({ message: "VendorRequest not found" });
-    request.paymentStatus = "paid";
-    await request.save();
-    const vendor = await Vendor.findById(request.vendorId);
-    try {
-      let body = {
-        boothname: request.boothname ? request.boothname : vendor.companyname,
-        vendorRequestId: request._id,
-        vendorId: request.vendorId,
-        isBazarBooth: request.isBazarBooth,
-        status: "Approved",
-        bazarId: request.bazarId?._id || request.bazarId,
-        boothSize: request.boothSize,
-        people: request.people,
-        location: request.location,
-        duration: request.duration,
-        startdate: request.startdate,
-        enddate: request.enddate,
-      };
-      if (!request.isBazarBooth) {
-        body.allowedusers = finalArray;
-      }
-      const booth = await Booth.create(body);
-      if (!request.isBazarBooth) {
-        await User.updateMany(
-          { role: { $in: finalArray } },
-          {
-            $push: {
-              notifications: {
-                message: `Check out ${vendor.companyname} — a new platform booth has gone live!`,
-              },
-            },
-          }
-        );
-        await EventsOffice.updateMany(
-          {},
-          {
-            $push: {
-              notifications: {
-                message: `Check out ${vendor.companyname} — a new platform booth has gone live!`,
-              },
-            },
-          }
-        );
+    if (request.vendorId.toString() !== vendorId.toString()) {
+      return res.status(403).json({ message: "Not your vendor request" });
+    }
+    if (request.status !== "Approved") {
+      return res.status(400).json({ message: "Request is not approved" });
+    }
+    if (request.paymentStatus !== "unpaid") {
+      return res
+        .status(400)
+        .json({ message: "Payment already processed or not allowed" });
+    }
+    if (
+      request.paymentDueAt &&
+      new Date(request.paymentDueAt).getTime() < Date.now()
+    ) {
+      return res.status(400).json({ message: "Payment deadline passed" });
+    }
+
+    // STRIPE CHECKOUT FLOW
+    if (method === "stripe") {
+      if (!process.env.STRIPE_SECRET_KEY) {
+        return res
+          .status(500)
+          .json({ message: "Stripe is not configured on the server" });
       }
       try {
-        await sendBoothPaymentReceiptEmail(vendor, booth);
-      } catch (emailErr) {
+        const StripeLib = (await import("stripe")).default;
+        const stripe = new StripeLib(process.env.STRIPE_SECRET_KEY);
+        const productName = request.boothname || "Vendor Booth";
+        const amount = typeof request.price === "number" ? request.price : 0;
+        const session = await stripe.checkout.sessions.create({
+          payment_method_types: ["card"],
+          mode: "payment",
+          line_items: [
+            {
+              price_data: {
+                currency: "egp",
+                product_data: { name: productName },
+                unit_amount: Math.round(amount * 100),
+              },
+              quantity: 1,
+            },
+          ],
+          success_url: `${
+            process.env.FRONTEND_URL || "http://localhost:5173"
+          }/payment-success?type=vendorRequest&id=${id}&session_id={CHECKOUT_SESSION_ID}`,
+          cancel_url: `${
+            process.env.FRONTEND_URL || "http://localhost:5173"
+          }/payment-cancelled?type=vendorRequest&id=${id}`,
+          metadata: {
+            userId: vendorId.toString(),
+            vendorRequestId: id,
+            type: "vendorRequest",
+          },
+        });
+        return res
+          .status(200)
+          .json({ url: session.url, sessionId: session.id });
+      } catch (stripeErr) {
         console.error(
-          "Failed to create booth after payment:",
-          emailErr && emailErr.message ? emailErr.message : emailErr
+          "Stripe session creation (vendorRequest) failed",
+          stripeErr
         );
+        return res
+          .status(500)
+          .json({ message: "Failed to create Stripe session" });
       }
-      res.json(booth);
-    } catch (err) {
-      next(err);
     }
+
+    // LEGACY / MANUAL FLOW (instant mark paid & create booth)
+    if (method === "manual") {
+      request.paymentStatus = "paid";
+      await request.save();
+      const vendor = await Vendor.findById(request.vendorId);
+      try {
+        const body = {
+          boothname: request.boothname ? request.boothname : vendor.companyname,
+          vendorRequestId: request._id,
+          vendorId: request.vendorId,
+          isBazarBooth: request.isBazarBooth,
+          status: "Approved",
+          bazarId: request.bazarId?._id || request.bazarId,
+          boothSize: request.boothSize,
+          people: request.people,
+          location: request.location,
+          duration: request.duration,
+          startdate: request.startdate,
+          enddate: request.enddate,
+        };
+        const booth = await Booth.create(body);
+        try {
+          const { sendBoothPaymentReceiptEmail } = await import(
+            "../utils/mailer.js"
+          );
+          await sendBoothPaymentReceiptEmail(vendor, {
+            ...booth.toObject(),
+            price: request.price,
+            people: request.people,
+          });
+        } catch (emailErr) {
+          console.error(
+            "Failed to send booth payment receipt:",
+            emailErr?.message || emailErr
+          );
+        }
+        return res.json(booth);
+      } catch (err) {
+        return next(err);
+      }
+    }
+
+    return res.status(400).json({ message: "Unsupported payment method" });
   } catch (err) {
     next(err);
   }
