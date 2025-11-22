@@ -6,6 +6,7 @@ import { Bell } from "lucide-react";
 export default function NotificationsDrawer() {
   const { user } = useAuthUser();
   const [open, setOpen] = useState(false);
+  const [anim, setAnim] = useState(false); // controls slide animation
   const [notifications, setNotifications] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -33,6 +34,16 @@ export default function NotificationsDrawer() {
     if (open) fetchNotifications();
   }, [open, fetchNotifications]);
 
+  // Handle enter/exit animation
+  useEffect(() => {
+    if (open) {
+      // delay to allow initial render with translate-x-full
+      const t = setTimeout(() => setAnim(true), 10);
+      return () => clearTimeout(t);
+    }
+    setAnim(false);
+  }, [open]);
+
   // Proactively fetch notifications when component mounts or user changes
   useEffect(() => {
     if (!user) return;
@@ -49,7 +60,8 @@ export default function NotificationsDrawer() {
     if (typeof window === "undefined") return undefined;
     const handleRefresh = () => fetchNotifications();
     window.addEventListener("notifications:refresh", handleRefresh);
-    return () => window.removeEventListener("notifications:refresh", handleRefresh);
+    return () =>
+      window.removeEventListener("notifications:refresh", handleRefresh);
   }, [fetchNotifications]);
 
   const markAsRead = async (id) => {
@@ -76,6 +88,12 @@ export default function NotificationsDrawer() {
 
   if (!user) return null;
 
+  const closeDrawer = () => {
+    // play slide-out then unmount
+    setAnim(false);
+    setTimeout(() => setOpen(false), 300);
+  };
+
   return (
     <div className="flex items-center gap-3">
       <button
@@ -94,16 +112,28 @@ export default function NotificationsDrawer() {
 
       {/* Drawer */}
       {open && (
-        <div className="fixed inset-0 z-50 flex">
-          {/* Left drawer */}
-          <aside className="w-full max-w-sm bg-white shadow-2xl p-4 overflow-y-auto rounded-r-2xl">
+        <div className="fixed inset-0 z-50">
+          {/* Backdrop */}
+          <div
+            className={`absolute inset-0 bg-black/30 transition-opacity duration-300 ${
+              anim ? "opacity-100" : "opacity-0"
+            }`}
+            onClick={closeDrawer}
+            aria-hidden
+          />
+          {/* Right drawer */}
+          <aside
+            className={`absolute right-0 top-0 h-full w-full max-w-sm bg-white shadow-2xl p-4 overflow-y-auto rounded-l-2xl transform transition-transform duration-300 ${
+              anim ? "translate-x-0" : "translate-x-full"
+            }`}
+          >
             <div className="flex items-center justify-between mb-4">
               <h3 className="text-lg font-semibold text-[#001233]">
                 Notifications
               </h3>
               <div className="flex items-center gap-2">
                 <button
-                  onClick={() => setOpen(false)}
+                  onClick={closeDrawer}
                   className="text-sm text-gray-500 hover:text-gray-800 transition"
                 >
                   Close
@@ -150,9 +180,6 @@ export default function NotificationsDrawer() {
               </ul>
             )}
           </aside>
-
-          {/* Clickable overlay: clicking anywhere here closes the drawer */}
-          <div className="flex-1" onClick={() => setOpen(false)} aria-hidden />
         </div>
       )}
     </div>

@@ -89,14 +89,13 @@ const NavbarUser = () => {
       <header className="w-full bg-[#001233] shadow-lg">
         <nav className="max-w-7xl mx-auto px-6 py-4">
           <div className="flex items-center justify-between">
-            {/* Left - Notifications */}
+            {/* Left - Logo */}
             <div className="flex items-center gap-3">
               <img
                 src="/ztcirc1.png"
                 alt="ZarfToken logo"
                 className="h-9 w-9 rounded-full object-cover"
               />
-              <NotificationsDrawer />
             </div>
 
             {/* Center - Links with dropdowns */}
@@ -171,7 +170,9 @@ const NavbarUser = () => {
                       setWorkshopsDropdownOpen(false);
                     }}
                     className={`px-4 py-2 rounded-full transition-all flex items-center gap-2 ${
-                      location.pathname.includes("/dashboard/user/all-events") ||
+                      location.pathname.includes(
+                        "/dashboard/user/all-events"
+                      ) ||
                       location.pathname.includes(
                         "/dashboard/user/favourite-events"
                       ) ||
@@ -323,7 +324,7 @@ const NavbarUser = () => {
               </div>
             </div>
 
-            {/* Right - Wallet + Logout */}
+            {/* Right - Wallet + Notifications + Logout */}
             <div className="flex items-center gap-4">
               <div className="flex items-center gap-2 text-white/90 text-sm">
                 <Wallet className="h-4 w-4" />
@@ -331,6 +332,7 @@ const NavbarUser = () => {
                   {formatWallet(user.wallet)} EGP
                 </span>
               </div>
+              <NotificationsDrawer />
               <button
                 onClick={handleLogout}
                 aria-label="Logout"

@@ -76,14 +76,13 @@ const NavbarEventsOffice = () => {
       <header className="w-full bg-[#001233] shadow-lg">
         <nav className="max-w-7xl mx-auto px-6 py-4">
           <div className="flex items-center justify-between">
-            {/* Left - Notifications */}
+            {/* Left - Logo */}
             <div className="flex items-center gap-3">
               <img
                 src="/ztcirc1.png"
                 alt="ZarfToken logo"
                 className="h-9 w-9 rounded-full object-cover"
               />
-              <NotificationsDrawer />
             </div>
 
             {/* Center - Links (with dropdowns) */}
@@ -348,16 +347,19 @@ const NavbarEventsOffice = () => {
               </div>
             </div>
 
-            {/* Right - Logout */}
-            <button
-              onClick={handleLogout}
-              aria-label="Logout"
-              title="Logout"
-              className="px-3 py-2 rounded-lg text-white/80 hover:text-white hover:bg-white/10 transition-all flex items-center gap-2 text-sm"
-            >
-              <LogOut className="h-4 w-4" />
-              <span className="hidden sm:inline">Logout</span>
-            </button>
+            {/* Right - Notifications + Logout */}
+            <div className="flex items-center gap-2">
+              <NotificationsDrawer />
+              <button
+                onClick={handleLogout}
+                aria-label="Logout"
+                title="Logout"
+                className="px-3 py-2 rounded-lg text-white/80 hover:text-white hover:bg-white/10 transition-all flex items-center gap-2 text-sm"
+              >
+                <LogOut className="h-4 w-4" />
+                <span className="hidden sm:inline">Logout</span>
+              </button>
+            </div>
           </div>
         </nav>
       </header>

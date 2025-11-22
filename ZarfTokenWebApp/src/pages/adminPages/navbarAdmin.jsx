@@ -78,14 +78,13 @@ const NavbarAdmin = () => {
         {/* Navigation Bar */}
         <nav className="max-w-7xl mx-auto px-6 py-4">
           <div className="grid grid-cols-3 items-center">
-            {/* Left side - Notifications */}
+            {/* Left side - Logo */}
             <div className="flex items-center gap-3 justify-self-start">
               <img
                 src="/ztcirc1.png"
                 alt="ZarfToken logo"
                 className="h-9 w-9 rounded-full object-cover"
               />
-              <NotificationsDrawer />
             </div>
 
             {/* Center - Navigation Links inside a pill */}
@@ -264,13 +263,13 @@ const NavbarAdmin = () => {
 
                 {/* Loyalty Partners */}
                 <NavLink
-                to="/dashboard/admin/loyalty-program"
-                className={({ isActive }) =>
-                  isActive
-                    ? "px-4 py-2 rounded-full bg-white/15 text-white font-semibold transition-all flex items-center gap-2 shadow-sm"
-                    : "px-4 py-2 rounded-full text-white/90 hover:text-white hover:bg-white/10 transition-all flex items-center gap-2"
-                }
-              >
+                  to="/dashboard/admin/loyalty-program"
+                  className={({ isActive }) =>
+                    isActive
+                      ? "px-4 py-2 rounded-full bg-white/15 text-white font-semibold transition-all flex items-center gap-2 shadow-sm"
+                      : "px-4 py-2 rounded-full text-white/90 hover:text-white hover:bg-white/10 transition-all flex items-center gap-2"
+                  }
+                >
                   <Star className="h-4 w-4" />
                   Partners
                 </NavLink>
@@ -290,16 +289,19 @@ const NavbarAdmin = () => {
               </div>
             </div>
 
-            {/* Right side - Logout */}
-            <button
-              onClick={handleLogout}
-              aria-label="Logout"
-              title="Logout"
-              className="px-3 py-2 rounded-lg text-white/80 hover:text-white hover:bg-white/10 transition-all flex items-center gap-2 text-sm justify-self-end"
-            >
-              <LogOut className="h-4 w-4" />
-              <span className="hidden sm:inline">Logout</span>
-            </button>
+            {/* Right side - Notifications + Logout */}
+            <div className="flex items-center gap-2 justify-self-end">
+              <NotificationsDrawer />
+              <button
+                onClick={handleLogout}
+                aria-label="Logout"
+                title="Logout"
+                className="px-3 py-2 rounded-lg text-white/80 hover:text-white hover:bg-white/10 transition-all flex items-center gap-2 text-sm"
+              >
+                <LogOut className="h-4 w-4" />
+                <span className="hidden sm:inline">Logout</span>
+              </button>
+            </div>
           </div>
         </nav>
 
