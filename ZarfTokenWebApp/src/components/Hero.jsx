@@ -116,16 +116,16 @@ const Hero = () => {
     <section className="relative z-10 flex w-full flex-1 items-center justify-center px-6 py-12">
       <div className="relative grid w-full max-w-6xl gap-12 md:grid-cols-2 md:items-center">
         <div className="max-w-xl space-y-4">
-          <h1 className="text-4xl font-bold text-[#001233] sm:text-5xl lg:text-6xl">
+          <h1 className="text-4xl font-bold text-[#001845] sm:text-5xl lg:text-6xl">
             All your events.
           </h1>
-          <h1 className="text-4xl font-bold text-[#001233] sm:text-5xl lg:text-6xl">
+          <h1 className="text-4xl font-bold text-[#001845] sm:text-5xl lg:text-6xl">
             One place.
           </h1>
-          <h1 className="text-4xl font-bold text-[#001233] sm:text-5xl lg:text-6xl">
+          <h1 className="text-4xl font-bold text-[#001845] sm:text-5xl lg:text-6xl">
             GUC x Zarf Token.
           </h1>
-          <p className="text-base text-[#001233] sm:text-lg">
+          <p className="text-base text-[#001845] sm:text-lg">
             From planning to participation, Zarf Token keeps your community
             synced. Instant registrations, real-time insights, and automated
             engagement at your fingertips.

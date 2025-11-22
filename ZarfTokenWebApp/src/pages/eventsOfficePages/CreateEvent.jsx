@@ -44,8 +44,8 @@ export default function CreateEvent() {
             onClick={() => setCurrentForm("Trip")}
             className={`${buttonStyle} ${
               currentForm === "Trip"
-                ? "bg-[#001233] text-white border-[#001233]"
-                : "bg-white text-[#001233] border-[#001233] hover:bg-[#001233] hover:text-white"
+                ? "bg-[#001845] text-white border-[#001845]"
+                : "bg-white text-[#001845] border-[#001845] hover:bg-[#001845] hover:text-white"
             }`}
           >
             Create Trip
@@ -55,8 +55,8 @@ export default function CreateEvent() {
             onClick={() => setCurrentForm("Bazaar")}
             className={`${buttonStyle} ${
               currentForm === "Bazaar"
-                ? "bg-[#001233] text-white border-[#001233]"
-                : "bg-white text-[#001233] border-[#001233] hover:bg-[#001233] hover:text-white"
+                ? "bg-[#001845] text-white border-[#001845]"
+                : "bg-white text-[#001845] border-[#001845] hover:bg-[#001845] hover:text-white"
             }`}
           >
             Create Bazaar
@@ -66,8 +66,8 @@ export default function CreateEvent() {
             onClick={() => setCurrentForm("Conference")}
             className={`${buttonStyle} ${
               currentForm === "Conference"
-                ? "bg-[#001233] text-white border-[#001233]"
-                : "bg-white text-[#001233] border-[#001233] hover:bg-[#001233] hover:text-white"
+                ? "bg-[#001845] text-white border-[#001845]"
+                : "bg-white text-[#001845] border-[#001845] hover:bg-[#001845] hover:text-white"
             }`}
           >
             Create Conference

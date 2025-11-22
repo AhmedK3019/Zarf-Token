@@ -1,5 +1,15 @@
 import React, { useState, useEffect } from "react";
-import { Calendar, Clock, Users, Dumbbell, ChevronLeft, ChevronRight, Plus, Trash2, Edit } from "lucide-react";
+import {
+  Calendar,
+  Clock,
+  Users,
+  Dumbbell,
+  ChevronLeft,
+  ChevronRight,
+  Plus,
+  Trash2,
+  Edit,
+} from "lucide-react";
 import api from "../../services/api";
 import { useAuthUser } from "../../hooks/auth";
 
@@ -7,62 +17,72 @@ const LIGHT_OVERLAY_CLASSES =
   "fixed inset-0 z-50 flex items-center justify-center p-4 bg-muted bg-opacity-90 backdrop-blur-sm animate-fade-in";
 
 const MONTHS = [
-  "January", "February", "March", "April", "May", "June",
-  "July", "August", "September", "October", "November", "December"
+  "January",
+  "February",
+  "March",
+  "April",
+  "May",
+  "June",
+  "July",
+  "August",
+  "September",
+  "October",
+  "November",
+  "December",
 ];
 
 // Simple color mapping for workout types
 const WORKOUT_COLORS = {
-  "Yoga": "bg-purple-100 text-purple-700",
-  "Pilates": "bg-green-100 text-green-700",
-  "Aerobics": "bg-blue-100 text-blue-700",
-  "Zumba": "bg-pink-100 text-pink-700",
+  Yoga: "bg-purple-100 text-purple-700",
+  Pilates: "bg-green-100 text-green-700",
+  Aerobics: "bg-blue-100 text-blue-700",
+  Zumba: "bg-pink-100 text-pink-700",
   "Cross Circuit": "bg-orange-100 text-orange-700",
-  "Kickboxing": "bg-red-100 text-red-700",
+  Kickboxing: "bg-red-100 text-red-700",
 };
 
 // Create Session Modal Component
 const CreateSessionModal = ({ isOpen, onClose, onSessionCreated }) => {
   const [formData, setFormData] = useState({
-    date: '',
-    time: '08:00',
+    date: "",
+    time: "08:00",
     duration: 60,
-    type: 'Yoga',
-    maxParticipants: 20
+    type: "Yoga",
+    maxParticipants: 20,
   });
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
-  const minDate = new Date().toISOString().split('T')[0];
+  const [error, setError] = useState("");
+  const minDate = new Date().toISOString().split("T")[0];
 
   // Pre-fill date with today's date when modal opens
   useEffect(() => {
     if (isOpen) {
       const today = new Date();
-      const dateStr = today.toISOString().split('T')[0];
-      setFormData(prev => ({ ...prev, date: dateStr }));
+      const dateStr = today.toISOString().split("T")[0];
+      setFormData((prev) => ({ ...prev, date: dateStr }));
     }
   }, [isOpen]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
-    setError('');
+    setError("");
 
     try {
-      const response = await api.post('/gym-sessions', formData);
+      const response = await api.post("/gym-sessions", formData);
       onSessionCreated(response.data);
       onClose();
       // Reset form
       setFormData({
-        date: new Date().toISOString().split('T')[0],
-        time: '08:00',
+        date: new Date().toISOString().split("T")[0],
+        time: "08:00",
         duration: 60,
-        type: 'Yoga',
-        maxParticipants: 20
+        type: "Yoga",
+        maxParticipants: 20,
       });
     } catch (err) {
-      console.error('Error creating session:', err);
-      setError(err.response?.data?.error || 'Failed to create session');
+      console.error("Error creating session:", err);
+      setError(err.response?.data?.error || "Failed to create session");
     } finally {
       setLoading(false);
     }
@@ -76,8 +96,10 @@ const CreateSessionModal = ({ isOpen, onClose, onSessionCreated }) => {
         className="bg-white rounded-2xl max-w-md w-full p-6"
         onClick={(e) => e.stopPropagation()}
       >
-        <h3 className="text-xl font-bold text-[#4C3BCF] mb-4">Create Gym Session</h3>
-        
+        <h3 className="text-xl font-bold text-[#4C3BCF] mb-4">
+          Create Gym Session
+        </h3>
+
         {error && (
           <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
             {error}
@@ -92,7 +114,9 @@ const CreateSessionModal = ({ isOpen, onClose, onSessionCreated }) => {
             <input
               type="date"
               value={formData.date}
-              onChange={(e) => setFormData(prev => ({ ...prev, date: e.target.value }))}
+              onChange={(e) =>
+                setFormData((prev) => ({ ...prev, date: e.target.value }))
+              }
               className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#736CED]"
               required
               min={minDate}
@@ -106,7 +130,9 @@ const CreateSessionModal = ({ isOpen, onClose, onSessionCreated }) => {
             <input
               type="time"
               value={formData.time}
-              onChange={(e) => setFormData(prev => ({ ...prev, time: e.target.value }))}
+              onChange={(e) =>
+                setFormData((prev) => ({ ...prev, time: e.target.value }))
+              }
               className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#736CED]"
               required
             />
@@ -121,7 +147,12 @@ const CreateSessionModal = ({ isOpen, onClose, onSessionCreated }) => {
               min="15"
               max="180"
               value={formData.duration}
-              onChange={(e) => setFormData(prev => ({ ...prev, duration: parseInt(e.target.value) }))}
+              onChange={(e) =>
+                setFormData((prev) => ({
+                  ...prev,
+                  duration: parseInt(e.target.value),
+                }))
+              }
               className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#736CED]"
               required
             />
@@ -133,11 +164,15 @@ const CreateSessionModal = ({ isOpen, onClose, onSessionCreated }) => {
             </label>
             <select
               value={formData.type}
-              onChange={(e) => setFormData(prev => ({ ...prev, type: e.target.value }))}
+              onChange={(e) =>
+                setFormData((prev) => ({ ...prev, type: e.target.value }))
+              }
               className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#736CED]"
             >
-              {Object.keys(WORKOUT_COLORS).map(workoutType => (
-                <option key={workoutType} value={workoutType}>{workoutType}</option>
+              {Object.keys(WORKOUT_COLORS).map((workoutType) => (
+                <option key={workoutType} value={workoutType}>
+                  {workoutType}
+                </option>
               ))}
             </select>
           </div>
@@ -151,7 +186,12 @@ const CreateSessionModal = ({ isOpen, onClose, onSessionCreated }) => {
               min="1"
               max="50"
               value={formData.maxParticipants}
-              onChange={(e) => setFormData(prev => ({ ...prev, maxParticipants: parseInt(e.target.value) }))}
+              onChange={(e) =>
+                setFormData((prev) => ({
+                  ...prev,
+                  maxParticipants: parseInt(e.target.value),
+                }))
+              }
               className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#736CED]"
               required
             />
@@ -182,37 +222,36 @@ const CreateSessionModal = ({ isOpen, onClose, onSessionCreated }) => {
 // Edit Session Modal Component (only allows editing date, time, duration)
 const EditSessionModal = ({ isOpen, onClose, onSessionUpdated, session }) => {
   const [formData, setFormData] = useState({
-    date: '',
-    time: '',
-    duration: 60
+    date: "",
+    time: "",
+    duration: 60,
   });
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
+  const [error, setError] = useState("");
 
-  
   useEffect(() => {
     if (isOpen && session) {
       setFormData({
         date: session.date,
         time: session.time,
-        duration: session.duration
+        duration: session.duration,
       });
-      setError('');
+      setError("");
     }
   }, [isOpen, session]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
-    setError('');
+    setError("");
 
     try {
       const response = await api.put(`/gym-sessions/${session._id}`, formData);
       onSessionUpdated(response.data);
       onClose();
     } catch (err) {
-      console.error('Error updating session:', err);
-      setError(err.response?.data?.error || 'Failed to update session');
+      console.error("Error updating session:", err);
+      setError(err.response?.data?.error || "Failed to update session");
     } finally {
       setLoading(false);
     }
@@ -220,13 +259,15 @@ const EditSessionModal = ({ isOpen, onClose, onSessionUpdated, session }) => {
 
   if (!isOpen || !session) return null;
 
-  const minDate = new Date().toISOString().split('T')[0];
+  const minDate = new Date().toISOString().split("T")[0];
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
       <div className="bg-white rounded-2xl max-w-md w-full p-6">
-        <h3 className="text-xl font-bold text-[#4C3BCF] mb-4">Edit Gym Session</h3>
-        
+        <h3 className="text-xl font-bold text-[#4C3BCF] mb-4">
+          Edit Gym Session
+        </h3>
+
         {error && (
           <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
             {error}
@@ -241,7 +282,9 @@ const EditSessionModal = ({ isOpen, onClose, onSessionUpdated, session }) => {
             <input
               type="date"
               value={formData.date}
-              onChange={(e) => setFormData(prev => ({ ...prev, date: e.target.value }))}
+              onChange={(e) =>
+                setFormData((prev) => ({ ...prev, date: e.target.value }))
+              }
               className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#736CED]"
               required
               min={minDate}
@@ -255,7 +298,9 @@ const EditSessionModal = ({ isOpen, onClose, onSessionUpdated, session }) => {
             <input
               type="time"
               value={formData.time}
-              onChange={(e) => setFormData(prev => ({ ...prev, time: e.target.value }))}
+              onChange={(e) =>
+                setFormData((prev) => ({ ...prev, time: e.target.value }))
+              }
               className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
               required
             />
@@ -267,7 +312,12 @@ const EditSessionModal = ({ isOpen, onClose, onSessionUpdated, session }) => {
             </label>
             <select
               value={formData.duration}
-              onChange={(e) => setFormData(prev => ({ ...prev, duration: parseInt(e.target.value) }))}
+              onChange={(e) =>
+                setFormData((prev) => ({
+                  ...prev,
+                  duration: parseInt(e.target.value),
+                }))
+              }
               className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary"
               required
             >
@@ -293,7 +343,7 @@ const EditSessionModal = ({ isOpen, onClose, onSessionUpdated, session }) => {
               className="flex-1 bg-[#4C3BCF] text-white py-2 px-4 rounded-lg hover:bg-[#3730A3] transition-colors disabled:opacity-50"
               disabled={loading}
             >
-              {loading ? 'Updating...' : 'Update Session'}
+              {loading ? "Updating..." : "Update Session"}
             </button>
           </div>
         </form>
@@ -316,13 +366,15 @@ export default function GymSchedule() {
 
   const currentMonth = currentDate.getMonth();
   const currentYear = currentDate.getFullYear();
-  
-  const isEventsOffice = user && (user.role === "Events Office" || user.role === "Event office");
-  
+
+  const isEventsOffice =
+    user && (user.role === "Events Office" || user.role === "Event office");
+
   const isUserRegistered = (session) => {
     if (!user || !session.registered) return false;
-    return session.registered.some(reg => 
-      (typeof reg === 'object' && reg._id === user._id) || reg === user._id
+    return session.registered.some(
+      (reg) =>
+        (typeof reg === "object" && reg._id === user._id) || reg === user._id
     );
   };
 
@@ -334,8 +386,11 @@ export default function GymSchedule() {
     try {
       setLoading(true);
       setError(null);
-      
-      const monthStr = `${currentYear}-${String(currentMonth + 1).padStart(2, '0')}`;
+
+      const monthStr = `${currentYear}-${String(currentMonth + 1).padStart(
+        2,
+        "0"
+      )}`;
       const response = await api.get(`/gym-sessions/month/${monthStr}`);
       setSessions(response.data);
     } catch (err) {
@@ -351,8 +406,8 @@ export default function GymSchedule() {
   };
 
   const handleSessionUpdated = (updatedSession) => {
-    setSessions(prevSessions => 
-      prevSessions.map(session => 
+    setSessions((prevSessions) =>
+      prevSessions.map((session) =>
         session._id === updatedSession._id ? updatedSession : session
       )
     );
@@ -366,16 +421,22 @@ export default function GymSchedule() {
   };
 
   const handleSessionDeleted = (sessionId) => {
-    setSessions(prevSessions => prevSessions.filter(session => session._id !== sessionId));
+    setSessions((prevSessions) =>
+      prevSessions.filter((session) => session._id !== sessionId)
+    );
     setSelectedSession(null);
-  }
+  };
 
   const handleDeleteSession = async (sessionId) => {
-    if (window.confirm('Are you sure you want to delete this session? This action cannot be undone.')) {
+    if (
+      window.confirm(
+        "Are you sure you want to delete this session? This action cannot be undone."
+      )
+    ) {
       try {
         await api.delete(`/gym-sessions/${sessionId}`);
         handleSessionDeleted(sessionId);
-        alert('Session deleted successfully.');
+        alert("Session deleted successfully.");
       } catch (err) {
         console.error("Error deleting session:", err);
         alert(err.response?.data?.error || "Failed to delete session.");
@@ -411,17 +472,17 @@ export default function GymSchedule() {
     try {
       setRegistering(true);
       const response = await api.post(`/gym-sessions/${sessionId}/register`);
-      
+
       if (selectedSession && selectedSession._id === sessionId) {
         setSelectedSession(response.data);
       }
-      
-      setSessions(prevSessions => 
-        prevSessions.map(session => 
+
+      setSessions((prevSessions) =>
+        prevSessions.map((session) =>
           session._id === sessionId ? response.data : session
         )
       );
-      
+
       alert("Successfully registered for the session!");
     } catch (err) {
       console.error("Error registering for session:", err);
@@ -439,17 +500,17 @@ export default function GymSchedule() {
     try {
       setRegistering(true);
       const response = await api.post(`/gym-sessions/${sessionId}/unregister`);
-      
+
       if (selectedSession && selectedSession._id === sessionId) {
         setSelectedSession(response.data);
       }
-      
-      setSessions(prevSessions => 
-        prevSessions.map(session => 
+
+      setSessions((prevSessions) =>
+        prevSessions.map((session) =>
           session._id === sessionId ? response.data : session
         )
       );
-      
+
       alert("Successfully unregistered from the session!");
     } catch (err) {
       console.error("Error unregistering from session:", err);
@@ -474,31 +535,32 @@ export default function GymSchedule() {
     const startingDayOfWeek = firstDay.getDay();
 
     const days = [];
-    
+
     for (let i = 0; i < startingDayOfWeek; i++) {
       days.push(null);
     }
-    
+
     for (let day = 1; day <= daysInMonth; day++) {
       days.push(day);
     }
-    
+
     return days;
   };
 
   const getSessionsForDate = (day) => {
     if (!day) return [];
-    const dateStr = `${currentYear}-${String(currentMonth + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
-    return sessions.filter(session => 
-      session.date.startsWith(dateStr)
-    );
+    const dateStr = `${currentYear}-${String(currentMonth + 1).padStart(
+      2,
+      "0"
+    )}-${String(day).padStart(2, "0")}`;
+    return sessions.filter((session) => session.date.startsWith(dateStr));
   };
 
   const formatTime = (timeStr) => {
     try {
-      const [hours, minutes] = timeStr.split(':');
+      const [hours, minutes] = timeStr.split(":");
       const hour = parseInt(hours);
-      const ampm = hour >= 12 ? 'PM' : 'AM';
+      const ampm = hour >= 12 ? "PM" : "AM";
       const displayHour = hour % 12 || 12;
       return `${displayHour}:${minutes} ${ampm}`;
     } catch (e) {
@@ -511,7 +573,7 @@ export default function GymSchedule() {
       <div className="max-w-6xl mx-auto space-y-6">
         {/* Header */}
         <div className="bg-white/90 backdrop-blur-md rounded-3xl shadow-2xl ring-1 ring-gray-100 overflow-hidden">
-          <div className="bg-gradient-to-r from-[#001233] via-[#1d2f64] to-[#312A68] px-4 py-5 sm:px-6">
+          <div className="bg-gradient-to-r from-[#001845] via-[#1d2f64] to-[#312A68] px-4 py-5 sm:px-6">
             <div className="grid grid-cols-3 items-center gap-3">
               <div className="flex items-center gap-2">
                 <button
@@ -528,7 +590,9 @@ export default function GymSchedule() {
                 </button>
               </div>
               <div className="text-center">
-                <p className="text-xs uppercase tracking-[0.2em] text-white/70 font-semibold">Gym Sessions</p>
+                <p className="text-xs uppercase tracking-[0.2em] text-white/70 font-semibold">
+                  Gym Sessions
+                </p>
                 <h2 className="text-2xl sm:text-3xl font-bold text-white drop-shadow-sm">
                   {MONTHS[currentMonth]} {currentYear}
                 </h2>
@@ -567,8 +631,19 @@ export default function GymSchedule() {
         ) : (
           <div className="bg-white/90 backdrop-blur-md rounded-3xl shadow-2xl ring-1 ring-gray-100 p-4 sm:p-6 space-y-4">
             <div className="grid grid-cols-7 gap-2 text-center">
-              {['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'].map(day => (
-                <div key={day} className="rounded-xl bg-gray-50 text-gray-700 font-semibold py-3 text-xs uppercase tracking-wide shadow-inner">
+              {[
+                "Sunday",
+                "Monday",
+                "Tuesday",
+                "Wednesday",
+                "Thursday",
+                "Friday",
+                "Saturday",
+              ].map((day) => (
+                <div
+                  key={day}
+                  className="rounded-xl bg-gray-50 text-gray-700 font-semibold py-3 text-xs uppercase tracking-wide shadow-inner"
+                >
                   {day}
                 </div>
               ))}
@@ -577,27 +652,42 @@ export default function GymSchedule() {
             <div className="grid grid-cols-7 gap-3">
               {getDaysInMonth().map((day, index) => {
                 const daySessions = getSessionsForDate(day);
-                const isToday = day && 
-                  new Date().getDate() === day && 
-                  new Date().getMonth() === currentMonth && 
+                const isToday =
+                  day &&
+                  new Date().getDate() === day &&
+                  new Date().getMonth() === currentMonth &&
                   new Date().getFullYear() === currentYear;
-                const isWeekend = day && ((index % 7 === 0) || (index % 7 === 6));
-                
+                const isWeekend = day && (index % 7 === 0 || index % 7 === 6);
+
                 return (
                   <div
                     key={index}
                     className={`min-h-[140px] rounded-2xl border border-gray-100 p-3 transition-all duration-200
-                      ${!day ? 'bg-gray-50/70 border-dashed text-gray-400' : 'bg-white shadow-[0_8px_24px_rgba(0,0,0,0.04)] hover:-translate-y-1 hover:shadow-[0_16px_36px_rgba(76,59,207,0.12)]'}
-                      ${isToday ? 'ring-2 ring-offset-2 ring-[#4C3BCF] ring-offset-white' : ''}
-                      ${isWeekend && day ? 'bg-indigo-50/40' : ''}`}
+                      ${
+                        !day
+                          ? "bg-gray-50/70 border-dashed text-gray-400"
+                          : "bg-white shadow-[0_8px_24px_rgba(0,0,0,0.04)] hover:-translate-y-1 hover:shadow-[0_16px_36px_rgba(76,59,207,0.12)]"
+                      }
+                      ${
+                        isToday
+                          ? "ring-2 ring-offset-2 ring-[#4C3BCF] ring-offset-white"
+                          : ""
+                      }
+                      ${isWeekend && day ? "bg-indigo-50/40" : ""}`}
                   >
                     {day && (
                       <>
                         <div className="flex items-center justify-between mb-3">
-                          <span className="text-sm font-semibold text-gray-800">{day}</span>
-                          {isToday && <span className="text-[11px] font-bold text-[#4C3BCF] bg-[#efeafb] px-2 py-0.5 rounded-full">Today</span>}
+                          <span className="text-sm font-semibold text-gray-800">
+                            {day}
+                          </span>
+                          {isToday && (
+                            <span className="text-[11px] font-bold text-[#4C3BCF] bg-[#efeafb] px-2 py-0.5 rounded-full">
+                              Today
+                            </span>
+                          )}
                         </div>
-                        
+
                         <div className="space-y-2">
                           {daySessions.map((session, sessionIndex) => {
                             const isRegistered = isUserRegistered(session);
@@ -605,22 +695,33 @@ export default function GymSchedule() {
                             const today = new Date();
                             today.setHours(0, 0, 0, 0);
                             const isPast = sessionDate < today;
-                            const sessionColor = WORKOUT_COLORS[session.type] || 'bg-gray-100 text-gray-700';
+                            const sessionColor =
+                              WORKOUT_COLORS[session.type] ||
+                              "bg-gray-100 text-gray-700";
 
                             return (
                               <div
                                 key={sessionIndex}
-                                onClick={() => !isPast && setSelectedSession(session)}
-                                className={`p-3 rounded-xl text-xs transition-all border border-white/70 shadow-sm ${isPast ? 'opacity-60 cursor-not-allowed' : 'cursor-pointer hover:shadow-md'} ${
-                                  isRegistered 
-                                    ? 'bg-green-100 text-green-900 font-semibold'
+                                onClick={() =>
+                                  !isPast && setSelectedSession(session)
+                                }
+                                className={`p-3 rounded-xl text-xs transition-all border border-white/70 shadow-sm ${
+                                  isPast
+                                    ? "opacity-60 cursor-not-allowed"
+                                    : "cursor-pointer hover:shadow-md"
+                                } ${
+                                  isRegistered
+                                    ? "bg-green-100 text-green-900 font-semibold"
                                     : `${sessionColor}`
                                 }`}
                               >
                                 <div className="font-semibold">
                                   {formatTime(session.time)} - {session.type}
                                 </div>
-                                <div className="text-[11px] opacity-80">{session.duration} min - {session.maxParticipants} max</div>
+                                <div className="text-[11px] opacity-80">
+                                  {session.duration} min -{" "}
+                                  {session.maxParticipants} max
+                                </div>
                               </div>
                             );
                           })}
@@ -644,42 +745,52 @@ export default function GymSchedule() {
         {selectedSession && (
           <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
             <div className="bg-white rounded-2xl max-w-md w-full p-6">
-               <div className="flex justify-between items-start">
-                  <h3 className="text-xl font-bold text-[#4C3BCF] mb-4">Session Details</h3>
-                  {isEventsOffice && (
-                     <div className="flex gap-2">
-                        <button 
-                           onClick={() => handleEditSession(selectedSession)} 
-                           className="p-2 text-blue-500 hover:bg-blue-100 rounded-full transition-colors"
-                           title="Edit Session"
-                        >
-                            <Edit size={20} />
-                        </button>
-                        <button 
-                           onClick={() => handleDeleteSession(selectedSession._id)} 
-                           className="p-2 text-red-500 hover:bg-red-100 rounded-full transition-colors"
-                           title="Delete Session"
-                        >
-                            <Trash2 size={20} />
-                        </button>
-                     </div>
-                  )}
+              <div className="flex justify-between items-start">
+                <h3 className="text-xl font-bold text-[#4C3BCF] mb-4">
+                  Session Details
+                </h3>
+                {isEventsOffice && (
+                  <div className="flex gap-2">
+                    <button
+                      onClick={() => handleEditSession(selectedSession)}
+                      className="p-2 text-blue-500 hover:bg-blue-100 rounded-full transition-colors"
+                      title="Edit Session"
+                    >
+                      <Edit size={20} />
+                    </button>
+                    <button
+                      onClick={() => handleDeleteSession(selectedSession._id)}
+                      className="p-2 text-red-500 hover:bg-red-100 rounded-full transition-colors"
+                      title="Delete Session"
+                    >
+                      <Trash2 size={20} />
+                    </button>
+                  </div>
+                )}
               </div>
-              
+
               <div className="space-y-3">
                 <div className="flex items-center gap-3">
                   <Calendar size={16} className="text-[#736CED]" />
-                  <span>{new Date(selectedSession.date).toLocaleDateString()}</span>
+                  <span>
+                    {new Date(selectedSession.date).toLocaleDateString()}
+                  </span>
                 </div>
-                
+
                 <div className="flex items-center gap-3">
                   <Clock size={16} className="text-[#736CED]" />
-                  <span>{formatTime(selectedSession.time)} ({selectedSession.duration} min)</span>
+                  <span>
+                    {formatTime(selectedSession.time)} (
+                    {selectedSession.duration} min)
+                  </span>
                 </div>
-                
+
                 <div className="flex items-center gap-3">
                   <Users size={16} className="text-[#736CED]" />
-                  <span>{selectedSession.registered?.length || 0}/{selectedSession.maxParticipants} registered</span>
+                  <span>
+                    {selectedSession.registered?.length || 0}/
+                    {selectedSession.maxParticipants} registered
+                  </span>
                 </div>
 
                 <div className="flex items-center gap-3">
@@ -707,10 +818,19 @@ export default function GymSchedule() {
                   ) : (
                     <button
                       onClick={() => handleRegister(selectedSession._id)}
-                      disabled={registering || selectedSession.registered?.length >= selectedSession.maxParticipants}
+                      disabled={
+                        registering ||
+                        selectedSession.registered?.length >=
+                          selectedSession.maxParticipants
+                      }
                       className="flex-1 px-4 py-2 bg-[#736CED] text-white rounded-lg hover:bg-[#4C3BCF] transition-colors disabled:opacity-50"
                     >
-                      {registering ? "Processing..." : selectedSession.registered?.length >= selectedSession.maxParticipants ? "Session Full" : "Register"}
+                      {registering
+                        ? "Processing..."
+                        : selectedSession.registered?.length >=
+                          selectedSession.maxParticipants
+                        ? "Session Full"
+                        : "Register"}
                     </button>
                   )
                 ) : (
@@ -744,4 +864,3 @@ export default function GymSchedule() {
     </div>
   );
 }
-

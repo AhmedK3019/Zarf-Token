@@ -15,7 +15,7 @@ const events = [
 
 const EventTicker = () => {
   return (
-    <div className="w-full bg-[#001233] text-white shadow-[0_12px_35px_rgba(115,108,237,0.25)]">
+    <div className="w-full bg-[#001845] text-white shadow-[0_12px_35px_rgba(115,108,237,0.25)]">
       <div className="ticker-container">
         <div className="ticker-track">
           {[...events, ...events].map((event, index) => (

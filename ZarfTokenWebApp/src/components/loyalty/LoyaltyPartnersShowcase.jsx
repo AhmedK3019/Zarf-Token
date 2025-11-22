@@ -1,5 +1,12 @@
 import React, { useEffect, useMemo, useState } from "react";
-import { Calendar, Percent, RefreshCcw, Search, ShieldCheck, Tag } from "lucide-react";
+import {
+  Calendar,
+  Percent,
+  RefreshCcw,
+  Search,
+  ShieldCheck,
+  Tag,
+} from "lucide-react";
 import api from "../../services/api";
 import CopyButton from "../CopyButton.jsx";
 import { useAuthUser } from "../../hooks/auth";
@@ -16,12 +23,30 @@ const STATUS_FILTERS = [
 ];
 
 const STATUS_STYLES = {
-  active: { badge: "bg-emerald-50 text-emerald-700 border-emerald-200", dot: "bg-emerald-500" },
-  approved: { badge: "bg-emerald-50 text-emerald-700 border-emerald-200", dot: "bg-emerald-500" },
-  pending: { badge: "bg-amber-50 text-amber-700 border-amber-200", dot: "bg-amber-500" },
-  rejected: { badge: "bg-rose-50 text-rose-700 border-rose-200", dot: "bg-rose-500" },
-  inactive: { badge: "bg-gray-50 text-gray-600 border-gray-200", dot: "bg-gray-400" },
-  cancelled: { badge: "bg-gray-50 text-gray-600 border-gray-200", dot: "bg-gray-400" },
+  active: {
+    badge: "bg-emerald-50 text-emerald-700 border-emerald-200",
+    dot: "bg-emerald-500",
+  },
+  approved: {
+    badge: "bg-emerald-50 text-emerald-700 border-emerald-200",
+    dot: "bg-emerald-500",
+  },
+  pending: {
+    badge: "bg-amber-50 text-amber-700 border-amber-200",
+    dot: "bg-amber-500",
+  },
+  rejected: {
+    badge: "bg-rose-50 text-rose-700 border-rose-200",
+    dot: "bg-rose-500",
+  },
+  inactive: {
+    badge: "bg-gray-50 text-gray-600 border-gray-200",
+    dot: "bg-gray-400",
+  },
+  cancelled: {
+    badge: "bg-gray-50 text-gray-600 border-gray-200",
+    dot: "bg-gray-400",
+  },
 };
 
 const formatDate = (value) => {
@@ -170,8 +195,7 @@ export default function LoyaltyPartnersShowcase({
   const filteredPartners = useMemo(() => {
     return partners.filter((partner) => {
       const statusKey = String(partner.vendorStatus || "active").toLowerCase();
-      const statusMatch =
-        statusFilter === "all" || statusKey === statusFilter;
+      const statusMatch = statusFilter === "all" || statusKey === statusFilter;
       if (!statusMatch) return false;
       if (!searchTerm) return true;
       return (
@@ -229,7 +253,7 @@ export default function LoyaltyPartnersShowcase({
             label="Total"
             value={statusCounts.total}
             helper="Partners in directory"
-            accent="text-[#001233]"
+            accent="text-[#001845]"
           />
           <StatCard
             label="Pending"
@@ -382,7 +406,7 @@ export default function LoyaltyPartnersShowcase({
                     key={partner.id}
                     className="relative flex h-full flex-col overflow-hidden rounded-3xl border border-gray-100 bg-white/95 p-6 shadow-sm ring-1 ring-black/5 transition hover:-translate-y-0.5 hover:shadow-md"
                   >
-                    <div className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-[#4C3BCF] via-[#E11D48] to-[#001233]" />
+                    <div className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-[#4C3BCF] via-[#E11D48] to-[#001845]" />
                     <div className="flex items-start justify-between gap-4">
                       <div className="flex gap-4">
                         <div className="flex h-16 w-16 items-center justify-center overflow-hidden rounded-2xl border border-[#E4E0FF] bg-white p-1">
@@ -392,7 +416,10 @@ export default function LoyaltyPartnersShowcase({
                             className="max-h-full max-w-full object-contain"
                             loading="lazy"
                             onError={(e) => {
-                              if (e.currentTarget.src.endsWith("/unknownicon.png")) return;
+                              if (
+                                e.currentTarget.src.endsWith("/unknownicon.png")
+                              )
+                                return;
                               e.currentTarget.src = "/unknownicon.png";
                             }}
                           />
@@ -401,11 +428,13 @@ export default function LoyaltyPartnersShowcase({
                           <p className="text-xs font-semibold uppercase tracking-wide text-gray-500">
                             Loyalty partner
                           </p>
-                          <h3 className="text-2xl font-bold text-[#001233]">
+                          <h3 className="text-2xl font-bold text-[#001845]">
                             {partner.vendorLabel}
                           </h3>
                           {partner.vendorEmail && (
-                            <p className="text-sm text-gray-500">{partner.vendorEmail}</p>
+                            <p className="text-sm text-gray-500">
+                              {partner.vendorEmail}
+                            </p>
                           )}
                           <div className="flex flex-wrap items-center gap-2 text-xs font-semibold">
                             <span className="inline-flex items-center gap-2 rounded-full bg-[#4C3BCF]/10 px-3 py-1 text-[#2c1f74]">
@@ -418,7 +447,9 @@ export default function LoyaltyPartnersShowcase({
                             </span>
                           </div>
                           {readableDate && (
-                            <p className="text-xs text-gray-500">Updated {readableDate}</p>
+                            <p className="text-xs text-gray-500">
+                              Updated {readableDate}
+                            </p>
                           )}
                         </div>
                       </div>
@@ -435,7 +466,9 @@ export default function LoyaltyPartnersShowcase({
                     <div className="mt-5 grid gap-3 text-sm text-gray-700 sm:grid-cols-3">
                       <div className="flex items-center gap-2 rounded-2xl bg-gray-50 px-3 py-2 font-semibold text-gray-700">
                         <Calendar size={16} className="text-[#4C3BCF]" />
-                        {readableDate ? `Reviewed ${readableDate}` : "Awaiting review"}
+                        {readableDate
+                          ? `Reviewed ${readableDate}`
+                          : "Awaiting review"}
                       </div>
                       <div className="flex items-center gap-2 rounded-2xl bg-gray-50 px-3 py-2 font-semibold text-gray-700">
                         <Percent size={16} className="text-[#4C3BCF]" />
@@ -498,9 +531,9 @@ const StatCard = ({ label, value, helper, accent }) => (
     <p className="text-xs font-semibold uppercase tracking-wide text-gray-500">
       {label}
     </p>
-    <p className={`text-2xl font-bold ${accent || "text-[#001233]"}`}>{value}</p>
-    {helper ? (
-      <p className="text-xs text-gray-500">{helper}</p>
-    ) : null}
+    <p className={`text-2xl font-bold ${accent || "text-[#001845]"}`}>
+      {value}
+    </p>
+    {helper ? <p className="text-xs text-gray-500">{helper}</p> : null}
   </div>
 );

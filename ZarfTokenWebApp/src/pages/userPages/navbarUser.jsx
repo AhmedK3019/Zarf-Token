@@ -86,7 +86,7 @@ const NavbarUser = () => {
 
   return (
     <div className="w-full">
-      <header className="w-full bg-[#001233] shadow-lg">
+      <header className="w-full bg-[#001845] shadow-lg">
         <nav className="max-w-7xl mx-auto px-6 py-4">
           <div className="grid grid-cols-3 items-center h-16">
             {/* Left - Logo */}

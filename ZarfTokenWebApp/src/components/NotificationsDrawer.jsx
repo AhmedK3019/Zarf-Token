@@ -128,7 +128,7 @@ export default function NotificationsDrawer() {
             }`}
           >
             <div className="flex items-center justify-between mb-4">
-              <h3 className="text-lg font-semibold text-[#001233]">
+              <h3 className="text-lg font-semibold text-[#001845]">
                 Notifications
               </h3>
               <div className="flex items-center gap-2">

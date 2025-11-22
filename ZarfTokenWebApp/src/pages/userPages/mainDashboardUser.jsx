@@ -35,7 +35,7 @@ const mainDashboardUser = () => {
       <NavbarUser />
       {/* Dashboard Container with My Favorites Section */}
       {isFavouriteEventsPage && (
-        <div className="w-full bg-[#001233] text-white px-6 py-8">
+        <div className="w-full bg-[#001845] text-white px-6 py-8">
           <div className="max-w-7xl mx-auto text-center">
             <h1 className="text-4xl font-bold sm:text-5xl mb-4">
               My Favourites
@@ -48,7 +48,7 @@ const mainDashboardUser = () => {
       )}
       {/* Dashboard Container with My Registered Events Section */}
       {isRegisteredEventsPage && (
-        <div className="w-full bg-[#001233] text-white px-6 py-8">
+        <div className="w-full bg-[#001845] text-white px-6 py-8">
           <div className="max-w-7xl mx-auto text-center">
             <h1 className="text-4xl font-bold sm:text-5xl mb-4">
               My Registered Events
@@ -61,7 +61,7 @@ const mainDashboardUser = () => {
       )}
       {/* Dashboard Container with Gym Schedule Section */}
       {isGymSchedulePage && (
-        <div className="w-full bg-[#001233] text-white px-6 py-8">
+        <div className="w-full bg-[#001845] text-white px-6 py-8">
           <div className="max-w-7xl mx-auto text-center">
             <h1 className="text-4xl font-bold sm:text-5xl mb-4">
               Gym Schedule
@@ -71,7 +71,7 @@ const mainDashboardUser = () => {
       )}
       {/* Dashboard Container with Loyalty Program Section */}
       {isLoyaltyProgramPage && (
-        <div className="w-full bg-[#001233] text-white px-6 py-8">
+        <div className="w-full bg-[#001845] text-white px-6 py-8">
           <div className="max-w-7xl mx-auto text-center">
             <h1 className="text-4xl font-bold sm:text-5xl mb-4">
               GUC Loyalty Program Partners
@@ -83,7 +83,7 @@ const mainDashboardUser = () => {
         </div>
       )}
       {isVendorsPollPage && (
-        <div className="w-full bg-[#001233] text-white px-6 py-8">
+        <div className="w-full bg-[#001845] text-white px-6 py-8">
           <div className="max-w-7xl mx-auto text-center">
             <h1 className="text-4xl font-bold sm:text-5xl mb-3">
               Vendors Poll
@@ -95,7 +95,7 @@ const mainDashboardUser = () => {
         </div>
       )}
       {isCourtsPage && (
-        <div className="w-full bg-[#001233] text-white px-6 py-8">
+        <div className="w-full bg-[#001845] text-white px-6 py-8">
           <div className="max-w-7xl mx-auto text-center">
             <h1 className="text-4xl font-bold sm:text-5xl mb-3">
               Campus Courts
@@ -108,7 +108,7 @@ const mainDashboardUser = () => {
         </div>
       )}
       {isCampusEventsPage && (
-        <div className="w-full bg-[#001233] text-white px-6 py-8">
+        <div className="w-full bg-[#001845] text-white px-6 py-8">
           <div className="max-w-7xl mx-auto text-center">
             <h1 className="text-4xl font-bold sm:text-5xl mb-4">
               Campus Events

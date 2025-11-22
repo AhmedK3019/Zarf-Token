@@ -201,7 +201,7 @@ function WorkshopCard({ workshop, onView }) {
     >
       <div className="px-6 py-6 space-y-4">
         <div className="flex items-start justify-between gap-3">
-          <div className="inline-flex items-center gap-2 rounded-full border border-[#dfe5ff] bg-[#E6ECFF] px-3 py-1 text-xs font-semibold uppercase tracking-wide text-[#001233]">
+          <div className="inline-flex items-center gap-2 rounded-full border border-[#dfe5ff] bg-[#E6ECFF] px-3 py-1 text-xs font-semibold uppercase tracking-wide text-[#001845]">
             <span className="h-2 w-2 rounded-full bg-[#4C3BCF]" />
             Workshop
           </div>
@@ -209,10 +209,10 @@ function WorkshopCard({ workshop, onView }) {
         </div>
 
         <div className="flex items-start justify-between gap-3">
-          <h4 className="flex-1 text-xl font-bold leading-tight text-[#001233]">
+          <h4 className="flex-1 text-xl font-bold leading-tight text-[#001845]">
             {workshop.title}
           </h4>
-          <span className="rounded-full border border-[#dfe5ff] bg-[#E6ECFF] px-3 py-1 text-xs font-semibold uppercase tracking-wide text-[#001233]">
+          <span className="rounded-full border border-[#dfe5ff] bg-[#E6ECFF] px-3 py-1 text-xs font-semibold uppercase tracking-wide text-[#001845]">
             {workshop.location}
           </span>
         </div>
@@ -413,7 +413,7 @@ function WorkshopModal({
           </div>
 
           {/* Header */}
-          <div className="relative bg-[#001233] px-8 py-6 text-white">
+          <div className="relative bg-[#001845] px-8 py-6 text-white">
             <button
               onClick={onClose}
               className="absolute top-6 right-6 p-2 rounded-full bg-white/20 hover:bg-white/30 transition-colors"
@@ -458,9 +458,7 @@ function WorkshopModal({
             >
               <div className="flex items-center gap-2">
                 <CheckCircle className="w-5 h-5 text-[#4C3BCF]" />
-                <h3 className="text-lg font-bold text-gray-900">
-                  Full Agenda
-                </h3>
+                <h3 className="text-lg font-bold text-gray-900">Full Agenda</h3>
               </div>
               <p className="text-sm leading-relaxed text-gray-700 pl-7 whitespace-pre-line">
                 {workshop.raw.fullagenda ||
@@ -652,7 +650,7 @@ function WorkshopModal({
                           value={group}
                           onChange={handleAllowedUsersChange}
                           checked={allowedUsers.includes(group)}
-                        className="rounded text-[#4C3BCF] focus:ring-[#4C3BCF]"
+                          className="rounded text-[#4C3BCF] focus:ring-[#4C3BCF]"
                         />
                         <span className="text-sm font-semibold text-gray-700">
                           {group}
@@ -749,7 +747,7 @@ function WorkshopModal({
                       onChange={(e) => setRequestMessage(e.target.value)}
                       rows={4}
                       placeholder="Highlight what needs to change before approval..."
-                      className="mt-2 w-full rounded-2xl border border-gray-200 bg-white px-4 py-3 text-sm text-gray-700 shadow-inner focus:outline-none focus:ring-2 focus:ring-[#001233]/40"
+                      className="mt-2 w-full rounded-2xl border border-gray-200 bg-white px-4 py-3 text-sm text-gray-700 shadow-inner focus:outline-none focus:ring-2 focus:ring-[#001845]/40"
                     />
                   </label>
                   {requestError && (
@@ -1014,7 +1012,7 @@ export default function WorkshopRequests() {
             <p className="text-xs font-semibold uppercase tracking-wide text-gray-500">
               Total
             </p>
-            <p className="text-2xl font-bold text-[#001233]">
+            <p className="text-2xl font-bold text-[#001845]">
               {statusCounts.total}
             </p>
             <p className="text-xs text-gray-500">Workshops in the queue</p>
@@ -1079,7 +1077,9 @@ export default function WorkshopRequests() {
           </div>
           <div className="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             <label className="flex flex-col gap-2">
-              <span className="text-sm font-semibold text-gray-800">Status</span>
+              <span className="text-sm font-semibold text-gray-800">
+                Status
+              </span>
               <select
                 value={statusFilter}
                 onChange={(e) => setStatusFilter(e.target.value)}
@@ -1114,7 +1114,7 @@ export default function WorkshopRequests() {
             <div className="col-span-full rounded-3xl border border-dashed border-gray-200 bg-white px-8 py-16 text-center shadow-sm">
               <div className="flex flex-col items-center gap-3">
                 <FileText className="h-12 w-12 text-[#4C3BCF]/30" />
-                <p className="text-lg font-semibold text-[#001233]/80">
+                <p className="text-lg font-semibold text-[#001845]/80">
                   No workshops match the current filters
                 </p>
                 <p className="text-sm text-gray-500">

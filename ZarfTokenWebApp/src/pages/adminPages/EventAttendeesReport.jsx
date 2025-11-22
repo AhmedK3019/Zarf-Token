@@ -7,7 +7,7 @@ import { getEventDetails, formatSimpleDate } from "../eventUtils";
 // Helper function to get attendee count for an event
 const getAttendeeCount = (rawEvent) => {
   if (!rawEvent) return 0;
-  
+
   // For workshops and trips, count attendees array
   if (rawEvent.attendees && Array.isArray(rawEvent.attendees)) {
     return rawEvent.attendees.length;
@@ -18,23 +18,19 @@ const getAttendeeCount = (rawEvent) => {
 // Palette aligned with the dashboard's deep blue tones
 const chartPalette = ["#001233", "#33415c", "#5c677d", "#7d8597", "#c0d6df"];
 
-
 export default function EventAttendeesReport() {
-
   const [events, setEvents] = useState([]);
   const [processedEvents, setProcessedEvents] = useState([]); // Filtered/sorted list
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
   // Filter State
-  const [filterType, setFilterType] = useState(""); 
-  const [filterName, setFilterName] = useState(""); 
-  const [filterDate, setFilterDate] = useState(""); 
-  const [startDateFilter, setStartDateFilter] = useState(""); 
+  const [filterType, setFilterType] = useState("");
+  const [filterName, setFilterName] = useState("");
+  const [filterDate, setFilterDate] = useState("");
+  const [startDateFilter, setStartDateFilter] = useState("");
   const [endDateFilter, setEndDateFilter] = useState("");
-  const [showFilters, setShowFilters] = useState(false); 
-
-
+  const [showFilters, setShowFilters] = useState(false);
 
   // Fetch all events on component mount
   useEffect(() => {
@@ -64,13 +60,12 @@ export default function EventAttendeesReport() {
     const hasStartDateFilter = startDateFilter.trim() !== "";
     const hasEndDateFilter = endDateFilter.trim() !== "";
 
-
     let baseFiltered = events
       .filter((rawEvent) => {
         return rawEvent.type === "workshop" || rawEvent.type === "trip";
       })
       .filter((rawEvent) => {
-        const event = getEventDetails(rawEvent); 
+        const event = getEventDetails(rawEvent);
 
         // Filter by event name
         let matchesName = true;
@@ -127,7 +122,7 @@ export default function EventAttendeesReport() {
       return [...eventList].sort((a, b) => {
         const eventA = getEventDetails(a);
         const eventB = getEventDetails(b);
-        
+
         const dateA = eventA.startDate || new Date(0);
         const dateB = eventB.startDate || new Date(0);
         return new Date(dateB) - new Date(dateA); // Newest first
@@ -166,13 +161,13 @@ export default function EventAttendeesReport() {
     const eventsWithAttendees = processedEvents
       .map((event) => {
         const attendeeCount = getAttendeeCount(event);
-        
+
         totalAttendees += attendeeCount;
         const type = event.type || "other";
         if (attendeesByType.hasOwnProperty(type)) {
           attendeesByType[type] += attendeeCount;
         }
-        
+
         return {
           ...event,
           attendeeCount: attendeeCount,
@@ -188,7 +183,7 @@ export default function EventAttendeesReport() {
   if (loading) {
     return (
       <div className="flex justify-center items-center h-64">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#001233]"></div>
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#001845]"></div>
         <p className="ml-4 text-gray-600">Loading attendees report...</p>
       </div>
     );
@@ -239,20 +234,18 @@ export default function EventAttendeesReport() {
     .map((segment) => `${segment.color} ${segment.start}% ${segment.end}%`)
     .join(", ");
 
-  
-
   return (
     <div className="p-8 bg-gray-50 min-h-screen">
       {/* --- Detailed Attendees Table --- */}
       <div className="bg-white rounded-lg shadow-lg border border-gray-200 overflow-hidden">
         {/* --- Table header with title and filter button --- */}
         <div className="flex flex-col sm:flex-row justify-between sm:items-center p-6 border-b gap-4">
-          <h2 className="text-xl font-semibold text-[#001233]">
+          <h2 className="text-xl font-semibold text-[#001845]">
             Attendee Breakdown per Event
           </h2>
           <button
             onClick={() => setShowFilters(!showFilters)}
-            className="px-4 py-2 rounded-lg border border-[#001233] text-[#001233] bg-white hover:bg-[#001233] hover:text-white focus:outline-none focus:ring-2 focus:ring-[#001233] focus:border-transparent shadow-sm flex items-center justify-center gap-2 text-sm font-medium transition-colors"
+            className="px-4 py-2 rounded-lg border border-[#001845] text-[#001845] bg-white hover:bg-[#001845] hover:text-white focus:outline-none focus:ring-2 focus:ring-[#001845] focus:border-transparent shadow-sm flex items-center justify-center gap-2 text-sm font-medium transition-colors"
           >
             <svg
               className="h-5 w-5 text-gray-600"
@@ -288,7 +281,7 @@ export default function EventAttendeesReport() {
                   id="filter-type"
                   value={filterType}
                   onChange={(e) => setFilterType(e.target.value)}
-                  className="w-full px-4 py-2 rounded-lg border border-gray-300 bg-white focus:outline-none focus:ring-2 focus:ring-[#001233] focus:border-transparent"
+                  className="w-full px-4 py-2 rounded-lg border border-gray-300 bg-white focus:outline-none focus:ring-2 focus:ring-[#001845] focus:border-transparent"
                 >
                   <option value="">All Types</option>
                   <option value="trip">Trip</option>
@@ -310,7 +303,7 @@ export default function EventAttendeesReport() {
                   value={filterName}
                   onChange={(e) => setFilterName(e.target.value)}
                   placeholder="Search by event name..."
-                  className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-[#001233] focus:border-transparent"
+                  className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-[#001845] focus:border-transparent"
                 />
               </div>
 
@@ -327,7 +320,7 @@ export default function EventAttendeesReport() {
                   id="filter-date"
                   value={filterDate}
                   onChange={(e) => setFilterDate(e.target.value)}
-                  className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-[#001233] focus:border-transparent"
+                  className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-[#001845] focus:border-transparent"
                 />
               </div>
 
@@ -344,11 +337,15 @@ export default function EventAttendeesReport() {
                       onChange={(e) => {
                         setStartDateFilter(e.target.value);
                         // Clear end date if it's before the new start date
-                        if (endDateFilter && e.target.value && new Date(endDateFilter) < new Date(e.target.value)) {
+                        if (
+                          endDateFilter &&
+                          e.target.value &&
+                          new Date(endDateFilter) < new Date(e.target.value)
+                        ) {
                           setEndDateFilter("");
                         }
                       }}
-                      className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-[#001233] focus:border-transparent"
+                      className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-[#001845] focus:border-transparent"
                       placeholder="Start"
                     />
                   </div>
@@ -361,7 +358,7 @@ export default function EventAttendeesReport() {
                       value={endDateFilter}
                       min={startDateFilter || undefined}
                       onChange={(e) => setEndDateFilter(e.target.value)}
-                      className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-[#001233] focus:border-transparent"
+                      className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-[#001845] focus:border-transparent"
                       placeholder="End"
                     />
                   </div>
@@ -369,7 +366,6 @@ export default function EventAttendeesReport() {
               </div>
             </div>
 
-            
             <div className="mt-6 flex justify-between items-center">
               <div className="text-sm text-gray-600">
                 {reportData.eventsWithAttendees.length} event
@@ -435,7 +431,9 @@ export default function EventAttendeesReport() {
                         {event.type}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                        {eventDetails.startDate ? formatSimpleDate(eventDetails.startDate) : "N/A"}
+                        {eventDetails.startDate
+                          ? formatSimpleDate(eventDetails.startDate)
+                          : "N/A"}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-800 text-right font-medium">
                         {event.attendeeCount}
@@ -462,11 +460,9 @@ export default function EventAttendeesReport() {
                   &nbsp;
                 </td>
                 <td className="px-6 py-4 text-right text-sm font-bold">
-                  <span className="text-gray-800 uppercase mr-4">
-                    Total:
-                  </span>
-                  
-                  <span className="text-[#001233] text-lg">
+                  <span className="text-gray-800 uppercase mr-4">Total:</span>
+
+                  <span className="text-[#001845] text-lg">
                     {reportData.totalAttendees}
                   </span>
                 </td>
@@ -482,7 +478,7 @@ export default function EventAttendeesReport() {
         <div className="bg-white rounded-lg shadow-lg border border-gray-200 p-6">
           <div className="flex justify-between items-center">
             <div>
-              <h3 className="text-lg font-semibold text-[#001233]">
+              <h3 className="text-lg font-semibold text-[#001845]">
                 Attendees by Event
               </h3>
               <p className="text-sm text-gray-500">
@@ -517,7 +513,7 @@ export default function EventAttendeesReport() {
                         />
                       </div>
                       <div className="mt-2 text-center">
-                        <div className="text-sm font-semibold text-[#001233]">
+                        <div className="text-sm font-semibold text-[#001845]">
                           {item.value} attendees
                         </div>
                         <div className="text-xs text-gray-500 truncate max-w-[110px]">
@@ -540,7 +536,7 @@ export default function EventAttendeesReport() {
         <div className="bg-white rounded-lg shadow-lg border border-gray-200 p-6">
           <div className="flex justify-between items-center">
             <div>
-              <h3 className="text-lg font-semibold text-[#001233]">
+              <h3 className="text-lg font-semibold text-[#001845]">
                 Attendance Contribution
               </h3>
               <p className="text-sm text-gray-500">
@@ -564,7 +560,7 @@ export default function EventAttendeesReport() {
                   />
                   <div className="absolute inset-8 bg-white rounded-full flex flex-col items-center justify-center text-center shadow">
                     <p className="text-xs text-gray-500">Total Attendees</p>
-                    <p className="text-base font-semibold text-[#001233] mt-1">
+                    <p className="text-base font-semibold text-[#001845] mt-1">
                       {reportData.totalAttendees}
                     </p>
                   </div>
@@ -582,7 +578,7 @@ export default function EventAttendeesReport() {
                         style={{ backgroundColor: segment.color }}
                       ></span>
                       <div className="min-w-0">
-                        <p className="text-sm font-medium text-[#001233] truncate">
+                        <p className="text-sm font-medium text-[#001845] truncate">
                           {segment.label}
                         </p>
                         <p className="text-xs text-gray-500">
@@ -590,7 +586,7 @@ export default function EventAttendeesReport() {
                         </p>
                       </div>
                     </div>
-                    <div className="text-sm font-semibold text-[#001233]">
+                    <div className="text-sm font-semibold text-[#001845]">
                       {segment.percent.toFixed(1)}%
                     </div>
                   </div>

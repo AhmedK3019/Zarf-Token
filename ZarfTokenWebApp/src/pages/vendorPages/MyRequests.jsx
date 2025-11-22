@@ -43,7 +43,9 @@ const combineDateParts = (dateValue, timeValue) => {
   const base = toDate(dateValue);
   if (!base) return null;
   if (typeof timeValue === "string" && timeValue.includes(":")) {
-    const [hours, minutes] = timeValue.split(":").map((part) => parseInt(part, 10));
+    const [hours, minutes] = timeValue
+      .split(":")
+      .map((part) => parseInt(part, 10));
     base.setHours(Number.isFinite(hours) ? hours : 0);
     base.setMinutes(Number.isFinite(minutes) ? minutes : 0, 0, 0);
   } else {
@@ -207,7 +209,9 @@ function PaymentDeadlineBadge({ banner }) {
   };
   return (
     <div
-      className={`mt-3 px-3 py-2 rounded-xl border text-sm font-semibold flex items-center gap-2 ${palette[banner.variant]}`}
+      className={`mt-3 px-3 py-2 rounded-xl border text-sm font-semibold flex items-center gap-2 ${
+        palette[banner.variant]
+      }`}
     >
       <Clock size={14} />
       {banner.message}
@@ -221,7 +225,8 @@ function PaymentDeadlineBadge({ banner }) {
 function DetailsModal({ request, onClose, nowMs }) {
   if (!request) return null;
   const paymentBanner = getPaymentBanner(request, nowMs);
-  const cancellationDate = request.cancelledAt && formatDate(request.cancelledAt);
+  const cancellationDate =
+    request.cancelledAt && formatDate(request.cancelledAt);
 
   const infoBlock = (
     <>
@@ -229,7 +234,8 @@ function DetailsModal({ request, onClose, nowMs }) {
         <div className="flex items-start gap-3">
           <Building className="mt-1 text-[#736CED]" size={16} />
           <div>
-            <span className="font-semibold">Booth Name:</span> {request.boothname}
+            <span className="font-semibold">Booth Name:</span>{" "}
+            {request.boothname}
           </div>
         </div>
       )}
@@ -243,7 +249,8 @@ function DetailsModal({ request, onClose, nowMs }) {
         <div className="flex items-start gap-3">
           <Clock className="mt-1 text-[#736CED]" size={16} />
           <div>
-            <span className="font-semibold">Duration:</span> {request.duration} weeks
+            <span className="font-semibold">Duration:</span> {request.duration}{" "}
+            weeks
           </div>
         </div>
       )}
@@ -252,7 +259,10 @@ function DetailsModal({ request, onClose, nowMs }) {
           <MapPin className="mt-1 text-[#736CED]" size={16} />
           <div>
             <span className="font-semibold">
-              {request.isBazarBooth ? "Requested Location" : "Platform Location"}:
+              {request.isBazarBooth
+                ? "Requested Location"
+                : "Platform Location"}
+              :
             </span>{" "}
             {request.location}
           </div>
@@ -291,12 +301,19 @@ function DetailsModal({ request, onClose, nowMs }) {
             <div className="flex items-center gap-2 text-sm text-gray-500 mb-2">
               <span className="font-semibold text-gray-700">Dashboard</span>
               <ChevronRight className="h-3 w-3" />
-              <span className="font-semibold text-gray-700">My Participations</span>
+              <span className="font-semibold text-gray-700">
+                My Participations
+              </span>
               <ChevronRight className="h-3 w-3" />
-              <span>{request.boothname || request.bazarId?.bazaarname || "Details"}</span>
+              <span>
+                {request.boothname || request.bazarId?.bazaarname || "Details"}
+              </span>
             </div>
             <h2 className="text-2xl font-bold text-[#4C3BCF]">
-              {request.boothname || (request.isBazarBooth ? "Bazaar Booth Request" : "Platform Booth Request")}
+              {request.boothname ||
+                (request.isBazarBooth
+                  ? "Bazaar Booth Request"
+                  : "Platform Booth Request")}
             </h2>
             <div className="flex items-center gap-3 mt-2">
               <StatusBadge status={request.status} />
@@ -347,9 +364,7 @@ function DetailsModal({ request, onClose, nowMs }) {
               infoBlock
             )}
           </div>
-          {paymentBanner && (
-            <PaymentDeadlineBadge banner={paymentBanner} />
-          )}
+          {paymentBanner && <PaymentDeadlineBadge banner={paymentBanner} />}
           {cancellationDate && (
             <div className="p-4 rounded-xl border border-dashed border-gray-200 bg-gray-50 text-sm text-gray-700">
               <div className="font-semibold flex items-center gap-2">
@@ -389,7 +404,8 @@ function CancellationDialog({
               Cancel participation?
             </h3>
             <p className="text-sm text-gray-600 mt-1">
-              Once cancelled, this request will move to the Cancelled tab. You can apply again at any time.
+              Once cancelled, this request will move to the Cancelled tab. You
+              can apply again at any time.
             </p>
           </div>
         </div>
@@ -432,7 +448,9 @@ const StatCard = ({ label, value, helper, accent }) => (
     <p className="text-xs font-semibold uppercase tracking-wide text-gray-500">
       {label}
     </p>
-    <p className={`text-2xl font-bold ${accent || "text-[#001233]"}`}>{value}</p>
+    <p className={`text-2xl font-bold ${accent || "text-[#001845]"}`}>
+      {value}
+    </p>
     {helper ? <p className="text-xs text-gray-500">{helper}</p> : null}
   </div>
 );
@@ -519,7 +537,10 @@ export default function MyRequests() {
   const filteredRequests = useMemo(() => {
     const term = search.trim().toLowerCase();
     return requests.filter((request) => {
-      if (statusTab !== "all" && mapStatusToTabKey(request.status) !== statusTab)
+      if (
+        statusTab !== "all" &&
+        mapStatusToTabKey(request.status) !== statusTab
+      )
         return false;
       if (viewFilter === "bazaar" && !request.isBazarBooth) return false;
       if (viewFilter === "platform" && request.isBazarBooth) return false;
@@ -566,9 +587,7 @@ export default function MyRequests() {
     setCancellingId(target._id);
     try {
       await api.delete(`/vendorRequests/${target._id}/cancel`, {
-        data: cancelDialog.reason
-          ? { reason: cancelDialog.reason.trim() }
-          : {},
+        data: cancelDialog.reason ? { reason: cancelDialog.reason.trim() } : {},
       });
       setRequests((prev) =>
         prev.map((item) =>
@@ -578,7 +597,8 @@ export default function MyRequests() {
                 status: "Cancelled",
                 paymentStatus: "cancelled",
                 cancelledAt: new Date().toISOString(),
-                cancellationReason: cancelDialog.reason.trim() || "Cancelled by vendor",
+                cancellationReason:
+                  cancelDialog.reason.trim() || "Cancelled by vendor",
               }
             : item
         )
@@ -636,7 +656,7 @@ export default function MyRequests() {
               label="Total"
               value={statusCounts.total}
               helper="Requests submitted"
-              accent="text-[#001233]"
+              accent="text-[#001845]"
             />
             <StatCard
               label="Pending"
@@ -669,7 +689,9 @@ export default function MyRequests() {
                 </p>
               </div>
               <div className="flex flex-wrap items-center gap-2">
-                { (statusTab !== "all" || viewFilter !== "all" || search.trim().length > 0) ? (
+                {statusTab !== "all" ||
+                viewFilter !== "all" ||
+                search.trim().length > 0 ? (
                   <button
                     onClick={resetFilters}
                     className="inline-flex items-center gap-2 rounded-full border border-gray-200 bg-white px-4 py-2.5 text-sm font-semibold text-gray-700 shadow-sm transition hover:bg-gray-50"
@@ -718,7 +740,9 @@ export default function MyRequests() {
                     {STATUS_TABS.map((tab) => (
                       <option key={tab.key} value={tab.key}>
                         {tab.label}
-                        {statusCounts[tab.key] ? ` (${statusCounts[tab.key]})` : ""}
+                        {statusCounts[tab.key]
+                          ? ` (${statusCounts[tab.key]})`
+                          : ""}
                       </option>
                     ))}
                   </select>
@@ -747,7 +771,9 @@ export default function MyRequests() {
             {loading ? (
               <div className="flex flex-col items-center gap-4 rounded-3xl border border-gray-100 bg-white/80 px-6 py-12 text-center shadow-sm">
                 <div className="inline-block h-12 w-12 border-4 border-[#736CED] border-t-transparent rounded-full animate-spin"></div>
-                <p className="text-sm text-gray-600">Loading your requests...</p>
+                <p className="text-sm text-gray-600">
+                  Loading your requests...
+                </p>
               </div>
             ) : error ? (
               <div className="flex flex-col items-center gap-3 rounded-3xl border border-rose-200 bg-rose-50 px-6 py-10 text-center text-rose-700">
@@ -763,7 +789,7 @@ export default function MyRequests() {
               </div>
             ) : filteredRequests.length === 0 ? (
               <div className="flex flex-col items-center gap-3 rounded-3xl border border-dashed border-gray-200 bg-white/80 px-8 py-16 text-center shadow-sm">
-                <p className="text-lg font-semibold text-[#001233]">
+                <p className="text-lg font-semibold text-[#001845]">
                   {emptyMessages[statusTab] || emptyMessages.all}
                 </p>
                 <button
@@ -778,7 +804,10 @@ export default function MyRequests() {
               <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
                 {filteredRequests.map((request) => {
                   const statusKey = mapStatusToTabKey(request.status);
-                  const cancellationState = getCancellationState(request, nowMs);
+                  const cancellationState = getCancellationState(
+                    request,
+                    nowMs
+                  );
                   const isCancelled = statusKey === "cancelled";
                   const paymentBanner =
                     statusKey === "accepted"
@@ -794,28 +823,33 @@ export default function MyRequests() {
                       key={request._id}
                       className="relative flex h-full flex-col overflow-hidden rounded-3xl border border-gray-100 bg-white/95 p-6 shadow-sm ring-1 ring-black/5 transition hover:-translate-y-0.5 hover:shadow-md"
                     >
-                      <div className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-[#4C3BCF] via-[#E11D48] to-[#001233]" />
+                      <div className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-[#4C3BCF] via-[#E11D48] to-[#001845]" />
                       <div className="flex items-start justify-between gap-3">
                         <div className="space-y-1">
                           <p className="text-xs font-semibold uppercase tracking-wide text-gray-500">
-                            {request.isBazarBooth ? "Bazaar participation" : "Platform booth"}
+                            {request.isBazarBooth
+                              ? "Bazaar participation"
+                              : "Platform booth"}
                           </p>
-                          <h3 className="text-xl font-bold text-[#001233]">
+                          <h3 className="text-xl font-bold text-[#001845]">
                             {request.boothname ||
                               (request.isBazarBooth
                                 ? "Bazaar Booth Request"
                                 : "Platform Booth Request")}
                           </h3>
-                          {request.isBazarBooth && request.bazarId?.bazaarname && (
-                            <p className="text-sm font-semibold text-[#736CED]">
-                              at {request.bazarId.bazaarname}
-                            </p>
-                          )}
+                          {request.isBazarBooth &&
+                            request.bazarId?.bazaarname && (
+                              <p className="text-sm font-semibold text-[#736CED]">
+                                at {request.bazarId.bazaarname}
+                              </p>
+                            )}
                         </div>
                         <StatusBadge status={request.status} />
                       </div>
 
-                      <div className={`mt-4 flex flex-wrap gap-3 text-sm ${textMuted}`}>
+                      <div
+                        className={`mt-4 flex flex-wrap gap-3 text-sm ${textMuted}`}
+                      >
                         <span className="inline-flex items-center gap-1 rounded-full bg-gray-50 px-3 py-1 font-semibold">
                           <Square size={14} />
                           {request.boothSize}
@@ -833,23 +867,31 @@ export default function MyRequests() {
                       </div>
 
                       {request.bazarId?.location && (
-                        <div className={`mt-3 flex items-center gap-2 text-sm ${textMuted}`}>
+                        <div
+                          className={`mt-3 flex items-center gap-2 text-sm ${textMuted}`}
+                        >
                           <MapPin size={14} />
                           {request.bazarId.location}
                         </div>
                       )}
                       {request.location && !request.isBazarBooth && (
-                        <div className={`mt-3 flex items-center gap-2 text-sm ${textMuted}`}>
+                        <div
+                          className={`mt-3 flex items-center gap-2 text-sm ${textMuted}`}
+                        >
                           <MapPin size={14} />
                           {request.location}
                         </div>
                       )}
-                      <div className={`mt-3 flex items-center gap-2 text-sm ${textMuted}`}>
+                      <div
+                        className={`mt-3 flex items-center gap-2 text-sm ${textMuted}`}
+                      >
                         <Calendar size={14} />
                         Submitted {formatDate(request.createdAt)}
                       </div>
 
-                      {paymentBanner && <PaymentDeadlineBadge banner={paymentBanner} />}
+                      {paymentBanner && (
+                        <PaymentDeadlineBadge banner={paymentBanner} />
+                      )}
 
                       {isCancelled && (
                         <div className="mt-4 p-4 bg-gray-50 rounded-xl border border-dashed border-gray-200 text-sm text-gray-600">
@@ -883,7 +925,9 @@ export default function MyRequests() {
                           </button>
                           <button
                             onClick={() => handleOpenCancel(request)}
-                            disabled={!cancellationState.canCancel || isCancelling}
+                            disabled={
+                              !cancellationState.canCancel || isCancelling
+                            }
                             title={
                               cancellationState.canCancel
                                 ? "Cancel request"

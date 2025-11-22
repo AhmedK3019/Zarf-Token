@@ -52,7 +52,9 @@ const StatCard = ({ label, value, helper, accent }) => (
     <p className="text-xs font-semibold uppercase tracking-wide text-gray-500">
       {label}
     </p>
-    <p className={`text-2xl font-bold ${accent || "text-[#001233]"}`}>{value}</p>
+    <p className={`text-2xl font-bold ${accent || "text-[#001845]"}`}>
+      {value}
+    </p>
     {helper ? <p className="text-xs text-gray-500">{helper}</p> : null}
   </div>
 );
@@ -68,7 +70,7 @@ function DetailsModal({ booth, onClose, getPlatformBoothEndDate }) {
         <div className="bg-white rounded-2xl w-full max-w-2xl shadow-2xl m-4 max-h-[90vh] overflow-y-auto transform animate-slide-up">
           <div className="sticky top-0 bg-white/80 backdrop-blur-lg border-b border-gray-200 p-6 flex justify-between items-center">
             <div>
-               <h2 className="text-2xl font-bold text-[#4C3BCF]">
+              <h2 className="text-2xl font-bold text-[#4C3BCF]">
                 {booth.boothname || "Bazaar Booth Request"}
               </h2>
               {booth.bazarId?.bazaarname && (
@@ -354,7 +356,7 @@ export default function AcceptedBooths() {
               label="Total"
               value={stats.total}
               helper="Approved booths"
-              accent="text-[#001233]"
+              accent="text-[#001845]"
             />
             <StatCard
               label="Bazaar"
@@ -370,7 +372,10 @@ export default function AcceptedBooths() {
             />
             <StatCard
               label="Team Size"
-              value={booths.reduce((sum, b) => sum + (b.people?.length || 0), 0)}
+              value={booths.reduce(
+                (sum, b) => sum + (b.people?.length || 0),
+                0
+              )}
               helper="Team members across booths"
               accent="text-emerald-700"
             />
@@ -387,7 +392,7 @@ export default function AcceptedBooths() {
                 </p>
               </div>
               <div className="flex flex-wrap items-center gap-2">
-                {(typeFilter !== "all" || search.trim().length > 0) ? (
+                {typeFilter !== "all" || search.trim().length > 0 ? (
                   <button
                     onClick={resetFilters}
                     className="inline-flex items-center gap-2 rounded-full border border-gray-200 bg-white px-4 py-2.5 text-sm font-semibold text-gray-700 shadow-sm transition hover:bg-gray-50"
@@ -461,7 +466,7 @@ export default function AcceptedBooths() {
               </div>
             ) : filteredItems.length === 0 ? (
               <div className="flex flex-col items-center gap-3 rounded-3xl border border-dashed border-gray-200 bg-white/80 px-8 py-16 text-center shadow-sm">
-                <p className="text-lg font-semibold text-[#001233]">
+                <p className="text-lg font-semibold text-[#001845]">
                   You have no approved booths that match these filters.
                 </p>
                 <button
@@ -479,15 +484,19 @@ export default function AcceptedBooths() {
                     key={booth._id}
                     className="relative flex h-full flex-col overflow-hidden rounded-3xl border border-gray-100 bg-white/95 p-6 shadow-sm ring-1 ring-black/5 transition hover:-translate-y-0.5 hover:shadow-md"
                   >
-                    <div className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-[#4C3BCF] via-[#E11D48] to-[#001233]" />
+                    <div className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-[#4C3BCF] via-[#E11D48] to-[#001845]" />
                     <div className="flex items-start justify-between gap-3">
                       <div className="space-y-1">
                         <p className="text-xs font-semibold uppercase tracking-wide text-gray-500">
-                          {booth.isBazarBooth ? "Bazaar booth" : "Platform booth"}
+                          {booth.isBazarBooth
+                            ? "Bazaar booth"
+                            : "Platform booth"}
                         </p>
-                        <h3 className="text-xl font-bold text-[#001233]">
+                        <h3 className="text-xl font-bold text-[#001845]">
                           {booth.boothname ||
-                            (booth.isBazarBooth ? "Bazaar Booth" : "Platform Storefront")}
+                            (booth.isBazarBooth
+                              ? "Bazaar Booth"
+                              : "Platform Storefront")}
                         </h3>
                         {booth.bazarId?.bazaarname && (
                           <p className="text-sm font-semibold text-[#736CED]">
@@ -507,9 +516,9 @@ export default function AcceptedBooths() {
                         {booth.duration
                           ? `${booth.duration} weeks`
                           : booth.bazarId?.startdate && booth.bazarId?.enddate
-                          ? `${formatDate(booth.bazarId.startdate)} - ${formatDate(
-                              booth.bazarId.enddate
-                            )}`
+                          ? `${formatDate(
+                              booth.bazarId.startdate
+                            )} - ${formatDate(booth.bazarId.enddate)}`
                           : "Scheduled"}
                       </div>
                       <div className="inline-flex items-center gap-2 rounded-2xl bg-gray-50 px-3 py-2 font-semibold">
@@ -519,7 +528,11 @@ export default function AcceptedBooths() {
                       {booth.isBazarBooth && booth.bazarId?.startdate && (
                         <div className="inline-flex items-center gap-2 rounded-2xl bg-gray-50 px-3 py-2 font-semibold">
                           <Calendar size={14} />
-                          Starts {formatDateTime(booth.bazarId.startdate, booth.bazarId.starttime)}
+                          Starts{" "}
+                          {formatDateTime(
+                            booth.bazarId.startdate,
+                            booth.bazarId.starttime
+                          )}
                         </div>
                       )}
                     </div>
@@ -544,11 +557,17 @@ export default function AcceptedBooths() {
                       >
                         View Details
                       </button>
-                      {!booth.isBazarBooth && booth.duration && booth.startdate && (
-                        <span className="text-xs font-semibold uppercase tracking-wide text-gray-500">
-                          Ends {getPlatformBoothEndDate(booth.startdate, booth.duration)}
-                        </span>
-                      )}
+                      {!booth.isBazarBooth &&
+                        booth.duration &&
+                        booth.startdate && (
+                          <span className="text-xs font-semibold uppercase tracking-wide text-gray-500">
+                            Ends{" "}
+                            {getPlatformBoothEndDate(
+                              booth.startdate,
+                              booth.duration
+                            )}
+                          </span>
+                        )}
                     </div>
                   </div>
                 ))}

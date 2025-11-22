@@ -228,7 +228,7 @@ export default function EventsSalesReport() {
   if (loading) {
     return (
       <div className="flex justify-center items-center h-64">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#001233]"></div>
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-[#001845]"></div>
         <p className="ml-4 text-gray-600">Loading sales report...</p>
       </div>
     );
@@ -281,12 +281,12 @@ export default function EventsSalesReport() {
       <div className="bg-white rounded-lg shadow-lg border border-gray-200 overflow-hidden">
         {/* --- Table header with title and filter button --- */}
         <div className="flex flex-col sm:flex-row justify-between sm:items-center p-6 border-b gap-4">
-          <h2 className="text-xl font-semibold text-[#001233]">
+          <h2 className="text-xl font-semibold text-[#001845]">
             Revenue Breakdown per Event
           </h2>
           <button
             onClick={() => setShowFilters(!showFilters)}
-            className="px-4 py-2 rounded-lg border border-[#001233] text-[#001233] bg-white hover:bg-[#001233] hover:text-white focus:outline-none focus:ring-2 focus:ring-[#001233] focus:border-transparent shadow-sm flex items-center justify-center gap-2 text-sm font-medium transition-colors"
+            className="px-4 py-2 rounded-lg border border-[#001845] text-[#001845] bg-white hover:bg-[#001845] hover:text-white focus:outline-none focus:ring-2 focus:ring-[#001845] focus:border-transparent shadow-sm flex items-center justify-center gap-2 text-sm font-medium transition-colors"
           >
             <svg
               className="h-5 w-5 text-gray-600"
@@ -322,7 +322,7 @@ export default function EventsSalesReport() {
                   id="filter-type"
                   value={filterType}
                   onChange={(e) => setFilterType(e.target.value)}
-                  className="w-full px-4 py-2 rounded-lg border border-gray-300 bg-white focus:outline-none focus:ring-2 focus:ring-[#001233] focus:border-transparent"
+                  className="w-full px-4 py-2 rounded-lg border border-gray-300 bg-white focus:outline-none focus:ring-2 focus:ring-[#001845] focus:border-transparent"
                 >
                   <option value="">All Types</option>
                   <option value="bazaar">Bazaar</option>
@@ -344,7 +344,7 @@ export default function EventsSalesReport() {
                   id="revenue-sort"
                   value={revenueSort}
                   onChange={(e) => setRevenueSort(e.target.value)}
-                  className="w-full px-4 py-2 rounded-lg border border-gray-300 bg-white focus:outline-none focus:ring-2 focus:ring-[#001233] focus:border-transparent"
+                  className="w-full px-4 py-2 rounded-lg border border-gray-300 bg-white focus:outline-none focus:ring-2 focus:ring-[#001845] focus:border-transparent"
                 >
                   <option value="">No Sorting</option>
                   <option value="greatest">Greatest to least</option>
@@ -365,7 +365,7 @@ export default function EventsSalesReport() {
                   id="filter-date"
                   value={filterDate}
                   onChange={(e) => setFilterDate(e.target.value)}
-                  className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-[#001233] focus:border-transparent"
+                  className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-[#001845] focus:border-transparent"
                 />
               </div>
 
@@ -380,7 +380,7 @@ export default function EventsSalesReport() {
                       type="date"
                       value={startDateFilter}
                       onChange={(e) => setStartDateFilter(e.target.value)}
-                      className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-[#001233] focus:border-transparent"
+                      className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-[#001845] focus:border-transparent"
                       placeholder="Start"
                     />
                   </div>
@@ -392,7 +392,7 @@ export default function EventsSalesReport() {
                       type="date"
                       value={endDateFilter}
                       onChange={(e) => setEndDateFilter(e.target.value)}
-                      className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-[#001233] focus:border-transparent"
+                      className="w-full px-4 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-[#001845] focus:border-transparent"
                       placeholder="End"
                     />
                   </div>
@@ -491,11 +491,9 @@ export default function EventsSalesReport() {
                   &nbsp;
                 </td>
                 <td className="px-6 py-4 text-right text-sm font-bold">
-                  <span className="text-gray-800 uppercase mr-4">
-                    Total:
-                  </span>
+                  <span className="text-gray-800 uppercase mr-4">Total:</span>
                   {/* Emphasized Total */}
-                  <span className="text-[#001233] text-lg">
+                  <span className="text-[#001845] text-lg">
                     {formatCurrency(reportData.totalRevenue)}
                   </span>
                 </td>
@@ -511,7 +509,7 @@ export default function EventsSalesReport() {
         <div className="bg-white rounded-lg shadow-lg border border-gray-200 p-6">
           <div className="flex justify-between items-center">
             <div>
-              <h3 className="text-lg font-semibold text-[#001233]">
+              <h3 className="text-lg font-semibold text-[#001845]">
                 Revenue by Event
               </h3>
               <p className="text-sm text-gray-500">
@@ -546,7 +544,7 @@ export default function EventsSalesReport() {
                         />
                       </div>
                       <div className="mt-2 text-center">
-                        <div className="text-sm font-semibold text-[#001233]">
+                        <div className="text-sm font-semibold text-[#001845]">
                           {formatCurrency(item.value)}
                         </div>
                         <div className="text-xs text-gray-500 truncate max-w-[110px]">
@@ -569,7 +567,7 @@ export default function EventsSalesReport() {
         <div className="bg-white rounded-lg shadow-lg border border-gray-200 p-6">
           <div className="flex justify-between items-center">
             <div>
-              <h3 className="text-lg font-semibold text-[#001233]">
+              <h3 className="text-lg font-semibold text-[#001845]">
                 Revenue Contribution
               </h3>
               <p className="text-sm text-gray-500">
@@ -593,7 +591,7 @@ export default function EventsSalesReport() {
                   />
                   <div className="absolute inset-8 bg-white rounded-full flex flex-col items-center justify-center text-center shadow">
                     <p className="text-xs text-gray-500">Total Revenue</p>
-                    <p className="text-base font-semibold text-[#001233] mt-1">
+                    <p className="text-base font-semibold text-[#001845] mt-1">
                       {formatCurrency(reportData.totalRevenue)}
                     </p>
                   </div>
@@ -611,7 +609,7 @@ export default function EventsSalesReport() {
                         style={{ backgroundColor: segment.color }}
                       ></span>
                       <div className="min-w-0">
-                        <p className="text-sm font-medium text-[#001233] truncate">
+                        <p className="text-sm font-medium text-[#001845] truncate">
                           {segment.label}
                         </p>
                         <p className="text-xs text-gray-500">
@@ -619,7 +617,7 @@ export default function EventsSalesReport() {
                         </p>
                       </div>
                     </div>
-                    <div className="text-sm font-semibold text-[#001233]">
+                    <div className="text-sm font-semibold text-[#001845]">
                       {segment.percent.toFixed(1)}%
                     </div>
                   </div>

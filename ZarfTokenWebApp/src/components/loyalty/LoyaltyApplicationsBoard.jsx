@@ -108,7 +108,8 @@ export default function LoyaltyApplicationsBoard() {
         const res = await api.get("/loyalty");
         const rows = Array.isArray(res.data) ? res.data : [];
         rows.sort(
-          (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+          (a, b) =>
+            new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
         );
         setApplications(rows);
       } catch (err) {
@@ -130,8 +131,7 @@ export default function LoyaltyApplicationsBoard() {
     return () => clearTimeout(timer);
   }, [actionFeedback]);
 
-  const setFeedback = (type, message) =>
-    setActionFeedback({ type, message });
+  const setFeedback = (type, message) => setActionFeedback({ type, message });
 
   const handleApprove = async (formId) => {
     if (!canReview || !formId) return;
@@ -235,7 +235,14 @@ export default function LoyaltyApplicationsBoard() {
         acc.total += 1;
         return acc;
       },
-      { total: 0, pending: 0, approved: 0, rejected: 0, cancelled: 0, inactive: 0 }
+      {
+        total: 0,
+        pending: 0,
+        approved: 0,
+        rejected: 0,
+        cancelled: 0,
+        inactive: 0,
+      }
     );
   }, [applications]);
 
@@ -256,7 +263,7 @@ export default function LoyaltyApplicationsBoard() {
             <p className="text-xs font-semibold uppercase tracking-wide text-gray-500">
               Total
             </p>
-            <p className="text-2xl font-bold text-[#001233]">
+            <p className="text-2xl font-bold text-[#001845]">
               {statusCounts.total}
             </p>
             <p className="text-xs text-gray-500">Applications received</p>
@@ -409,13 +416,13 @@ export default function LoyaltyApplicationsBoard() {
                   key={app._id}
                   className="relative w-full overflow-hidden rounded-3xl border border-gray-100 bg-white/95 p-6 shadow-sm ring-1 ring-black/5 transition hover:-translate-y-0.5 hover:shadow-md"
                 >
-                  <div className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-[#4C3BCF] via-[#E11D48] to-[#001233]" />
+                  <div className="absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-[#4C3BCF] via-[#E11D48] to-[#001845]" />
                   <div className="flex items-start justify-between gap-3">
                     <div className="space-y-1">
                       <p className="text-xs font-semibold uppercase tracking-wide text-gray-500">
                         Loyalty Application
                       </p>
-                      <p className="text-2xl font-bold text-[#001233]">
+                      <p className="text-2xl font-bold text-[#001845]">
                         {vendorName}
                       </p>
                       <div className="flex flex-wrap items-center gap-2 text-xs font-semibold">
@@ -466,7 +473,9 @@ export default function LoyaltyApplicationsBoard() {
                       </div>
                       <p className="mt-2 text-sm leading-relaxed text-gray-700">
                         {termsCopy}
-                        {!isExpanded && termsLength > snippet.length ? "..." : ""}
+                        {!isExpanded && termsLength > snippet.length
+                          ? "..."
+                          : ""}
                       </p>
                     </div>
                   )}
@@ -562,79 +571,79 @@ export default function LoyaltyApplicationsBoard() {
       {rejectionModal.open && (
         <div className="fixed inset-0 z-40 flex items-center justify-center bg-black/40 px-4">
           <div className="w-full max-w-lg rounded-3xl bg-white p-6 shadow-2xl">
-          <div className="flex items-start justify-between gap-3">
-            <div>
-              <p className="text-xs font-semibold uppercase tracking-wide text-rose-500">
-                Reject application
-              </p>
-              <h3 className="text-xl font-bold text-[#18122B]">
-                {rejectionModal.form?.promoCode}
-              </h3>
-              <p className="text-sm text-gray-500">
-                {rejectionModal.form?.vendorId?.companyname ||
-                  rejectionModal.form?.vendorId?.name ||
-                  rejectionModal.form?.vendorId?.email ||
-                  "Vendor"}
-              </p>
+            <div className="flex items-start justify-between gap-3">
+              <div>
+                <p className="text-xs font-semibold uppercase tracking-wide text-rose-500">
+                  Reject application
+                </p>
+                <h3 className="text-xl font-bold text-[#18122B]">
+                  {rejectionModal.form?.promoCode}
+                </h3>
+                <p className="text-sm text-gray-500">
+                  {rejectionModal.form?.vendorId?.companyname ||
+                    rejectionModal.form?.vendorId?.name ||
+                    rejectionModal.form?.vendorId?.email ||
+                    "Vendor"}
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={() => !rejectionModal.submitting && closeRejectModal()}
+                className="rounded-full p-1 text-gray-500 hover:bg-gray-100"
+                disabled={rejectionModal.submitting}
+              >
+                <XCircle className="h-5 w-5" />
+              </button>
             </div>
-            <button
-              type="button"
-              onClick={() => !rejectionModal.submitting && closeRejectModal()}
-              className="rounded-full p-1 text-gray-500 hover:bg-gray-100"
-              disabled={rejectionModal.submitting}
-            >
-              <XCircle className="h-5 w-5" />
-            </button>
-          </div>
-          <div className="mt-5 space-y-2 text-sm text-gray-600">
-            <label className="font-semibold text-gray-800">
-              Rejection reason
-            </label>
-            <textarea
-              rows={4}
-              maxLength={600}
-              value={rejectionModal.reason}
-              onChange={(e) =>
-                setRejectionModal((prev) => ({
-                  ...prev,
-                  reason: e.target.value,
-                  error: null,
-                }))
-              }
-              placeholder="Explain why this offer cannot be approved. Vendors will see this message."
-              className="w-full rounded-2xl border border-gray-200 bg-gray-50/60 p-3 text-sm focus:border-[#4C3BCF] focus:bg-white focus:outline-none"
-            />
-            <div className="flex items-center justify-between text-xs text-gray-400">
-              <span>Minimum 10 characters</span>
-              <span>{rejectionModal.reason.length}/600</span>
-            </div>
-            {rejectionModal.error && (
-              <p className="text-sm text-rose-600">{rejectionModal.error}</p>
-            )}
-          </div>
-          <div className="mt-6 flex justify-end gap-3">
-            <button
-              type="button"
-              onClick={closeRejectModal}
-              disabled={rejectionModal.submitting}
-              className="rounded-full border border-gray-200 px-4 py-2 text-sm font-semibold text-gray-600 hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-60"
-            >
-              Cancel
-            </button>
-            <button
-              type="button"
-              onClick={submitRejection}
-              disabled={rejectionModal.submitting}
-              className="inline-flex items-center gap-2 rounded-full bg-rose-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-rose-700 disabled:cursor-not-allowed disabled:bg-rose-400"
-            >
-              {rejectionModal.submitting ? (
-                <Loader2 className="h-4 w-4 animate-spin" />
-              ) : (
-                <MessageSquareWarning className="h-4 w-4" />
+            <div className="mt-5 space-y-2 text-sm text-gray-600">
+              <label className="font-semibold text-gray-800">
+                Rejection reason
+              </label>
+              <textarea
+                rows={4}
+                maxLength={600}
+                value={rejectionModal.reason}
+                onChange={(e) =>
+                  setRejectionModal((prev) => ({
+                    ...prev,
+                    reason: e.target.value,
+                    error: null,
+                  }))
+                }
+                placeholder="Explain why this offer cannot be approved. Vendors will see this message."
+                className="w-full rounded-2xl border border-gray-200 bg-gray-50/60 p-3 text-sm focus:border-[#4C3BCF] focus:bg-white focus:outline-none"
+              />
+              <div className="flex items-center justify-between text-xs text-gray-400">
+                <span>Minimum 10 characters</span>
+                <span>{rejectionModal.reason.length}/600</span>
+              </div>
+              {rejectionModal.error && (
+                <p className="text-sm text-rose-600">{rejectionModal.error}</p>
               )}
-              Submit Rejection
-            </button>
-          </div>
+            </div>
+            <div className="mt-6 flex justify-end gap-3">
+              <button
+                type="button"
+                onClick={closeRejectModal}
+                disabled={rejectionModal.submitting}
+                className="rounded-full border border-gray-200 px-4 py-2 text-sm font-semibold text-gray-600 hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-60"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={submitRejection}
+                disabled={rejectionModal.submitting}
+                className="inline-flex items-center gap-2 rounded-full bg-rose-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-rose-700 disabled:cursor-not-allowed disabled:bg-rose-400"
+              >
+                {rejectionModal.submitting ? (
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                ) : (
+                  <MessageSquareWarning className="h-4 w-4" />
+                )}
+                Submit Rejection
+              </button>
+            </div>
           </div>
         </div>
       )}

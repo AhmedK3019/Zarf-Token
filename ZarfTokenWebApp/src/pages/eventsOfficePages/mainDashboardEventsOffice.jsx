@@ -42,7 +42,7 @@ const MainDashboardEventsOffice = () => {
     <div>
       <NavbarEventsOffice />
       {isCreateEventPage && (
-        <div className="w-full bg-[#001233] text-white px-6 py-8">
+        <div className="w-full bg-[#001845] text-white px-6 py-8">
           <div className="max-w-7xl mx-auto text-center">
             <h1 className="text-4xl font-bold sm:text-5xl mb-4">
               Create Events
@@ -51,7 +51,7 @@ const MainDashboardEventsOffice = () => {
         </div>
       )}
       {isEventsSalesReportPage && (
-        <div className="w-full bg-[#001233] text-white px-6 py-8">
+        <div className="w-full bg-[#001845] text-white px-6 py-8">
           <div className="max-w-7xl mx-auto text-center">
             <h1 className="text-4xl font-bold sm:text-5xl mb-4">
               Events Sales Report
@@ -60,7 +60,7 @@ const MainDashboardEventsOffice = () => {
         </div>
       )}
       {isEventAttendeesReportPage && (
-        <div className="w-full bg-[#001233] text-white px-6 py-8">
+        <div className="w-full bg-[#001845] text-white px-6 py-8">
           <div className="max-w-7xl mx-auto text-center">
             <h1 className="text-4xl font-bold sm:text-5xl mb-4">
               Event Attendees Report
@@ -69,7 +69,7 @@ const MainDashboardEventsOffice = () => {
         </div>
       )}
       {isWorkshopRequestsPage && (
-        <div className="w-full bg-[#001233] text-white px-6 py-8">
+        <div className="w-full bg-[#001845] text-white px-6 py-8">
           <div className="max-w-7xl mx-auto text-center">
             <h1 className="text-4xl font-bold sm:text-5xl mb-2">
               Workshops & Approvals
@@ -78,7 +78,7 @@ const MainDashboardEventsOffice = () => {
         </div>
       )}
       {isLoyaltyProgramPage && (
-        <div className="w-full bg-[#001233] text-white px-6 py-8">
+        <div className="w-full bg-[#001845] text-white px-6 py-8">
           <div className="max-w-7xl mx-auto text-center">
             <h1 className="text-4xl font-bold sm:text-5xl mb-4">
               GUC Loyalty Program Partners
@@ -87,7 +87,7 @@ const MainDashboardEventsOffice = () => {
         </div>
       )}
       {isVendorRequestsPage && (
-        <div className="w-full bg-[#001233] text-white px-6 py-8">
+        <div className="w-full bg-[#001845] text-white px-6 py-8">
           <div className="max-w-7xl mx-auto text-center">
             <h1 className="text-4xl font-bold sm:text-5xl mb-4">
               Vendor Requests
@@ -96,7 +96,7 @@ const MainDashboardEventsOffice = () => {
         </div>
       )}
       {isLoyaltyVendorsPage && (
-        <div className="w-full bg-[#001233] text-white px-6 py-8">
+        <div className="w-full bg-[#001845] text-white px-6 py-8">
           <div className="max-w-7xl mx-auto text-center">
             <h1 className="text-4xl font-bold sm:text-5xl mb-4">
               Vendor Loyalty Applications
@@ -105,14 +105,14 @@ const MainDashboardEventsOffice = () => {
         </div>
       )}
       {isAllEventsPage && (
-        <div className="w-full bg-[#001233] text-white px-6 py-8">
+        <div className="w-full bg-[#001845] text-white px-6 py-8">
           <div className="max-w-7xl mx-auto text-center">
             <h1 className="text-4xl font-bold sm:text-5xl mb-4">All Events</h1>
           </div>
         </div>
       )}
       {isGenerateQrPage && (
-        <div className="w-full bg-[#001233] text-white px-6 py-8">
+        <div className="w-full bg-[#001845] text-white px-6 py-8">
           <div className="max-w-7xl mx-auto text-center">
             <h1 className="text-4xl font-bold sm:text-5xl mb-2">
               Generate QR Code
@@ -121,7 +121,7 @@ const MainDashboardEventsOffice = () => {
         </div>
       )}
       {isGymSchedulePage && (
-        <div className="w-full bg-[#001233] text-white px-6 py-8">
+        <div className="w-full bg-[#001845] text-white px-6 py-8">
           <div className="max-w-7xl mx-auto text-center">
             <h1 className="text-4xl font-bold sm:text-5xl mb-4">
               Gym Sessions
