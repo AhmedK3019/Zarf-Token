@@ -252,7 +252,7 @@ export default function AllUsers() {
   return (
     <div className="min-h-screen w-full overflow-x-hidden overflow-y-auto bg-muted text-[#1F1B3B]">
       <div className="relative flex min-h-screen w-full flex-col items-center px-6 py-8">
-        <div className="w-full max-w-6xl">
+        <div className="w-full max">
           {message && (
             <div className="mb-4 text-center bg-green-100 text-green-800 py-2 rounded">
               {message}
@@ -489,42 +489,45 @@ export default function AllUsers() {
               No users found.
             </div>
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-12">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-12">
               {filteredUsers.map((user) => (
                 <div
                   key={user._id}
-                  className="bg-white rounded-2xl p-6 shadow-[0_10px_25px_rgba(165,148,249,0.2)] border border-white/50 hover:shadow-[0_15px_35px_rgba(165,148,249,0.3)] transition-all hover:-translate-y-1"
+                  className="bg-white rounded-2xl p-6 shadow-[0_10px_25px_rgba(165,148,249,0.2)] border border-white/50 hover:shadow-[0_15px_35px_rgba(165,148,249,0.3)] transition-all hover:-translate-y-1 flex flex-col justify-between"
                 >
-                  <h3 className="text-xl font-bold text-[#4C3BCF] mb-2">
-                    {user.firstName ||
-                      user.firstname ||
-                      user.companyname ||
-                      "Unknown"}{" "}
-                    {user.lastName || user.lastname || ""}{" "}
-                    {authUser?._id === user?._id ? "(You)" : ""}
-                  </h3>
+                  <div>
+                    <div className="flex justify-between items-start mb-2">
+                      <h3 className="text-xl font-bold text-[#4C3BCF] flex-1">
+                        {user.firstName ||
+                          user.firstname ||
+                          user.companyname ||
+                          "Unknown"}{" "}
+                        {user.lastName || user.lastname || ""}{" "}
+                        {authUser?._id === user?._id ? "(You)" : ""}
+                      </h3>
+                      <span
+                        className={`px-2 py-1 text-xs font-semibold rounded-full ml-2 ${
+                          user.status?.toLowerCase() === "active"
+                            ? "bg-green-100 text-green-800"
+                            : "bg-red-100 text-red-800"
+                        }`}
+                      >
+                        {user.status || "Unknown"}
+                      </span>
+                    </div>
 
-                  <p className="text-sm text-[#312A68] mb-1">
-                    Email: {user.email || "N/A"}
-                  </p>
+                    <p className="text-sm text-[#312A68] mb-1">
+                      Email: {user.email || "N/A"}
+                    </p>
 
-                  <p className="text-sm text-[#312A68] mb-1">
-                    GUC ID: {user.gucid || "N/A"}
-                  </p>
+                    <p className="text-sm text-[#312A68] mb-1">
+                      GUC ID: {user.gucid || "N/A"}
+                    </p>
 
-                  <p className="text-sm text-[#312A68] mb-1 capitalize">
-                    Role: {user.companyname ? "Vendor" : user.role || "User"}
-                  </p>
-
-                  <p
-                    className={`text-sm mb-4 font-semibold ${
-                      user.status?.toLowerCase() === "active"
-                        ? "text-green-700"
-                        : "text-red-700"
-                    }`}
-                  >
-                    Status: {user.status || "Unknown"}
-                  </p>
+                    <p className="text-sm text-[#312A68] mb-4 capitalize">
+                      Role: {user.companyname ? "Vendor" : user.role || "User"}
+                    </p>
+                  </div>
 
                   <div className="flex justify-end gap-2 flex-wrap">
                     {normalizeRole(user.role) !== "admin" && (
@@ -532,14 +535,14 @@ export default function AllUsers() {
                         {user.status?.toLowerCase() === "active" ? (
                           <button
                             onClick={() => handleBlock(user._id, user.role)}
-                            className="bg-orange-500 text-white font-medium px-4 py-2 rounded-full hover:bg-orange-600 transition-colors"
+                            className="rounded-lg px-4 py-2 text-sm font-semibold text-center transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 border border-yellow-200 bg-yellow-50 text-yellow-700 hover:bg-yellow-100 focus-visible:ring-yellow-200"
                           >
                             Block
                           </button>
                         ) : (
                           <button
                             onClick={() => handleUnblock(user._id, user.role)}
-                            className="bg-green-500 text-white font-medium px-4 py-2 rounded-full hover:bg-green-600 transition-colors"
+                            className="rounded-lg px-4 py-2 text-sm font-semibold text-center transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 border border-green-200 bg-green-50 text-green-700 hover:bg-green-100 focus-visible:ring-green-200"
                           >
                             Unblock
                           </button>
@@ -548,7 +551,7 @@ export default function AllUsers() {
                     )}
                     <button
                       onClick={() => handleDelete(user._id, user.role)}
-                      className="bg-[#C14953] text-white font-medium px-4 py-2 rounded-full hover:bg-red-600 transition-colors"
+                      className="rounded-lg px-4 py-2 text-sm font-semibold text-center transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 border border-red-200 bg-red-50 text-red-600 hover:bg-red-100 focus-visible:ring-red-200"
                     >
                       Delete
                     </button>
