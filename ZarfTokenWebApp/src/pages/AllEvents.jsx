@@ -500,6 +500,29 @@ const AllEvents = () => {
     }
   };
 
+  const handleExcelDownload = async (event) => {
+    try {
+      console.log("here");
+      const response = await api.get(
+        `/allEvents/registeredNamesExcel/${event._id}/${event.type}`,
+        { responseType: "blob" } // VERY IMPORTANT
+      );
+      console.log(response.data);
+      // Create a download link
+      const url = window.URL.createObjectURL(new Blob([response.data]));
+      const link = document.createElement("a");
+      link.href = url;
+      link.setAttribute("download", "registrations.xlsx"); // default file name
+
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+    } catch (error) {
+      console.error("Download API error:", error);
+      alert("Failed to download the excel sheet. Please try again.");
+    }
+  };
+
   const handleRegisterEvent = (event) => {
     setRegisterModalEvent(event);
     setShowRegisterModal(true);
@@ -918,6 +941,7 @@ const AllEvents = () => {
                 onViewBooths={handleViewBooths}
                 onViewDetails={handleViewDetails}
                 onArchive={handleArchiveEvent}
+                onExcelDownload={handleExcelDownload}
                 isFavourite={
                   favKeys.has(`${event.type}-${event._id}`) ||
                   favKeys.has(`${event.type}:${event._id}`)

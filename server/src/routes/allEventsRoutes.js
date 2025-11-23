@@ -24,4 +24,8 @@ router.delete("/removeRate/:id/:rateid/:type", AllEventsController.removeRate);
 router.patch("/archiveEvent/:id/:type", AllEventsController.archiveEvent);
 router.patch("/unArchiveEvent/:id/:type", AllEventsController.unArchiveEvent);
 router.get("/getArchivedEvents", AllEventsController.getArchivedEvents);
+router.get(
+  "/registeredNamesExcel/:id/:type",
+  AllEventsController.excelRegisterdPeople
+);
 export default router;

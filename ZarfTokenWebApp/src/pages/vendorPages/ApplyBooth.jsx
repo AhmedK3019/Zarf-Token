@@ -47,6 +47,7 @@ const initialFormState = {
   boothSize: "2x2",
   duration: 1,
   location: boothLocations[0].id,
+  startdate: "",
 };
 
 export default function ApplyBooth() {
@@ -91,7 +92,10 @@ export default function ApplyBooth() {
     if (formData.attendees.length < 5) {
       setFormData({
         ...formData,
-        attendees: [...formData.attendees, { name: "", email: "", idDocument: null }],
+        attendees: [
+          ...formData.attendees,
+          { name: "", email: "", idDocument: null },
+        ],
       });
     }
   };
@@ -107,9 +111,13 @@ export default function ApplyBooth() {
     setError(null);
 
     // Validate that all attendees have ID documents uploaded
-    const missingIds = formData.attendees.filter(attendee => !attendee.idDocument);
+    const missingIds = formData.attendees.filter(
+      (attendee) => !attendee.idDocument
+    );
     if (missingIds.length > 0) {
-      setError(`Please upload ID documents for all attendees. ${missingIds.length} attendee(s) missing ID documents.`);
+      setError(
+        `Please upload ID documents for all attendees. ${missingIds.length} attendee(s) missing ID documents.`
+      );
       setIsSubmitting(false);
       return;
     }
@@ -129,14 +137,14 @@ export default function ApplyBooth() {
         formData.attendees.map(async (attendee) => {
           if (attendee.idDocument) {
             const idFormData = new FormData();
-            idFormData.append('file', attendee.idDocument);
-            
-            const uploadResponse = await api.post('/uploads', idFormData, {
+            idFormData.append("file", attendee.idDocument);
+
+            const uploadResponse = await api.post("/uploads", idFormData, {
               headers: {
-                'Content-Type': 'multipart/form-data',
+                "Content-Type": "multipart/form-data",
               },
             });
-            
+
             return {
               name: attendee.name,
               email: attendee.email,
@@ -146,6 +154,10 @@ export default function ApplyBooth() {
           return attendee;
         })
       );
+      let start = new Date(formData.startdate);
+      let enddate = new Date(start); // clone
+
+      enddate.setDate(start.getDate() + formData.duration * 7);
 
       const payload = {
         boothname: formData.boothname,
@@ -154,6 +166,8 @@ export default function ApplyBooth() {
         duration: formData.duration,
         location: formData.location,
         vendorId: user._id,
+        startdate: formData.startdate,
+        enddate: enddate,
       };
 
       const response = await api.post(`/vendorRequests/platform`, payload);
@@ -243,6 +257,24 @@ export default function ApplyBooth() {
 
                       <div>
                         <label
+                          htmlFor="startdate"
+                          className="block text-sm font-medium text-[#4C3BCF] mb-2"
+                        >
+                          Start date
+                        </label>
+                        <input
+                          type="date"
+                          id="startdate"
+                          name="startdate"
+                          value={formData.startdate}
+                          onChange={handleFormChange}
+                          required
+                          className="w-full rounded-lg border-2 border-gray-200 shadow-sm focus:border-[#736CED] focus:ring-[#736CED] text-[#312A68]"
+                        />
+                      </div>
+
+                      <div>
+                        <label
                           htmlFor="boothSize"
                           className="block text-sm font-medium text-[#4C3BCF] mb-2"
                         >
@@ -313,7 +345,12 @@ export default function ApplyBooth() {
                               <input
                                 type="file"
                                 accept="image/*,.pdf"
-                                onChange={(e) => handleIdDocumentChange(index, e.target.files[0])}
+                                onChange={(e) =>
+                                  handleIdDocumentChange(
+                                    index,
+                                    e.target.files[0]
+                                  )
+                                }
                                 className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
                                 required
                                 id={`id-upload-${index}`}
@@ -323,13 +360,25 @@ export default function ApplyBooth() {
                                 className="flex items-center gap-3 px-4 py-2 bg-gradient-to-r from-[#EEE9FF] to-[#F8F6FF] border-2 border-dashed border-[#736CED]/30 hover:border-[#736CED]/50 rounded-lg cursor-pointer transition-all hover:shadow-md group"
                               >
                                 <div className="flex items-center justify-center w-8 h-8 bg-[#736CED]/10 rounded-full group-hover:bg-[#736CED]/20 transition-colors">
-                                  <svg className="w-4 h-4 text-[#736CED]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+                                  <svg
+                                    className="w-4 h-4 text-[#736CED]"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    viewBox="0 0 24 24"
+                                  >
+                                    <path
+                                      strokeLinecap="round"
+                                      strokeLinejoin="round"
+                                      strokeWidth={2}
+                                      d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"
+                                    />
                                   </svg>
                                 </div>
                                 <div className="flex-1">
                                   <div className="text-sm font-medium text-[#4C3BCF]">
-                                    {attendee.idDocument ? 'Change ID Document' : 'Upload ID Document'}
+                                    {attendee.idDocument
+                                      ? "Change ID Document"
+                                      : "Upload ID Document"}
                                   </div>
                                   <div className="text-xs text-[#312A68]/70">
                                     PNG, JPG, PDF • Max 10MB
@@ -337,18 +386,36 @@ export default function ApplyBooth() {
                                 </div>
                                 {attendee.idDocument && (
                                   <div className="flex items-center gap-1 text-green-600">
-                                    <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-                                      <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                                    <svg
+                                      className="w-4 h-4"
+                                      fill="currentColor"
+                                      viewBox="0 0 20 20"
+                                    >
+                                      <path
+                                        fillRule="evenodd"
+                                        d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+                                        clipRule="evenodd"
+                                      />
                                     </svg>
-                                    <span className="text-xs font-medium">Uploaded</span>
+                                    <span className="text-xs font-medium">
+                                      Uploaded
+                                    </span>
                                   </div>
                                 )}
                               </label>
                             </div>
                             {attendee.idDocument && (
                               <div className="mt-2 text-xs text-green-600 font-medium flex items-center gap-1">
-                                <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
-                                  <path fillRule="evenodd" d="M4 4a2 2 0 00-2 2v8a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2H4zm0 2h12v8H4V6z" clipRule="evenodd" />
+                                <svg
+                                  className="w-3 h-3"
+                                  fill="currentColor"
+                                  viewBox="0 0 20 20"
+                                >
+                                  <path
+                                    fillRule="evenodd"
+                                    d="M4 4a2 2 0 00-2 2v8a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2H4zm0 2h12v8H4V6z"
+                                    clipRule="evenodd"
+                                  />
                                 </svg>
                                 {attendee.idDocument.name}
                               </div>

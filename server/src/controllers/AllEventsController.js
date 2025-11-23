@@ -8,6 +8,7 @@ import User from "../models/User.js";
 import Admin from "../models/Admin.js";
 import EventsOffice from "../models/EventsOffice.js";
 import userController from "./userController.js";
+import * as XLSX from "xlsx/xlsx.mjs";
 const getAllEvents = async (req, res, next) => {
   try {
     const role = req.userRole;
@@ -665,6 +666,53 @@ const notifyOneHourPrior = async () => {
   }
 };
 
+const excelRegisterdPeople = async (req, res, next) => {
+  try {
+    const { id, type } = req.params;
+    let model;
+    switch (type) {
+      case "workshop":
+        model = Workshop;
+        break;
+      case "trip":
+        model = Trip;
+        break;
+      default:
+        return res.status(404).json({ message: "Invalid type" });
+    }
+    console.log("here");
+    const event = await model.findById(id);
+    console.log(event);
+    console.log("array" + event.registered);
+    let registrationArray = event.registered;
+    registrationArray = registrationArray.map((item) => {
+      return {
+        firstname: item.firstname,
+        lastname: item.lastname,
+      };
+    });
+    console.log(registrationArray);
+    const worksheet = XLSX.utils.json_to_sheet(registrationArray);
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, "Registrations");
+    const excelBuffer = XLSX.write(workbook, {
+      type: "buffer",
+      bookType: "xlsx",
+    });
+    res.setHeader(
+      "Content-Disposition",
+      "attachment; filename=registrations.xlsx"
+    );
+    res.setHeader(
+      "Content-Type",
+      "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+    );
+    return res.send(excelBuffer);
+  } catch (error) {
+    next(error);
+  }
+};
+
 export default {
   getAllEvents,
   getEventsByType,
@@ -680,4 +728,5 @@ export default {
   unArchiveEvent,
   notifyOneDayPrior,
   notifyOneHourPrior,
+  excelRegisterdPeople,
 };

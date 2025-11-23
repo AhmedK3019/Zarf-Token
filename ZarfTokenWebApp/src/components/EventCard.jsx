@@ -25,6 +25,7 @@ const EventCard = ({
   userIsEligible,
   onDelete,
   onArchive,
+  onExcelDownload,
   onRegister,
   onViewBooths,
   onViewDetails,
@@ -173,6 +174,9 @@ const EventCard = ({
   const canArchive =
     user?.role?.toLowerCase().includes("event") &&
     new Date(event.endDate) < Date.now();
+  const canDownloadExcel =
+    user?.role?.toLowerCase().includes("event") &&
+    (event.type == "workshop" || event.type == "trip");
 
   const isCreator =
     event.type === "workshop" &&
@@ -321,6 +325,20 @@ const EventCard = ({
         Update
       </button>,
       "update"
+    );
+  }
+  if (canDownloadExcel) {
+    addActionButton(
+      <button
+        type="button"
+        onClick={() => {
+          onExcelDownload(event.original);
+        }}
+        className={`${actionButtonBase} border border-green-200 bg-purple-50 text-green-700 hover:bg-green-100 focus-visible:ring-green-200`}
+      >
+        download
+      </button>,
+      "download"
     );
   }
 
