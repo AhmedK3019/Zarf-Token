@@ -298,7 +298,7 @@ const NavbarAdmin = () => {
         {/* Main Heading and Subtitle */}
         {(() => {
           const path = location.pathname || "";
-          let headerTitle = "Campus Events & Booths";
+          let headerTitle = "GUC Loyalty Program Partners";
           let headerSubtitle = "";
 
           if (path.includes("/signup-requests")) {

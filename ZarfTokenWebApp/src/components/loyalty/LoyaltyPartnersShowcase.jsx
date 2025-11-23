@@ -278,11 +278,8 @@ export default function LoyaltyPartnersShowcase({
         <div className="rounded-3xl border border-gray-100 bg-white/80 p-5 shadow-sm">
           <div className="flex flex-wrap items-center justify-between gap-3">
             <div className="space-y-1">
-              <p className="text-xs font-semibold uppercase tracking-wide text-gray-500">
+              <p className="text-lg font-bold tracking-wide text-gray-800">
                 Filters
-              </p>
-              <p className="text-sm text-gray-600">
-                Cohesive controls for quick partner reviews.
               </p>
             </div>
             <div className="flex flex-wrap items-center gap-2">
