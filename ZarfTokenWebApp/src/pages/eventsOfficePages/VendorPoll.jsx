@@ -157,21 +157,21 @@ export default function VendorPoll() {
   return (
     <div className="p-4 space-y-8">
       <div>
-        <h2 className="text-2xl font-semibold">Vendor Polls</h2>
         {error ? <p className="mt-2 text-sm text-red-600">{error}</p> : null}
       </div>
 
       {/* Overlap detection */}
       <section>
-        <h3 className="text-lg font-semibold mb-2">
-          Overlapping Pending Platform Requests
-        </h3>
         {loading ? (
-          <p className="text-gray-600 text-sm">Loading...</p>
+          <div className="flex items-center justify-center py-20">
+            <p className="text-gray-600 text-sm text-center">Loading...</p>
+          </div>
         ) : overlapGroups.length === 0 ? (
-          <p className="text-gray-600 text-sm">
-            No overlapping pending platform vendor requests found.
-          </p>
+          <div className="flex items-center justify-center py-20">
+            <p className="text-gray-600 text-sm text-center">
+              No overlapping pending platform vendor requests found.
+            </p>
+          </div>
         ) : (
           <div className="space-y-4">
             {overlapGroups.map((group, idx) => (
@@ -221,11 +221,16 @@ export default function VendorPoll() {
 
       {/* Active polls */}
       <section>
-        <h3 className="text-lg font-semibold mb-2">Active Polls</h3>
         {loading ? (
-          <p className="text-gray-600 text-sm">Loading...</p>
+          <div className="flex items-center justify-center py-20">
+            <p className="text-gray-600 text-sm text-center">Loading...</p>
+          </div>
         ) : (activePolls || []).length === 0 ? (
-          <p className="text-gray-600 text-sm">No active polls.</p>
+          <div className="flex items-center justify-center py-20">
+            <p className="text-gray-600 text-sm text-center">
+              No active polls.
+            </p>
+          </div>
         ) : (
           <div className="space-y-3">
             {activePolls.map((poll) => {
@@ -290,11 +295,14 @@ export default function VendorPoll() {
 
       {/* Past polls */}
       <section>
-        <h3 className="text-lg font-semibold mb-2">Past Polls</h3>
         {loading ? (
-          <p className="text-gray-600 text-sm">Loading...</p>
+          <div className="flex items-center justify-center py-20">
+            <p className="text-gray-600 text-sm text-center">Loading...</p>
+          </div>
         ) : (pastPolls || []).length === 0 ? (
-          <p className="text-gray-600 text-sm">No past polls.</p>
+          <div className="flex items-center justify-center py-20">
+            <p className="text-gray-600 text-sm text-center">No past polls.</p>
+          </div>
         ) : (
           <div className="space-y-3">
             {pastPolls.map((poll) => {
