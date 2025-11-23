@@ -451,11 +451,11 @@ const removeRate = async (req, res, next) => {
 const archiveEvent = async (req, res, next) => {
   try {
     const { id, type } = req.params;
+    console.log(id, type);
     let model;
     switch (type) {
       case "trip":
         model = Trip;
-        console.log("trip");
         break;
       case "workshop":
         model = Workshop;
@@ -463,9 +463,9 @@ const archiveEvent = async (req, res, next) => {
       case "bazaar":
         model = Bazaar;
         break;
-      // case "booth":
-      //   model = Booth;
-      //   break;
+      case "booth":
+        model = Booth;
+        break;
       case "conference":
         model = Conference;
         break;
@@ -474,9 +474,9 @@ const archiveEvent = async (req, res, next) => {
     }
     let event = await model.findById(id);
     if (!event) return res.stauts(404).json({ message: "Event not found" });
-    if (new Date(event.enddate) - new Date() > 0) {
-      return res.json({ message: "Event start date has not passed yet" });
-    }
+    // if (new Date(event.enddate) - new Date() > 0) {
+    //   return res.json({ message: "Event start date has not passed yet" });
+    // }
     let result = await model.findByIdAndUpdate(
       id,
       { archive: true },

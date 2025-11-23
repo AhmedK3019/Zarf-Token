@@ -24,6 +24,7 @@ const EventCard = ({
   userIsPrivileged,
   userIsEligible,
   onDelete,
+  onArchive,
   onRegister,
   onViewBooths,
   onViewDetails,
@@ -169,9 +170,14 @@ const EventCard = ({
       event.type === "trip") &&
     new Date(event.startDate) > Date.now();
 
-  
-  const isCreator = event.type === "workshop" && event.createdBy && 
-                   (event.createdBy === user?._id || event.createdBy._id === user?._id);
+  const canArchive =
+    user?.role?.toLowerCase().includes("event") &&
+    new Date(event.endDate) < Date.now();
+
+  const isCreator =
+    event.type === "workshop" &&
+    event.createdBy &&
+    (event.createdBy === user?._id || event.createdBy._id === user?._id);
 
   const canRegister =
     userIsEligible &&
@@ -318,6 +324,19 @@ const EventCard = ({
     );
   }
 
+  if (canArchive) {
+    addActionButton(
+      <button
+        type="button"
+        onClick={() => onArchive?.(event.original)}
+        className={`${actionButtonBase} border border-blue-200 bg-blue-50 text-blue-700 hover:bg-blue-100 focus-visible:ring-blue-200`}
+      >
+        Archive
+      </button>,
+      "archive"
+    );
+  }
+
   const defaultRegistrationButtons = [];
 
   if (isRegistered) {
@@ -346,7 +365,6 @@ const EventCard = ({
     );
   }
 
-  
   if (isCreator && userIsEligible) {
     defaultRegistrationButtons.push(
       <button

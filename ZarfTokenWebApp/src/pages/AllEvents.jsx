@@ -350,7 +350,9 @@ const AllEvents = () => {
         const matchesSearch =
           !lowercasedSearch ||
           event.name?.toLowerCase().includes(lowercasedSearch) ||
-          `${event.createdBy?.firstname || ""} ${event.createdBy?.lastname || ""}`
+          `${event.createdBy?.firstname || ""} ${
+            event.createdBy?.lastname || ""
+          }`
             .toLowerCase()
             .includes(lowercasedSearch) ||
           event.professors?.some((prof) =>
@@ -370,8 +372,7 @@ const AllEvents = () => {
             ? "upcoming"
             : "past"
           : "unknown";
-        const matchesStatus =
-          !statusFilter || statusFilter === eventStatus;
+        const matchesStatus = !statusFilter || statusFilter === eventStatus;
 
         const isRegistered =
           Array.isArray(event.attendees) &&
@@ -488,6 +489,17 @@ const AllEvents = () => {
     }
   };
 
+  const handleArchiveEvent = async (event) => {
+    try {
+      await api.patch(`allEvents/archiveEvent/${event._id}/${event.type}`);
+      const updatedEvents = events.filter((e) => e._id !== event._id);
+      setEvents(updatedEvents);
+    } catch (error) {
+      console.error("Archive API error:", error);
+      alert("Failed to archive the event. Please try again.");
+    }
+  };
+
   const handleRegisterEvent = (event) => {
     setRegisterModalEvent(event);
     setShowRegisterModal(true);
@@ -558,16 +570,17 @@ const AllEvents = () => {
   // Rating and Comments Handlers
   const handleViewComments = async (eventRaw, eventId, eventType) => {
     setSelectedRatingEvent(eventRaw);
-    
+
     const attendees = getEventDetails(eventRaw).attendees;
-    const userHasAttended = Array.isArray(attendees) 
-      ? attendees.some((a) => 
-          (a.userId === user?._id || a.userId?._id === user?._id) &&
-          a.paid === true &&
-          a.cancelled !== true
-        ) 
+    const userHasAttended = Array.isArray(attendees)
+      ? attendees.some(
+          (a) =>
+            (a.userId === user?._id || a.userId?._id === user?._id) &&
+            a.paid === true &&
+            a.cancelled !== true
+        )
       : false;
-    
+
     setHasAttended(userHasAttended);
     setShowCommentsModal(true);
 
@@ -587,16 +600,17 @@ const AllEvents = () => {
 
   const handleRateEvent = async (eventRaw, eventId, eventType) => {
     setSelectedRatingEvent(eventRaw);
-    
+
     const attendees = getEventDetails(eventRaw).attendees;
-    const userHasAttended = Array.isArray(attendees) 
-      ? attendees.some((a) => 
-          (a.userId === user?._id || a.userId?._id === user?._id) &&
-          a.paid === true &&
-          a.cancelled !== true
-        ) 
+    const userHasAttended = Array.isArray(attendees)
+      ? attendees.some(
+          (a) =>
+            (a.userId === user?._id || a.userId?._id === user?._id) &&
+            a.paid === true &&
+            a.cancelled !== true
+        )
       : false;
-    
+
     setHasAttended(userHasAttended);
     setShowRatingModal(true);
 
@@ -903,6 +917,7 @@ const AllEvents = () => {
                 onRegister={handleRegisterEvent}
                 onViewBooths={handleViewBooths}
                 onViewDetails={handleViewDetails}
+                onArchive={handleArchiveEvent}
                 isFavourite={
                   favKeys.has(`${event.type}-${event._id}`) ||
                   favKeys.has(`${event.type}:${event._id}`)
@@ -1020,9 +1035,7 @@ const AllEvents = () => {
                             </button>
                           )}
                         </div>
-                        <p className="text-gray-700 ml-10">
-                          {comment.comment}
-                        </p>
+                        <p className="text-gray-700 ml-10">{comment.comment}</p>
                       </div>
                     ))}
                   </div>
@@ -1035,44 +1048,52 @@ const AllEvents = () => {
             </div>
 
             {/* Add Comment Form - Only for regular users who attended */}
-            {user?.role !== "Admin" && user?.role !== "Event office" && hasAttended && (
-              <div className="p-6 border-t bg-gray-50">
-                <h4 className="font-semibold text-gray-800 mb-3">
-                  Add a Comment
-                </h4>
-                <div className="flex gap-3">
-                  <textarea
-                    value={newComment}
-                    onChange={(e) => setNewComment(e.target.value)}
-                    placeholder="Share your thoughts about this event..."
-                    className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#4C3BCF] focus:border-transparent resize-none"
-                    rows="3"
-                    disabled={commentSubmitting}
-                  />
-                  <button
-                    onClick={submitComment}
-                    disabled={!newComment.trim() || commentSubmitting}
-                    className="px-4 py-2 bg-[#4C3BCF] text-white rounded-lg hover:bg-[#3730A3] transition-colors disabled:opacity-50 disabled:cursor-not-allowed h-fit"
-                  >
-                    {commentSubmitting ? "Posting..." : "Post"}
-                  </button>
+            {user?.role !== "Admin" &&
+              user?.role !== "Event office" &&
+              hasAttended && (
+                <div className="p-6 border-t bg-gray-50">
+                  <h4 className="font-semibold text-gray-800 mb-3">
+                    Add a Comment
+                  </h4>
+                  <div className="flex gap-3">
+                    <textarea
+                      value={newComment}
+                      onChange={(e) => setNewComment(e.target.value)}
+                      placeholder="Share your thoughts about this event..."
+                      className="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#4C3BCF] focus:border-transparent resize-none"
+                      rows="3"
+                      disabled={commentSubmitting}
+                    />
+                    <button
+                      onClick={submitComment}
+                      disabled={!newComment.trim() || commentSubmitting}
+                      className="px-4 py-2 bg-[#4C3BCF] text-white rounded-lg hover:bg-[#3730A3] transition-colors disabled:opacity-50 disabled:cursor-not-allowed h-fit"
+                    >
+                      {commentSubmitting ? "Posting..." : "Post"}
+                    </button>
+                  </div>
                 </div>
-              </div>
-            )}
-            
+              )}
+
             {/* Message for non-attendees */}
-            {user?.role !== "Admin" && user?.role !== "Event office" && !hasAttended && (
-              <div className="p-6 border-t bg-gray-50">
-                <div className="text-center text-gray-600">
-                  <p className="mb-2">Only paid attendees who haven't cancelled can leave comments.</p>
-                  <p className="text-sm">Register and attend this event to share your thoughts!</p>
+            {user?.role !== "Admin" &&
+              user?.role !== "Event office" &&
+              !hasAttended && (
+                <div className="p-6 border-t bg-gray-50">
+                  <div className="text-center text-gray-600">
+                    <p className="mb-2">
+                      Only paid attendees who haven't cancelled can leave
+                      comments.
+                    </p>
+                    <p className="text-sm">
+                      Register and attend this event to share your thoughts!
+                    </p>
+                  </div>
                 </div>
-              </div>
-            )}
+              )}
           </div>
         </div>
       )}
-      
       {/* Rate Event Modal */}
       {showRatingModal && selectedRatingEvent && (
         <div className={LIGHT_OVERLAY_CLASSES} onClick={closeRatingModal}>
@@ -1081,9 +1102,7 @@ const AllEvents = () => {
             onClick={(e) => e.stopPropagation()}
           >
             <div className="flex items-center justify-between p-6 border-b">
-              <h3 className="text-xl font-bold text-[#4C3BCF]">
-                Rate Event
-              </h3>
+              <h3 className="text-xl font-bold text-[#4C3BCF]">Rate Event</h3>
               <button
                 onClick={closeRatingModal}
                 className="text-gray-500 hover:text-gray-700"
@@ -1130,8 +1149,13 @@ const AllEvents = () => {
                 </div>
               ) : (
                 <div className="text-center mb-6">
-                  <p className="text-gray-600 mb-2">Only paid attendees who haven't cancelled can rate this event.</p>
-                  <p className="text-sm text-gray-500">Register and attend this event to share your rating!</p>
+                  <p className="text-gray-600 mb-2">
+                    Only paid attendees who haven't cancelled can rate this
+                    event.
+                  </p>
+                  <p className="text-sm text-gray-500">
+                    Register and attend this event to share your rating!
+                  </p>
                 </div>
               )}
 
@@ -1154,7 +1178,8 @@ const AllEvents = () => {
             </div>
           </div>
         </div>
-      )}      {/* Ratings List Modal */}
+      )}{" "}
+      {/* Ratings List Modal */}
       {showRatingsListModal && selectedEvent && (
         <div
           className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50"
@@ -1237,5 +1262,3 @@ const AllEvents = () => {
 };
 
 export default AllEvents;
-
-
