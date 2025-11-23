@@ -1,8 +1,8 @@
 <div align="center">
 
-<h1 style="border-bottom: none;">Zarf Token</h1>
+# Zarf Token
 
-<h3>The GUC EMS</h3>
+### The GUC EMS
 
 ![MongoDB](https://img.shields.io/badge/-MongoDB-black?style=flat-square&logo=mongodb)
 ![Express.js](https://img.shields.io/badge/-Express.js-black?style=flat-square&logo=express)
@@ -18,7 +18,7 @@
 
 </div>
 
-A web-based platform designed to streamline the planning, management, and participation of campus events. Zarf Token serves as a centralized hub connecting the events office, students, teaching assistants, staff, faculty, and external vendors to create a seamless event experience across GUC.
+Zarf Token serves as a centralized hub connecting the events office, students, teaching assistants, staff, faculty, and external vendors to create a seamless event experience across GUC. We are a web-based platform designed to streamline the planning, management, and participation of campus events.
 
 ## Motivation
 
@@ -82,15 +82,15 @@ This project follows consistent coding standards to ensure readability and maint
 
 **Color Palette:**
 The project uses a carefully selected color palette to ensure visual consistency and brand identity.
-- **Primary Colour:** #736CED (Main purple)
-- **Secondary Colour:** #6DD3CE (Teal)
-- **Accent Colour:** #C14953 (Reddish)
-- **Muted Colour:** #D5CFE1 (Soft Background)
-- **Info Colour:** #54C6EB (Sky Blue)
+- **Header Background & Main Text:** #001a4d
+- **Text & Card Backgrounds:** #ffffff
+- **Refresh Button & Interactive Elements:** #7c3aed
+- **Main Heading Text & Primary Branding:** #0a1c3f
+- **Notification Badge & Rejected Count:** #dc2626
 
 **Typography:**
-- **Primary Font:** Playfair Display:- Used for headings, titles, and emphasis elements
-- **Secondary Fonts:** TBD:- Used for body text, buttons, and UI components
+- **Primary Font:** Playfair Display (Used for headings, titles, and emphasis elements)
+- **Secondary Fonts:** Inter (Used for body text, buttons, and UI components)
 
 ## Screenshots (Postman Tests)
 
@@ -143,16 +143,14 @@ The project uses a carefully selected color palette to ensure visual consistency
 > **Note:**  
 > Additional screenshots will be added in upcoming sprints — including event creation, admin dashboard, and vendor workflows.
 
-
-
 ## Tech/Framework Used
 
 **MERN Stack:**
 
-- **MongoDB:-** NoSQL database for flexible data management (Version: v8.2.1)
-- **Express.js:-** Backend web application framework (Version: 5.1.0)
-- **React.js:-** Frontend library for building user interfaces (Version: 19.1.1)
-- **Node.js:-** JavaScript runtime environment (Version: 22.16.0)
+- **MongoDB** - NoSQL database for flexible data management (Version: v8.2.1)
+- **Express.js** - Backend web application framework (Version: 5.1.0)
+- **React.js** - Frontend library for building user interfaces (Version: 19.1.1)
+- **Node.js** - JavaScript runtime environment (Version: 22.16.0)
 
 **Additional Technologies & Libraries:**
 
@@ -181,7 +179,6 @@ We distinguished Zarf Token through comprehensive role-based functionality and a
 **Feature 4:** TBD in Sprints 2 and 3
 
 **Feature 5:** TBD in Sprints 2 and 3
-
 
 ## Code Examples
 
@@ -222,8 +219,6 @@ export const getAllBazarsBooths = async (req, res) => {
   }
 };
 ```
-
-
 
 ## Installation
 
@@ -372,7 +367,8 @@ If you encounter errors while trying to run the project, follow these steps in o
 **Detailed Usage Instructions:** TBD (Comprehensive user guides with screenshots will be added for each role.)
 
 ## Contribute
-We welcome contributions from our GUCians!! Whether you're fixing bugs, adding features, or improving documentation, your help is appreciated and encouraged!!
+
+We welcome contributions from our GUCians! Whether you're fixing bugs, adding features, or improving documentation, your help is appreciated and encouraged!
 
 **Areas for Contribution:**
 - Address any of the known issues listed above
@@ -393,7 +389,6 @@ We welcome contributions from our GUCians!! Whether you're fixing bugs, adding f
 5. **Commit Your Changes:** Use clear, descriptive commit messages
 6. **Push to Your Fork:** Push your changes to your forked repository
 7. **Submit a Pull Request:** Open a PR with a clear description of your changes
-
 
 ## Credits
 
@@ -429,12 +424,17 @@ We would like to sincerely thank:
 
 **License Type:**
 Distributed under the MIT License. See `LICENSE` for more information.
+
+**Third-Party Licenses:**
+- Stripe - Stripe API and SDK are licensed under the Stripe Terms of Service. See `Stripe` for more information.
+
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+[![Stripe](https://img.shields.io/badge/Payments-Stripe-5469d4?style=flat-square&logo=stripe)](https://stripe.com)
 
 ---
 
 **Project Repository:** TBD
 
-**Contact:** For questions or support, please contact our scrum master [Abdelhamid Sameh Abdelhamid].
+**Contact:** For questions or support, please contact our scrum master Abdelhamid Sameh.
 
 **Last Updated:** November '25
