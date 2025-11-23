@@ -52,6 +52,11 @@ Zarf Token solves these challenges by providing a unified platform that simplifi
 - Edge cases are not consistently handled across the codebase
 - Legacy code from earlier versions remains in some pages (e.g., `AllEvents.jsx`)
 - `MyWorkshops.jsx` and `WorkshopRequests.jsx` inconsistently access backend response data—sometimes using raw values, sometimes through card component functions—resulting in fragmented, difficult-to-maintain code
+- All get requests populate objects that might be needed in the future which delays the response
+- Some pages are just useless and can be merged into other pages
+- Admin and events office pages are not agile enough. They look similiar to the users pages
+- Some pages are the same for admins and users which is a huge security risk
+- No specific naming convention used for naming models' fields
 
 **Data Synchronization & State Management**
 - Only a subset of pages implement auto-refresh (10-second intervals) to reflect backend changes
@@ -74,8 +79,6 @@ This project follows consistent coding standards to ensure readability and maint
 - Meaningful variable and function names using camelCase
 - Consistent indentation (2 spaces)
 - Comprehensive comments for complex logic
-
-**Git Commit Style:** Conventional Commits format for clear version history
 
 **Color Palette:**
 The project uses a carefully selected color palette to ensure visual consistency and brand identity.
@@ -154,7 +157,7 @@ The project uses a carefully selected color palette to ensure visual consistency
 **Additional Technologies & Libraries:**
 
 **Backend:**
-- TBD
+- **stripe** - Handling credit/debit card payments
 
 **Frontend:**
 - **react-router-dom** - Routing library for React applications
@@ -307,64 +310,21 @@ If you encounter errors while trying to run the project, follow these steps in o
 
 ## API Reference
 
-**Base URL:** TBD
+**Base URL:** http://localhost:3000/api
 
-**Authentication:** TBD
+**Authentication:** /api/auth
 
-**API Documentation:** TBD
+**Trips:** /api/trips
 
-*API documentation will be available covering:*
+**Bazaars:** /api/bazaars
 
-**Authentication Endpoints:**
+**Conferences:** /api/conferences
 
-**Event Management Endpoints:**
-- CRUD operations for events
+**Workshops:** /api/workshops
 
-**User Management Endpoints:**
-- Profile management
-- Role assignment and permissions
-- User verification
+**All Events:** /api/allEvents
 
-**Vendor Endpoints:**
-- Company registration
-- Documentation management
-- Event participation requests
-
-**Admin Endpoints:**
-- User validation
-- System configuration
-- Reporting and analytics
-
-API documentation with request/response examples, error codes, and usage guidelines will be provided as development progresses.
-
-## Tests
-
-**Testing Framework:** TBD
-
-**Testing Strategy:**
-
-*The project will implement comprehensive testing at multiple levels:*
-
-**Unit Tests:**
-- Individual function and component testing
-- Database model validation
-
-**Integration Tests:**
-- API endpoint testing
-- Database integration testing
-
-**End-to-End Tests:**
-- User workflow testing
-- Complete feature path validation
-
-**Test Coverage Goals:**
-- Minimum 92% code coverage
-- All critical paths tested
-- Edge cases and error handling validated
-
-**Running Tests:** TBD
-
-**Test Examples and Commands:** 
+**Polls:** /api/polls
 
 ## How to Use?
 
