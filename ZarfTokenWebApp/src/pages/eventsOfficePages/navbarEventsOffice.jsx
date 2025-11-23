@@ -254,64 +254,17 @@ const NavbarEventsOffice = () => {
                 </div>
 
                 {/* Loyalty dropdown */}
-                <div className="relative" ref={loyaltyRef}>
-                  <button
-                    onClick={() => setLoyaltyOpen((s) => !s)}
-                    aria-expanded={loyaltyOpen}
-                    aria-haspopup="true"
-                    className={`px-4 py-2 rounded-full transition-all flex items-center gap-2 ${
-                      isLoyaltyActive
-                        ? "bg-white/15 text-white font-semibold shadow-sm"
-                        : "text-white/90 hover:text-white hover:bg-white/10"
-                    }`}
-                  >
-                    <Star className="h-4 w-4" />
-                    <span>Loyalty</span>
-                    <ChevronDown
-                      className={`h-4 w-4 transition-transform ${
-                        loyaltyOpen ? "-rotate-180" : ""
-                      }`}
-                    />
-                  </button>
-
-                  {loyaltyOpen && (
-                    <div className="absolute top-full left-0 mt-2 w-56 bg-white rounded-lg shadow-xl border border-gray-200 overflow-hidden z-50">
-                      <NavLink
-                        to="/dashboard/eventsOffice/loyalty-vendors"
-                        className={({ isActive }) =>
-                          `flex items-center gap-3 px-4 py-3 text-gray-800 hover:bg-primary/5 hover:text-primary transition-colors ${
-                            isActive
-                              ? "bg-primary/10 text-primary font-semibold"
-                              : ""
-                          }`
-                        }
-                      >
-                        <span className="flex items-center gap-2">
-                          <span className="relative">
-                            <Star className="h-4 w-4 text-black" />
-                            <Star className="h-4 w-4 text-black/70 absolute -right-1 -top-1" />
-                          </span>
-                          Loyalty Applications
-                        </span>
-                      </NavLink>
-                      <NavLink
-                        to="/dashboard/eventsOffice/loyalty-program"
-                        className={({ isActive }) =>
-                          `flex items-center gap-3 px-4 py-3 text-gray-800 hover:bg-primary/5 hover:text-primary transition-colors border-t border-gray-200 ${
-                            isActive
-                              ? "bg-primary/10 text-primary font-semibold"
-                              : ""
-                          }`
-                        }
-                      >
-                        <span className="flex items-center gap-2">
-                          <Package className="h-4 w-4" />
-                          Loyalty Programs
-                        </span>
-                      </NavLink>
-                    </div>
-                  )}
-                </div>
+                <NavLink
+                  to="/dashboard/eventsOffice/loyalty-program"
+                  className={({ isActive }) =>
+                    isActive
+                      ? "px-4 py-2 rounded-full bg-white/15 text-white font-semibold transition-all flex items-center gap-2 shadow-sm"
+                      : "px-4 py-2 rounded-full text-white/90 hover:text-white hover:bg-white/10 transition-all flex items-center gap-2"
+                  }
+                >
+                  <Star className="h-4 w-4" />
+                  Loyals
+                </NavLink>
 
                 {/* Poll link */}
                 <NavLink

@@ -168,7 +168,6 @@ const MainDashboardEventsOffice = () => {
           <Route path="workshop-requests" element={<WorkshopRequests />} />
           <Route path="archived-events" element={<ArchivedEvents />} />
           <Route path="generate-qr" element={<GenerateQR />} />
-          <Route path="loyalty-vendors" element={<LoyaltyVendors />} />
           <Route
             path="loyalty-program"
             element={<LoyaltyPartnersDirectory />}
