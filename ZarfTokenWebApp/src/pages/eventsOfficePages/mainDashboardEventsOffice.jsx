@@ -6,7 +6,6 @@ import CreateEvent from "./CreateEvent";
 import WorkshopRequests from "./WorkshopRequests";
 import ArchivedEvents from "./ArchivedEvents";
 import GenerateQR from "./GenerateQR";
-import LoyaltyVendors from "../adminPages/LoyaltyVendors";
 import LoyaltyPartnersDirectory from "./LoyaltyPartnersDirectory";
 import VendorRequests from "../adminPages/VendorRequests";
 import VendorPoll from "./VendorPoll";
@@ -29,8 +28,6 @@ const MainDashboardEventsOffice = () => {
     location.pathname === "/dashboard/eventsOffice/loyalty-program";
   const isVendorRequestsPage =
     location.pathname === "/dashboard/eventsOffice/vendor-requests";
-  const isLoyaltyVendorsPage =
-    location.pathname === "/dashboard/eventsOffice/loyalty-vendors";
   const isAllEventsPage =
     location.pathname === "/dashboard/eventsOffice/all-events" ||
     location.pathname === "/dashboard/eventsOffice";
@@ -97,15 +94,6 @@ const MainDashboardEventsOffice = () => {
           </div>
         </div>
       )}
-      {isLoyaltyVendorsPage && (
-        <div className="w-full bg-[#001845] text-white px-6 py-8">
-          <div className="max-w-7xl mx-auto text-center">
-            <h1 className="text-4xl font-bold sm:text-5xl mb-4">
-              Vendor Loyalty Applications
-            </h1>
-          </div>
-        </div>
-      )}
       {isAllEventsPage && (
         <div className="w-full bg-[#001845] text-white px-6 py-8">
           <div className="max-w-7xl mx-auto text-center">
@@ -148,7 +136,6 @@ const MainDashboardEventsOffice = () => {
           isWorkshopRequestsPage ||
           isLoyaltyProgramPage ||
           isVendorRequestsPage ||
-          isLoyaltyVendorsPage ||
           isAllEventsPage ||
           isGenerateQrPage ||
           isGymSchedulePage
