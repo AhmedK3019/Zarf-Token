@@ -3,7 +3,7 @@ import api from "../services/api";
 import { useAuthUser } from "../hooks/auth";
 import { Bell } from "lucide-react";
 
-export default function NotificationsDrawer() {
+export default function NotificationsDrawer({className}) {
   const { user } = useAuthUser();
   const [open, setOpen] = useState(false);
   const [anim, setAnim] = useState(false); // controls slide animation
@@ -99,7 +99,7 @@ export default function NotificationsDrawer() {
       <button
         onClick={() => setOpen((s) => !s)}
         aria-label="Notifications"
-        className="relative px-4 py-2 rounded-lg text-white/90 hover:text-white hover:bg-white/10 transition-all flex items-center gap-2"
+        className={ className || "relative px-4 py-2 rounded-lg text-white/90 hover:text-white hover:bg-white/10 transition-all flex items-center gap-2"}
         title="Notifications"
       >
         <Bell className="h-5 w-5" />
