@@ -55,17 +55,13 @@ export const getAllPolls = async (req, res) => {
 export const voteInPoll = async (req, res) => {
   try {
     const { pollId, boothId } = req.body;
-    const userId = req.user._id;
+    const userId = req.userId;
     const poll = await Poll.findById(pollId);
     if (!poll) {
       return res.status(404).json({ error: "Poll not found." });
     }
     if (new Date() > new Date(poll.endDate)) {
       return res.status(400).json({ error: "Poll has ended." });
-    }
-    const boothExists = poll.booths.includes(mongoose.Types.ObjectId(boothId));
-    if (!boothExists) {
-      return res.status(400).json({ error: "Booth not part of this poll." });
     }
     const existingVoteIndex = poll.votes.findIndex((vote) =>
       vote.user.equals(userId)

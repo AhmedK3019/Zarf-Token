@@ -67,7 +67,27 @@ export default function VendorPoll() {
   const [resultsModalPoll, setResultsModalPoll] = useState(null);
   const [detailsModalPoll, setDetailsModalPoll] = useState(null);
 
-  const overlapGroups = useMemo(() => buildOverlapGroups(requests), [requests]);
+  // Build a set of VendorRequest IDs that are already in any poll (active or past)
+  const excludedRequestIds = useMemo(() => {
+    const ids = new Set();
+    const addFromPoll = (poll) => {
+      for (const b of poll?.booths || []) {
+        const id = typeof b === "string" ? b : b?._id || b;
+        if (id) ids.add(String(id));
+      }
+    };
+    for (const p of activePolls || []) addFromPoll(p);
+    for (const p of pastPolls || []) addFromPoll(p);
+    return ids;
+  }, [activePolls, pastPolls]);
+
+  // Exclude any requests that already appear in a poll before computing overlaps
+  const overlapGroups = useMemo(() => {
+    const eligible = (requests || []).filter(
+      (r) => !excludedRequestIds.has(String(r._id))
+    );
+    return buildOverlapGroups(eligible);
+  }, [requests, excludedRequestIds]);
 
   const refreshAll = async () => {
     setError("");

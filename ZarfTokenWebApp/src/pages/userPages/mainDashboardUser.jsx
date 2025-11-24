@@ -40,7 +40,7 @@ const mainDashboardUser = () => {
             <h1 className="text-4xl font-bold sm:text-5xl mb-4">
               My Favourites
             </h1>
-            <p className="text-sm max-w-2xl mx-auto opacity-90">
+            <p className="text-lg max-w-2xl mx-auto opacity-90">
               Here are your favourite events.
             </p>
           </div>
@@ -53,7 +53,7 @@ const mainDashboardUser = () => {
             <h1 className="text-4xl font-bold sm:text-5xl mb-4">
               My Registered Events
             </h1>
-            <p className="text-sm max-w-2xl mx-auto opacity-90">
+            <p className="text-lg max-w-2xl mx-auto opacity-90">
               Here are the workshops and trips you signed up for.
             </p>
           </div>
@@ -66,6 +66,9 @@ const mainDashboardUser = () => {
             <h1 className="text-4xl font-bold sm:text-5xl mb-4">
               Gym Schedule
             </h1>
+            <p className="text-lg max-w-2xl mx-auto opacity-90">
+              Check out the gym schedule and plan your workouts.
+            </p>
           </div>
         </div>
       )}
@@ -113,7 +116,7 @@ const mainDashboardUser = () => {
             <h1 className="text-4xl font-bold sm:text-5xl mb-4">
               Campus Events
             </h1>
-            <p className="text-sm max-w-2xl mx-auto opacity-90">
+            <p className="text-lg max-w-2xl mx-auto opacity-90">
               Explore all upcoming events happening on campus.
             </p>
           </div>

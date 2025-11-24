@@ -1,6 +1,7 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { CheckCircle2, MapPin, X } from "lucide-react";
 import api from "../../services/api";
+import { useAuthUser } from "../../hooks/auth";
 
 // Counts votes per booth for a poll
 const countVotes = (poll) => {
@@ -19,28 +20,50 @@ export default function VendorsPoll() {
   const [polls, setPolls] = useState([]); // active polls only
   const [selection, setSelection] = useState({}); // pollId -> boothId
   const [toast, setToast] = useState(null);
+  const { user } = useAuthUser();
+  const userReady = !!(user && user._id);
 
   const refresh = async () => {
     setError("");
     setLoading(true);
     try {
+      // Wait until user is hydrated to avoid null access
+      if (!userReady) {
+        return; // keep loading state until user arrives
+      }
       const res = await api.get("/polls/active");
       const active = res.data || [];
       setPolls(active);
       // derive current user selections if votes include this user
+      const sel = {};
+      if (userReady) {
+        for (const poll of active) {
+          for (const v of poll.votes || []) {
+            const voteUserId =
+              typeof v.user === "string" ? v.user : v.user?._id || v.user;
+            if (voteUserId && voteUserId === user._id) {
+              sel[poll._id] =
+                typeof v.booth === "string" ? v.booth : v.booth?._id || v.booth;
+              break;
+            }
+          }
+        }
+      }
+      setSelection(sel);
       // Fallback: do nothing (user-specific highlight only after they vote)
     } catch (e) {
       setError(
         e?.response?.data?.error || e?.message || "Failed to load polls"
       );
     } finally {
-      setLoading(false);
+      // Only stop loading after user is ready
+      if (userReady) setLoading(false);
     }
   };
 
   useEffect(() => {
     refresh();
-  }, []);
+  }, [userReady]);
 
   useEffect(() => {
     if (!toast) return;
@@ -75,7 +98,7 @@ export default function VendorsPoll() {
   return (
     <div className="w-full bg-[#F8FAFC] text-[#0F172A]">
       <div className="mx-auto flex w-full max-w-6xl flex-col gap-8 px-4 py-10 sm:px-6 lg:px-8">
-        {loading ? (
+        {!userReady || loading ? (
           <div className="flex items-center justify-center py-20">
             <p className="text-sm text-gray-600">Loading active polls...</p>
           </div>
@@ -148,23 +171,27 @@ export default function VendorsPoll() {
                                     ).toLocaleDateString()}`
                                   : "Dates TBD"}
                               </p>
-                              {typeof booth.price === "number" ? (
-                                <p className="text-sm font-semibold text-emerald-600">
-                                  Price: {booth.price} EGP
-                                </p>
-                              ) : null}
                             </div>
                             <div className="flex flex-col items-end gap-3 md:w-56">
                               <button
                                 type="button"
+                                disabled={!userReady}
                                 onClick={() => vote(poll._id, boothId)}
                                 className={`w-full rounded-2xl px-4 py-3 text-sm font-semibold transition ${
                                   votedFor
                                     ? "bg-emerald-500 text-white shadow-md shadow-emerald-200/60"
                                     : "border border-gray-200 bg-white text-[#1F2937] hover:bg-gray-50"
+                                } ${
+                                  !userReady
+                                    ? "opacity-50 cursor-not-allowed"
+                                    : ""
                                 }`}
                               >
-                                {votedFor ? "Voted" : "Vote for this booth"}
+                                {!userReady
+                                  ? "Loading user..."
+                                  : votedFor
+                                  ? "Voted"
+                                  : "Vote for this booth"}
                               </button>
                               <div className="w-full rounded-2xl bg-gray-50 p-3 text-xs text-gray-600">
                                 <div className="flex items-center justify-between text-gray-700">
