@@ -490,15 +490,23 @@ const archiveEvent = async (req, res, next) => {
     next(error);
   }
 };
-const getArchivedEvents = async (req, res, next) => {
+const getArchivedEvents = async (_req, res, next) => {
   try {
-    let events = [];
-    let trips = await Trip.find({ archive: true });
-    let workshops = await Workshop.find({ archive: true });
-    let bazaars = await Bazaar.find({ archive: true });
-    let booths = await Booth.find({ archive: true });
-    let conferences = await Conference.find({ archive: true });
-    events = [...trips, ...workshops, ...bazaars, ...booths, ...conferences];
+    let filter = { archive: true };
+    const [trips, workshops, bazaars, booths, conferences] = await Promise.all([
+      Trip.find(filter),
+      Workshop.find(filter),
+      Bazaar.find(filter),
+      Booth.find(filter),
+      Conference.find(filter),
+    ]);
+    let events = [
+      ...trips,
+      ...workshops,
+      ...bazaars,
+      ...booths,
+      ...conferences,
+    ];
     return res.status(200).json(events);
   } catch (error) {
     next(error);
@@ -519,9 +527,9 @@ const unArchiveEvent = async (req, res, next) => {
       case "bazaar":
         model = Bazaar;
         break;
-      // case "booth":
-      //   model = Booth;
-      //   break;
+      case "booth":
+        model = Booth;
+        break;
       case "conference":
         model = Conference;
         break;
@@ -529,6 +537,7 @@ const unArchiveEvent = async (req, res, next) => {
         return res.status(400).json({ message: "Invalid type" });
     }
     let event = await model.findById(id);
+    console.log(event);
     if (!event) return res.satuts(404).json({ message: "Event not found" });
     let result = await model.findByIdAndUpdate(
       id,
