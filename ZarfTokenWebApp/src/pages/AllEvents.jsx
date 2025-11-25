@@ -5,180 +5,21 @@ import { useAuthUser } from "../hooks/auth";
 import EventCard from "../components/EventCard";
 import { getEventDetails, formatDate } from "./eventUtils";
 import EventDetailsModal from "../components/EventDetailsModal";
-import { X, User, Star, MessageCircle, Trash2, Filter } from "lucide-react";
+import { 
+  X, 
+  User, 
+  Star, 
+  MessageCircle, 
+  Trash2, 
+  Filter, 
+  ChevronDown, 
+  ChevronUp 
+} from "lucide-react";
 
 const LIGHT_OVERLAY_CLASSES =
   "fixed inset-0 z-50 flex items-center justify-center p-4 bg-muted bg-opacity-90 backdrop-blur-sm animate-fade-in";
 
 // ===== EXTRACTED MODAL COMPONENTS =====
-
-const FilterPopup = ({
-  showFilterPopup,
-  onClose,
-  filterProfessorName,
-  setFilterProfessorName,
-  filterLocation,
-  setFilterLocation,
-  filterType,
-  setFilterType,
-  filterDateMode,
-  setFilterDateMode,
-  filterSingleDate,
-  setFilterSingleDate,
-  filterStartDate,
-  setFilterStartDate,
-  filterEndDate,
-  setFilterEndDate,
-  onApplyFilters,
-  onClearFilters,
-}) => {
-  if (!showFilterPopup) return null;
-
-  return (
-    <div
-      className="fixed inset-0 bg-transparent bg-opacity-20 backdrop-blur-sm flex items-center justify-center z-50 p-4"
-      onClick={onClose}
-    >
-      <div
-        className="bg-white rounded-2xl max-w-md w-full p-6"
-        onClick={(e) => e.stopPropagation()}
-      >
-        <div className="flex justify-between items-center mb-4">
-          <h2 className="text-xl font-bold text-[#4C3BCF]">Filter Events</h2>
-          <button
-            onClick={onClose}
-            className="text-gray-500 hover:text-gray-700 text-2xl"
-          >
-            <X size={24} />
-          </button>
-        </div>
-
-        <div className="space-y-4">
-          {/* Professor Name Filter */}
-          <div>
-            <label className="block text-sm font-semibold text-gray-700 mb-1">
-              Professor Name
-            </label>
-            <input
-              type="text"
-              value={filterProfessorName}
-              onChange={(e) => setFilterProfessorName(e.target.value)}
-              placeholder="Filter by professor name..."
-              className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-[#4C3BCF]"
-            />
-          </div>
-
-          {/* Location Filter */}
-          <div>
-            <label className="block text-sm font-semibold text-gray-700 mb-1">
-              Location
-            </label>
-            <input
-              type="text"
-              value={filterLocation}
-              onChange={(e) => setFilterLocation(e.target.value)}
-              placeholder="Filter by location..."
-              className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-[#4C3BCF]"
-            />
-          </div>
-
-          {/* Type Filter */}
-          <div>
-            <label className="block text-sm font-semibold text-gray-700 mb-1">
-              Event Type
-            </label>
-            <select
-              value={filterType}
-              onChange={(e) => setFilterType(e.target.value)}
-              className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-[#4C3BCF]"
-            >
-              <option value="">All Types</option>
-              <option value="workshop">Workshop</option>
-              <option value="bazaar">Bazaar</option>
-              <option value="trip">Trip</option>
-              <option value="conference">Conference</option>
-              <option value="booth">Booth</option>
-            </select>
-          </div>
-
-          {/* Date Filter Mode */}
-          <div>
-            <label className="block text-sm font-semibold text-gray-700 mb-1">
-              Date Filter
-            </label>
-            <select
-              value={filterDateMode}
-              onChange={(e) => setFilterDateMode(e.target.value)}
-              className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-[#4C3BCF]"
-            >
-              <option value="">No Date Filter</option>
-              <option value="single">Active on Specific Date</option>
-              <option value="range">Within Date Range</option>
-            </select>
-          </div>
-
-          {/* Single Date */}
-          {filterDateMode === "single" && (
-            <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-1">
-                Specific Date
-              </label>
-              <input
-                type="date"
-                value={filterSingleDate}
-                onChange={(e) => setFilterSingleDate(e.target.value)}
-                className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-[#4C3BCF]"
-              />
-            </div>
-          )}
-
-          {/* Date Range */}
-          {filterDateMode === "range" && (
-            <>
-              <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-1">
-                  Start Date
-                </label>
-                <input
-                  type="date"
-                  value={filterStartDate}
-                  onChange={(e) => setFilterStartDate(e.target.value)}
-                  className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-[#4C3BCF]"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-semibold text-gray-700 mb-1">
-                  End Date
-                </label>
-                <input
-                  type="date"
-                  value={filterEndDate}
-                  onChange={(e) => setFilterEndDate(e.target.value)}
-                  className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-[#4C3BCF]"
-                />
-              </div>
-            </>
-          )}
-        </div>
-
-        <div className="mt-6 flex justify-end gap-3">
-          <button
-            onClick={onClearFilters}
-            className="px-4 py-2 rounded-full border hover:bg-gray-100"
-          >
-            Clear Filters
-          </button>
-          <button
-            onClick={onApplyFilters}
-            className="px-4 py-2 rounded-full bg-[#4C3BCF] text-white hover:bg-[#3730A3]"
-          >
-            Apply Filters
-          </button>
-        </div>
-      </div>
-    </div>
-  );
-};
 
 const RegistrationModal = ({
   registerModalEvent,
@@ -206,7 +47,7 @@ const RegistrationModal = ({
             onClick={onClose}
             className="text-gray-500 hover:text-gray-700 text-2xl"
           >
-            X
+            <X size={24} />
           </button>
         </div>
         {regError && <p className="text-sm text-red-500 mb-2">{regError}</p>}
@@ -350,6 +191,7 @@ const AllEvents = () => {
   const [statusFilter, setStatusFilter] = useState("");
   const [regFilter, setRegFilter] = useState("");
   const [sortBy, setSortBy] = useState("date_added_desc");
+  
   // UI State
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
@@ -365,7 +207,7 @@ const AllEvents = () => {
   const [showRatingModal, setShowRatingModal] = useState(false);
   const [showRatingsListModal, setShowRatingsListModal] = useState(false);
   const [selectedRatingEvent, setSelectedRatingEvent] = useState(null);
-  const [hasAttended, setHasAttended] = useState(false); // Add attendance state
+  const [hasAttended, setHasAttended] = useState(false); 
   const [comments, setComments] = useState([]);
   const [ratings, setRatings] = useState([]);
   const [commentsLoading, setCommentsLoading] = useState(false);
@@ -380,15 +222,15 @@ const AllEvents = () => {
   // Refresh trigger for EventCard components
   const [refreshTrigger, setRefreshTrigger] = useState(0);
 
-  // Filter Popup State
-  const [showFilterPopup, setShowFilterPopup] = useState(false);
-  const [filterProfessorName, setFilterProfessorName] = useState("");
+  // --- RE-ADDED OLD FILTER STATES ---
+  const [showFilters, setShowFilters] = useState(false);
   const [filterLocation, setFilterLocation] = useState("");
-  const [filterType, setFilterType] = useState("");
-  const [filterDateMode, setFilterDateMode] = useState(""); // '', 'single', 'range'
-  const [filterSingleDate, setFilterSingleDate] = useState("");
-  const [filterStartDate, setFilterStartDate] = useState("");
-  const [filterEndDate, setFilterEndDate] = useState("");
+  const [filterProfessor, setFilterProfessor] = useState("");
+  const [filterDate, setFilterDate] = useState("");
+  const [startDateFilter, setStartDateFilter] = useState("");
+  const [endDateFilter, setEndDateFilter] = useState("");
+  const [filterType, setFilterType] = useState(""); 
+  // Note: Old 'dateSort' is handled by the new 'sortBy' dropdown
 
   const [showRegisterModal, setShowRegisterModal] = useState(false);
   const [registerModalEvent, setRegisterModalEvent] = useState(null);
@@ -518,22 +360,29 @@ const AllEvents = () => {
     setSearchTerm("");
   }, [selectedCategory, fetchEventsByCategory]);
 
-  // Search, Filtering and Sorting (Favourite Events style)
+  // Search, Filtering and Sorting (Combines New UI logic with Old Filter Panel Logic)
   useEffect(() => {
     const lowercasedSearch = searchTerm.toLowerCase().trim();
     const now = new Date();
+
+    // Prepare Old Filter Values
+    const lowercasedLocation = filterLocation.toLowerCase().trim();
+    const hasLocationFilter = lowercasedLocation !== "";
+    const lowercasedProfessor = filterProfessor.toLowerCase().trim();
+    const hasProfessorFilter = lowercasedProfessor !== "";
+    const hasDateFilter = filterDate.trim() !== "";
+    const hasStartDateFilter = startDateFilter.trim() !== "";
+    const hasEndDateFilter = endDateFilter.trim() !== "";
 
     const filtered = events
       .filter((rawEvent) => {
         const event = getEventDetails(rawEvent);
 
-        // Search bar - event name, professor, or type only
+        // 1. Search bar (New UI Logic)
         const matchesSearch =
           !lowercasedSearch ||
           event.name?.toLowerCase().includes(lowercasedSearch) ||
-          `${event.createdBy?.firstname || ""} ${
-            event.createdBy?.lastname || ""
-          }`
+          `${event.createdBy?.firstname || ""} ${event.createdBy?.lastname || ""}`
             .toLowerCase()
             .includes(lowercasedSearch) ||
           event.professors?.some((prof) =>
@@ -543,67 +392,7 @@ const AllEvents = () => {
           ) ||
           event.type?.toLowerCase().includes(lowercasedSearch);
 
-        // Professor Name filter (popup)
-        const matchesProfessorFilter =
-          !filterProfessorName ||
-          `${event.createdBy?.firstname || ""} ${
-            event.createdBy?.lastname || ""
-          }`
-            .toLowerCase()
-            .includes(filterProfessorName.toLowerCase()) ||
-          event.professors?.some((prof) =>
-            `${prof.firstname} ${prof.lastname}`
-              .toLowerCase()
-              .includes(filterProfessorName.toLowerCase())
-          ) ||
-          event.professorname
-            ?.toLowerCase()
-            .includes(filterProfessorName.toLowerCase());
-
-        // Location filter (popup)
-        const matchesLocationFilter =
-          !filterLocation ||
-          event.location?.toLowerCase().includes(filterLocation.toLowerCase());
-
-        // Type filter (popup)
-        const matchesTypeFilter =
-          !filterType || event.type?.toLowerCase() === filterType.toLowerCase();
-
-        // Date filter (popup)
-        let matchesDateFilter = true;
-        if (filterDateMode === "single" && filterSingleDate) {
-          const targetDate = new Date(filterSingleDate);
-          const eventStart = event.startDate ? new Date(event.startDate) : null;
-          const eventEnd = event.endDate ? new Date(event.endDate) : null;
-          if (eventStart && eventEnd) {
-            matchesDateFilter =
-              targetDate >= eventStart && targetDate <= eventEnd;
-          } else if (eventStart) {
-            matchesDateFilter = targetDate >= eventStart;
-          } else {
-            matchesDateFilter = false;
-          }
-        } else if (
-          filterDateMode === "range" &&
-          filterStartDate &&
-          filterEndDate
-        ) {
-          const rangeStart = new Date(filterStartDate);
-          const rangeEnd = new Date(filterEndDate);
-          const eventStart = event.startDate ? new Date(event.startDate) : null;
-          const eventEnd = event.endDate ? new Date(event.endDate) : null;
-          if (eventStart && eventEnd) {
-            // Event overlaps with range if event starts before range ends and event ends after range starts
-            matchesDateFilter =
-              eventStart <= rangeEnd && eventEnd >= rangeStart;
-          } else if (eventStart) {
-            matchesDateFilter =
-              eventStart >= rangeStart && eventStart <= rangeEnd;
-          } else {
-            matchesDateFilter = false;
-          }
-        }
-
+        // 2. Status & Registration (New UI Logic)
         const eventStatus = event.startDate
           ? event.startDate > now
             ? "upcoming"
@@ -623,14 +412,85 @@ const AllEvents = () => {
           !regFilter ||
           (regFilter === "registered" ? isRegistered : !isRegistered);
 
+        // 3. OLD FILTERS (Logic restored from AllEventsOld.jsx)
+        
+        // Location Filter
+        const matchesLocation =
+        !hasLocationFilter ||
+        event.location?.toLowerCase().includes(lowercasedLocation);
+
+        // Professor Filter (Detailed check from Old file)
+        let matchesProfessor = true;
+        if (hasProfessorFilter) {
+          const conferenceProfMatch =
+            event.professorname?.toLowerCase().includes(lowercasedProfessor);
+
+          const workshopProfMatch = event.professors?.some((prof) =>
+            `${prof.firstname} ${prof.lastname}`
+              .toLowerCase()
+              .includes(lowercasedProfessor)
+          );
+
+          const createdByMatch = `${event.createdBy?.firstname} ${event.createdBy?.lastname}`
+            .toLowerCase()
+            .includes(lowercasedProfessor);
+
+          matchesProfessor = conferenceProfMatch || workshopProfMatch || createdByMatch;
+        }
+
+        // Specific Date Filter
+        let matchesDate = true;
+        if (hasDateFilter && event.startDate) {
+          const filterParts = filterDate.split("-").map(Number);
+          const filterYear = filterParts[0];
+          const filterMonth = filterParts[1] - 1;
+          const filterDay = filterParts[2];
+
+          const eventStartDate = new Date(event.startDate);
+          const eventYear = eventStartDate.getFullYear();
+          const eventMonth = eventStartDate.getMonth();
+          const eventDay = eventStartDate.getDate();
+
+          matchesDate =
+            eventYear === filterYear &&
+            eventMonth === filterMonth &&
+            eventDay === filterDay;
+        }
+
+        // Start Date Range
+        let matchesStartDate = true;
+        if (hasStartDateFilter && event.startDate) {
+          const filterStartDate = new Date(startDateFilter);
+          const eventStartDate = new Date(event.startDate);
+          filterStartDate.setHours(0, 0, 0, 0);
+          eventStartDate.setHours(0, 0, 0, 0);
+          matchesStartDate = eventStartDate >= filterStartDate;
+        }
+
+        // End Date Range
+        let matchesEndDate = true;
+        if (hasEndDateFilter && event.startDate) {
+          const filterEndDate = new Date(endDateFilter);
+          const eventStartDate = new Date(event.startDate);
+          filterEndDate.setHours(0, 0, 0, 0);
+          eventStartDate.setHours(0, 0, 0, 0);
+          matchesEndDate = eventStartDate <= filterEndDate;
+        }
+
+        const matchesType = 
+          !filterType || 
+          event.type?.toLowerCase() === filterType.toLowerCase();
+
         return (
           matchesSearch &&
           matchesStatus &&
           matchesReg &&
-          matchesProfessorFilter &&
-          matchesLocationFilter &&
-          matchesTypeFilter &&
-          matchesDateFilter
+          matchesLocation &&
+          matchesProfessor &&
+          matchesDate &&
+          matchesStartDate &&
+          matchesEndDate &&
+          matchesType
         );
       })
       .sort((a, b) => {
@@ -679,14 +539,13 @@ const AllEvents = () => {
     regFilter,
     sortBy,
     user?._id,
-    filterProfessorName,
     filterLocation,
-    filterType,
-    filterDateMode,
-    filterSingleDate,
-    filterStartDate,
-    filterEndDate,
+    filterProfessor,
+    filterDate,
+    startDateFilter,
+    endDateFilter
   ]);
+
   // ===== EVENT HANDLERS =====
 
   const handleToggleFavourite = async (raw) => {
@@ -1108,19 +967,13 @@ const AllEvents = () => {
     }
   };
 
-  const handleApplyFilters = () => {
-    setShowFilterPopup(false);
-    // Filters are applied automatically via useEffect dependencies
-  };
-
   const handleClearFilters = () => {
-    setFilterProfessorName("");
     setFilterLocation("");
+    setFilterProfessor("");
+    setFilterDate("");
+    setStartDateFilter("");
+    setEndDateFilter("");
     setFilterType("");
-    setFilterDateMode("");
-    setFilterSingleDate("");
-    setFilterStartDate("");
-    setFilterEndDate("");
   };
 
   // ===== MAIN RENDER =====
@@ -1128,6 +981,7 @@ const AllEvents = () => {
     <div className="min-h-screen w-full bg-muted text-gray-800">
       <main className="w-full px-6 py-8">
         <div className="w-full max-w-7xl mx-auto space-y-4 mb-8">
+          {/* 1. New UI Search Bar with "Filters" Toggle Button */}
           <div className="flex gap-3">
             <div className="relative flex-1">
               <input
@@ -1151,17 +1005,18 @@ const AllEvents = () => {
                 />
               </svg>
             </div>
+            
             <button
-              onClick={() => setShowFilterPopup(true)}
+              onClick={() => setShowFilters(!showFilters)}
               className="flex items-center gap-2 px-5 py-3 rounded-lg border border-gray-200 bg-white text-[#312A68] shadow-sm hover:bg-gray-50 focus:border-[#736CED] focus:outline-none focus:ring-2 focus:ring-[#736CED]/20 transition-colors"
               title="Advanced Filters"
             >
               <Filter size={20} className="text-[#736CED]" />
-              <span className="font-medium">Filters</span>
-              {(filterProfessorName ||
-                filterLocation ||
-                filterType ||
-                filterDateMode) && (
+              <span className="font-medium">
+                {showFilters ? "Hide Filters" : "Filters"}
+              </span>
+              {showFilters ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
+              {(filterLocation || filterProfessor || filterDate || startDateFilter) && (
                 <span className="ml-1 px-2 py-0.5 bg-[#736CED] text-white text-xs rounded-full">
                   Active
                 </span>
@@ -1169,52 +1024,130 @@ const AllEvents = () => {
             </button>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
-            <select
-              className="w-full rounded-lg border border-gray-200 bg-white px-4 py-3 text-sm text-[#312A68] shadow-sm focus:border-[#736CED] focus:outline-none focus:ring-2 focus:ring-[#736CED]/20"
-              value={selectedCategory}
-              onChange={(e) => setSelectedCategory(e.target.value)}
-            >
-              {eventCategories.map((o) => (
-                <option key={o.id} value={o.id}>
-                  {o.name}
-                </option>
-              ))}
-            </select>
-            <select
-              className="w-full rounded-lg border border-gray-200 bg-white px-4 py-3 text-sm text-[#312A68] shadow-sm focus:border-[#736CED] focus:outline-none focus:ring-2 focus:ring-[#736CED]/20"
-              value={statusFilter}
-              onChange={(e) => setStatusFilter(e.target.value)}
-            >
-              {statusOptions.map((o) => (
-                <option key={o.id} value={o.id}>
-                  {o.name}
-                </option>
-              ))}
-            </select>
-            <select
-              className="w-full rounded-lg border border-gray-200 bg-white px-4 py-3 text-sm text-[#312A68] shadow-sm focus:border-[#736CED] focus:outline-none focus:ring-2 focus:ring-[#736CED]/20"
-              value={regFilter}
-              onChange={(e) => setRegFilter(e.target.value)}
-            >
-              {regOptions.map((o) => (
-                <option key={o.id} value={o.id}>
-                  {o.name}
-                </option>
-              ))}
-            </select>
-            <select
-              className="w-full rounded-lg border border-gray-200 bg-white px-4 py-3 text-sm text-[#312A68] shadow-sm focus:border-[#736CED] focus:outline-none focus:ring-2 focus:ring-[#736CED]/20"
-              value={sortBy}
-              onChange={(e) => setSortBy(e.target.value)}
-            >
-              {sortOptions.map((o) => (
-                <option key={o.id} value={o.id}>
-                  {o.name}
-                </option>
-              ))}
-            </select>
-          </div>
+          {/* 2. THE OLD FILTER PANEL (Restored) */}
+          {showFilters && (
+            <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 animate-fade-in">
+              <div className="flex justify-between items-center mb-4">
+                <h3 className="text-lg font-bold text-[#4C3BCF]">Advanced Filters</h3>
+                <button
+                  onClick={handleClearFilters}
+                  className="text-sm text-gray-500 hover:text-[#4C3BCF] underline"
+                >
+                  Clear advanced filters
+                </button>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                {/* Location Filter */}
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 mb-1">
+                    Location
+                  </label>
+                  <input
+                    type="text"
+                    value={filterLocation}
+                    onChange={(e) => setFilterLocation(e.target.value)}
+                    placeholder="Filter by location..."
+                    className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-[#4C3BCF]"
+                  />
+                </div>
+
+                {/* Professor Filter */}
+                <div>
+                  <label className="block text-sm font-semibold text-gray-700 mb-1">
+                    Professor Name
+                  </label>
+                  <input
+                    type="text"
+                    value={filterProfessor}
+                    onChange={(e) => setFilterProfessor(e.target.value)}
+                    placeholder="Filter by professor name..."
+                    className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-[#4C3BCF]"
+                  />
+                </div>
+              </div>
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 mb-1">
+                  Event Type
+                </label>
+                <select
+                  value={filterType}
+                  onChange={(e) => setFilterType(e.target.value)}
+                  className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-[#4C3BCF] bg-white"
+                >
+                  <option value="">All Events</option>
+                  <option value="workshop">Workshop</option>
+                  <option value="bazaar">Bazaar</option>
+                  <option value="trip">Trip</option>
+                  <option value="conference">Conference</option>
+                  <option value="booth">Booth</option>
+                </select>
+              </div>
+
+              <div className=" pt-4">
+                <h4 className="text-sm font-bold text-gray-800 mb-4">Date Options</h4>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  {/* Specific Date */}
+                  <div>
+                    <label className="block text-sm font-semibold text-gray-700 mb-1">
+                      Specific Date
+                    </label>
+                    <div className="relative">
+                      <input
+                        type="date"
+                        value={filterDate}
+                        onChange={(e) => setFilterDate(e.target.value)}
+                        // Use conditional string interpolation to add extra right padding (pr-10) when a date is selected
+                        className={`w-full py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-[#4C3BCF] ${
+                          filterDate ? "pl-4 pr-10" : "px-4"
+                        }`}
+                      />
+                      {filterDate && (
+                        <button
+                          onClick={() => setFilterDate("")}
+                          className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                        >
+                          <X size={16} />
+                        </button>
+                      )}
+                    </div>
+                  </div>
+
+                  {/* Date Range */}
+                  <div>
+                    <label className="block text-sm font-semibold text-gray-700 mb-1">
+                      Date Range
+                    </label>
+                    <div className="flex gap-2 items-center">
+                      <input
+                        type="date"
+                        value={startDateFilter}
+                        onChange={(e) => {
+                           setStartDateFilter(e.target.value);
+                           if (endDateFilter && e.target.value && new Date(endDateFilter) < new Date(e.target.value)) {
+                             setEndDateFilter("");
+                           }
+                        }}
+                        className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-[#4C3BCF]"
+                        placeholder="Start"
+                      />
+                      <span className="text-gray-500">to</span>
+                      <input
+                        type="date"
+                        value={endDateFilter}
+                        min={startDateFilter || undefined}
+                        onChange={(e) => setEndDateFilter(e.target.value)}
+                        className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-[#4C3BCF]"
+                        placeholder="End"
+                      />
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
+          
         </div>
 
         {/* Events Grid */}
@@ -1269,27 +1202,6 @@ const AllEvents = () => {
           </div>
         )}
       </main>
-      {/* Filter Popup */}
-      <FilterPopup
-        showFilterPopup={showFilterPopup}
-        onClose={() => setShowFilterPopup(false)}
-        filterProfessorName={filterProfessorName}
-        setFilterProfessorName={setFilterProfessorName}
-        filterLocation={filterLocation}
-        setFilterLocation={setFilterLocation}
-        filterType={filterType}
-        setFilterType={setFilterType}
-        filterDateMode={filterDateMode}
-        setFilterDateMode={setFilterDateMode}
-        filterSingleDate={filterSingleDate}
-        setFilterSingleDate={setFilterSingleDate}
-        filterStartDate={filterStartDate}
-        setFilterStartDate={setFilterStartDate}
-        filterEndDate={filterEndDate}
-        setFilterEndDate={setFilterEndDate}
-        onApplyFilters={handleApplyFilters}
-        onClearFilters={handleClearFilters}
-      />
       {/* Modals */}
       {showDetailsModal && selectedEvent && (
         <EventDetailsModal
