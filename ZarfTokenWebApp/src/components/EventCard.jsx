@@ -16,6 +16,10 @@ import {
   X,
   MessageCircle,
   Star,
+  Trash2,
+  FileSpreadsheet,
+  Edit,
+  FileText,
 } from "lucide-react";
 
 const EventCard = ({
@@ -156,6 +160,12 @@ const EventCard = ({
     }
   }, [event.description]);
 
+  const isBazaar = event.type === "bazaar";
+  const isPlatformBooth =
+    event.type === "booth" && !event.original?.isBazarBooth;
+  const isBazaarBooth = event.type === "booth" && event.original?.isBazarBooth;
+  const isWorkshop = event.type === "workshop";
+
   const canDelete =
     userIsPrivileged &&
     (event.type === "bazaar" ||
@@ -178,6 +188,13 @@ const EventCard = ({
     user?.role?.toLowerCase().includes("event") &&
     (event.type == "workshop" || event.type == "trip");
 
+  const canViewDetails =
+    isPlatformBooth ||
+    isBazaarBooth ||
+    isWorkshop ||
+    event.type === "trip" ||
+    event.type === "conference";
+
   const isCreator =
     event.type === "workshop" &&
     event.createdBy &&
@@ -191,12 +208,6 @@ const EventCard = ({
     !isRegistered &&
     !isCreator &&
     (event.capacity ? (attendeesArr?.length ?? 0) < event.capacity : true);
-
-  const isBazaar = event.type === "bazaar";
-  const isPlatformBooth =
-    event.type === "booth" && !event.original?.isBazarBooth;
-  const isBazaarBooth = event.type === "booth" && event.original?.isBazarBooth;
-  const isWorkshop = event.type === "workshop";
 
   const toggleDescription = () => {
     if (hasOverflow) setIsDescriptionExpanded((v) => !v);
@@ -302,45 +313,8 @@ const EventCard = ({
     );
   };
 
-  if (canDelete) {
-    addActionButton(
-      <button
-        type="button"
-        onClick={() => onDelete?.(event.original)}
-        className={`${actionButtonBase} border border-red-200 bg-red-50 text-red-600 hover:bg-red-100 focus-visible:ring-red-200`}
-      >
-        Delete
-      </button>,
-      "delete"
-    );
-  }
-
-  if (canUpdate) {
-    addActionButton(
-      <button
-        type="button"
-        onClick={() => onUpdate(event.type)}
-        className={`${actionButtonBase} border border-purple-200 bg-purple-50 text-purple-700 hover:bg-purple-100 focus-visible:ring-purple-200`}
-      >
-        Update
-      </button>,
-      "update"
-    );
-  }
-  if (canDownloadExcel) {
-    addActionButton(
-      <button
-        type="button"
-        onClick={() => {
-          onExcelDownload(event.original);
-        }}
-        className={`${actionButtonBase} border border-green-200 bg-purple-50 text-green-700 hover:bg-green-100 focus-visible:ring-green-200`}
-      >
-        download
-      </button>,
-      "download"
-    );
-  }
+  // The actions Delete / Update / Download / View Details are rendered
+  // as compact clickable icons in the card header (see UI below).
 
   if (canArchive) {
     addActionButton(
@@ -443,25 +417,6 @@ const EventCard = ({
     );
   }
 
-  if (
-    isPlatformBooth ||
-    isBazaarBooth ||
-    isWorkshop ||
-    event.type === "trip" ||
-    event.type === "conference"
-  ) {
-    addActionButton(
-      <button
-        type="button"
-        onClick={() => onViewDetails?.(event.original)}
-        className={`${actionButtonBase} border border-[#4a4ae6]/30 text-[#4a4ae6] hover:bg-[#4a4ae6]/10 focus-visible:ring-[#4a4ae6]/30`}
-      >
-        View Details
-      </button>,
-      "view-details"
-    );
-  }
-
   if (footerExtra) {
     React.Children.toArray(footerExtra).forEach((extra, index) => {
       addActionButton(extra, `extra-${index}`);
@@ -470,13 +425,80 @@ const EventCard = ({
 
   return (
     <div className="relative flex min-h-[420px] flex-col rounded-2xl border border-gray-100 bg-white p-6 shadow-sm transition-all duration-300 hover:-translate-y-1 hover:scale-[1.02] hover:shadow-xl">
-      {(isPastEvent || canShowFavourite) && (
+      {(isPastEvent ||
+        canShowFavourite ||
+        canDelete ||
+        canDownloadExcel ||
+        canUpdate ||
+        canViewDetails) && (
         <div className="absolute right-4 top-4 flex items-center gap-2">
           {isPastEvent && (
             <span className="rounded-full bg-[#f0f0f0] px-2 py-1 text-[11px] font-semibold uppercase tracking-wide text-gray-700">
               Past Event
             </span>
           )}
+
+          {/* Compact icon actions */}
+          {canViewDetails && (
+            <button
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation();
+                onViewDetails?.(event.original);
+              }}
+              title="View details"
+              className="rounded-full border border-gray-200 bg-white/90 p-2 shadow-sm transition hover:bg-gray-100 focus-visible:outline-none"
+              aria-label="View details"
+            >
+              <FileText size={16} />
+            </button>
+          )}
+
+          {canUpdate && (
+            <button
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation();
+                onUpdate(event.type);
+              }}
+              title="Edit"
+              className="rounded-full border border-gray-200 bg-white/90 p-2 shadow-sm transition hover:bg-gray-100 focus-visible:outline-none"
+              aria-label="Edit"
+            >
+              <Edit size={16} />
+            </button>
+          )}
+
+          {canDownloadExcel && (
+            <button
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation();
+                onExcelDownload(event.original);
+              }}
+              title="Download Excel"
+              className="rounded-full border border-green-200 bg-white/90 p-2 shadow-sm transition hover:bg-green-100 focus-visible:outline-none"
+              aria-label="Download Excel"
+            >
+              <FileSpreadsheet size={16} />
+            </button>
+          )}
+
+          {canDelete && (
+            <button
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation();
+                onDelete?.(event.original);
+              }}
+              title="Delete"
+              className="rounded-full border border-red-200 bg-white/90 p-2 text-red-600 shadow-sm transition hover:bg-red-100 focus-visible:outline-none"
+              aria-label="Delete"
+            >
+              <Trash2 size={16} />
+            </button>
+          )}
+
           {canShowFavourite && (
             <button
               type="button"
