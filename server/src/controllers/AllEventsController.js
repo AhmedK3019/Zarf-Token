@@ -689,19 +689,26 @@ const excelRegisterdPeople = async (req, res, next) => {
       default:
         return res.status(404).json({ message: "Invalid type" });
     }
-    console.log("here");
     const event = await model.findById(id);
-    console.log(event);
-    console.log("array" + event.registered);
     let registrationArray = event.registered;
+    let attendeesArray = event.attendees;
+    let i = 0;
     registrationArray = registrationArray.map((item) => {
       return {
-        firstname: item.firstname,
-        lastname: item.lastname,
+        First_name: item.firstname,
+        Last_name: item.lastname,
+        Paid_status: String(item.paid).toLowerCase(),
       };
     });
-    console.log(registrationArray);
-    const worksheet = XLSX.utils.json_to_sheet(registrationArray);
+    attendeesArray = attendeesArray.map((item) => {
+      return {
+        First_name: item.firstname,
+        Last_name: item.lastname,
+        Paid_status: String(item.paid).toLowerCase(),
+      };
+    });
+    let filterArray = [...attendeesArray, ...registrationArray];
+    const worksheet = XLSX.utils.json_to_sheet(filterArray);
     const workbook = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(workbook, worksheet, "Registrations");
     const excelBuffer = XLSX.write(workbook, {
