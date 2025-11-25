@@ -1,327 +1,147 @@
-import { NavLink, useNavigate, useLocation } from "react-router-dom";
-import { useAuthUser } from "../../hooks/auth";
-import { useState, useRef, useEffect } from "react";
+import { useState } from "react";
+import { NavLink } from "react-router-dom";
 import {
-  LogOut,
   Calendar,
   PlusCircle,
-  FileText,
   Archive,
-  QrCode,
+  LayoutDashboard,
+  Users,
+  FileText,
+  PackageCheck,
   Star,
-  Package,
   BarChart,
+  QrCode,
   Clock,
-  ChevronDown,
+  ChevronLeft,
+  ChevronRight
 } from "lucide-react";
-import logo from "../../assets/logo.png";
-import NotificationsDrawer from "../../components/NotificationsDrawer";
 
 const NavbarEventsOffice = () => {
-  const navigate = useNavigate();
-  const { user, logout } = useAuthUser();
-  const [eventsOpen, setEventsOpen] = useState(false);
-  const [requestsOpen, setRequestsOpen] = useState(false);
-  const [loyaltyOpen, setLoyaltyOpen] = useState(false);
-  const eventsRef = useRef(null);
-  const requestsRef = useRef(null);
-  const loyaltyRef = useRef(null);
-  const location = useLocation();
-  const isEventsActive =
-    location.pathname.includes("/all-events") ||
-    location.pathname.includes("/create-event") ||
-    location.pathname.includes("/archived-events") ||
-    location.pathname.includes("/events-sales-report") ||
-    location.pathname.includes("/event-attendees-report");
-  const isRequestsActive =
-    location.pathname.includes("/workshop-requests") ||
-    location.pathname.includes("/vendor-requests");
-  const isLoyaltyActive =
-    location.pathname.includes("/loyalty-vendors") ||
-    location.pathname.includes("/loyalty-program");
+  const [isCollapsed, setIsCollapsed] = useState(false);
 
-  // close dropdowns when clicking outside
-  useEffect(() => {
-    function onDocClick(e) {
-      if (eventsRef.current && !eventsRef.current.contains(e.target)) {
-        setEventsOpen(false);
-      }
-      if (requestsRef.current && !requestsRef.current.contains(e.target)) {
-        setRequestsOpen(false);
-      }
-      if (loyaltyRef.current && !loyaltyRef.current.contains(e.target)) {
-        setLoyaltyOpen(false);
-      }
-    }
-    document.addEventListener("click", onDocClick);
-    return () => document.removeEventListener("click", onDocClick);
-  }, []);
-
-  // close on route change
-  useEffect(() => {
-    setEventsOpen(false);
-    setRequestsOpen(false);
-    setLoyaltyOpen(false);
-  }, [location.pathname]);
-
-  if (!user || user.role !== "Event office") return null;
-
-  const handleLogout = () => {
-    logout();
-    navigate("/", { replace: true });
-  };
+  const linkClass = ({ isActive }) =>
+    `flex items-center gap-3 py-3 rounded-lg transition-all duration-300 text-sm font-medium whitespace-nowrap ${
+      isActive
+        ? "bg-white/10 text-white shadow-sm"
+        : "text-blue-100 hover:bg-white/5 hover:text-white"
+    } ${
+      isCollapsed 
+        ? "px-4"  
+        : "px-4"        
+    }`;
 
   return (
-    <div className="w-full">
-      <header className="w-full bg-[#001845] shadow-lg">
-        <nav className="max-w-7xl mx-auto px-6 py-4">
-          <div className="grid grid-cols-3 items-center h-16">
-            {/* Left - Logo */}
-            <div className="flex items-center gap-1">
-              <div className="relative h-16 overflow-visible">
-                <img
-                  src="/NavbarLogo.png"
-                  alt="ZarfToken logo"
-                  className="h-16 w-auto object-contain"
-                />
-                <p className="text-white ml-2 text-lg font-semibold absolute bottom-0 left-16">
-                  Welcome, Officer!
-                </p>
-              </div>
-            </div>
-
-            {/* Center - Links (with dropdowns) */}
-            <div className="hidden lg:flex items-center gap-4 text-sm font-medium text-white justify-self-center">
-              {/* Pill control for main navigation items */}
-              <div className="flex items-center gap-1 rounded-full bg-white/5 px-2 py-1 shadow-[0_10px_30px_rgba(0,0,0,0.22)] border border-white/10">
-                {/* Events dropdown: All / Create / Archived */}
-                <div className="relative" ref={eventsRef}>
-                  <button
-                    onClick={() => setEventsOpen((s) => !s)}
-                    aria-expanded={eventsOpen}
-                    aria-haspopup="true"
-                    className={`px-4 py-2 rounded-full transition-all flex items-center gap-2 ${
-                      isEventsActive
-                        ? "bg-white/15 text-white font-semibold shadow-sm"
-                        : "text-white/90 hover:text-white hover:bg-white/10"
-                    }`}
-                  >
-                    <Calendar className="h-4 w-4" />
-                    <span>Events</span>
-                    <ChevronDown
-                      className={`h-4 w-4 transition-transform ${
-                        eventsOpen ? "-rotate-180" : ""
-                      }`}
-                    />
-                  </button>
-
-                  {eventsOpen && (
-                    <div className="absolute top-full left-0 mt-2 w-56 bg-white rounded-lg shadow-xl border border-gray-200 overflow-hidden z-50">
-                      <NavLink
-                        to="/dashboard/eventsOffice/all-events"
-                        className={({ isActive }) =>
-                          `flex items-center gap-3 px-4 py-3 text-gray-800 hover:bg-primary/5 hover:text-primary transition-colors ${
-                            isActive
-                              ? "bg-primary/10 text-primary font-semibold"
-                              : ""
-                          }`
-                        }
-                      >
-                        <span className="flex items-center gap-2">
-                          <Calendar className="h-4 w-4" />
-                          All Events
-                        </span>
-                      </NavLink>
-                      <NavLink
-                        to="/dashboard/eventsOffice/create-event"
-                        className={({ isActive }) =>
-                          `flex items-center gap-3 px-4 py-3 text-gray-800 hover:bg-primary/5 hover:text-primary transition-colors border-t border-gray-200 ${
-                            isActive
-                              ? "bg-primary/10 text-primary font-semibold"
-                              : ""
-                          }`
-                        }
-                      >
-                        <span className="flex items-center gap-2">
-                          <PlusCircle className="h-4 w-4" />
-                          Create Event
-                        </span>
-                      </NavLink>
-                      <NavLink
-                        to="/dashboard/eventsOffice/archived-events"
-                        className={({ isActive }) =>
-                          `flex items-center gap-3 px-4 py-3 text-gray-800 hover:bg-primary/5 hover:text-primary transition-colors border-t border-gray-200 ${
-                            isActive
-                              ? "bg-primary/10 text-primary font-semibold"
-                              : ""
-                          }`
-                        }
-                      >
-                        <span className="flex items-center gap-2">
-                          <Archive className="h-4 w-4" />
-                          Archived Events
-                        </span>
-                      </NavLink>
-                      <NavLink
-                        to="/dashboard/eventsOffice/events-sales-report"
-                        className={({ isActive }) =>
-                          `flex items-center gap-3 px-4 py-3 text-gray-800 hover:bg-primary/5 hover:text-primary transition-colors border-t border-gray-200 ${
-                            isActive
-                              ? "bg-primary/10 text-primary font-semibold"
-                              : ""
-                          }`
-                        }
-                      >
-                        <span className="flex items-center gap-2">
-                          <FileText className="h-4 w-4" />
-                          Events Sales Report
-                        </span>
-                      </NavLink>
-                      <NavLink
-                        to="/dashboard/eventsOffice/event-attendees-report"
-                        className={({ isActive }) =>
-                          `flex items-center gap-3 px-4 py-3 text-gray-800 hover:bg-primary/5 hover:text-primary transition-colors border-t border-gray-200 ${
-                            isActive
-                              ? "bg-primary/10 text-primary font-semibold"
-                              : ""
-                          }`
-                        }
-                      >
-                        <span className="flex items-center gap-2">
-                          <FileText className="h-4 w-4" />
-                          Event Attendees Report
-                        </span>
-                      </NavLink>
-                    </div>
-                  )}
-                </div>
-
-                {/* Requests dropdown: Workshop Requests / Vendor Requests */}
-                <div className="relative" ref={requestsRef}>
-                  <button
-                    onClick={() => setRequestsOpen((s) => !s)}
-                    aria-expanded={requestsOpen}
-                    aria-haspopup="true"
-                    className={`px-4 py-2 rounded-full transition-all flex items-center gap-2 ${
-                      isRequestsActive
-                        ? "bg-white/15 text-white font-semibold shadow-sm"
-                        : "text-white/90 hover:text-white hover:bg-white/10"
-                    }`}
-                  >
-                    <FileText className="h-4 w-4" />
-                    <span>Requests</span>
-                    <ChevronDown
-                      className={`h-4 w-4 transition-transform ${
-                        requestsOpen ? "-rotate-180" : ""
-                      }`}
-                    />
-                  </button>
-
-                  {requestsOpen && (
-                    <div className="absolute top-full left-0 mt-2 w-56 bg-white rounded-lg shadow-xl border border-gray-200 overflow-hidden z-50">
-                      <NavLink
-                        to="/dashboard/eventsOffice/workshop-requests"
-                        className={({ isActive }) =>
-                          `flex items-center gap-3 px-4 py-3 text-gray-800 hover:bg-primary/5 hover:text-primary transition-colors ${
-                            isActive
-                              ? "bg-primary/10 text-primary font-semibold"
-                              : ""
-                          }`
-                        }
-                      >
-                        <span className="flex items-center gap-2">
-                          <FileText className="h-4 w-4" />
-                          Workshop Requests
-                        </span>
-                      </NavLink>
-                      <NavLink
-                        to="/dashboard/eventsOffice/vendor-requests"
-                        className={({ isActive }) =>
-                          `flex items-center gap-3 px-4 py-3 text-gray-800 hover:bg-primary/5 hover:text-primary transition-colors border-t border-gray-200 ${
-                            isActive
-                              ? "bg-primary/10 text-primary font-semibold"
-                              : ""
-                          }`
-                        }
-                      >
-                        <span className="flex items-center gap-2">
-                          <Package className="h-4 w-4" />
-                          Vendor Requests
-                        </span>
-                      </NavLink>
-                    </div>
-                  )}
-                </div>
-
-                {/* Loyalty dropdown */}
-                <NavLink
-                  to="/dashboard/eventsOffice/loyalty-program"
-                  className={({ isActive }) =>
-                    isActive
-                      ? "px-4 py-2 rounded-full bg-white/15 text-white font-semibold transition-all flex items-center gap-2 shadow-sm"
-                      : "px-4 py-2 rounded-full text-white/90 hover:text-white hover:bg-white/10 transition-all flex items-center gap-2"
-                  }
-                >
-                  <Star className="h-4 w-4" />
-                  Loyals
-                </NavLink>
-
-                {/* Poll link */}
-                <NavLink
-                  to="/dashboard/eventsOffice/vendor-poll"
-                  className={({ isActive }) =>
-                    isActive
-                      ? "px-4 py-2 rounded-full bg-white/15 text-white font-semibold transition-all flex items-center gap-2 shadow-sm"
-                      : "px-4 py-2 rounded-full text-white/90 hover:text-white hover:bg-white/10 transition-all flex items-center gap-2"
-                  }
-                >
-                  <BarChart className="h-4 w-4" />
-                  Poll
-                </NavLink>
-
-                {/* QR and Gym moved into the pill */}
-                <NavLink
-                  to="/dashboard/eventsOffice/generate-qr"
-                  className={({ isActive }) =>
-                    isActive
-                      ? "px-4 py-2 rounded-full bg-white/15 text-white font-semibold transition-all flex items-center gap-2 shadow-sm"
-                      : "px-4 py-2 rounded-full text-white/90 hover:text-white hover:bg-white/10 transition-all flex items-center gap-2"
-                  }
-                >
-                  <QrCode className="h-4 w-4" />
-                  QR
-                </NavLink>
-                <NavLink
-                  to="/dashboard/eventsOffice/gym-schedule"
-                  className={({ isActive }) =>
-                    isActive
-                      ? "px-4 py-2 rounded-full bg-white/15 text-white font-semibold transition-all flex items-center gap-2 shadow-sm"
-                      : "px-4 py-2 rounded-full text-white/90 hover:text-white hover:bg-white/10 transition-all flex items-center gap-2"
-                  }
-                >
-                  <Clock className="h-4 w-4" />
-                  Gym
-                </NavLink>
-              </div>
-            </div>
-
-            {/* Right - Notifications + Logout */}
-            <div className="flex items-center gap-2 justify-self-end">
-              <NotificationsDrawer />
-              <button
-                onClick={handleLogout}
-                aria-label="Logout"
-                title="Logout"
-                className="px-3 py-2 rounded-lg text-white/80 hover:text-white hover:bg-white/10 transition-all flex items-center gap-2 text-sm"
-              >
-                <LogOut className="h-4 w-4" />
-                <span className="hidden sm:inline">Logout</span>
-              </button>
-            </div>
+    <nav 
+      className={`bg-[#001845] flex flex-col h-full shrink-0 border-r border-blue-900 transition-all duration-300 ease-in-out ${
+        isCollapsed ? "w-20" : "w-64"
+      }`}
+    >
+      <div className={`flex items-center h-20 border-b border-white/10 shrink-0 transition-all duration-300 ${
+          isCollapsed ? "px-2" : "px-4"
+        }`}
+      >
+        <div className="flex items-center overflow-hidden">
+          <img
+            src="/NavbarLogo.png"
+            alt="Logo"
+            className={`object-contain transition-all duration-300 ${isCollapsed ? "h-8 w-8" : "h-8 w-auto"}`}
+          />
+          <div 
+            className={`flex items-center overflow-hidden transition-all duration-300 ${
+              isCollapsed ? "w-0 opacity-0" : "w-32 opacity-100 ml-3"
+            }`}
+          >
+            <span className="text-white font-bold tracking-wide whitespace-nowrap">
+              Zarf Token
+            </span>
           </div>
-        </nav>
-      </header>
-    </div>
+        </div>
+        <button
+          onClick={() => setIsCollapsed(!isCollapsed)}
+          className="ml-auto p-2 rounded-lg text-blue-200 hover:bg-white/10 hover:text-white transition-colors focus:outline-none"
+          title={isCollapsed ? "Expand" : "Collapse"}
+        >
+          {isCollapsed ? <ChevronRight size={20} /> : <ChevronLeft size={20} />}
+        </button>
+      </div>
+
+      <div className="flex-1 overflow-y-auto py-6 px-3 space-y-1 overflow-x-hidden custom-scrollbar">
+        
+        {!isCollapsed && (
+          <div className="px-3 mb-2 mt-2 text-xs font-semibold text-blue-400 uppercase tracking-wider animate-in fade-in">
+            Events Management
+          </div>
+        )}
+        
+        <NavLink to="/dashboard/eventsOffice/all-events" className={linkClass} title="All Events">
+          <Calendar size={20} className="shrink-0" />
+          {!isCollapsed && <span>All Events</span>}
+        </NavLink>
+
+        <NavLink to="/dashboard/eventsOffice/create-event" className={linkClass} title="Create Event">
+          <PlusCircle size={20} className="shrink-0" />
+          {!isCollapsed && <span>Create Event</span>}
+        </NavLink>
+
+        <NavLink to="/dashboard/eventsOffice/archived-events" className={linkClass} title="Archived Events">
+          <Archive size={20} className="shrink-0" />
+          {!isCollapsed && <span>Archived Events</span>}
+        </NavLink>
+        
+        <NavLink to="/dashboard/eventsOffice/events-sales-report" className={linkClass} title="Sales Report">
+          <LayoutDashboard size={20} className="shrink-0" />
+          {!isCollapsed && <span>Sales Report</span>}
+        </NavLink>
+        
+        <NavLink to="/dashboard/eventsOffice/event-attendees-report" className={linkClass} title="Attendees Report">
+          <Users size={20} className="shrink-0" />
+          {!isCollapsed && <span>Attendees Report</span>}
+        </NavLink>
+
+        {!isCollapsed && (
+          <div className="px-3 mb-2 mt-6 text-xs font-semibold text-blue-400 uppercase tracking-wider animate-in fade-in">
+            Requests
+          </div>
+        )}
+
+        <NavLink to="/dashboard/eventsOffice/workshop-requests" className={linkClass} title="Workshop Requests">
+          <FileText size={20} className="shrink-0" />
+          {!isCollapsed && <span>Workshop Requests</span>}
+        </NavLink>
+        
+        <NavLink to="/dashboard/eventsOffice/vendor-requests" className={linkClass} title="Vendor Requests">
+          <PackageCheck size={20} className="shrink-0" />
+          {!isCollapsed && <span>Vendor Requests</span>}
+        </NavLink>
+
+        {!isCollapsed && (
+          <div className="px-3 mb-2 mt-6 text-xs font-semibold text-blue-400 uppercase tracking-wider animate-in fade-in">
+            Tools & Directory
+          </div>
+        )}
+
+        <NavLink to="/dashboard/eventsOffice/loyalty-program" className={linkClass} title="Loyalty Partners">
+          <Star size={20} className="shrink-0" />
+          {!isCollapsed && <span>Loyalty Partners</span>}
+        </NavLink>
+
+        <NavLink to="/dashboard/eventsOffice/vendor-poll" className={linkClass} title="Vendors Poll">
+          <BarChart size={20} className="shrink-0" />
+          {!isCollapsed && <span>Vendors Poll</span>}
+        </NavLink>
+
+        <NavLink to="/dashboard/eventsOffice/generate-qr" className={linkClass} title="Generate QR">
+          <QrCode size={20} className="shrink-0" />
+          {!isCollapsed && <span>Generate QR</span>}
+        </NavLink>
+
+        <NavLink to="/dashboard/eventsOffice/gym-schedule" className={linkClass} title="Gym Schedule">
+          <Clock size={20} className="shrink-0" />
+          {!isCollapsed && <span>Gym Schedule</span>}
+        </NavLink>
+
+      </div>
+    </nav>
   );
 };
 

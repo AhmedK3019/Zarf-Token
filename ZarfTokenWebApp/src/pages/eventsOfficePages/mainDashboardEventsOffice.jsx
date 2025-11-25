@@ -1,5 +1,8 @@
-import { Routes, Route, useLocation } from "react-router-dom";
+import { Routes, Route } from "react-router-dom";
 import NavbarEventsOffice from "./navbarEventsOffice";
+import NotificationsDrawer from "../../components/NotificationsDrawer";
+import { useAuthUser } from "../../hooks/auth";
+import { LogOut } from "lucide-react";
 
 import AllEvents from "../AllEvents";
 import CreateEvent from "./CreateEvent";
@@ -14,170 +17,48 @@ import NotFound from "../NotFoundPage";
 import EditEvent from "./EditEvents";
 import EventsSalesReport from "../adminPages/EventsSalesReport";
 import EventAttendeesReport from "../adminPages/EventAttendeesReport";
+
 const MainDashboardEventsOffice = () => {
-  const location = useLocation();
-  const isCreateEventPage =
-    location.pathname === "/dashboard/eventsOffice/create-event";
-  const isEventsSalesReportPage =
-    location.pathname === "/dashboard/eventsOffice/events-sales-report";
-  const isEventAttendeesReportPage =
-    location.pathname === "/dashboard/eventsOffice/event-attendees-report";
-  const isWorkshopRequestsPage =
-    location.pathname === "/dashboard/eventsOffice/workshop-requests";
-  const isLoyaltyProgramPage =
-    location.pathname === "/dashboard/eventsOffice/loyalty-program";
-  const isVendorRequestsPage =
-    location.pathname === "/dashboard/eventsOffice/vendor-requests";
-  const isAllEventsPage =
-    location.pathname === "/dashboard/eventsOffice/all-events" ||
-    location.pathname === "/dashboard/eventsOffice";
-  const isGenerateQrPage =
-    location.pathname === "/dashboard/eventsOffice/generate-qr";
-  const isGymSchedulePage =
-    location.pathname === "/dashboard/eventsOffice/gym-schedule";
-  const isVendorsPollPage =
-    location.pathname === "/dashboard/eventsOffice/vendor-poll";
-  const isArchivedEventsPage =
-    location.pathname === "/dashboard/eventsOffice/archived-events";
+  const { logout } = useAuthUser();
+
   return (
-    <div>
+    <div className="flex h-screen w-full bg-muted overflow-hidden">
       <NavbarEventsOffice />
-      {isCreateEventPage && (
-        <div className="w-full bg-[#001845] text-white px-6 py-8">
-          <div className="max-w-7xl mx-auto text-center">
-            <h1 className="text-4xl font-bold sm:text-5xl mb-4">
-              Create Events
-            </h1>
+      <div className="flex-1 flex flex-col h-full overflow-hidden">
+        <header className="h-20 bg-white border-b border-gray-200 flex items-center justify-between px-8 shrink-0 z-20 relative">
+          <h2 className="text-lg font-semibold text-[#001845]">Events Office Dashboard</h2>
+          <div className="flex items-center gap-3">
+            <div className="relative flex items-center justify-center w-10 h-10 rounded-full bg-gray-100 text-[#001845] hover:bg-gray-200 transition-all cursor-pointer overflow-visible">
+              <NotificationsDrawer className="text-[#001845]" />
+            </div>
+            <button
+              onClick={() => { logout(); window.location.href = "/"; }}
+              className="px-4 py-2 rounded-lg bg-gray-100 text-[#001845] hover:bg-gray-200 transition-colors flex items-center gap-2 text-sm font-semibold"
+            >
+              <LogOut size={16} />
+              Logout
+            </button>
           </div>
-        </div>
-      )}
-      {isEventsSalesReportPage && (
-        <div className="w-full bg-[#001845] text-white px-6 py-8">
-          <div className="max-w-7xl mx-auto text-center">
-            <h1 className="text-4xl font-bold sm:text-5xl mb-4">
-              Events Sales Report
-            </h1>
-          </div>
-        </div>
-      )}
-      {isEventAttendeesReportPage && (
-        <div className="w-full bg-[#001845] text-white px-6 py-8">
-          <div className="max-w-7xl mx-auto text-center">
-            <h1 className="text-4xl font-bold sm:text-5xl mb-4">
-              Event Attendees Report
-            </h1>
-          </div>
-        </div>
-      )}
-      {isWorkshopRequestsPage && (
-        <div className="w-full bg-[#001845] text-white px-6 py-8">
-          <div className="max-w-7xl mx-auto text-center">
-            <h1 className="text-4xl font-bold sm:text-5xl mb-2">
-              Workshops & Approvals
-            </h1>
-          </div>
-        </div>
-      )}
-      {isLoyaltyProgramPage && (
-        <div className="w-full bg-[#001845] text-white px-6 py-8">
-          <div className="max-w-7xl mx-auto text-center">
-            <h1 className="text-4xl font-bold sm:text-5xl mb-4">
-              GUC Loyalty Program Partners
-            </h1>
-          </div>
-        </div>
-      )}
-      {isVendorRequestsPage && (
-        <div className="w-full bg-[#001845] text-white px-6 py-8">
-          <div className="max-w-7xl mx-auto text-center">
-            <h1 className="text-4xl font-bold sm:text-5xl mb-4">
-              Vendor Requests
-            </h1>
-          </div>
-        </div>
-      )}
-      {isAllEventsPage && (
-        <div className="w-full bg-[#001845] text-white px-6 py-8">
-          <div className="max-w-7xl mx-auto text-center">
-            <h1 className="text-4xl font-bold sm:text-5xl mb-4">All Events</h1>
-          </div>
-        </div>
-      )}
-      {isGenerateQrPage && (
-        <div className="w-full bg-[#001845] text-white px-6 py-8">
-          <div className="max-w-7xl mx-auto text-center">
-            <h1 className="text-4xl font-bold sm:text-5xl mb-2">
-              Generate QR Code
-            </h1>
-          </div>
-        </div>
-      )}
-      {isGymSchedulePage && (
-        <div className="w-full bg-[#001845] text-white px-6 py-8">
-          <div className="max-w-7xl mx-auto text-center">
-            <h1 className="text-4xl font-bold sm:text-5xl mb-4">
-              Gym Sessions
-            </h1>
-          </div>
-        </div>
-      )}
-      {isVendorsPollPage && (
-        <div className="w-full bg-[#001845] text-white px-6 py-8">
-          <div className="max-w-7xl mx-auto text-center">
-            <h1 className="text-4xl font-bold sm:text-5xl mb-4">
-              Vendors Poll
-            </h1>
-          </div>
-        </div>
-      )}
-      {isArchivedEventsPage && (
-        <div className="w-full bg-[#001845] text-white px-6 py-8">
-          <div className="max-w-7xl mx-auto text-center">
-            <h1 className="text-4xl font-bold sm:text-5xl mb-4">
-              Archived Events
-            </h1>
-          </div>
-        </div>
-      )}
-      <main
-        className={`w-full px-4 ${
-          isCreateEventPage ||
-          isEventsSalesReportPage ||
-          isEventAttendeesReportPage ||
-          isWorkshopRequestsPage ||
-          isLoyaltyProgramPage ||
-          isVendorRequestsPage ||
-          isAllEventsPage ||
-          isGenerateQrPage ||
-          isGymSchedulePage ||
-          isAllEventsPage
-            ? "mt-8"
-            : "mt-6"
-        }`}
-      >
-        <Routes>
-          <Route index element={<AllEvents />} />
-          <Route path="all-events" element={<AllEvents />} />
-          <Route path="events-sales-report" element={<EventsSalesReport />} />
-          <Route
-            path="event-attendees-report"
-            element={<EventAttendeesReport />}
-          />
-          <Route path="create-event" element={<CreateEvent />} />
-          <Route path="workshop-requests" element={<WorkshopRequests />} />
-          <Route path="archived-events" element={<ArchivedEvents />} />
-          <Route path="generate-qr" element={<GenerateQR />} />
-          <Route
-            path="loyalty-program"
-            element={<LoyaltyPartnersDirectory />}
-          />
-          <Route path="vendor-requests" element={<VendorRequests />} />
-          <Route path="vendor-poll" element={<VendorPoll />} />
-          <Route path="gym-schedule" element={<GymSchedule />} />
-          <Route path="edit-event/:type/:id" element={<EditEvent />} />
-          <Route path="*" element={<NotFound />}></Route>
-        </Routes>
-      </main>
+        </header>
+        <main className="flex-1 overflow-y-auto p-0">
+          <Routes>
+            <Route index element={<AllEvents />} />
+            <Route path="all-events" element={<AllEvents />} />
+            <Route path="events-sales-report" element={<EventsSalesReport />} />
+            <Route path="event-attendees-report" element={<EventAttendeesReport />} />
+            <Route path="create-event" element={<CreateEvent />} />
+            <Route path="workshop-requests" element={<WorkshopRequests />} />
+            <Route path="archived-events" element={<ArchivedEvents />} />
+            <Route path="generate-qr" element={<GenerateQR />} />
+            <Route path="loyalty-program" element={<LoyaltyPartnersDirectory />} />
+            <Route path="vendor-requests" element={<VendorRequests />} />
+            <Route path="vendor-poll" element={<VendorPoll />} />
+            <Route path="gym-schedule" element={<GymSchedule />} />
+            <Route path="edit-event/:type/:id" element={<EditEvent />} />
+            <Route path="*" element={<NotFound />}></Route>
+          </Routes>
+        </main>
+      </div>
     </div>
   );
 };
