@@ -297,7 +297,8 @@ export default function RegisteredEvents() {
           (a) =>
             (a.userId === user?._id || a.userId?._id === user?._id) &&
             a.paid === true &&
-            a.cancelled !== true
+            a.cancelled !== true &&
+            getEventDetails(eventRaw).startdate < new Date()
         )
       : false;
 
@@ -332,7 +333,8 @@ export default function RegisteredEvents() {
           (a) =>
             (a.userId === user?._id || a.userId?._id === user?._id) &&
             a.paid === true &&
-            a.cancelled !== true
+            a.cancelled !== true &&
+            getEventDetails(eventRaw).startdate < new Date()
         )
       : false;
 

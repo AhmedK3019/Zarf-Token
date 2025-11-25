@@ -863,7 +863,8 @@ const AllEvents = () => {
           (a) =>
             (a.userId === user?._id || a.userId?._id === user?._id) &&
             a.paid === true &&
-            a.cancelled !== true
+            a.cancelled !== true &&
+            getEventDetails(eventRaw).startdate < new Date()
         )
       : false;
 
@@ -893,7 +894,8 @@ const AllEvents = () => {
           (a) =>
             (a.userId === user?._id || a.userId?._id === user?._id) &&
             a.paid === true &&
-            a.cancelled !== true
+            a.cancelled !== true &&
+            getEventDetails(eventRaw).startdate < new Date()
         )
       : false;
 
