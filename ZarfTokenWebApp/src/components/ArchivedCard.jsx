@@ -3,13 +3,36 @@ export default function ArchivedCard({ event, onUnArchive, onDelete }) {
   const actionButtonBase =
     "w-full rounded-lg px-4 py-2 text-sm font-semibold text-center transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2";
 
+    const getEventTypeColor = (type) => {
+    const colors = {
+      workshop: "#3B82F6",
+      bazaar: "#8B5CF6",
+      trip: "#10B981",
+      conference: "#F59E0B",
+      booth: "#EC4899",
+    };
+    return colors[type] || "#4a4ae6";
+  };
+
+  const eventTypeColor = getEventTypeColor(event.type);
+
   return (
     <div className="rounded-2xl shadow-md p-6 bg-white w-full">
-      {/* Event Type Badge */}
-      <div className="inline-flex items-center justify-center gap-0.5 bg-gray-100 text-gray-600 text-sm px-3 py-1 rounded-full">
-        <span className="w-2 h-2 bg-gary-600 rounded-full"></span>
-        {event.type}
-      </div>
+      <div
+            className="mb-3 inline-flex items-center gap-2 rounded-full px-3 py-1 text-xs font-semibold capitalize"
+            style={{
+              backgroundColor: `${eventTypeColor}15`,
+              color: eventTypeColor,
+            }}
+          >
+            <span
+              className="h-2 w-2 rounded-full"
+              style={{ backgroundColor: eventTypeColor }}
+            />
+            {event.type === "booth" && !event.original?.isBazarBooth
+              ? "Platform Booth"
+              : event.type}
+          </div>
 
       {/* Name */}
       <h2 className="text-2xl font-semibold mt-3">
@@ -49,7 +72,7 @@ export default function ArchivedCard({ event, onUnArchive, onDelete }) {
           }}
           className={`${actionButtonBase} border border-blue-200 bg-blue-50 text-blue-700 hover:bg-blue-100 focus-visible:ring-blue-200 rounded-lg`}
         >
-          un archive
+          UnArchive
         </button>
 
         <button
@@ -59,7 +82,7 @@ export default function ArchivedCard({ event, onUnArchive, onDelete }) {
           }}
           className={`${actionButtonBase} border border-red-200 bg-red-50 text-red-700 hover:bg-red-100 focus-visible:ring-red-200 rounded-lg`}
         >
-          delete
+          Delete
         </button>
       </div>
     </div>
