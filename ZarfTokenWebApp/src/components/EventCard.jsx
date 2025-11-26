@@ -431,7 +431,7 @@ const EventCard = ({
         canDownloadExcel ||
         canUpdate ||
         canViewDetails) && (
-        <div className="absolute right-4 top-4 flex items-center gap-2">
+        <div className="absolute right-4 top-4 flex items-center gap-2 py-1.5">
           {isPastEvent && (
             <span className="rounded-full bg-[#f0f0f0] px-2 py-1 text-[11px] font-semibold uppercase tracking-wide text-gray-700">
               Past Event
