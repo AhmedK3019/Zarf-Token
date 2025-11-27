@@ -35,6 +35,16 @@ const workshopSchema = Joi.object({
     awaitingResponseFrom: Joi.string().allow(""),
     message: Joi.string().allow(""),
   }),
+  revenue: Joi.alternatives()
+    .try(Joi.number(), Joi.object())
+    .optional()
+    .default(0),
+  archive: Joi.boolean().optional().default(false),
+  allowedusers: Joi.array().optional().default([]),
+  registered: Joi.array().optional().default([]),
+  ratings: Joi.array().optional().default([]),
+  userComments: Joi.array().optional().default([]),
+  __v: Joi.number().optional(),
 });
 
 const attendeesSchema = Joi.object({
@@ -196,24 +206,6 @@ const updateWorkshop = async (req, res, next) => {
   }
 };
 
-// const setAllowedRoles = async (req, res, next) => {
-//   try {
-//     const { id } = req.params;
-//     const { allowedusers } = req.body;
-//     if (allowedusers.length == 0 || !allowedusers) {
-//       return res.status().json({ message: "Please select at least one role" });
-//     }
-//     let update = WorkShop.findByIdAndUpdate(
-//       id,
-//       { allowedusers },
-//       { new: true }
-//     );
-//     return res.status(200).json({ message: "done updating", update });
-//   } catch (error) {
-//     next(error);
-//   }
-// };
-
 const updateWorkshopStatus = async (req, res, next) => {
   try {
     const { id } = req.params;
@@ -368,14 +360,14 @@ const registerForWorkshop = async (req, res, next) => {
     });
     if (!check)
       return res.status(404).json({ message: "Workshop is not found" });
-    
+
     // Check if user is the creator of the workshop
     if (check.createdBy && check.createdBy.toString() === userId.toString()) {
       return res
         .status(400)
         .json({ message: "You cannot register for your own workshop" });
     }
-    
+
     if (
       check.attendees.some((a) => a.userId?.toString() === userId.toString()) ||
       check.registered.some((a) => a.userId?.toString() === userId.toString())
