@@ -82,7 +82,6 @@ export default function AllAdminsAndOfficers() {
     <div className="relative flex min-h-screen w-full flex-col items-center">
       <main className="relative z-10 flex w-full flex-1 flex-col items-center px-6 py-8">
         <div className="w-full max-w-6xl">
-
           {loading ? (
             <div className="text-center py-12">
               <div className="inline-block animate-spin rounded-full h-10 w-10 border-b-2 border-[#736CED]"></div>
@@ -129,15 +128,16 @@ export default function AllAdminsAndOfficers() {
                         </p>
                       </div>
                     </div>
-
-                    <div className="mt-4 pt-4 border-t border-gray-100 flex items-center justify-between">
-                      <button
-                        onClick={() => handleDelete(id, u.role)}
-                        className="rounded-full bg-rose-50 px-4 py-2 text-rose-700 text-sm font-medium hover:bg-rose-100 transition-colors"
-                      >
-                        Delete
-                      </button>
-                    </div>
+                    {id !== user?._id && (
+                      <div className="mt-4 pt-4 border-t border-gray-100 flex items-center justify-between">
+                        <button
+                          onClick={() => handleDelete(id, u.role)}
+                          className="rounded-full bg-rose-50 px-4 py-2 text-rose-700 text-sm font-medium hover:bg-rose-100 transition-colors"
+                        >
+                          Delete
+                        </button>
+                      </div>
+                    )}
                   </div>
                 );
               })}

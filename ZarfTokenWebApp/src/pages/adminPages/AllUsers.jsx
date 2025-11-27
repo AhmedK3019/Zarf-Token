@@ -247,8 +247,8 @@ export default function AllUsers() {
   }, [search, statusFilter, users, userTypeFilter]);
 
   return (
-    <div className="min-h-screen w-full overflow-x-hidden overflow-y-auto bg-muted text-[#1F1B3B]">
-      <div className="relative flex min-h-screen w-full flex-col items-center px-6 py-8">
+    <div className="min-h-screen w-full bg-muted text-[#1F1B3B]">
+      <div className="flex min-h-screen w-full flex-col items-center px-6 py-8">
         <div className="w-full max">
           {message && (
             <div className="mb-4 text-center bg-green-100 text-green-800 py-2 rounded">
@@ -276,7 +276,7 @@ export default function AllUsers() {
                 onChange={(e) => setStatusFilter(e.target.value)}
                 className="border border-white/50 bg-white/70 text-[#1F1B3B] rounded-full px-5 py-2 focus:outline-none focus:ring-2 focus:ring-[#736CED] shadow-sm"
               >
-                <option value="all">All Statuses</option>
+                <option value="all">All Status</option>
                 <option value="active">Active Only</option>
                 <option value="blocked">Blocked Only</option>
               </select>
@@ -297,7 +297,7 @@ export default function AllUsers() {
 
             <button
               onClick={() => setShowCreate((v) => !v)}
-              className="w-full md:w-auto inline-flex items-center justify-center gap-2 rounded-full bg-[#4C3BCF] px-5 py-2 text-white font-semibold shadow-md hover:bg-[#3a2faa] transition-colors"
+              className="w-full md:w-auto inline-flex items-center justify-center gap-2 rounded-full bg-[#001889] px-5 py-2 text-white font-semibold shadow-md hover:bg-[#3a2faa] transition-colors"
             >
               {showCreate ? "Close" : "Add Admin/Officer"}
             </button>
@@ -495,85 +495,150 @@ export default function AllUsers() {
               No users found.
             </div>
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-12">
-              {filteredUsers.map((user) => (
-                <div
-                  key={user._id}
-                  className="bg-white rounded-2xl p-6 shadow-[0_10px_25px_rgba(165,148,249,0.2)] border border-white/50 hover:shadow-[0_15px_35px_rgba(165,148,249,0.3)] transition-all hover:-translate-y-1 flex flex-col justify-between"
-                >
-                  <div>
-                    <div className="flex justify-between items-start mb-2">
-                      <h3 className="text-xl font-bold text-[#4C3BCF] flex-1">
-                        {user.firstName ||
-                          user.firstname ||
-                          user.companyname ||
-                          "Unknown"}{" "}
-                        {user.lastName || user.lastname || ""}{" "}
-                        {authUser?._id === user?._id ? "(You)" : ""}
-                      </h3>
-                      <span
-                        className={`px-2 py-1 text-xs font-semibold rounded-full ml-2 ${
-                          user.status?.toLowerCase() === "active"
-                            ? "bg-green-100 text-green-800"
-                            : "bg-red-100 text-red-800"
-                        }`}
+            <div className="bg-white rounded-2xl shadow-[0_10px_25px_rgba(165,148,249,0.2)] border border-white/50 overflow-hidden mb-12">
+              <div className="overflow-x-auto">
+                <table className="w-full">
+                  <thead className="bg-[#001889] text-white">
+                    <tr>
+                      <th className="px-6 py-4 text-left text-sm font-semibold">
+                        Name
+                      </th>
+                      <th className="px-6 py-4 text-left text-sm font-semibold">
+                        Email
+                      </th>
+                      <th className="px-6 py-4 text-left text-sm font-semibold">
+                        GUC ID
+                      </th>
+                      <th className="px-6 py-4 text-left text-sm font-semibold">
+                        Role
+                      </th>
+                      <th className="px-6 py-4 text-left text-sm font-semibold">
+                        Status
+                      </th>
+                      <th className="px-6 py-4 text-center text-sm font-semibold">
+                        Actions
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-gray-200">
+                    {filteredUsers.map((user) => (
+                      <tr
+                        key={user._id}
+                        className="hover:bg-[#F8F7FF] transition-colors"
                       >
-                        {user.status || "Unknown"}
-                      </span>
-                    </div>
-
-                    <p className="text-sm text-[#312A68] mb-1">
-                      Email: {user.email || "N/A"}
-                    </p>
-
-                    <p className="text-sm text-[#312A68] mb-1">
-                      GUC ID: {user.gucid || "N/A"}
-                    </p>
-
-                    <p className="text-sm text-[#312A68] mb-4 capitalize">
-                      Role: {user.companyname ? "Vendor" : user.role || "User"}
-                    </p>
-                  </div>
-
-                  <div className="flex justify-end gap-2 flex-wrap">
-                    {normalizeRole(user.role) !== "admin" && (
-                      <>
-                        {user.status?.toLowerCase() === "active" ? (
-                          <button
-                            onClick={() => handleBlock(user._id, user.role)}
-                            className="rounded-lg px-4 py-2 text-sm font-semibold text-center transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 border border-yellow-200 bg-yellow-50 text-yellow-700 hover:bg-yellow-100 focus-visible:ring-yellow-200"
+                        <td className="px-6 py-4 text-sm text-[#312A68]">
+                          {user.firstName ||
+                            user.firstname ||
+                            user.companyname ||
+                            "Unknown"}{" "}
+                          {user.lastName || user.lastname || ""}{" "}
+                          {authUser?._id === user?._id && (
+                            <span className="text-[#4C3BCF] font-semibold">
+                              (You)
+                            </span>
+                          )}
+                        </td>
+                        <td className="px-6 py-4 text-sm text-[#312A68]">
+                          {user.email || "N/A"}
+                        </td>
+                        <td className="px-6 py-4 text-sm text-[#312A68]">
+                          {user.gucid || "N/A"}
+                        </td>
+                        <td className="px-6 py-4 text-sm text-[#312A68] capitalize">
+                          {user.companyname ? "Vendor" : user.role || "User"}
+                        </td>
+                        <td className="px-6 py-4">
+                          <span
+                            className={`inline-flex px-3 py-1 text-xs font-semibold rounded-full ${
+                              user.status?.toLowerCase() === "active"
+                                ? "bg-green-100 text-green-800"
+                                : "bg-red-100 text-red-800"
+                            }`}
                           >
-                            Block
-                          </button>
-                        ) : (
-                          <button
-                            onClick={() => handleUnblock(user._id, user.role)}
-                            className="rounded-lg px-4 py-2 text-sm font-semibold text-center transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 border border-green-200 bg-green-50 text-green-700 hover:bg-green-100 focus-visible:ring-green-200"
-                          >
-                            Unblock
-                          </button>
-                        )}
-                      </>
-                    )}
-                    <button
-                      onClick={() => handleDelete(user._id, user.role)}
-                      className="rounded-lg px-4 py-2 text-sm font-semibold text-center transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 border border-red-200 bg-red-50 text-red-600 hover:bg-red-100 focus-visible:ring-red-200"
-                    >
-                      Delete
-                    </button>
-                  </div>
-                </div>
-              ))}
+                            {user.status || "Unknown"}
+                          </span>
+                        </td>
+                        <td className="px-6 py-4">
+                          <div className="flex justify-center gap-3">
+                            {normalizeRole(user.role) !== "admin" && (
+                              <>
+                                {user.status?.toLowerCase() === "active" ? (
+                                  <button
+                                    onClick={() =>
+                                      handleBlock(user._id, user.role)
+                                    }
+                                    className="w-10 h-10 rounded-full flex items-center justify-center transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 border-2 border-yellow-500 bg-yellow-50 text-yellow-600 hover:bg-yellow-500 hover:text-white focus-visible:ring-yellow-200"
+                                    title="Block"
+                                  >
+                                    <svg
+                                      className="w-5 h-5"
+                                      fill="none"
+                                      stroke="currentColor"
+                                      viewBox="0 0 24 24"
+                                    >
+                                      <path
+                                        strokeLinecap="round"
+                                        strokeLinejoin="round"
+                                        strokeWidth={2.5}
+                                        d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636"
+                                      />
+                                    </svg>
+                                  </button>
+                                ) : (
+                                  <button
+                                    onClick={() =>
+                                      handleUnblock(user._id, user.role)
+                                    }
+                                    className="w-10 h-10 rounded-full flex items-center justify-center transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 border-2 border-green-500 bg-green-50 text-green-600 hover:bg-green-500 hover:text-white focus-visible:ring-green-200"
+                                    title="Unblock"
+                                  >
+                                    <svg
+                                      className="w-5 h-5"
+                                      fill="none"
+                                      stroke="currentColor"
+                                      viewBox="0 0 24 24"
+                                    >
+                                      <path
+                                        strokeLinecap="round"
+                                        strokeLinejoin="round"
+                                        strokeWidth={2.5}
+                                        d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
+                                      />
+                                    </svg>
+                                  </button>
+                                )}
+                              </>
+                            )}
+                            <button
+                              onClick={() => handleDelete(user._id, user.role)}
+                              className="w-10 h-10 rounded-full flex items-center justify-center transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 border-2 border-red-500 bg-red-50 text-red-600 hover:bg-red-500 hover:text-white focus-visible:ring-red-200"
+                              title="Delete"
+                            >
+                              <svg
+                                className="w-5 h-5"
+                                fill="none"
+                                stroke="currentColor"
+                                viewBox="0 0 24 24"
+                              >
+                                <path
+                                  strokeLinecap="round"
+                                  strokeLinejoin="round"
+                                  strokeWidth={2.5}
+                                  d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+                                />
+                              </svg>
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
             </div>
           )}
         </div>
       </div>
-
-      <footer className="relative z-10 w-full px-6 py-6 text-center text-sm text-[#312A68]/80">
-        {new Date().getFullYear()} Zarf Token. All rights reserved.
-      </footer>
-
-      <div className="pointer-events-none absolute bottom-[-10%] left-1/2 h-56 w-[100%] -translate-x-1/2 rounded-[50%] bg-gradient-to-r from-[#736CED] via-[#A594F9] to-[#6DD3CE] opacity-60 -z-10" />
     </div>
   );
 }
