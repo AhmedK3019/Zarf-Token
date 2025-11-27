@@ -95,7 +95,6 @@ export default function AllUsers() {
   };
 
   const handleUnblock = async (id, role) => {
-    if (!window.confirm("Are you sure you want to unblock this user?")) return;
     try {
       const res = await api.patch(`/allUsers/unBlockUser/${id}/${role}`);
       setMessage(res.data.message || "User unblocked successfully");
@@ -172,9 +171,7 @@ export default function AllUsers() {
       clearToasts();
     } catch (err) {
       setError(
-        err.response?.data?.message ||
-          err.message ||
-          "Failed to create account"
+        err.response?.data?.message || err.message || "Failed to create account"
       );
       clearToasts();
     } finally {
@@ -338,7 +335,10 @@ export default function AllUsers() {
                       value={createForm.firstname}
                       onChange={(e) =>
                         setCreateForm((s) => {
-                          setFieldErrors((prev) => ({ ...prev, firstname: null }));
+                          setFieldErrors((prev) => ({
+                            ...prev,
+                            firstname: null,
+                          }));
                           return {
                             ...s,
                             firstname: e.target.value,
@@ -365,7 +365,10 @@ export default function AllUsers() {
                       value={createForm.lastname}
                       onChange={(e) =>
                         setCreateForm((s) => {
-                          setFieldErrors((prev) => ({ ...prev, lastname: null }));
+                          setFieldErrors((prev) => ({
+                            ...prev,
+                            lastname: null,
+                          }));
                           return {
                             ...s,
                             lastname: e.target.value,
@@ -421,7 +424,10 @@ export default function AllUsers() {
                       value={createForm.password}
                       onChange={(e) =>
                         setCreateForm((s) => {
-                          setFieldErrors((prev) => ({ ...prev, password: null }));
+                          setFieldErrors((prev) => ({
+                            ...prev,
+                            password: null,
+                          }));
                           return {
                             ...s,
                             password: e.target.value,
