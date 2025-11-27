@@ -29,6 +29,10 @@ const mainDashboardUser = () => {
     location.pathname === "/dashboard/user/vendors-poll";
   const isCourtsPage = location.pathname === "/dashboard/user/courts";
   const isCampusEventsPage = location.pathname === "/dashboard/user/all-events";
+  const isCreateWorkshopPage =
+    location.pathname === "/dashboard/user/create-workshop";
+  const isMyWorkshopsPage =
+    location.pathname === "/dashboard/user/my-workshops";
 
   return (
     <div>
@@ -118,6 +122,30 @@ const mainDashboardUser = () => {
             </h1>
             <p className="text-lg max-w-2xl mx-auto opacity-90">
               Explore all upcoming events happening on campus.
+            </p>
+          </div>
+        </div>
+      )}
+      {isCreateWorkshopPage && (
+        <div className="w-full bg-[#001845] text-white px-6 py-8">
+          <div className="max-w-7xl mx-auto text-center">
+            <h1 className="text-4xl font-bold sm:text-5xl mb-4">
+              Create Workshop
+            </h1>
+            <p className="text-lg max-w-2xl mx-auto opacity-90">
+              Plan and organize a new workshop for students.
+            </p>
+          </div>
+        </div>
+      )}
+      {isMyWorkshopsPage && (
+        <div className="w-full bg-[#001845] text-white px-6 py-8">
+          <div className="max-w-7xl mx-auto text-center">
+            <h1 className="text-4xl font-bold sm:text-5xl mb-4">
+              My Workshops
+            </h1>
+            <p className="text-lg max-w-2xl mx-auto opacity-90">
+              Manage and view the workshops you have created.
             </p>
           </div>
         </div>

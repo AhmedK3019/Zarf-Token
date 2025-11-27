@@ -114,20 +114,6 @@ export default function CreateWorkshop() {
       <div className="relative flex min-h-screen w-full flex-col items-center">
         <main className="relative z-10 flex w-full flex-1 flex-col items-center px-6 py-8">
           <div className="w-full max-w-6xl">
-            <div className="mb-8 text-center">
-              <h2 className="text-3xl font-bold text-[#736CED] sm:text-4xl mb-2">
-                Create Workshop
-              </h2>
-              {error ? (
-                <p className="max-w-2xl mx-auto text-[#9F2D20] bg-[#FEE2E2] border border-[#FCA5A5] rounded-lg px-4 py-2">
-                  {error}
-                </p>
-              ) : (
-                <p className="text-[#312A68] opacity-80">
-                  Here you can create a workshop.
-                </p>
-              )}
-            </div>
             <form
               onSubmit={handleSubmit}
               className="space-y-4 max-w-3xl bg-white/70 rounded-xl p-6 shadow mx-auto"

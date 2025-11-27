@@ -315,15 +315,6 @@ export default function MyWorkshops() {
       <div className="relative flex min-h-screen w-full flex-col items-center">
         <main className="relative z-10 flex w-full flex-1 flex-col items-center px-6 py-8">
           <div className="w-full max-w-6xl">
-            <div className="mb-8 text-center">
-              <h2 className="text-3xl font-bold text-[#736CED] sm:text-4xl mb-2">
-                My Workshops
-              </h2>
-              <p className="text-[#312A68] opacity-80">
-                Here are the workshops created by you.
-              </p>
-            </div>
-
             {workshops.length === 0 ? (
               <div className="text-center text-[#312A68]/70 py-16 bg-white/50 rounded-3xl">
                 You have not created any workshops yet.
@@ -449,26 +440,48 @@ export default function MyWorkshops() {
                                 Workshop Participants
                               </h4>
                             </div>
-                            
+
                             {/* Capacity Summary */}
                             <div className="mb-4 p-3 bg-gradient-to-r from-[#736CED]/10 to-[#6DD3CE]/10 rounded-lg border border-[#736CED]/20">
                               <div className="flex items-center justify-between text-sm">
                                 <span className="font-medium text-[#312A68]">
-                                  Total Capacity: <span className="text-[#736CED] font-bold">{w.capacity || 0}</span>
+                                  Total Capacity:{" "}
+                                  <span className="text-[#736CED] font-bold">
+                                    {w.capacity || 0}
+                                  </span>
                                 </span>
                                 <span className="font-medium text-[#312A68]">
-                                  Registered: <span className="text-[#6DD3CE] font-bold">{(w.registered?.length || 0) + (w.attendees?.length || 0)}</span>
+                                  Registered:{" "}
+                                  <span className="text-[#6DD3CE] font-bold">
+                                    {(w.registered?.length || 0) +
+                                      (w.attendees?.length || 0)}
+                                  </span>
                                 </span>
                                 <span className="font-medium text-[#312A68]">
-                                  Remaining: <span className={`font-bold ${(w.capacity || 0) - ((w.registered?.length || 0) + (w.attendees?.length || 0)) <= 0 ? 'text-[#C14953]' : 'text-[#28a745]'}`}>
-                                    {Math.max(0, (w.capacity || 0) - ((w.registered?.length || 0) + (w.attendees?.length || 0)))}
+                                  Remaining:{" "}
+                                  <span
+                                    className={`font-bold ${
+                                      (w.capacity || 0) -
+                                        ((w.registered?.length || 0) +
+                                          (w.attendees?.length || 0)) <=
+                                      0
+                                        ? "text-[#C14953]"
+                                        : "text-[#28a745]"
+                                    }`}
+                                  >
+                                    {Math.max(
+                                      0,
+                                      (w.capacity || 0) -
+                                        ((w.registered?.length || 0) +
+                                          (w.attendees?.length || 0))
+                                    )}
                                   </span>
                                 </span>
                               </div>
                             </div>
 
-                            
-                            {((w.attendees && w.attendees.length > 0) || (w.registered && w.registered.length > 0)) ? (
+                            {(w.attendees && w.attendees.length > 0) ||
+                            (w.registered && w.registered.length > 0) ? (
                               <div className="space-y-4">
                                 {/* Paid Attendees */}
                                 {w.attendees && w.attendees.length > 0 && (
@@ -488,7 +501,8 @@ export default function MyWorkshops() {
                                           </div>
                                           <div className="min-w-0 flex-1">
                                             <p className="text-xs font-medium text-gray-900 truncate">
-                                              {attendee.firstname} {attendee.lastname}
+                                              {attendee.firstname}{" "}
+                                              {attendee.lastname}
                                             </p>
                                             <p className="text-xs text-gray-600 truncate">
                                               {attendee.gucid}
@@ -505,27 +519,31 @@ export default function MyWorkshops() {
                                   <div>
                                     <h5 className="text-sm font-semibold text-[#54C6EB] mb-2 flex items-center gap-1">
                                       <Clock className="w-3.5 h-3.5" />
-                                      Registered (Pending Payment) ({w.registered.length})
+                                      Registered (Pending Payment) (
+                                      {w.registered.length})
                                     </h5>
                                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
-                                      {w.registered.map((participant, index) => (
-                                        <div
-                                          key={`registered-${index}`}
-                                          className="flex items-center gap-2 p-2 bg-blue-50 border border-blue-200 rounded-lg"
-                                        >
-                                          <div className="w-6 h-6 bg-[#54C6EB] rounded-full flex items-center justify-center flex-shrink-0">
-                                            <Clock className="w-3.5 h-3.5 text-white" />
+                                      {w.registered.map(
+                                        (participant, index) => (
+                                          <div
+                                            key={`registered-${index}`}
+                                            className="flex items-center gap-2 p-2 bg-blue-50 border border-blue-200 rounded-lg"
+                                          >
+                                            <div className="w-6 h-6 bg-[#54C6EB] rounded-full flex items-center justify-center flex-shrink-0">
+                                              <Clock className="w-3.5 h-3.5 text-white" />
+                                            </div>
+                                            <div className="min-w-0 flex-1">
+                                              <p className="text-xs font-medium text-gray-900 truncate">
+                                                {participant.firstname}{" "}
+                                                {participant.lastname}
+                                              </p>
+                                              <p className="text-xs text-gray-600 truncate">
+                                                {participant.gucid}
+                                              </p>
+                                            </div>
                                           </div>
-                                          <div className="min-w-0 flex-1">
-                                            <p className="text-xs font-medium text-gray-900 truncate">
-                                              {participant.firstname} {participant.lastname}
-                                            </p>
-                                            <p className="text-xs text-gray-600 truncate">
-                                              {participant.gucid}
-                                            </p>
-                                          </div>
-                                        </div>
-                                      ))}
+                                        )
+                                      )}
                                     </div>
                                   </div>
                                 )}
@@ -535,9 +553,12 @@ export default function MyWorkshops() {
                                 <div className="w-12 h-12 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-3">
                                   <Users className="w-6 h-6 text-gray-400" />
                                 </div>
-                                <p className="text-sm text-gray-500 mb-1">No participants yet</p>
+                                <p className="text-sm text-gray-500 mb-1">
+                                  No participants yet
+                                </p>
                                 <p className="text-xs text-gray-400">
-                                  Participants will appear here once they register for your workshop
+                                  Participants will appear here once they
+                                  register for your workshop
                                 </p>
                               </div>
                             )}
