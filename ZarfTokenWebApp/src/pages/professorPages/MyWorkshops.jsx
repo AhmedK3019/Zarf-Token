@@ -269,15 +269,6 @@ export default function MyWorkshops() {
       if (payload.capacity !== undefined)
         payload.capacity = Number(payload.capacity) || 0;
 
-      delete payload._id;
-      delete payload.type;
-      delete payload.createdBy;
-      delete payload.createdAt;
-      delete payload.attendees;
-      delete payload.comments;
-      if (payload.message) delete payload.message;
-      if (payload.currentMessage) delete payload.currentMessage;
-      delete payload.status;
       const res = await api.put(
         `/workshops/updateWorkshop/${editing}`,
         payload
