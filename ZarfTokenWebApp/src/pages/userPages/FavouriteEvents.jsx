@@ -39,8 +39,6 @@ const sortOptions = [
 export default function FavouriteEvents() {
   const { user } = useAuthUser();
   const [loading, setLoading] = useState(false);
-  const [toastMsg, setToastMsg] = useState(null);
-  const [toastType, setToastType] = useState("info");
   const [error, setError] = useState(null);
   const [favs, setFavs] = useState([]);
 
@@ -91,9 +89,6 @@ export default function FavouriteEvents() {
         registration: r.registration || "unknown",
       }));
       setFavs(list);
-      setToastMsg("Favorites loaded");
-      setToastType("success");
-      setTimeout(() => setToastMsg(null), 1500);
     } catch (e) {
       setError(e?.response?.data?.message || "Failed to load favourites");
     } finally {
@@ -160,16 +155,8 @@ export default function FavouriteEvents() {
           (x) => !(x.itemType === fav.itemType && x.itemId === fav.itemId)
         )
       );
-      setToastMsg("Removed from favorites");
-      setToastType("success");
-      setTimeout(() => setToastMsg(null), 2000);
       return true;
     } catch (e) {
-      setToastMsg(
-        e?.response?.data?.message || "Failed to remove from favorites"
-      );
-      setToastType("error");
-      setTimeout(() => setToastMsg(null), 2500);
       return false;
     }
   };
@@ -774,15 +761,6 @@ export default function FavouriteEvents() {
               </button>
             </div>
           </div>
-        </div>
-      )}
-      {toastMsg && (
-        <div
-          className={`fixed top-4 right-4 z-50 px-4 py-2 rounded-md text-white ${
-            toastType === "error" ? "bg-red-600" : "bg-emerald-600"
-          }`}
-        >
-          {toastMsg}
         </div>
       )}
     </div>

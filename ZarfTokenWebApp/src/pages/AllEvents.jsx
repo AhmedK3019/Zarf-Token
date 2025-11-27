@@ -178,8 +178,6 @@ const AllEvents = () => {
 
   // Favourites state for heart toggle
   const [favKeys, setFavKeys] = useState(new Set());
-  const [toastMsg, setToastMsg] = useState(null);
-  const [toastType, setToastType] = useState("info");
 
   // ===== STATE GROUPS =====
 
@@ -564,9 +562,6 @@ const AllEvents = () => {
         const next = new Set(favKeys);
         next.delete(key);
         setFavKeys(next);
-        setToastMsg("Removed from favorites");
-        setToastType("success");
-        setTimeout(() => setToastMsg(null), 1500);
       } else {
         await api.post(`/user/addFavourite/${user._id}`, {
           itemType: raw.type,
@@ -575,14 +570,10 @@ const AllEvents = () => {
         const next = new Set(favKeys);
         next.add(key);
         setFavKeys(next);
-        setToastMsg("Added to favorites");
-        setToastType("success");
-        setTimeout(() => setToastMsg(null), 1500);
       }
     } catch (e) {
-      setToastMsg(e?.response?.data?.message || "Action failed");
-      setToastType("error");
-      setTimeout(() => setToastMsg(null), 2000);
+      console.error("Favourite toggle error:", e);
+      alert("Failed to update favourites. Please try again.");
     }
   };
 
@@ -1225,15 +1216,6 @@ const AllEvents = () => {
             <p className="text-gray-600 text-lg">
               No events found for this category.
             </p>
-          </div>
-        )}
-        {toastMsg && (
-          <div
-            className={`fixed top-4 right-4 z-50 px-4 py-2 rounded-md text-white ${
-              toastType === "error" ? "bg-red-600" : "bg-emerald-600"
-            }`}
-          >
-            {toastMsg}
           </div>
         )}
       </main>

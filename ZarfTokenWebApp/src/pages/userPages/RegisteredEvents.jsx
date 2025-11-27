@@ -16,8 +16,6 @@ export default function RegisteredEvents() {
   const [error, setError] = useState("");
   // favourites state (for heart toggle)
   const [favKeys, setFavKeys] = useState(new Set());
-  const [toastMsg, setToastMsg] = useState(null);
-  const [toastType, setToastType] = useState("info");
 
   // details & pay modal state
   const [selectedEvent, setSelectedEvent] = useState(null);
@@ -91,9 +89,6 @@ export default function RegisteredEvents() {
         const next = new Set(favKeys);
         next.delete(key);
         setFavKeys(next);
-        setToastMsg("Removed from favorites");
-        setToastType("success");
-        setTimeout(() => setToastMsg(null), 1500);
       } else {
         await api.post(`/user/addFavourite/${user._id}`, {
           itemType: raw.type,
@@ -102,14 +97,9 @@ export default function RegisteredEvents() {
         const next = new Set(favKeys);
         next.add(key);
         setFavKeys(next);
-        setToastMsg("Added to favorites");
-        setToastType("success");
-        setTimeout(() => setToastMsg(null), 1500);
       }
     } catch (e) {
-      setToastMsg(e?.response?.data?.message || "Action failed");
-      setToastType("error");
-      setTimeout(() => setToastMsg(null), 2000);
+      console.error("Favourite toggle error:", e);
     }
   };
 
@@ -148,9 +138,6 @@ export default function RegisteredEvents() {
         return;
       }
       await api.patch(endpoints[raw.type], { userId: user._id });
-      setToastMsg("Registration canceled");
-      setToastType("success");
-      setTimeout(() => setToastMsg(null), 1500);
       // refresh registered events
       const res = await api.get(
         `/allEvents/getEventsRegisteredByMe/${user._id}`
@@ -159,9 +146,7 @@ export default function RegisteredEvents() {
       // Refresh user (wallet refund, etc.)
       await refreshUser();
     } catch (err) {
-      setToastMsg(err?.response?.data?.message || "Cancel failed");
-      setToastType("error");
-      setTimeout(() => setToastMsg(null), 2000);
+      console.error("Cancellation error:", err);
     }
   };
 
@@ -553,16 +538,6 @@ export default function RegisteredEvents() {
             )}
           </div>
         </main>
-        {/* Toast message */}
-        {toastMsg && (
-          <div
-            className={`fixed top-4 right-4 z-50 px-4 py-2 rounded-md text-white ${
-              toastType === "error" ? "bg-red-600" : "bg-emerald-600"
-            }`}
-          >
-            {toastMsg}
-          </div>
-        )}
         {/* Details Modal */}
         {showDetailsModal && selectedEvent && (
           <EventDetailsModal
@@ -603,21 +578,12 @@ export default function RegisteredEvents() {
                 if (!ep)
                   throw new Error("Wallet payment not supported for this type");
                 await api.post(ep, { method: "wallet" });
-                setToastMsg("Wallet payment successful");
-                setToastType("success");
-                setTimeout(() => setToastMsg(null), 1500);
                 setShowPayModal(false);
                 await refreshRegistered();
                 // Wallet deducted, refresh user object
                 await refreshUser();
               } catch (e) {
-                setToastMsg(
-                  e?.response?.data?.message ||
-                    e.message ||
-                    "Wallet payment failed"
-                );
-                setToastType("error");
-                setTimeout(() => setToastMsg(null), 2500);
+                console.error("Wallet payment error:", e);
               } finally {
                 setPaySubmitting(false);
               }
@@ -641,13 +607,7 @@ export default function RegisteredEvents() {
                   throw new Error("Stripe session URL missing");
                 }
               } catch (e) {
-                setToastMsg(
-                  e?.response?.data?.message ||
-                    e.message ||
-                    "Stripe payment failed"
-                );
-                setToastType("error");
-                setTimeout(() => setToastMsg(null), 2500);
+                console.error("Stripe payment error:", e);
               } finally {
                 setPaySubmitting(false);
               }
