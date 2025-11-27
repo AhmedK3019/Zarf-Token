@@ -342,10 +342,9 @@ const NavbarUser = () => {
                 onClick={handleLogout}
                 aria-label="Logout"
                 title="Logout"
-                className="px-3 py-2 rounded-lg text-white/80 hover:text-white hover:bg-white/10 transition-all flex items-center gap-2 text-sm"
+                className="p-2 rounded-lg text-white/90 hover:text-white hover:bg-white/10 transition-all"
               >
-                <LogOut className="h-4 w-4" />
-                <span className="hidden sm:inline">Logout</span>
+                <LogOut className="h-5 w-5" />
               </button>
             </div>
           </div>
