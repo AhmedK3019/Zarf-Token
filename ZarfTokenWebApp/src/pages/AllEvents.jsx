@@ -5,15 +5,15 @@ import { useAuthUser } from "../hooks/auth";
 import EventCard from "../components/EventCard";
 import { getEventDetails, formatDate } from "./eventUtils";
 import EventDetailsModal from "../components/EventDetailsModal";
-import { 
-  X, 
-  User, 
-  Star, 
-  MessageCircle, 
-  Trash2, 
-  Filter, 
-  ChevronDown, 
-  ChevronUp 
+import {
+  X,
+  User,
+  Star,
+  MessageCircle,
+  Trash2,
+  Filter,
+  ChevronDown,
+  ChevronUp,
 } from "lucide-react";
 
 const LIGHT_OVERLAY_CLASSES =
@@ -191,7 +191,7 @@ const AllEvents = () => {
   const [statusFilter, setStatusFilter] = useState("");
   const [regFilter, setRegFilter] = useState("");
   const [sortBy, setSortBy] = useState("date_added_desc");
-  
+
   // UI State
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
@@ -207,7 +207,7 @@ const AllEvents = () => {
   const [showRatingModal, setShowRatingModal] = useState(false);
   const [showRatingsListModal, setShowRatingsListModal] = useState(false);
   const [selectedRatingEvent, setSelectedRatingEvent] = useState(null);
-  const [hasAttended, setHasAttended] = useState(false); 
+  const [hasAttended, setHasAttended] = useState(false);
   const [comments, setComments] = useState([]);
   const [ratings, setRatings] = useState([]);
   const [commentsLoading, setCommentsLoading] = useState(false);
@@ -229,7 +229,7 @@ const AllEvents = () => {
   const [filterDate, setFilterDate] = useState("");
   const [startDateFilter, setStartDateFilter] = useState("");
   const [endDateFilter, setEndDateFilter] = useState("");
-  const [filterType, setFilterType] = useState(""); 
+  const [filterType, setFilterType] = useState("");
   // Note: Old 'dateSort' is handled by the new 'sortBy' dropdown
 
   const [showRegisterModal, setShowRegisterModal] = useState(false);
@@ -382,7 +382,9 @@ const AllEvents = () => {
         const matchesSearch =
           !lowercasedSearch ||
           event.name?.toLowerCase().includes(lowercasedSearch) ||
-          `${event.createdBy?.firstname || ""} ${event.createdBy?.lastname || ""}`
+          `${event.createdBy?.firstname || ""} ${
+            event.createdBy?.lastname || ""
+          }`
             .toLowerCase()
             .includes(lowercasedSearch) ||
           event.professors?.some((prof) =>
@@ -413,17 +415,18 @@ const AllEvents = () => {
           (regFilter === "registered" ? isRegistered : !isRegistered);
 
         // 3. OLD FILTERS (Logic restored from AllEventsOld.jsx)
-        
+
         // Location Filter
         const matchesLocation =
-        !hasLocationFilter ||
-        event.location?.toLowerCase().includes(lowercasedLocation);
+          !hasLocationFilter ||
+          event.location?.toLowerCase().includes(lowercasedLocation);
 
         // Professor Filter (Detailed check from Old file)
         let matchesProfessor = true;
         if (hasProfessorFilter) {
-          const conferenceProfMatch =
-            event.professorname?.toLowerCase().includes(lowercasedProfessor);
+          const conferenceProfMatch = event.professorname
+            ?.toLowerCase()
+            .includes(lowercasedProfessor);
 
           const workshopProfMatch = event.professors?.some((prof) =>
             `${prof.firstname} ${prof.lastname}`
@@ -431,11 +434,13 @@ const AllEvents = () => {
               .includes(lowercasedProfessor)
           );
 
-          const createdByMatch = `${event.createdBy?.firstname} ${event.createdBy?.lastname}`
-            .toLowerCase()
-            .includes(lowercasedProfessor);
+          const createdByMatch =
+            `${event.createdBy?.firstname} ${event.createdBy?.lastname}`
+              .toLowerCase()
+              .includes(lowercasedProfessor);
 
-          matchesProfessor = conferenceProfMatch || workshopProfMatch || createdByMatch;
+          matchesProfessor =
+            conferenceProfMatch || workshopProfMatch || createdByMatch;
         }
 
         // Specific Date Filter
@@ -477,9 +482,8 @@ const AllEvents = () => {
           matchesEndDate = eventStartDate <= filterEndDate;
         }
 
-        const matchesType = 
-          !filterType || 
-          event.type?.toLowerCase() === filterType.toLowerCase();
+        const matchesType =
+          !filterType || event.type?.toLowerCase() === filterType.toLowerCase();
 
         return (
           matchesSearch &&
@@ -543,7 +547,7 @@ const AllEvents = () => {
     filterProfessor,
     filterDate,
     startDateFilter,
-    endDateFilter
+    endDateFilter,
   ]);
 
   // ===== EVENT HANDLERS =====
@@ -1005,7 +1009,7 @@ const AllEvents = () => {
                 />
               </svg>
             </div>
-            
+
             <button
               onClick={() => setShowFilters(!showFilters)}
               className="flex items-center gap-2 px-5 py-3 rounded-lg border border-gray-200 bg-white text-[#312A68] shadow-sm hover:bg-gray-50 focus:border-[#736CED] focus:outline-none focus:ring-2 focus:ring-[#736CED]/20 transition-colors"
@@ -1015,8 +1019,15 @@ const AllEvents = () => {
               <span className="font-medium">
                 {showFilters ? "Hide Filters" : "Filters"}
               </span>
-              {showFilters ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
-              {(filterLocation || filterProfessor || filterDate || startDateFilter) && (
+              {showFilters ? (
+                <ChevronUp size={16} />
+              ) : (
+                <ChevronDown size={16} />
+              )}
+              {(filterLocation ||
+                filterProfessor ||
+                filterDate ||
+                startDateFilter) && (
                 <span className="ml-1 px-2 py-0.5 bg-[#736CED] text-white text-xs rounded-full">
                   Active
                 </span>
@@ -1028,7 +1039,9 @@ const AllEvents = () => {
           {showFilters && (
             <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 animate-fade-in">
               <div className="flex justify-between items-center mb-4">
-                <h3 className="text-lg font-bold text-[#4C3BCF]">Advanced Filters</h3>
+                <h3 className="text-lg font-bold text-[#4C3BCF]">
+                  Advanced Filters
+                </h3>
                 <button
                   onClick={handleClearFilters}
                   className="text-sm text-gray-500 hover:text-[#4C3BCF] underline"
@@ -1084,8 +1097,28 @@ const AllEvents = () => {
                 </select>
               </div>
 
+              {/* Sort By */}
+              <div className="mb-6 pt-4">
+                <label className="block text-sm font-semibold text-gray-700 mb-1">
+                  Sort Events By
+                </label>
+                <select
+                  value={sortBy}
+                  onChange={(e) => setSortBy(e.target.value)}
+                  className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-[#4C3BCF] bg-white"
+                >
+                  {sortOptions.map((option) => (
+                    <option key={option.id} value={option.id}>
+                      {option.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
               <div className=" pt-4">
-                <h4 className="text-sm font-bold text-gray-800 mb-4">Date Options</h4>
+                <h4 className="text-sm font-bold text-gray-800 mb-4">
+                  Date Options
+                </h4>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   {/* Specific Date */}
                   <div>
@@ -1123,10 +1156,14 @@ const AllEvents = () => {
                         type="date"
                         value={startDateFilter}
                         onChange={(e) => {
-                           setStartDateFilter(e.target.value);
-                           if (endDateFilter && e.target.value && new Date(endDateFilter) < new Date(e.target.value)) {
-                             setEndDateFilter("");
-                           }
+                          setStartDateFilter(e.target.value);
+                          if (
+                            endDateFilter &&
+                            e.target.value &&
+                            new Date(endDateFilter) < new Date(e.target.value)
+                          ) {
+                            setEndDateFilter("");
+                          }
                         }}
                         className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-[#4C3BCF]"
                         placeholder="Start"
@@ -1146,8 +1183,6 @@ const AllEvents = () => {
               </div>
             </div>
           )}
-
-          
         </div>
 
         {/* Events Grid */}
