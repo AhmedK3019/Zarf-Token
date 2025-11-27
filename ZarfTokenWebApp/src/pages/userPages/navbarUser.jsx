@@ -105,65 +105,6 @@ const NavbarUser = () => {
 
             {/* Center - Links with dropdowns */}
             <div className="hidden lg:flex items-center gap-4 text-sm font-medium text-white justify-self-center">
-              {/* Workshops dropdown (Professors only): Create / My Workshops */}
-              {user.role === "Professor" && (
-                <div className="relative" ref={workshopsRef}>
-                  <button
-                    onClick={() => {
-                      setWorkshopsDropdownOpen(!workshopsDropdownOpen);
-                      setEventsDropdownOpen(false);
-                      setGymDropdownOpen(false);
-                    }}
-                    className={`px-4 py-2 rounded-lg transition-all flex items-center gap-2 ${
-                      location.pathname.includes("/create-workshop") ||
-                      location.pathname.includes("/my-workshops")
-                        ? "bg-white/10 text-white font-semibold"
-                        : "text-white/90 hover:text-white hover:bg-white/5"
-                    }`}
-                  >
-                    <PlusCircle className="h-4 w-4" />
-                    Workshops
-                    <ChevronDown
-                      className={`h-4 w-4 ${
-                        workshopsDropdownOpen ? "rotate-180" : ""
-                      }`}
-                    />
-                  </button>
-                  {workshopsDropdownOpen && (
-                    <div className="absolute top-full left-0 mt-2 w-56 bg-white rounded-lg shadow-xl border border-gray-200 overflow-hidden z-50">
-                      <NavLink
-                        to="/dashboard/user/create-workshop"
-                        onClick={() => setWorkshopsDropdownOpen(false)}
-                        className={({ isActive }) =>
-                          `flex items-center gap-3 px-4 py-3 text-gray-800 hover:bg-primary/5 hover:text-primary transition-colors ${
-                            isActive
-                              ? "bg-primary/10 text-primary font-semibold"
-                              : ""
-                          }`
-                        }
-                      >
-                        <PlusCircle className="h-4 w-4" />
-                        <span className="font-medium">Create Workshop</span>
-                      </NavLink>
-                      <NavLink
-                        to="/dashboard/user/my-workshops"
-                        onClick={() => setWorkshopsDropdownOpen(false)}
-                        className={({ isActive }) =>
-                          `flex items-center gap-3 px-4 py-3 text-gray-800 hover:bg-primary/5 hover:text-primary transition-colors border-t border-gray-200 ${
-                            isActive
-                              ? "bg-primary/10 text-primary font-semibold"
-                              : ""
-                          }`
-                        }
-                      >
-                        <List className="h-4 w-4" />
-                        <span className="font-medium">My Workshops</span>
-                      </NavLink>
-                    </div>
-                  )}
-                </div>
-              )}
-
               {/* Pill control for the main navigation items */}
               <div className="flex items-center gap-1 rounded-full bg-white/5 px-2 py-1 shadow-[0_10px_30px_rgba(0,0,0,0.22)] border border-white/10">
                 {/* Events dropdown: All / Favourites / Registered */}
@@ -240,6 +181,38 @@ const NavbarUser = () => {
                         <CheckSquare className="h-4 w-4" />
                         <span className="font-medium">Registered</span>
                       </NavLink>
+                      {user.role === "Professor" && (
+                        <>
+                          <NavLink
+                            to="/dashboard/user/create-workshop"
+                            className={({ isActive }) =>
+                              `flex items-center gap-3 px-4 py-3 text-gray-800 hover:bg-primary/5 hover:text-primary transition-colors border-t border-gray-200 ${
+                                isActive
+                                  ? "bg-primary/10 text-primary font-semibold"
+                                  : ""
+                              }`
+                            }
+                            onClick={() => setEventsDropdownOpen(false)}
+                          >
+                            <PlusCircle className="h-4 w-4" />
+                            <span className="font-medium">Create Workshop</span>
+                          </NavLink>
+                          <NavLink
+                            to="/dashboard/user/my-workshops"
+                            className={({ isActive }) =>
+                              `flex items-center gap-3 px-4 py-3 text-gray-800 hover:bg-primary/5 hover:text-primary transition-colors border-t border-gray-200 ${
+                                isActive
+                                  ? "bg-primary/10 text-primary font-semibold"
+                                  : ""
+                              }`
+                            }
+                            onClick={() => setEventsDropdownOpen(false)}
+                          >
+                            <List className="h-4 w-4" />
+                            <span className="font-medium">My Workshops</span>
+                          </NavLink>
+                        </>
+                      )}
                     </div>
                   )}
                 </div>
