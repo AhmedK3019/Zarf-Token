@@ -70,8 +70,6 @@ export default function VendorRequests() {
 
     // REJECT FLOW
     if (action === "reject") {
-      const confirmMsg = `Are you sure you want to REJECT this request?`;
-      if (!window.confirm(confirmMsg)) return;
       processRequest(id, "reject");
       return;
     }
@@ -101,7 +99,7 @@ export default function VendorRequests() {
 
   // --- Toggle Team Members Expansion ---
   const toggleTeamExpansion = (requestId) => {
-    setExpandedTeams(prev => {
+    setExpandedTeams((prev) => {
       const newSet = new Set(prev);
       if (newSet.has(requestId)) {
         newSet.delete(requestId);
@@ -346,7 +344,9 @@ export default function VendorRequests() {
                                     <>
                                       <button
                                         onClick={() =>
-                                          handleViewDocument(req.people[0].DocumentId)
+                                          handleViewDocument(
+                                            req.people[0].DocumentId
+                                          )
                                         }
                                         className="text-gray-400 hover:text-green-600"
                                       >
@@ -373,55 +373,55 @@ export default function VendorRequests() {
                                 </div>
                               </li>
                             )}
-                            
+
                             {/* Show remaining members if expanded */}
-                            {expandedTeams.has(req._id) && req.people.slice(1).map((p, i) => (
-                              <li
-                                key={i + 1}
-                                className="flex items-center gap-2 p-2 rounded bg-gray-50"
-                              >
-                                <div className="w-6 h-6 bg-gray-200 rounded-full flex items-center justify-center">
-                                  <User size={12} className="text-gray-500" />
-                                </div>
-                                <div className="flex-1 min-w-0 overflow-hidden">
-                                  <div className="text-xs font-medium truncate">
-                                    {p.name}
+                            {expandedTeams.has(req._id) &&
+                              req.people.slice(1).map((p, i) => (
+                                <li
+                                  key={i + 1}
+                                  className="flex items-center gap-2 p-2 rounded bg-gray-50"
+                                >
+                                  <div className="w-6 h-6 bg-gray-200 rounded-full flex items-center justify-center">
+                                    <User size={12} className="text-gray-500" />
                                   </div>
-                                </div>
-                                <div className="flex gap-1">
-                                  {p.DocumentId ? (
-                                    <>
-                                      <button
-                                        onClick={() =>
-                                          handleViewDocument(p.DocumentId)
-                                        }
-                                        className="text-gray-400 hover:text-green-600"
-                                      >
-                                        <Eye size={14} />
-                                      </button>
-                                      <button
-                                        onClick={() =>
-                                          handleDownloadDocument(
-                                            p.DocumentId,
-                                            p.name
-                                          )
-                                        }
-                                        className="text-gray-400 hover:text-blue-600"
-                                      >
-                                        <Download size={14} />
-                                      </button>
-                                    </>
-                                  ) : (
-                                    <AlertCircle
-                                      size={14}
-                                      className="text-red-300"
-                                    />
-                                  )}
-                                </div>
-                              </li>
-                            ))}
+                                  <div className="flex-1 min-w-0 overflow-hidden">
+                                    <div className="text-xs font-medium truncate">
+                                      {p.name}
+                                    </div>
+                                  </div>
+                                  <div className="flex gap-1">
+                                    {p.DocumentId ? (
+                                      <>
+                                        <button
+                                          onClick={() =>
+                                            handleViewDocument(p.DocumentId)
+                                          }
+                                          className="text-gray-400 hover:text-green-600"
+                                        >
+                                          <Eye size={14} />
+                                        </button>
+                                        <button
+                                          onClick={() =>
+                                            handleDownloadDocument(
+                                              p.DocumentId,
+                                              p.name
+                                            )
+                                          }
+                                          className="text-gray-400 hover:text-blue-600"
+                                        >
+                                          <Download size={14} />
+                                        </button>
+                                      </>
+                                    ) : (
+                                      <AlertCircle
+                                        size={14}
+                                        className="text-red-300"
+                                      />
+                                    )}
+                                  </div>
+                                </li>
+                              ))}
                           </ul>
-                          
                           {/* Show more/less button if there are more than 1 member */}
                           {req.people.length > 1 && (
                             <button
@@ -436,7 +436,8 @@ export default function VendorRequests() {
                               ) : (
                                 <>
                                   <ChevronDown size={12} />
-                                  Show {req.people.length - 1} more member{req.people.length - 1 !== 1 ? 's' : ''}
+                                  Show {req.people.length - 1} more member
+                                  {req.people.length - 1 !== 1 ? "s" : ""}
                                 </>
                               )}
                             </button>

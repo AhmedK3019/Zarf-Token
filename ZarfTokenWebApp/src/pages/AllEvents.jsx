@@ -946,7 +946,6 @@ const AllEvents = () => {
       }
 
       await api.patch(endpoints[type], payload);
-      alert("Registration successful!");
       closeRegisterModal();
 
       // Refresh events to reflect registration changes

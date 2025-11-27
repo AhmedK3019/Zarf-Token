@@ -436,32 +436,12 @@ export default function GymSchedule() {
       try {
         await api.delete(`/gym-sessions/${sessionId}`);
         handleSessionDeleted(sessionId);
-        alert("Session deleted successfully.");
       } catch (err) {
         console.error("Error deleting session:", err);
         alert(err.response?.data?.error || "Failed to delete session.");
       }
     }
   };
-
-  /*
-  const handleDeleteMonthSessions = async () => {
-    if (window.confirm(`Are you sure you want to delete all sessions for ${MONTHS[currentMonth]} ${currentYear}? This action cannot be undone.`)) {
-      setLoading(true);
-      try {
-        const monthStr = `${currentYear}-${String(currentMonth + 1).padStart(2, '0')}`;
-        await api.delete(`/gym-sessions/month/${monthStr}`);
-        await fetchMonthSessions();
-        alert(`All sessions for ${MONTHS[currentMonth]} ${currentYear} have been deleted.`);
-      } catch (err) {
-        console.error("Error deleting month's sessions:", err);
-        setError(err.response?.data?.error || "Failed to delete sessions for the month.");
-      } finally {
-        setLoading(false);
-      }
-    }
-  };
-  */
 
   const handleRegister = async (sessionId) => {
     if (!user) {
@@ -482,8 +462,6 @@ export default function GymSchedule() {
           session._id === sessionId ? response.data : session
         )
       );
-
-      alert("Successfully registered for the session!");
     } catch (err) {
       console.error("Error registering for session:", err);
       alert(err.response?.data?.error || "Failed to register for session");
@@ -510,8 +488,6 @@ export default function GymSchedule() {
           session._id === sessionId ? response.data : session
         )
       );
-
-      alert("Successfully unregistered from the session!");
     } catch (err) {
       console.error("Error unregistering from session:", err);
       alert(err.response?.data?.error || "Failed to unregister from session");

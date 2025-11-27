@@ -304,12 +304,6 @@ export default function FavouriteEvents() {
   const deleteComment = async (commentId) => {
     if (!selectedRatingEvent) return;
 
-    // Show confirmation dialog
-    const confirmDelete = window.confirm(
-      "Are you sure you want to delete this comment? This action cannot be undone."
-    );
-    if (!confirmDelete) return;
-
     try {
       const eventDetails = getEventDetails(selectedRatingEvent);
       await api.delete(
