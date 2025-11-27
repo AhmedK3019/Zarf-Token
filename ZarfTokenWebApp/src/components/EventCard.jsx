@@ -235,6 +235,7 @@ const EventCard = ({
     ? new Date(referenceDate).getTime() < Date.now()
     : false;
   const startLabel = event.startDate ? formatSimpleDate(event.startDate) : null;
+  const endLabel = event.endDate ? formatSimpleDate(event.endDate) : null;
   const registrationDeadlineLabel = event.registrationDeadline
     ? formatSimpleDate(new Date(event.registrationDeadline))
     : null;
@@ -287,6 +288,10 @@ const EventCard = ({
       label: durationLabel
         ? `Starts ${startLabel} · ${durationLabel}`
         : `Starts ${startLabel}`,
+    },
+    endLabel && {
+      icon: Calendar,
+      label: `Ends ${endLabel}`,
     },
     registrationDeadlineLabel && {
       icon: ClockAlert,
