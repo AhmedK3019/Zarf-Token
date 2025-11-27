@@ -383,7 +383,7 @@ export default function FavouriteEvents() {
       {/* Filters & Sorting */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-3 mb-6 max-w-7xl mx-auto">
         <select
-          className="border rounded-lg p-2"
+          className="border rounded-lg p-2 bg-white"
           value={typeFilter}
           onChange={(e) => setTypeFilter(e.target.value)}
         >
@@ -394,7 +394,7 @@ export default function FavouriteEvents() {
           ))}
         </select>
         <select
-          className="border rounded-lg p-2"
+          className="border rounded-lg p-2 bg-white"
           value={statusFilter}
           onChange={(e) => setStatusFilter(e.target.value)}
         >
@@ -405,7 +405,7 @@ export default function FavouriteEvents() {
           ))}
         </select>
         <select
-          className="border rounded-lg p-2"
+          className="border rounded-lg p-2 bg-white"
           value={regFilter}
           onChange={(e) => setRegFilter(e.target.value)}
         >
@@ -416,7 +416,7 @@ export default function FavouriteEvents() {
           ))}
         </select>
         <select
-          className="border rounded-lg p-2"
+          className="border rounded-lg p-2 bg-white"
           value={sortBy}
           onChange={(e) => setSortBy(e.target.value)}
         >
