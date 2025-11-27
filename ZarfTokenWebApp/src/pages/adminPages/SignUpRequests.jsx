@@ -32,8 +32,6 @@ export default function SignUpRequests() {
       return;
     }
 
-    if (!window.confirm(`Accept this request as ${chosenRole}?`)) return;
-
     try {
       await api.post(`/registerRequests/setRole/${id}`, { role: chosenRole });
 
@@ -48,8 +46,6 @@ export default function SignUpRequests() {
   };
 
   const handleReject = async (id) => {
-    if (!window.confirm("Are you sure you want to reject this request?"))
-      return;
     try {
       await api.delete(`/registerRequests/deleteRegisterRequest/${id}`);
       setRequests((prev) => prev.filter((r) => r._id !== id));
@@ -86,10 +82,9 @@ export default function SignUpRequests() {
   }, []);
 
   return (
-    <div className="min-h-screen w-full overflow-hidden bg-muted text-[#1F1B3B]">
-      <div className="relative flex min-h-screen w-full flex-col items-center px-6 py-8">
+    <div className="min-h-screen w-full bg-muted text-[#1F1B3B]">
+      <div className="flex min-h-screen w-full flex-col items-center px-6 py-8">
         <div className="w-full">
-
           {message && (
             <div className="mb-4 text-center bg-green-100 text-green-800 py-2 rounded">
               {message}
@@ -111,68 +106,116 @@ export default function SignUpRequests() {
               No sign-up requests available.
             </div>
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
-              {requests.map((req) => (
-                <div
-                  key={req._id}
-                  className="bg-white rounded-2xl p-6 shadow-[0_10px_25px_rgba(165,148,249,0.2)] border border-white/50 hover:shadow-[0_15px_35px_rgba(165,148,249,0.3)] transition-all hover:-translate-y-1"
-                >
-                  <h3 className="text-xl font-bold text-[#4C3BCF] mb-2">
-                    {req.firstname} {req.lastname}
-                  </h3>
-                  <p className="text-sm text-[#312A68] mb-1">
-                    Email: {req.email}
-                  </p>
-                  <p className="text-sm text-[#312A68] mb-4">
-                    GUC ID: {req.gucid || "N/A"}
-                  </p>
-
-                  <div className="mb-4">
-                    <label className="block text-sm font-medium text-[#312A68] mb-1">
-                      Assign Role
-                    </label>
-                    <select
-                      value={selectedRoles[req._id] || ""}
-                      onChange={(e) =>
-                        handleRoleChange(req._id, e.target.value)
-                      }
-                      className="w-full rounded-full border border-[#A594F9] bg-white px-4 py-2 text-[#312A68] focus:outline-none focus:ring-2 focus:ring-[#736CED] transition"
-                    >
-                      <option value="" disabled>
-                        Select Role
-                      </option>
-                      <option value="Staff">Staff</option>
-                      <option value="TA">Teaching Assistant</option>
-                      <option value="Professor">Professor</option>
-                    </select>
-                  </div>
-
-                  <div className="flex justify-between gap-3">
-                    <button
-                      onClick={() => handleAccept(req._id)}
-                      className="flex-1 rounded-lg px-4 py-2 text-sm font-semibold text-center transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 border border-green-200 bg-green-50 text-green-700 hover:bg-green-100 focus-visible:ring-green-200"
-                    >
-                      Accept
-                    </button>
-                    <button
-                      onClick={() => handleReject(req._id)}
-                      className="flex-1 rounded-lg px-4 py-2 text-sm font-semibold text-center transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 border border-red-200 bg-red-50 text-red-600 hover:bg-red-100 focus-visible:ring-red-200"
-                    >
-                      Reject
-                    </button>
-                  </div>
-                </div>
-              ))}
+            <div className="bg-white rounded-2xl shadow-[0_10px_25px_rgba(165,148,249,0.2)] border border-white/50 overflow-hidden mb-12">
+              <div className="overflow-x-auto">
+                <table className="w-full">
+                  <thead className="bg-[#001889] text-white">
+                    <tr>
+                      <th className="px-6 py-4 text-left text-sm font-semibold">
+                        First Name
+                      </th>
+                      <th className="px-6 py-4 text-left text-sm font-semibold">
+                        Last Name
+                      </th>
+                      <th className="px-6 py-4 text-left text-sm font-semibold">
+                        Email
+                      </th>
+                      <th className="px-6 py-4 text-left text-sm font-semibold">
+                        GUC ID
+                      </th>
+                      <th className="px-6 py-4 text-left text-sm font-semibold">
+                        Role
+                      </th>
+                      <th className="px-6 py-4 text-center text-sm font-semibold">
+                        Actions
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-gray-200">
+                    {requests.map((req) => (
+                      <tr
+                        key={req._id}
+                        className="hover:bg-[#F8F7FF] transition-colors"
+                      >
+                        <td className="px-6 py-4 text-sm text-[#312A68]">
+                          {req.firstname}
+                        </td>
+                        <td className="px-6 py-4 text-sm text-[#312A68]">
+                          {req.lastname}
+                        </td>
+                        <td className="px-6 py-4 text-sm text-[#312A68]">
+                          {req.email}
+                        </td>
+                        <td className="px-6 py-4 text-sm text-[#312A68]">
+                          {req.gucid || "N/A"}
+                        </td>
+                        <td className="px-6 py-4">
+                          <select
+                            value={selectedRoles[req._id] || ""}
+                            onChange={(e) =>
+                              handleRoleChange(req._id, e.target.value)
+                            }
+                            className="w-full max-w-[180px] rounded-lg border border-[#A594F9] bg-white px-3 py-2 text-sm text-[#312A68] focus:outline-none focus:ring-2 focus:ring-[#736CED] transition"
+                          >
+                            <option value="" disabled>
+                              Select Role
+                            </option>
+                            <option value="Staff">Staff</option>
+                            <option value="TA">Teaching Assistant</option>
+                            <option value="Professor">Professor</option>
+                          </select>
+                        </td>
+                        <td className="px-6 py-4">
+                          <div className="flex justify-center gap-3">
+                            <button
+                              onClick={() => handleAccept(req._id)}
+                              className="w-10 h-10 rounded-full flex items-center justify-center transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 border-2 border-green-500 bg-green-50 text-green-600 hover:bg-green-500 hover:text-white focus-visible:ring-green-200"
+                              title="Accept"
+                            >
+                              <svg
+                                className="w-5 h-5"
+                                fill="none"
+                                stroke="currentColor"
+                                viewBox="0 0 24 24"
+                              >
+                                <path
+                                  strokeLinecap="round"
+                                  strokeLinejoin="round"
+                                  strokeWidth={2.5}
+                                  d="M5 13l4 4L19 7"
+                                />
+                              </svg>
+                            </button>
+                            <button
+                              onClick={() => handleReject(req._id)}
+                              className="w-10 h-10 rounded-full flex items-center justify-center transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 border-2 border-red-500 bg-red-50 text-red-600 hover:bg-red-500 hover:text-white focus-visible:ring-red-200"
+                              title="Reject"
+                            >
+                              <svg
+                                className="w-5 h-5"
+                                fill="none"
+                                stroke="currentColor"
+                                viewBox="0 0 24 24"
+                              >
+                                <path
+                                  strokeLinecap="round"
+                                  strokeLinejoin="round"
+                                  strokeWidth={2.5}
+                                  d="M6 18L18 6M6 6l12 12"
+                                />
+                              </svg>
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
             </div>
           )}
         </div>
       </div>
-
-      <footer className="relative z-10 w-full px-6 py-6 text-center text-sm text-[#312A68]/80">
-        {new Date().getFullYear()} Zarf Token. All rights reserved.
-      </footer>
-
-      <div className="pointer-events-none absolute bottom-[-12%] left-1/2 h-64 w-[130%] -translate-x-1/2 rounded-[50%] bg-gradient-to-r from-[#736CED] via-[#A594F9] to-[#6DD3CE] opacity-70 -z-10" />
     </div>
   );
 }
