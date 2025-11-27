@@ -23,8 +23,8 @@ export default function PaymentSuccess() {
         if (!cancelled) {
           const dashboardPath =
             user.role.toLowerCase() === "vendor"
-              ? `/dashboard/${user.role.toLowerCase()}`
-              : `/dashboard/user`;
+              ? `/dashboard/${user.role.toLowerCase()}/upcoming-bazaars`
+              : `/dashboard/user/all-events`;
           setTimeout(() => navigate(dashboardPath), 1200);
         }
       }
@@ -37,9 +37,9 @@ export default function PaymentSuccess() {
 
   const resolveDashboardPath = () => {
     if (user.role.toLowerCase() === "vendor") {
-      return `/dashboard/${user.role.toLowerCase()}`;
+      return `/dashboard/${user.role.toLowerCase()}/upcoming-bazaars`;
     }
-    return `/dashboard/user`;
+    return `/dashboard/user/all-events`;
   };
 
   return (

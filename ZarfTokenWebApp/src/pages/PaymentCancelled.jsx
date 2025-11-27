@@ -10,9 +10,9 @@ export default function PaymentCancelled() {
 
   const resolveDashboardPath = () => {
     if (user.role.toLowerCase() === "vendor") {
-      return `/dashboard/${user.role.toLowerCase()}`;
+      return `/dashboard/${user.role.toLowerCase()}/upcoming-bazaars`;
     }
-    return `/dashboard/user`;
+    return `/dashboard/user/all-events`;
   };
 
   return (

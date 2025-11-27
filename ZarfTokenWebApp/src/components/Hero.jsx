@@ -5,10 +5,10 @@ import api from "../services/api";
 import { useAuthUser } from "../hooks/auth";
 
 const roleRoutes = {
-  admin: "/dashboard/admin",
-  company: "/dashboard/vendor",
-  eventsOffice: "/dashboard/eventsOffice",
-  user: "/dashboard/user",
+  admin: "/dashboard/admin/all-events",
+  company: "/dashboard/vendor/upcoming-bazaars",
+  eventsOffice: "/dashboard/eventsOffice/all-events",
+  user: "/dashboard/user/all-events",
 };
 
 const resolveRoleRoute = async (email, password) => {

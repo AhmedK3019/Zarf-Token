@@ -10,17 +10,17 @@ export default function NotFound() {
     if (!user) return "/";
     switch (user.role?.toLowerCase()) {
       case "admin":
-        return "/dashboard/admin";
+        return "/dashboard/admin/all-events";
       case "vendor":
-        return "/dashboard/vendor";
+        return "/dashboard/vendor/upcoming-bazaars";
       case "event office":
       case "eventsoffice":
-        return "/dashboard/eventsoffice";
+        return "/dashboard/eventsOffice/all-events";
       case "student":
       case "staff":
       case "ta":
       case "professor":
-        return "/dashboard/user";
+        return "/dashboard/user/all-events";
       default:
         return "/";
     }
