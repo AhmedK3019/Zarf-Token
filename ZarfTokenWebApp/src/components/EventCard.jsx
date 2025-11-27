@@ -20,6 +20,7 @@ import {
   FileSpreadsheet,
   Edit,
   FileText,
+  Archive,
 } from "lucide-react";
 
 const EventCard = ({
@@ -321,19 +322,6 @@ const EventCard = ({
   // The actions Delete / Update / Download / View Details are rendered
   // as compact clickable icons in the card header (see UI below).
 
-  if (canArchive) {
-    addActionButton(
-      <button
-        type="button"
-        onClick={() => onArchive?.(event.original)}
-        className={`${actionButtonBase} border border-blue-200 bg-blue-50 text-blue-700 hover:bg-blue-100 focus-visible:ring-blue-200`}
-      >
-        Archive
-      </button>,
-      "archive"
-    );
-  }
-
   const defaultRegistrationButtons = [];
 
   if (isRegistered) {
@@ -435,7 +423,8 @@ const EventCard = ({
         canDelete ||
         canDownloadExcel ||
         canUpdate ||
-        canViewDetails) && (
+        canViewDetails ||
+        canArchive) && (
         <div className="absolute right-4 top-4 flex items-center gap-2 py-1.5">
           {isPastEvent && (
             <span className="rounded-full bg-[#f0f0f0] px-2 py-1 text-[11px] font-semibold uppercase tracking-wide text-gray-700">
@@ -486,6 +475,21 @@ const EventCard = ({
               aria-label="Download Excel"
             >
               <FileSpreadsheet size={16} />
+            </button>
+          )}
+
+          {canArchive && (
+            <button
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation();
+                onArchive?.(event.original);
+              }}
+              title="Archive"
+              className="rounded-full border border-blue-200 bg-white/90 p-2 text-blue-600 shadow-sm transition hover:bg-blue-100 focus-visible:outline-none"
+              aria-label="Archive"
+            >
+              <Archive size={16} />
             </button>
           )}
 

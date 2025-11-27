@@ -210,7 +210,6 @@ const updateWorkshopStatus = async (req, res, next) => {
   try {
     const { id } = req.params;
     const { status, allowedUsers } = req.body;
-    console.log(req.body);
     const updatedStatus = await WorkShop.findByIdAndUpdate(
       id,
       { status },
