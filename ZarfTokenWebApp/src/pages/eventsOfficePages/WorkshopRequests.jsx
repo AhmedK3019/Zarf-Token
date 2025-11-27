@@ -228,7 +228,7 @@ function WorkshopCard({ workshop, onView }) {
         )}
 
         {awaitingFrom === "Event office" && awaitingCopy && (
-          <p className="text-xs text-gray-500 italic">{awaitingCopy}</p>
+          <p className="text-xs font-semibold text-amber-700">{awaitingCopy}</p>
         )}
 
         <div className="flex items-center justify-between gap-4 pt-2">
@@ -995,10 +995,9 @@ export default function WorkshopRequests() {
   // const handleAllowedUsersChange = (e) => { ... }
 
   const handleRequestEditsSuccess = (message = "Edit request sent.") => {
-    // We need to refetch or update the workshop state to show the new "awaiting" message
-    // For simplicity, just show the toast. A full solution might refetch.
     setFeedback({ tone: "Flagged", message });
-    setSelectedWorkshop(null); // Close modal to see changes (or refetch data)
+    setSelectedWorkshop(null); // Close modal
+    handleRefresh(); // Refresh the workshop data
   };
 
   return (

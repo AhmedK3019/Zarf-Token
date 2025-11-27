@@ -93,8 +93,10 @@ export default function MyWorkshops() {
   const handleAcceptEdits = async (_evt) => {
     try {
       const res = await api.post(`/workshops/acceptEdits/${editing}`);
+      const payload = res.data.workshop || res.data;
+      // Update the card to reflect accepted edits
       setWorkshops((prev) =>
-        prev.map((w) => (w._id === editing ? { ...w, ...res.data } : w))
+        prev.map((w) => (w._id === editing ? { ...w, ...payload } : w))
       );
       setEditDecisionById((prev) => ({ ...prev, [editing]: "accepted" }));
     } catch (error) {
@@ -106,8 +108,9 @@ export default function MyWorkshops() {
     try {
       const res = await api.post(`/workshops/rejectEdits/${editing}`);
       // Keep the card visible and reflect rejection locally
+      const payload = res.data.workshop || res.data;
       setWorkshops((prev) =>
-        prev.map((w) => (w._id === editing ? { ...w, ...res.data } : w))
+        prev.map((w) => (w._id === editing ? { ...w, ...payload } : w))
       );
       setEditDecisionById((prev) => ({ ...prev, [editing]: "rejected" }));
     } catch (error) {
@@ -272,6 +275,9 @@ export default function MyWorkshops() {
       delete payload.createdAt;
       delete payload.attendees;
       delete payload.comments;
+      if (payload.message) delete payload.message;
+      if (payload.currentMessage) delete payload.currentMessage;
+      delete payload.status;
       const res = await api.put(
         `/workshops/updateWorkshop/${editing}`,
         payload
