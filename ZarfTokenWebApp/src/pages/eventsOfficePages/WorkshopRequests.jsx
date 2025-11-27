@@ -247,7 +247,7 @@ function WorkshopCard({ workshop, onView }) {
             className={classNames(
               BUTTON_BASE,
               BUTTON_VARIANTS.primary,
-              "px-5 py-2.5"
+              "px-5 py-2.5 whitespace-nowrap"
             )}
           >
             <FileText className="w-4 h-4" />
@@ -625,6 +625,21 @@ function WorkshopModal({
                       </button>
                     );
                   })}
+                  {/* Request Edits button next to Accept and Reject */}
+                  {awaitingResponse !== "Professor" && (
+                    <button
+                      type="button"
+                      onClick={handleToggleRequestForm}
+                      className={classNames(
+                        BUTTON_BASE,
+                        BUTTON_VARIANTS.info,
+                        "w-full"
+                      )}
+                    >
+                      <Flag className="w-4 h-4" />
+                      {requestButtonText}
+                    </button>
+                  )}
                 </div>
               )}
 
@@ -701,24 +716,6 @@ function WorkshopModal({
                   </div>
                 </div>
               )}
-
-              {/* Show Request Edits button ONLY if Pending and NOT approving */}
-              {workshop.status === "Pending" &&
-                !isApproving &&
-                awaitingResponse !== "Professor" && (
-                  <button
-                    type="button"
-                    onClick={handleToggleRequestForm}
-                    className={classNames(
-                      BUTTON_BASE,
-                      BUTTON_VARIANTS.info,
-                      "w-full sm:w-auto"
-                    )}
-                  >
-                    <Flag className="w-4 h-4" />
-                    {requestButtonText}
-                  </button>
-                )}
 
               {/* Show this if workshop is already decided */}
               {workshop.status !== "Pending" && (
