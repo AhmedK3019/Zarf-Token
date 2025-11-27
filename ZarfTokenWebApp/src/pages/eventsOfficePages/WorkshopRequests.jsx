@@ -942,6 +942,7 @@ export default function WorkshopRequests() {
         message: "Workshop accepted and published successfully!",
       });
       setSelectedWorkshop(null); // Close modal
+      handleRefresh(); // Refresh the workshop data
     } catch (err) {
       console.error("Error approving workshop:", err);
       setFeedback({
@@ -980,6 +981,7 @@ export default function WorkshopRequests() {
         message: "Workshop rejected.",
       });
       setSelectedWorkshop(null); // Close modal
+      handleRefresh(); // Refresh the workshop data
     } catch (err) {
       console.error("Error rejecting workshop:", err);
       setFeedback({
