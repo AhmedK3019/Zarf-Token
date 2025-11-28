@@ -1004,93 +1004,81 @@ export default function WorkshopRequests() {
   };
 
   return (
-    <div className="min-h-screen w-full bg-gradient-to-br from-[#f5f7ff] via-white to-[#eef2ff] px-4 py-6 lg:px-6 lg:py-8">
-      <div className="mx-auto w-full max-w-7xl space-y-6">
-        <section className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-          <div className="rounded-2xl border border-gray-100 bg-white/80 p-4 shadow-sm">
-            <p className="text-xs font-semibold uppercase tracking-wide text-gray-500">
+    <div className="min-h-screen w-full bg-gradient-to-br from-[#f5f7ff] via-white to-[#eef2ff] px-4 py-3 lg:px-6 lg:py-4">
+      <div className="mx-auto w-full max-w-7xl space-y-3">
+        <section className="grid gap-2 sm:grid-cols-2 lg:grid-cols-4">
+          <div className="rounded-lg border border-gray-100 bg-white/80 p-2.5 shadow-sm">
+            <p className="text-[10px] font-semibold uppercase tracking-wide text-gray-500">
               Total
             </p>
-            <p className="text-2xl font-bold text-[#001845]">
+            <p className="text-lg font-bold text-[#001845]">
               {statusCounts.total}
             </p>
-            <p className="text-xs text-gray-500">Workshops in the queue</p>
           </div>
-          <div className="rounded-2xl border border-gray-100 bg-white/80 p-4 shadow-sm">
-            <p className="text-xs font-semibold uppercase tracking-wide text-gray-500">
+          <div className="rounded-lg border border-gray-100 bg-white/80 p-2.5 shadow-sm">
+            <p className="text-[10px] font-semibold uppercase tracking-wide text-gray-500">
               Pending
             </p>
-            <p className="text-2xl font-bold text-amber-700">
+            <p className="text-lg font-bold text-amber-700">
               {statusCounts.Pending}
             </p>
-            <p className="text-xs text-gray-500">Awaiting review</p>
           </div>
-          <div className="rounded-2xl border border-gray-100 bg-white/80 p-4 shadow-sm">
-            <p className="text-xs font-semibold uppercase tracking-wide text-gray-500">
+          <div className="rounded-lg border border-gray-100 bg-white/80 p-2.5 shadow-sm">
+            <p className="text-[10px] font-semibold uppercase tracking-wide text-gray-500">
               Approved
             </p>
-            <p className="text-2xl font-bold text-emerald-700">
+            <p className="text-lg font-bold text-emerald-700">
               {statusCounts.Approved}
             </p>
-            <p className="text-xs text-gray-500">Published to viewers</p>
           </div>
-          <div className="rounded-2xl border border-gray-100 bg-white/80 p-4 shadow-sm">
-            <p className="text-xs font-semibold uppercase tracking-wide text-gray-500">
+          <div className="rounded-lg border border-gray-100 bg-white/80 p-2.5 shadow-sm">
+            <p className="text-[10px] font-semibold uppercase tracking-wide text-gray-500">
               Rejected
             </p>
-            <p className="text-2xl font-bold text-rose-700">
+            <p className="text-lg font-bold text-rose-700">
               {statusCounts.Rejected}
             </p>
-            <p className="text-xs text-gray-500">Sent back to requesters</p>
           </div>
         </section>
 
-        <section className="rounded-3xl border border-gray-100 bg-white/80 p-5 shadow-sm">
-          <div className="flex flex-wrap items-center justify-between gap-3">
-            <div className="space-y-1">
-              <p className="text-xs font-semibold uppercase tracking-wide text-gray-500">
-                Filters
-              </p>
-              <p className="text-sm text-gray-600">
-                Stay aligned with the approval flow using familiar controls.
-              </p>
+        <section className="rounded-xl border border-gray-100 bg-white/80 p-3 shadow-sm">
+          <div className="flex flex-wrap items-center justify-between gap-2">
+            <div className="flex items-center gap-3">
+              <label className="flex items-center gap-2">
+                <span className="text-xs font-semibold text-gray-700">
+                  Status:
+                </span>
+                <select
+                  value={statusFilter}
+                  onChange={(e) => setStatusFilter(e.target.value)}
+                  className="rounded-lg border border-gray-200 bg-white px-3 py-1.5 text-xs font-semibold text-gray-900 shadow-sm transition focus:border-[#4C3BCF] focus:outline-none focus:ring-1 focus:ring-[#d7d1ff]"
+                >
+                  {["All", "Pending", "Approved", "Rejected"].map((status) => (
+                    <option key={status} value={status}>
+                      {status}
+                    </option>
+                  ))}
+                </select>
+              </label>
             </div>
             <div className="flex flex-wrap items-center gap-2">
               {hasActiveFilters ? (
                 <button
                   onClick={resetFilters}
-                  className="inline-flex items-center gap-2 rounded-full border border-gray-200 bg-white px-4 py-2.5 text-sm font-semibold text-gray-700 shadow-sm transition hover:bg-gray-50"
+                  className="inline-flex items-center gap-1.5 rounded-full border border-gray-200 bg-white px-3 py-1.5 text-xs font-semibold text-gray-700 shadow-sm transition hover:bg-gray-50"
                 >
-                  <RefreshCw className="h-4 w-4 text-gray-500" />
-                  Clear filters
+                  <RefreshCw className="h-3 w-3 text-gray-500" />
+                  Clear
                 </button>
               ) : null}
               <button
                 onClick={handleRefresh}
-                className="inline-flex items-center gap-2 rounded-full border border-[#4C3BCF] bg-[#4C3BCF] px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-[#3728a6] hover:border-[#3728a6]"
+                className="inline-flex items-center gap-1.5 rounded-full border border-[#4C3BCF] bg-[#4C3BCF] px-3 py-1.5 text-xs font-semibold text-white shadow-sm transition hover:bg-[#3728a6] hover:border-[#3728a6]"
               >
-                <RefreshCw className="h-4 w-4" />
+                <RefreshCw className="h-3 w-3" />
                 Refresh
               </button>
             </div>
-          </div>
-          <div className="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            <label className="flex flex-col gap-2">
-              <span className="text-sm font-semibold text-gray-800">
-                Status
-              </span>
-              <select
-                value={statusFilter}
-                onChange={(e) => setStatusFilter(e.target.value)}
-                className="w-full rounded-2xl border border-gray-200 bg-white px-4 py-3 text-sm font-semibold text-gray-900 shadow-sm transition focus:border-[#4C3BCF] focus:outline-none focus:ring-2 focus:ring-[#d7d1ff]"
-              >
-                {["All", "Pending", "Approved", "Rejected"].map((status) => (
-                  <option key={status} value={status}>
-                    {status}
-                  </option>
-                ))}
-              </select>
-            </label>
           </div>
         </section>
 
