@@ -97,10 +97,6 @@ const StatusPill = ({ status }) => {
 const RequirementChecklist = ({ isPromoUnique, termsOk, discountOk }) => {
   const rows = [
     {
-      label: "Promo code is unique",
-      ok: isPromoUnique,
-    },
-    {
       label: `Discount between ${DISCOUNT_MIN}% and ${DISCOUNT_MAX}%`,
       ok: discountOk,
     },
@@ -274,9 +270,7 @@ const SubmissionSuccessModal = ({ data, countdown, onViewStatus }) => {
 
         <div className="mt-6 rounded-2xl bg-gray-50 p-4 text-left text-sm text-gray-600">
           <div className="flex items-center justify-between">
-            <span className="font-semibold text-gray-800">
-              Application ID
-            </span>
+            <span className="font-semibold text-gray-800">Application ID</span>
             <span className="font-mono text-[#4C3BCF]">{data.reference}</span>
           </div>
           <div className="mt-2 flex items-center justify-between">
@@ -345,7 +339,8 @@ export default function ApplyLoyalty() {
       const res = await api.get("/loyalty", { params: { vendorId } });
       const rows = Array.isArray(res.data) ? res.data : [];
       rows.sort(
-        (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+        (a, b) =>
+          new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
       );
       setApplications(rows);
     } catch (err) {
@@ -422,55 +417,9 @@ export default function ApplyLoyalty() {
   const canSubmit = Boolean(vendorId) && !activeApplication;
 
   const wordCount = useMemo(
-    () =>
-      formValues.terms
-        .trim()
-        .split(/\s+/)
-        .filter(Boolean).length,
+    () => formValues.terms.trim().split(/\s+/).filter(Boolean).length,
     [formValues.terms]
   );
-
-  useEffect(() => {
-    const raw = formValues.promoCode || "";
-    if (!raw.trim()) {
-      setPromoStatus({ state: "idle", available: null, message: null });
-      return;
-    }
-    const normalized = normalizePromo(raw);
-    if (normalized.length < 3) {
-      setPromoStatus({
-        state: "typing",
-        available: null,
-        message: "Keep typing to check availability",
-      });
-      return;
-    }
-    if (debounceRef.current) clearTimeout(debounceRef.current);
-    setPromoStatus({ state: "checking", available: null, message: null });
-    debounceRef.current = setTimeout(async () => {
-      try {
-        const res = await api.get(
-          `/loyalty/check-code/${encodeURIComponent(normalized)}`
-        );
-        setPromoStatus({
-          state: res.data?.available ? "available" : "taken",
-          available: Boolean(res.data?.available),
-          message: res.data?.available
-            ? "Promo code is available"
-            : "Promo code already exists",
-        });
-      } catch (err) {
-        const message =
-          err?.response?.data?.error ||
-          err?.message ||
-          "Unable to verify promo code";
-        setPromoStatus({ state: "error", available: null, message });
-      }
-    }, 400);
-    return () => {
-      if (debounceRef.current) clearTimeout(debounceRef.current);
-    };
-  }, [formValues.promoCode]);
 
   const validationErrors = useMemo(() => {
     const errors = {};
@@ -575,262 +524,226 @@ export default function ApplyLoyalty() {
   return (
     <>
       <div className="space-y-6 p-6">
-      <header className="flex flex-wrap items-center justify-end gap-3">
-        <button
-          type="button"
-          onClick={() => navigate(STATUS_PAGE_PATH)}
-          className="inline-flex items-center gap-2 rounded-full border border-[#736CED]/50 px-4 py-2 text-sm font-semibold text-[#4C3BCF] hover:bg-[#F6F3FF]"
-        >
-          <ShieldCheck size={16} />
-          View status page
-        </button>
-        <button
-          type="button"
-          onClick={fetchApplications}
-          className="inline-flex items-center gap-2 rounded-full border border-gray-200 px-4 py-2 text-sm font-semibold text-gray-600 hover:bg-gray-50"
-        >
-          <RefreshCcw size={16} />
-          Refresh status
-        </button>
-      </header>
-
-      {activeApplication && (
-        <div className="flex items-start gap-3 rounded-2xl border border-amber-200 bg-amber-50/80 p-4 text-amber-900">
-          <ShieldCheck className="mt-0.5 h-5 w-5" />
-          <div>
-            <p className="font-semibold">Application unavailable</p>
-            <p className="text-sm">
-              You already have an active loyalty program (
-              {activeApplication.status}) submitted on{" "}
-              {formatDate(activeApplication.createdAt)}. Cancel your current
-              program from the status page before submitting another one.
-            </p>
-          </div>
-        </div>
-      )}
-
-      {!activeApplication && lastRejected && (
-        <div className="flex items-start gap-3 rounded-2xl border border-indigo-200 bg-indigo-50/80 p-4 text-indigo-900">
-          <Info className="mt-0.5 h-5 w-5" />
-          <div>
-            <p className="font-semibold">You can resubmit</p>
-            <p className="text-sm">
-              Your previous application (submitted {formatDate(lastRejected.createdAt)}
-              ) was rejected. Update your promo details below and resubmit.
-            </p>
-          </div>
-        </div>
-      )}
-
-      <div className="grid gap-6 lg:grid-cols-5">
-        <form
-          onSubmit={handleSubmit}
-          className="space-y-5 rounded-3xl border border-gray-100 bg-white/80 p-6 shadow-sm lg:col-span-3"
-        >
-          <div>
-            <label
-              htmlFor="promoCode"
-              className="flex items-center justify-between text-sm font-semibold text-gray-700"
-            >
-              Promo Code
-              <span
-                className={`text-xs font-semibold ${
-                  promoStatus.state === "available"
-                    ? "text-emerald-600"
-                    : promoStatus.state === "taken"
-                    ? "text-rose-600"
-                    : "text-gray-400"
-                }`}
-              >
-                {promoStatus.message}
-              </span>
-            </label>
-            <input
-              id="promoCode"
-              name="promoCode"
-              type="text"
-              maxLength={20}
-              disabled={!canSubmit}
-              value={formValues.promoCode}
-              onChange={handleChange}
-              onBlur={() => handleBlur("promoCode")}
-              className={`mt-2 w-full rounded-2xl border px-4 py-3 text-lg font-semibold tracking-widest uppercase shadow-inner placeholder:text-gray-400 focus:border-[#736CED] focus:ring-2 focus:ring-[#C4B5FD]/70 ${
-                showError("promoCode") ? "border-rose-300" : "border-gray-200"
-              }`}
-              placeholder="PROMO2025"
-            />
-            {showError("promoCode") && (
-              <p className="mt-1 text-sm text-rose-600">
-                {validationErrors.promoCode}
-              </p>
-            )}
-          </div>
-
-          <div>
-            <label
-              htmlFor="discountRate"
-              className="text-sm font-semibold text-gray-700"
-            >
-              Discount Rate (%)
-            </label>
-            <div className="mt-2 flex items-center gap-3">
-              <input
-                type="range"
-                min={DISCOUNT_MIN}
-                max={DISCOUNT_MAX}
-                step={1}
-                id="discountRate"
-                name="discountRate"
-                disabled={!canSubmit}
-                value={formValues.discountRate}
-                onChange={handleChange}
-                onBlur={() => handleBlur("discountRate")}
-                className="flex-1 accent-[#736CED]"
-              />
-              <input
-                type="number"
-                min={DISCOUNT_MIN}
-                max={DISCOUNT_MAX}
-                name="discountRate"
-                disabled={!canSubmit}
-                value={formValues.discountRate}
-                onChange={handleChange}
-                onBlur={() => handleBlur("discountRate")}
-                className={`w-20 rounded-2xl border px-3 py-2 text-center text-lg font-semibold ${
-                  showError("discountRate") ? "border-rose-300" : "border-gray-200"
-                }`}
-              />
-            </div>
-            {showError("discountRate") && (
-              <p className="mt-1 text-sm text-rose-600">
-                {validationErrors.discountRate}
-              </p>
-            )}
-          </div>
-
-          <div>
-            <label
-              htmlFor="terms"
-              className="flex items-center justify-between text-sm font-semibold text-gray-700"
-            >
-              Terms & Conditions
-              <span className="text-xs text-gray-500">{termsStats}</span>
-            </label>
-            <textarea
-              id="terms"
-              name="terms"
-              rows={8}
-              maxLength={TERMS_MAX_CHARS}
-              disabled={!canSubmit}
-              value={formValues.terms}
-              onChange={handleChange}
-              onBlur={() => handleBlur("terms")}
-              className={`mt-2 w-full rounded-2xl border px-4 py-3 text-sm leading-6 shadow-inner placeholder:text-gray-400 focus:border-[#736CED] focus:ring-2 focus:ring-[#C4B5FD]/70 ${
-                showError("terms") ? "border-rose-300" : "border-gray-200"
-              }`}
-              placeholder="Explain the loyalty mechanics, redemption rules, validity period, exclusions, and customer support commitments."
-            />
-            <div className="mt-1 text-xs text-gray-500">
-              Minimum {TERMS_MIN_CHARS} characters / {TERMS_MIN_WORDS} words.
-            </div>
-            {showError("terms") && (
-              <p className="mt-1 text-sm text-rose-600">
-                {validationErrors.terms}
-              </p>
-            )}
-          </div>
-
-          {serverError && (
-            <div className="flex items-center gap-2 rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700">
-              <AlertCircle size={16} />
-              <span>{serverError}</span>
-            </div>
-          )}
-
+        <header className="flex flex-wrap items-center justify-end gap-3">
           <button
-            type="submit"
-            disabled={!canSubmit || submitting}
-            className={`w-full rounded-2xl px-5 py-3 text-center text-sm font-semibold text-white shadow-lg transition ${
-              !canSubmit || submitting
-                ? "cursor-not-allowed bg-gray-400"
-                : "bg-[#4C3BCF] hover:bg-[#3728a6]"
-            }`}
+            type="button"
+            onClick={() => navigate(STATUS_PAGE_PATH)}
+            className="inline-flex items-center gap-2 rounded-full border border-[#736CED]/50 px-4 py-2 text-sm font-semibold text-[#4C3BCF] hover:bg-[#F6F3FF]"
           >
-            <span className="inline-flex items-center justify-center gap-2">
-              {submitting && <Loader2 className="h-4 w-4 animate-spin" />}
-              {activeApplication ? "Program Active" : "Submit Application"}
-            </span>
+            <ShieldCheck size={16} />
+            View status page
           </button>
-          {!canSubmit && (
-            <p className="text-center text-xs text-gray-500">
-              You can submit a new application only after cancelling your active
-              program or once a pending request is resolved.
-            </p>
-          )}
-        </form>
+          <button
+            type="button"
+            onClick={fetchApplications}
+            className="inline-flex items-center gap-2 rounded-full border border-gray-200 px-4 py-2 text-sm font-semibold text-gray-600 hover:bg-gray-50"
+          >
+            <RefreshCcw size={16} />
+            Refresh status
+          </button>
+        </header>
 
-        <div className="space-y-5 lg:col-span-2">
-          <PreviewCard values={formValues} vendor={user} />
-          <div className="rounded-3xl border border-gray-100 bg-white/80 p-5 shadow-sm">
-            <p className="text-sm font-semibold text-gray-700">
-              Submission Checklist
-            </p>
-            <p className="text-xs text-gray-500">
-              All criteria must pass before the Events Office reviews your
-              request.
-            </p>
-            <div className="mt-4">
-              <RequirementChecklist {...requirementState} />
+        {activeApplication && (
+          <div className="flex items-start gap-3 rounded-2xl border border-amber-200 bg-amber-50/80 p-4 text-amber-900">
+            <ShieldCheck className="mt-0.5 h-5 w-5" />
+            <div>
+              <p className="font-semibold">Application unavailable</p>
+              <p className="text-sm">
+                You already have an active loyalty program (
+                {activeApplication.status}) submitted on{" "}
+                {formatDate(activeApplication.createdAt)}. Cancel your current
+                program from the status page before submitting another one.
+              </p>
+            </div>
+          </div>
+        )}
+
+        {!activeApplication && lastRejected && (
+          <div className="flex items-start gap-3 rounded-2xl border border-indigo-200 bg-indigo-50/80 p-4 text-indigo-900">
+            <Info className="mt-0.5 h-5 w-5" />
+            <div>
+              <p className="font-semibold">You can resubmit</p>
+              <p className="text-sm">
+                Your previous application (submitted{" "}
+                {formatDate(lastRejected.createdAt)}) was rejected. Update your
+                promo details below and resubmit.
+              </p>
+            </div>
+          </div>
+        )}
+
+        <div className="grid gap-6 lg:grid-cols-5">
+          <form
+            onSubmit={handleSubmit}
+            className="space-y-5 rounded-3xl border border-gray-100 bg-white/80 p-6 shadow-sm lg:col-span-3"
+          >
+            <div>
+              <label
+                htmlFor="promoCode"
+                className="flex items-center justify-between text-sm font-semibold text-gray-700"
+              >
+                Promo Code
+                <span
+                  className={`text-xs font-semibold ${
+                    promoStatus.state === "available"
+                      ? "text-emerald-600"
+                      : promoStatus.state === "taken"
+                      ? "text-rose-600"
+                      : "text-gray-400"
+                  }`}
+                >
+                  {promoStatus.message}
+                </span>
+              </label>
+              <input
+                id="promoCode"
+                name="promoCode"
+                type="text"
+                maxLength={20}
+                disabled={!canSubmit}
+                value={formValues.promoCode}
+                onChange={handleChange}
+                onBlur={() => handleBlur("promoCode")}
+                className={`mt-2 w-full rounded-2xl border px-4 py-3 text-lg font-semibold tracking-widest uppercase shadow-inner placeholder:text-gray-400 focus:border-[#736CED] focus:ring-2 focus:ring-[#C4B5FD]/70 ${
+                  showError("promoCode") ? "border-rose-300" : "border-gray-200"
+                }`}
+                placeholder="PROMO2025"
+              />
+              {showError("promoCode") && (
+                <p className="mt-1 text-sm text-rose-600">
+                  {validationErrors.promoCode}
+                </p>
+              )}
+            </div>
+
+            <div>
+              <label
+                htmlFor="discountRate"
+                className="text-sm font-semibold text-gray-700"
+              >
+                Discount Rate (%)
+              </label>
+              <div className="mt-2 flex items-center gap-3">
+                <input
+                  type="range"
+                  min={DISCOUNT_MIN}
+                  max={DISCOUNT_MAX}
+                  step={1}
+                  id="discountRate"
+                  name="discountRate"
+                  disabled={!canSubmit}
+                  value={formValues.discountRate}
+                  onChange={handleChange}
+                  onBlur={() => handleBlur("discountRate")}
+                  className="flex-1 accent-[#736CED]"
+                />
+                <input
+                  type="number"
+                  min={DISCOUNT_MIN}
+                  max={DISCOUNT_MAX}
+                  name="discountRate"
+                  disabled={!canSubmit}
+                  value={formValues.discountRate}
+                  onChange={handleChange}
+                  onBlur={() => handleBlur("discountRate")}
+                  className={`w-20 rounded-2xl border px-3 py-2 text-center text-lg font-semibold ${
+                    showError("discountRate")
+                      ? "border-rose-300"
+                      : "border-gray-200"
+                  }`}
+                />
+              </div>
+              {showError("discountRate") && (
+                <p className="mt-1 text-sm text-rose-600">
+                  {validationErrors.discountRate}
+                </p>
+              )}
+            </div>
+
+            <div>
+              <label
+                htmlFor="terms"
+                className="flex items-center justify-between text-sm font-semibold text-gray-700"
+              >
+                Terms & Conditions
+                <span className="text-xs text-gray-500">{termsStats}</span>
+              </label>
+              <textarea
+                id="terms"
+                name="terms"
+                rows={8}
+                maxLength={TERMS_MAX_CHARS}
+                disabled={!canSubmit}
+                value={formValues.terms}
+                onChange={handleChange}
+                onBlur={() => handleBlur("terms")}
+                className={`mt-2 w-full rounded-2xl border px-4 py-3 text-sm leading-6 shadow-inner placeholder:text-gray-400 focus:border-[#736CED] focus:ring-2 focus:ring-[#C4B5FD]/70 ${
+                  showError("terms") ? "border-rose-300" : "border-gray-200"
+                }`}
+                placeholder="Explain the loyalty mechanics, redemption rules, validity period, exclusions, and customer support commitments."
+              />
+              <div className="mt-1 text-xs text-gray-500">
+                Minimum {TERMS_MIN_CHARS} characters / {TERMS_MIN_WORDS} words.
+              </div>
+              {showError("terms") && (
+                <p className="mt-1 text-sm text-rose-600">
+                  {validationErrors.terms}
+                </p>
+              )}
+            </div>
+
+            {serverError && (
+              <div className="flex items-center gap-2 rounded-2xl border border-rose-200 bg-rose-50 px-4 py-3 text-sm text-rose-700">
+                <AlertCircle size={16} />
+                <span>{serverError}</span>
+              </div>
+            )}
+
+            <button
+              type="submit"
+              disabled={!canSubmit || submitting}
+              className={`w-full rounded-2xl px-5 py-3 text-center text-sm font-semibold text-white shadow-lg transition ${
+                !canSubmit || submitting
+                  ? "cursor-not-allowed bg-gray-400"
+                  : "bg-[#4C3BCF] hover:bg-[#3728a6]"
+              }`}
+            >
+              <span className="inline-flex items-center justify-center gap-2">
+                {submitting && <Loader2 className="h-4 w-4 animate-spin" />}
+                {activeApplication ? "Program Active" : "Submit Application"}
+              </span>
+            </button>
+            {!canSubmit && (
+              <p className="text-center text-xs text-gray-500">
+                You can submit a new application only after cancelling your
+                active program or once a pending request is resolved.
+              </p>
+            )}
+          </form>
+
+          <div className="space-y-5 lg:col-span-2">
+            <PreviewCard values={formValues} vendor={user} />
+            <div className="rounded-3xl border border-gray-100 bg-white/80 p-5 shadow-sm">
+              <p className="text-sm font-semibold text-gray-700">
+                Submission Checklist
+              </p>
+              <p className="text-xs text-gray-500">
+                All criteria must pass before the Events Office reviews your
+                request.
+              </p>
+              <div className="mt-4">
+                <RequirementChecklist {...requirementState} />
+              </div>
             </div>
           </div>
         </div>
       </div>
-
-      <section className="rounded-3xl border border-gray-100 bg-white/80 p-6 shadow-sm">
-        <div className="flex flex-wrap items-center justify-between gap-4">
-          <div>
-            <h2 className="text-lg font-semibold text-[#18122B]">
-              Submission history
-            </h2>
-            <p className="text-sm text-gray-500">
-              Track previous decisions from the Events Office.
-            </p>
-          </div>
-          <span className="text-xs font-semibold text-gray-500">
-            {applications.length} total
-          </span>
-        </div>
-
-        {loadingApps ? (
-          <div className="mt-6 flex items-center gap-2 text-sm text-gray-500">
-            <Loader2 className="h-4 w-4 animate-spin" />
-            Loading your applications...
-          </div>
-        ) : appsError ? (
-          <div className="mt-6 flex items-center gap-3 rounded-2xl border border-rose-200 bg-rose-50 p-4 text-sm text-rose-700">
-            <AlertTriangle size={16} />
-            <span>{appsError}</span>
-          </div>
-        ) : applications.length === 0 ? (
-          <div className="mt-6 rounded-2xl border border-dashed border-gray-200 p-6 text-center text-sm text-gray-500">
-            No submissions yet. Your first application will appear here once
-            sent.
-          </div>
-        ) : (
-          <div className="mt-6 space-y-4">
-            {applications.map((app) => (
-              <ApplicationCard key={app._id} application={app} />
-            ))}
-          </div>
-        )}
-      </section>
-    </div>
-    <ConfettiBurst active={Boolean(celebration)} />
-    <SubmissionSuccessModal
-      data={celebration}
-      countdown={redirectCountdown}
-      onViewStatus={handleViewStatus}
-    />
+      <ConfettiBurst active={Boolean(celebration)} />
+      <SubmissionSuccessModal
+        data={celebration}
+        countdown={redirectCountdown}
+        onViewStatus={handleViewStatus}
+      />
     </>
   );
 }

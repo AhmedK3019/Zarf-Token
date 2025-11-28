@@ -33,7 +33,7 @@ export const hasEventStarted = (request) => {
   if (!reference) return false;
   const start = new Date(reference);
   if (Number.isNaN(start.getTime())) return false;
-  return start <= now;
+  return start <= new Date();
 };
 
 export const getCancellationEligibility = (request) => {
