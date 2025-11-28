@@ -293,7 +293,6 @@ export const sendVendorCancellationEmail = async ({
   const html = `
     <p>Dear ${vendor.companyname || "Vendor"},</p>
     <p>${intro}</p>
-    ${reasonLine}
     <p>If you would like to participate again, you can submit a new application at any time.</p>
     <p>Best regards,<br/>GUC Events Team</p>
   `;

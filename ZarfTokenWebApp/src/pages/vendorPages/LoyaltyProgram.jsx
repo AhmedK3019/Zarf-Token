@@ -91,18 +91,9 @@ const LoyaltyProgram = ({ vendor }) => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [refreshKey, setRefreshKey] = useState(0);
-  const [cancelModalOpen, setCancelModalOpen] = useState(false);
-  const [cancelReason, setCancelReason] = useState("");
-  const [cancelling, setCancelling] = useState(false);
-  const [cancelError, setCancelError] = useState(null);
-  const [applyAgainModalOpen, setApplyAgainModalOpen] = useState(false);
   const [toast, setToast] = useState(null);
-  const [cancelRequestModalOpen, setCancelRequestModalOpen] = useState(false);
-  const [cancellingRequest, setCancellingRequest] = useState(false);
   const [cancelApprovedModalOpen, setCancelApprovedModalOpen] = useState(false);
-  const [cancelApprovedReason, setCancelApprovedReason] = useState("");
   const [cancellingApproved, setCancellingApproved] = useState(false);
-  const [cancelApprovedError, setCancelApprovedError] = useState(null);
 
   useEffect(() => {
     if (!vendorId) return;
@@ -115,7 +106,8 @@ const LoyaltyProgram = ({ vendor }) => {
         if (cancelled) return;
         const rows = Array.isArray(res.data) ? res.data : [];
         rows.sort(
-          (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+          (a, b) =>
+            new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
         );
         setApplications(rows);
       } catch (err) {
@@ -141,196 +133,57 @@ const LoyaltyProgram = ({ vendor }) => {
     return () => clearTimeout(timer);
   }, [toast]);
 
-  const pendingApplication = useMemo(
-    () => applications.find((app) => app.status?.toLowerCase() === "pending"),
-    [applications]
-  );
   const latestApplication = useMemo(
     () => (applications.length ? applications[0] : null),
     [applications]
   );
-  const approvedApplication = useMemo(
-    () => applications.find((app) => app.status?.toLowerCase() === "approved"),
-    [applications]
-  );
 
-  const heroApplication = pendingApplication || latestApplication;
+  const heroApplication = latestApplication;
   const heroStatus = heroApplication?.status?.toLowerCase() || "not_applied";
-  const statusCopy = STATUS_INFO[heroStatus] || STATUS_INFO.not_applied; // eslint-disable-line no-unused-vars
-  const hasHistory = applications.length > 0;
-  const hasActiveProgram = applications.some((app) => {
-    const status = String(app.status || "").toLowerCase();
-    return !NON_ACTIVE_STATUSES.includes(status);
-  });
-  const canApply = !hasActiveProgram;
 
   const primaryCta = useMemo(() => {
-    if (!vendorId || !canApply) return null;
+    if (!vendorId || latestApplication) return null;
     return {
-      label: hasHistory ? "Apply Again" : "Apply Now",
+      label: "Apply Now",
       to: "/dashboard/vendor/apply-loyalty",
       variant: "primary",
-      requiresReminder: hasHistory,
     };
-  }, [vendorId, canApply, hasHistory]);
+  }, [vendorId, latestApplication]);
 
   const handleNavigate = (to) => navigate(to);
-  const handleApplyAgainProceed = () => {
-    setApplyAgainModalOpen(false);
-    if (primaryCta?.to) {
-      handleNavigate(primaryCta.to);
-    }
-  };
-  const canCancelParticipation = Boolean(approvedApplication);
-  const canCancelRequest = Boolean(pendingApplication);
-  // Show cancel button for any application (pending or approved)
-  const hasAnyApplication = applications.length > 0;
-
-  const openCancelModal = () => {
-    setCancelError(null);
-    setCancelReason("");
-    setCancelModalOpen(true);
-  };
-
-  const openCancelRequestModal = () => {
-    setCancelRequestModalOpen(true);
-  };
-
-  const closeCancelRequestModal = () => {
-    if (cancellingRequest) return;
-    setCancelRequestModalOpen(false);
-  };
-
-  const handleCancelRequest = async () => {
-    const appToCancel = pendingApplication || latestApplication;
-    if (!vendorId || !appToCancel) return;
-    setCancellingRequest(true);
-    try {
-      // TODO: Implement backend API call here
-      // await api.delete(`/loyalty/${appToCancel._id}`);
-      
-      // Uncomment below when backend is ready:
-      // setApplications((prev) =>
-      //   prev.filter((app) => app._id !== appToCancel._id)
-      // );
-      // setCancelRequestModalOpen(false);
-      // setCancelRequestReason("");
-      // setToast({
-      //   type: "success",
-      //   message: "Loyalty program request cancelled successfully.",
-      // });
-      // setRefreshKey((key) => key + 1);
-      
-      // For now, show a message that backend needs to be implemented
-      setCancelRequestModalOpen(false);
-      setToast({
-        type: "error",
-        message: "will do backend later",
-      });
-    } catch (err) {
-      const message =
-        err?.response?.data?.error ||
-        err?.message ||
-        "Failed to cancel request. Please try again.";
-      setToast({
-        type: "error",
-        message,
-      });
-    } finally {
-      setCancellingRequest(false);
-    }
-  };
 
   const openCancelApprovedModal = () => {
-    setCancelApprovedError(null);
-    setCancelApprovedReason("");
     setCancelApprovedModalOpen(true);
   };
 
   const closeCancelApprovedModal = () => {
     if (cancellingApproved) return;
     setCancelApprovedModalOpen(false);
-    setCancelApprovedReason("");
-    setCancelApprovedError(null);
   };
 
   const handleCancelApproved = async () => {
-    const appToCancel = approvedApplication || latestApplication;
-    if (!vendorId || !appToCancel) return;
+    if (!vendorId) return;
     setCancellingApproved(true);
-    setCancelApprovedError(null);
     try {
-      // TODO: Implement backend API call here
-      // await api.delete(`/loyalty/${appToCancel._id}`, {
-      //   data: { reason: cancelApprovedReason.trim() },
-      // });
-      
-      // Uncomment below when backend is ready:
-      // setApplications((prev) =>
-      //   prev.filter((app) => app._id !== appToCancel._id)
-      // );
-      // setCancelApprovedModalOpen(false);
-      // setCancelApprovedReason("");
-      // setToast({
-      //   type: "success",
-      //   message: "Loyalty program cancelled successfully.",
-      // });
-      // setRefreshKey((key) => key + 1);
-      
-      // For now, show a message that backend needs to be implemented
+      await api.delete(`/loyalty/${vendorId}`);
+
       setCancelApprovedModalOpen(false);
-      setCancelApprovedReason("");
       setToast({
-        type: "error",
-        message: "will do backend later",
+        type: "success",
+        message: "Loyalty program cancelled successfully.",
       });
+      setRefreshKey((key) => key + 1);
     } catch (err) {
       const message =
         err?.response?.data?.error ||
         err?.message ||
         "Failed to cancel program. Please try again.";
-      setCancelApprovedError(message);
+      setToast({
+        type: "error",
+        message,
+      });
     } finally {
       setCancellingApproved(false);
-    }
-  };
-
-  const closeCancelModal = () => {
-    if (cancelling) return;
-    setCancelModalOpen(false);
-    setCancelReason("");
-    setCancelError(null);
-  };
-
-  const handleCancelParticipation = async () => {
-    if (!vendorId || !approvedApplication) return;
-    setCancelling(true);
-    setCancelError(null);
-    try {
-      await api.delete("/loyalty/vendor", {
-        data: { reason: cancelReason.trim() },
-      });
-      setApplications((prev) =>
-        prev.filter((app) => app._id !== approvedApplication._id)
-      );
-      setCancelModalOpen(false);
-      setCancelReason("");
-      setToast({
-        type: "success",
-        message: "Loyalty program removed from the directory.",
-      });
-      setRefreshKey((key) => key + 1);
-      if (typeof window !== "undefined") {
-        window.dispatchEvent(new CustomEvent("notifications:refresh"));
-      }
-    } catch (err) {
-      const message =
-        err?.response?.data?.error ||
-        err?.message ||
-        "Failed to cancel participation. Please try again.";
-      setCancelError(message);
-    } finally {
-      setCancelling(false);
     }
   };
 
@@ -347,68 +200,19 @@ const LoyaltyProgram = ({ vendor }) => {
           </button>
           {primaryCta && (
             <button
-              onClick={() => {
-                if (primaryCta.requiresReminder) {
-                  setApplyAgainModalOpen(true);
-                  return;
-                }
-                handleNavigate(primaryCta.to);
-              }}
-              className={`inline-flex items-center gap-2 rounded-full px-5 py-2 text-sm font-semibold shadow ${
-                primaryCta.variant === "primary"
-                  ? "bg-[#4C3BCF] text-white hover:bg-[#3728a6]"
-                  : "border border-gray-200 text-gray-700 hover:bg-gray-50"
-              }`}
+              onClick={() => handleNavigate(primaryCta.to)}
+              className="inline-flex items-center gap-2 rounded-full px-5 py-2 text-sm font-semibold shadow bg-[#4C3BCF] text-white hover:bg-[#3728a6]"
             >
               {primaryCta.label}
             </button>
           )}
-          {hasAnyApplication && (
-            <>
-              {canCancelRequest && (
-                <button
-                  onClick={openCancelRequestModal}
-                  className="inline-flex items-center gap-2 rounded-full bg-rose-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-rose-700"
-                >
-                  Cancel Request
-                </button>
-              )}
-              {canCancelParticipation && (
-                <>
-                  <button
-                    onClick={openCancelApprovedModal}
-                    className="inline-flex items-center gap-2 rounded-full bg-rose-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-rose-700"
-                  >
-                    Cancel
-                  </button>
-                  <button
-                    onClick={openCancelModal}
-                    className="inline-flex items-center gap-2 rounded-full bg-rose-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-rose-700"
-                  >
-                    <ShieldCheck size={16} />
-                    Cancel Participation
-                  </button>
-                </>
-              )}
-              {/* Fallback: show cancel button for any application if status doesn't match pending/approved */}
-              {!canCancelRequest && !canCancelParticipation && latestApplication && (
-                <button
-                  onClick={() => {
-                    // If status is approved (case-insensitive), use approved cancel
-                    const status = latestApplication.status?.toLowerCase();
-                    if (status === "approved") {
-                      openCancelApprovedModal();
-                    } else {
-                      // Otherwise treat as pending request
-                      openCancelRequestModal();
-                    }
-                  }}
-                  className="inline-flex items-center gap-2 rounded-full bg-rose-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-rose-700"
-                >
-                  Cancel
-                </button>
-              )}
-            </>
+          {latestApplication && (
+            <button
+              onClick={openCancelApprovedModal}
+              className="inline-flex items-center gap-2 rounded-full bg-rose-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-rose-700"
+            >
+              Cancel
+            </button>
           )}
         </div>
 
@@ -469,149 +273,7 @@ const LoyaltyProgram = ({ vendor }) => {
             )}
           </div>
         )}
-
-        {approvedApplication && (
-          <div className="rounded-2xl border border-emerald-200 bg-emerald-50/80 p-5 text-emerald-900">
-            <div className="flex items-center justify-between gap-3">
-              <div className="flex items-center gap-2 text-sm font-semibold uppercase tracking-wide">
-                <ShieldCheck size={16} />
-                Active Partnership Details
-              </div>
-              <button
-                onClick={openCancelApprovedModal}
-                className="inline-flex items-center gap-2 rounded-full bg-rose-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-rose-700"
-              >
-                Cancel
-              </button>
-            </div>
-            <div className="mt-4 grid gap-4 text-sm sm:grid-cols-3">
-              <div>
-                <p className="text-emerald-600">Promo Code</p>
-                <p className="text-2xl font-bold">{approvedApplication.promoCode}</p>
-              </div>
-              <div>
-                <p className="text-emerald-600">Discount Rate</p>
-                <p className="text-2xl font-bold">
-                  {approvedApplication.discountRate}% OFF
-                </p>
-              </div>
-              <div>
-                <p className="text-emerald-600">Approved On</p>
-                <p className="text-lg font-semibold">
-                  {formatDate(approvedApplication.reviewedAt || approvedApplication.updatedAt)}
-                </p>
-              </div>
-            </div>
-            {approvedApplication.termsAndConditions && (
-              <div className="mt-4 rounded-2xl bg-white/80 p-4 text-sm text-emerald-800">
-                <p className="font-semibold">Key Terms</p>
-                <p className="mt-1">
-                  {summarizeTerms(approvedApplication.termsAndConditions, 260)}
-                </p>
-              </div>
-            )}
-          </div>
-        )}
       </section>
-
-      {cancelModalOpen && (
-        <div className="fixed inset-0 z-40 flex items-center justify-center bg-black/30 px-4">
-          <div className="w-full max-w-lg rounded-3xl bg-white p-6 shadow-2xl">
-            <div className="flex items-start justify-between gap-3">
-              <div>
-                <p className="text-xs font-semibold uppercase tracking-wide text-rose-500">
-                  Cancel participation
-                </p>
-                <h3 className="text-2xl font-bold text-[#18122B]">Are you sure?</h3>
-                <p className="text-sm text-gray-600">
-                  Cancelling removes your promo from the loyalty directory immediately.
-                  Students will no longer see your offer until you submit a new application.
-                </p>
-              </div>
-              <button
-                type="button"
-                onClick={closeCancelModal}
-                className="rounded-full p-2 text-gray-400 hover:bg-gray-100"
-                aria-label="Close"
-              >
-                <X className="h-4 w-4" />
-              </button>
-            </div>
-
-            <div className="mt-4">
-              <label className="text-sm font-semibold text-gray-700">
-                Optional note for the Events Office
-              </label>
-              <textarea
-                rows={4}
-                value={cancelReason}
-                onChange={(e) => setCancelReason(e.target.value)}
-                placeholder="Briefly explain why you’re leaving the program."
-                className="mt-2 w-full rounded-2xl border border-gray-200 bg-gray-50 p-3 text-sm focus:border-[#4C3BCF] focus:bg-white focus:outline-none"
-              />
-            </div>
-            {cancelError && (
-              <p className="mt-2 text-sm text-rose-600">{cancelError}</p>
-            )}
-
-            <div className="mt-6 flex flex-wrap justify-end gap-3">
-              <button
-                type="button"
-                onClick={closeCancelModal}
-                disabled={cancelling}
-                className="rounded-full border border-gray-200 px-4 py-2 text-sm font-semibold text-gray-600 hover:bg-gray-50 disabled:cursor-not-allowed"
-              >
-                Keep participation
-              </button>
-              <button
-                type="button"
-                onClick={handleCancelParticipation}
-                disabled={cancelling}
-                className="inline-flex items-center gap-2 rounded-full border border-rose-200 bg-rose-600 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-rose-700 disabled:cursor-not-allowed disabled:opacity-60"
-              >
-                {cancelling ? (
-                  <Loader2 className="h-4 w-4 animate-spin" />
-                ) : (
-                  <AlertTriangle className="h-4 w-4" />
-                )}
-                Confirm cancel
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {cancelRequestModalOpen && (
-        <div className="fixed inset-0 z-40 flex items-center justify-center bg-black/30 px-4">
-          <div className="w-full max-w-lg rounded-3xl bg-white p-6 shadow-2xl">
-            <div className="space-y-3 text-center">
-              <h3 className="text-2xl font-bold text-[#18122B]">Cancel Your Application?</h3>
-            </div>
-
-            <div className="mt-6 flex flex-wrap items-center justify-between gap-3">
-              <button
-                type="button"
-                onClick={closeCancelRequestModal}
-                disabled={cancellingRequest}
-                className="rounded-full bg-emerald-600 px-5 py-2 text-sm font-semibold text-white transition hover:bg-emerald-500 disabled:cursor-not-allowed disabled:opacity-60"
-              >
-                Keep Request
-              </button>
-              <button
-                type="button"
-                onClick={handleCancelRequest}
-                disabled={cancellingRequest}
-                className="inline-flex items-center gap-2 rounded-full bg-rose-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-rose-700 disabled:cursor-not-allowed disabled:opacity-60"
-              >
-                {cancellingRequest ? (
-                  <Loader2 className="h-4 w-4 animate-spin" />
-                ) : null}
-                Confirm Cancel
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
 
       {cancelApprovedModalOpen && (
         <div className="fixed inset-0 z-40 flex items-center justify-center bg-black/30 px-4">
@@ -619,11 +281,14 @@ const LoyaltyProgram = ({ vendor }) => {
             <div className="flex items-start justify-between gap-3">
               <div>
                 <p className="text-xs font-semibold uppercase tracking-wide text-rose-500">
-                  Cancel program
+                  Cancel Loyalty Program
                 </p>
-                <h3 className="text-2xl font-bold text-[#18122B]">Cancel Your Approved Program?</h3>
+                <h3 className="text-2xl font-bold text-[#18122B]">
+                  Cancel Your Loyalty Program?
+                </h3>
                 <p className="text-sm text-gray-600">
-                  This will cancel your approved loyalty program. Your promo will be removed from the directory and students will no longer see your offer. You can submit a new application at any time.
+                  This will cancel your loyalty program application. You can
+                  submit a new application at any time.
                 </p>
               </div>
               <button
@@ -635,22 +300,6 @@ const LoyaltyProgram = ({ vendor }) => {
                 <X className="h-4 w-4" />
               </button>
             </div>
-
-            <div className="mt-4">
-              <label className="text-sm font-semibold text-gray-700">
-                Optional reason for cancellation
-              </label>
-              <textarea
-                rows={4}
-                value={cancelApprovedReason}
-                onChange={(e) => setCancelApprovedReason(e.target.value)}
-                placeholder="Briefly explain why you're cancelling this program."
-                className="mt-2 w-full rounded-2xl border border-gray-200 bg-gray-50 p-3 text-sm focus:border-[#4C3BCF] focus:bg-white focus:outline-none"
-              />
-            </div>
-            {cancelApprovedError && (
-              <p className="mt-2 text-sm text-rose-600">{cancelApprovedError}</p>
-            )}
 
             <div className="mt-6 flex flex-wrap justify-end gap-3">
               <button
@@ -659,7 +308,7 @@ const LoyaltyProgram = ({ vendor }) => {
                 disabled={cancellingApproved}
                 className="rounded-full border border-gray-200 px-4 py-2 text-sm font-semibold text-gray-600 hover:bg-gray-50 disabled:cursor-not-allowed"
               >
-                Keep Program
+                Keep Application
               </button>
               <button
                 type="button"
@@ -671,35 +320,6 @@ const LoyaltyProgram = ({ vendor }) => {
                   <Loader2 className="h-4 w-4 animate-spin" />
                 ) : null}
                 Confirm Cancel
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {applyAgainModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 px-4">
-          <div className="w-full max-w-lg rounded-3xl bg-white p-6 shadow-2xl">
-            <div className="space-y-3">
-              <h3 className="text-2xl font-bold text-[#18122B]">Before you proceed</h3>
-              <p className="text-sm text-gray-600">
-                Please make sure you do not have any ongoing Loyalty Program partnerships before submitting a new application.
-              </p>
-            </div>
-            <div className="mt-6 flex flex-wrap justify-end gap-3">
-              <button
-                type="button"
-                onClick={() => setApplyAgainModalOpen(false)}
-                className="rounded-full bg-rose-600 px-5 py-2 text-sm font-semibold text-white hover:bg-rose-500"
-              >
-                Close
-              </button>
-              <button
-                type="button"
-                onClick={handleApplyAgainProceed}
-                className="rounded-full bg-emerald-600 px-5 py-2 text-sm font-semibold text-white hover:bg-emerald-500"
-              >
-                Proceed
               </button>
             </div>
           </div>
