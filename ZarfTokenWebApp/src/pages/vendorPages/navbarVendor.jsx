@@ -45,7 +45,7 @@ const NavbarVendor = ({ vendor }) => {
                   className="h-16 w-auto object-contain"
                 />
                 <p className="text-white ml-2 text-lg font-semibold absolute bottom-0 left-16">
-                  Welcome, Vendor!
+                  Welcome, {user.companyname}!
                 </p>
               </div>
             </div>
