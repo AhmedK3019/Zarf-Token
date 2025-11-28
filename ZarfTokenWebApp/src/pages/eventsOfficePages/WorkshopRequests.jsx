@@ -847,9 +847,9 @@ export default function WorkshopRequests() {
       try {
         setIsLoading(true);
         const ws = await api.get("/workshops/getAllWorkshops");
-        const res = ws.filter((w) => w.status !== "Approved");
-        const payload = Array.isArray(res.data)
-          ? res.data
+        const res = ws.data.filter((w) => w.status !== "Approved");
+        const payload = Array.isArray(res)
+          ? res
           : Array.isArray(res.data?.workshops)
           ? res.data.workshops
           : [];

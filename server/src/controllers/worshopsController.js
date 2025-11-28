@@ -187,14 +187,9 @@ const updateWorkshop = async (req, res, next) => {
       delete normalizedBody.registerationDeadline;
       delete normalizedBody.registerationdeadline;
     }
-    const { value, error } = workshopSchema.validate(normalizedBody);
-    if (error) {
-      console.log(error);
-      return res.status(400).json({ message: error.details[0].message });
-    }
     const workshop = await WorkShop.findByIdAndUpdate(
       { _id: id },
-      { $set: value },
+      { $set: normalizedBody },
       { new: true }
     );
     if (!workshop) {

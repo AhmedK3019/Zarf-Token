@@ -395,6 +395,26 @@ export default function MyWorkshops() {
                             <p className="text-sm leading-relaxed text-gray-700 line-clamp-2">
                               {w.shortdescription}
                             </p>
+
+                            {/* Show message if awaiting professor response */}
+                            {w.currentMessage?.awaitingResponseFrom ===
+                              "Professor" &&
+                              w.currentMessage?.message && (
+                                <div className="mt-3 p-3 bg-amber-50 border border-amber-200 rounded-lg">
+                                  <div className="flex items-start gap-2">
+                                    <Flag className="w-4 h-4 text-amber-600 flex-shrink-0 mt-0.5" />
+                                    <div className="flex-1">
+                                      <p className="text-xs font-semibold text-amber-800 mb-1">
+                                        Events Office Requested Changes:
+                                      </p>
+                                      <p className="text-sm text-amber-900">
+                                        {w.comments}
+                                      </p>
+                                    </div>
+                                  </div>
+                                </div>
+                              )}
+
                             <div className="text-sm text-gray-600">
                               {w.startdate && w.enddate ? (
                                 <span>
@@ -904,10 +924,30 @@ export default function MyWorkshops() {
                                 ) : (
                                   <>
                                     <div>
-                                      <label className="text-xs text-[#312A68]">
-                                        Events office has requested the
-                                        following changes:
-                                      </label>
+                                      <div className="flex items-center justify-between gap-2 mb-2">
+                                        <label className="text-xs text-[#312A68] font-semibold">
+                                          Events office has requested the
+                                          following changes:
+                                        </label>
+                                        <div className="flex gap-2">
+                                          <button
+                                            onClick={handleAcceptEdits}
+                                            title="Accept Edits"
+                                            className="rounded-full border border-emerald-200 bg-white/90 p-2 text-emerald-600 shadow-sm transition hover:bg-emerald-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500"
+                                            aria-label="Accept Edits"
+                                          >
+                                            <CheckCircle size={18} />
+                                          </button>
+                                          <button
+                                            onClick={handleRejectEdits}
+                                            title="Reject Edits"
+                                            className="rounded-full border border-rose-200 bg-white/90 p-2 text-rose-600 shadow-sm transition hover:bg-rose-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-rose-500"
+                                            aria-label="Reject Edits"
+                                          >
+                                            <XCircle size={18} />
+                                          </button>
+                                        </div>
+                                      </div>
                                       <textarea
                                         value={w.comments || ""}
                                         readOnly
@@ -915,54 +955,28 @@ export default function MyWorkshops() {
                                         rows={3}
                                       />
                                     </div>
-                                    <div className="flex justify-end mt-4">
-                                      <button
-                                        className={classNames(
-                                          BUTTON_BASE,
-                                          BUTTON_VARIANTS.primary,
-                                          "w-full sm:w-auto mr-3"
-                                        )}
-                                        onClick={handleAcceptEdits}
-                                      >
-                                        Accept Edits
-                                      </button>
-                                      <button
-                                        className={classNames(
-                                          BUTTON_BASE,
-                                          BUTTON_VARIANTS.danger,
-                                          "w-full sm:w-auto"
-                                        )}
-                                        onClick={handleRejectEdits}
-                                      >
-                                        Reject Edits
-                                      </button>
-                                    </div>
                                   </>
                                 )}
                               </div>
                             )}
 
                             {/* Save / Cancel Buttons */}
-                            <div className="flex items-center justify-end gap-3 pt-4 border-t border-[#736CED]/20 mt-4">
-                              <button
-                                onClick={cancelEdit}
-                                className={classNames(
-                                  BUTTON_BASE,
-                                  BUTTON_VARIANTS.danger,
-                                  "px-8 py-2.5"
-                                )}
-                              >
-                                Cancel
-                              </button>
+                            <div className="flex justify-end gap-2 pt-4 border-t border-[#736CED]/20 mt-4">
                               <button
                                 onClick={saveEdit}
-                                className={classNames(
-                                  BUTTON_BASE,
-                                  BUTTON_VARIANTS.primary,
-                                  "px-8 py-2.5"
-                                )}
+                                title="Save Changes"
+                                className="rounded-full border border-blue-200 bg-white/90 p-2 text-blue-600 shadow-sm transition hover:bg-blue-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
+                                aria-label="Save Changes"
                               >
-                                Save Changes
+                                <CheckCircle size={18} />
+                              </button>
+                              <button
+                                onClick={cancelEdit}
+                                title="Cancel"
+                                className="rounded-full border border-gray-200 bg-white/90 p-2 text-gray-600 shadow-sm transition hover:bg-gray-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gray-400"
+                                aria-label="Cancel"
+                              >
+                                <X size={18} />
                               </button>
                             </div>
                           </div>
