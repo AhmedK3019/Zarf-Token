@@ -86,14 +86,12 @@ const formatDateTime = (dateStr, timeStr) => {
 };
 
 const getEventStartDate = (request) => {
-  if (request?.eventStartAt) return toDate(request.eventStartAt);
-  if (request?.isBazarBooth && request?.bazarId?.startdate) {
+  if (request.bazarId)
     return combineDateParts(
       request.bazarId.startdate,
-      request.bazarId.starttime || request.bazarId.startTime
+      request.bazarId.starttime
     );
-  }
-  return null;
+  return combineDateParts(request.startdate, "00:00");
 };
 
 const getPaymentBanner = (request, nowMs) => {
@@ -334,35 +332,33 @@ function DetailsModal({ request, onClose, nowMs }) {
         </div>
         <div className="p-6 space-y-6">
           <div className="space-y-4">
-            {request.isBazarBooth && request.bazarId?.startdate ? (
-              <>
-                {infoBlock}
-                <div className="flex items-start gap-3">
-                  <Calendar className="mt-1 text-[#736CED]" size={16} />
-                  <div>
-                    <span className="font-semibold">Event Starts:</span>{" "}
-                    {formatDateTime(
-                      request.bazarId.startdate,
-                      request.bazarId.starttime
-                    )}
-                  </div>
+            <>
+              {infoBlock}
+              <div className="flex items-start gap-3">
+                <Calendar className="mt-1 text-[#736CED]" size={16} />
+                <div>
+                  <span className="font-semibold">Start Date:</span>{" "}
+                  {formatDate(request.startdate)}
+                  {request.starttime && (
+                    <span className="text-gray-600 ml-2">
+                      at {request.starttime}
+                    </span>
+                  )}
                 </div>
-                {request.bazarId.enddate && (
-                  <div className="flex items-start gap-3">
-                    <Clock className="mt-1 text-[#736CED]" size={16} />
-                    <div>
-                      <span className="font-semibold">Event Ends:</span>{" "}
-                      {formatDateTime(
-                        request.bazarId.enddate,
-                        request.bazarId.endtime
-                      )}
-                    </div>
-                  </div>
-                )}
-              </>
-            ) : (
-              infoBlock
-            )}
+              </div>
+              <div className="flex items-start gap-3">
+                <Calendar className="mt-1 text-[#736CED]" size={16} />
+                <div>
+                  <span className="font-semibold">End Date:</span>{" "}
+                  {formatDate(request.enddate)}
+                  {request.endtime && (
+                    <span className="text-gray-600 ml-2">
+                      at {request.endtime}
+                    </span>
+                  )}
+                </div>
+              </div>
+            </>
           </div>
           {paymentBanner && <PaymentDeadlineBadge banner={paymentBanner} />}
           {cancellationDate && (
@@ -386,15 +382,12 @@ function DetailsModal({ request, onClose, nowMs }) {
 
 // CancellationDialog removed (no longer used)
 
-const StatCard = ({ label, value, helper, accent }) => (
-  <div className="rounded-2xl border border-gray-100 bg-white/80 p-4 shadow-sm">
-    <p className="text-xs font-semibold uppercase tracking-wide text-gray-500">
+const StatCard = ({ label, value, accent }) => (
+  <div className="rounded-lg border border-gray-100 bg-white/80 p-2.5 shadow-sm">
+    <p className="text-[10px] font-semibold uppercase tracking-wide text-gray-500">
       {label}
     </p>
-    <p className={`text-2xl font-bold ${accent || "text-[#001845]"}`}>
-      {value}
-    </p>
-    {helper ? <p className="text-xs text-gray-500">{helper}</p> : null}
+    <p className={`text-lg font-bold ${accent || "text-[#001845]"}`}>{value}</p>
   </div>
 );
 
@@ -459,7 +452,7 @@ export default function MyRequests() {
     return () => {
       active = false;
     };
-  }, [user, refreshKey]);
+  }, [user?._id, refreshKey]);
 
   const statusCounts = useMemo(() => {
     return requests.reduce(
@@ -576,92 +569,54 @@ export default function MyRequests() {
         .animate-slide-up { animation: slide-up 0.4s ease-out forwards; }
         .animate-pop { animation: pop 1.2s ease-out forwards; }
       `}</style>
-      <div className="min-h-screen w-full bg-gradient-to-br from-[#f5f7ff] via-white to-[#eef2ff] text-[#1F1B3B] font-sans px-4 py-8 lg:px-6 lg:py-10">
-        <main className="mx-auto flex w-full max-w-7xl flex-1 flex-col gap-6">
-          <section className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="min-h-screen w-full bg-gradient-to-br from-[#f5f7ff] via-white to-[#eef2ff] text-[#1F1B3B] font-sans px-4 py-3 lg:px-6 lg:py-4">
+        <main className="mx-auto flex w-full max-w-7xl flex-1 flex-col gap-3">
+          <section className="grid gap-2 sm:grid-cols-2 lg:grid-cols-4">
             <StatCard
               label="Total"
               value={statusCounts.total}
-              helper="Requests submitted"
               accent="text-[#001845]"
             />
             <StatCard
               label="Pending"
               value={statusCounts.pending}
-              helper="Awaiting review"
               accent="text-amber-700"
             />
             <StatCard
               label="Accepted"
               value={statusCounts.accepted}
-              helper="Awaiting payment or live"
               accent="text-emerald-700"
             />
             <StatCard
               label="Rejected"
               value={statusCounts.rejected}
-              helper="Declined submissions"
               accent="text-rose-700"
             />
           </section>
 
-          <section className="rounded-3xl border border-gray-100 bg-white/80 p-5 shadow-sm">
-            <div className="flex flex-wrap items-center justify-between gap-3">
-              <div className="space-y-1">
-                <p className="text-xs font-semibold uppercase tracking-wide text-gray-500">
-                  Filters
-                </p>
-                <p className="text-sm text-gray-600">
-                  Search and filter your booth and platform requests.
-                </p>
-              </div>
-              <div className="flex flex-wrap items-center gap-2">
-                {statusTab !== "all" ||
-                viewFilter !== "all" ||
-                search.trim().length > 0 ? (
-                  <button
-                    onClick={resetFilters}
-                    className="inline-flex items-center gap-2 rounded-full border border-gray-200 bg-white px-4 py-2.5 text-sm font-semibold text-gray-700 shadow-sm transition hover:bg-gray-50"
-                  >
-                    <RefreshCcw className="h-4 w-4 text-gray-500" />
-                    Clear filters
-                  </button>
-                ) : null}
-                <button
-                  onClick={handleRefresh}
-                  className="inline-flex items-center gap-2 rounded-full border border-[#4C3BCF] bg-[#4C3BCF] px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-[#3728a6] hover:border-[#3728a6]"
-                >
-                  <RefreshCcw className="h-4 w-4" />
-                  Refresh
-                </button>
-              </div>
-            </div>
-
-            <div className="mt-4 flex flex-col gap-3 rounded-2xl border border-gray-100 bg-white/70 p-4 shadow-inner">
-              <div className="flex flex-col gap-3 lg:flex-row lg:items-end">
-                <label className="relative flex-1 min-w-[220px]">
-                  <span className="mb-2 block text-sm font-semibold text-gray-800">
-                    Search
-                  </span>
+          <section className="rounded-xl border border-gray-100 bg-white/80 p-3 shadow-sm">
+            <div className="flex flex-wrap items-center justify-between gap-2">
+              <div className="flex items-center gap-3">
+                <label className="relative flex-1 min-w-[200px]">
                   <div className="relative">
-                    <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
+                    <Search className="pointer-events-none absolute left-3 top-1/2 h-3 w-3 -translate-y-1/2 text-gray-400" />
                     <input
                       type="text"
                       value={search}
                       onChange={(e) => setSearch(e.target.value)}
                       placeholder="Search by booth name or bazaar"
-                      className="h-12 w-full rounded-2xl border border-gray-200 bg-white pl-10 pr-4 text-sm font-semibold text-gray-900 shadow-sm transition focus:border-[#4C3BCF] focus:outline-none focus:ring-2 focus:ring-[#d7d1ff]"
+                      className="h-9 w-full rounded-lg border border-gray-200 bg-white pl-9 pr-3 text-xs font-semibold text-gray-900 shadow-sm transition focus:border-[#4C3BCF] focus:outline-none focus:ring-1 focus:ring-[#d7d1ff]"
                     />
                   </div>
                 </label>
-                <label className="w-full lg:w-48">
-                  <span className="mb-2 block text-sm font-semibold text-gray-800">
-                    Status
+                <label className="flex items-center gap-2">
+                  <span className="text-xs font-semibold text-gray-700">
+                    Status:
                   </span>
                   <select
                     value={statusTab}
                     onChange={(e) => setStatusTab(e.target.value)}
-                    className="h-12 w-full rounded-2xl border border-gray-200 bg-white px-4 text-sm font-semibold text-gray-900 shadow-sm transition focus:border-[#4C3BCF] focus:outline-none focus:ring-2 focus:ring-[#d7d1ff]"
+                    className="h-9 rounded-lg border border-gray-200 bg-white px-3 text-xs font-semibold text-gray-900 shadow-sm transition focus:border-[#4C3BCF] focus:outline-none focus:ring-1 focus:ring-[#d7d1ff]"
                   >
                     <option value="all">All</option>
                     {STATUS_TABS.map((tab) => (
@@ -674,14 +629,14 @@ export default function MyRequests() {
                     ))}
                   </select>
                 </label>
-                <label className="w-full lg:w-48">
-                  <span className="mb-2 block text-sm font-semibold text-gray-800">
-                    Type
+                <label className="flex items-center gap-2">
+                  <span className="text-xs font-semibold text-gray-700">
+                    Type:
                   </span>
                   <select
                     value={viewFilter}
                     onChange={(e) => setViewFilter(e.target.value)}
-                    className="h-12 w-full rounded-2xl border border-gray-200 bg-white px-4 text-sm font-semibold text-gray-900 shadow-sm transition focus:border-[#4C3BCF] focus:outline-none focus:ring-2 focus:ring-[#d7d1ff]"
+                    className="h-9 rounded-lg border border-gray-200 bg-white px-3 text-xs font-semibold text-gray-900 shadow-sm transition focus:border-[#4C3BCF] focus:outline-none focus:ring-1 focus:ring-[#d7d1ff]"
                   >
                     {VIEW_FILTERS.map((filter) => (
                       <option key={filter.key} value={filter.key}>
@@ -690,6 +645,26 @@ export default function MyRequests() {
                     ))}
                   </select>
                 </label>
+              </div>
+              <div className="flex flex-wrap items-center gap-2">
+                {statusTab !== "all" ||
+                viewFilter !== "all" ||
+                search.trim().length > 0 ? (
+                  <button
+                    onClick={resetFilters}
+                    className="inline-flex items-center gap-1.5 rounded-full border border-gray-200 bg-white px-3 py-1.5 text-xs font-semibold text-gray-700 shadow-sm transition hover:bg-gray-50"
+                  >
+                    <RefreshCcw className="h-3 w-3 text-gray-500" />
+                    Clear
+                  </button>
+                ) : null}
+                <button
+                  onClick={handleRefresh}
+                  className="inline-flex items-center gap-1.5 rounded-full border border-[#4C3BCF] bg-[#4C3BCF] px-3 py-1.5 text-xs font-semibold text-white shadow-sm transition hover:bg-[#3728a6] hover:border-[#3728a6]"
+                >
+                  <RefreshCcw className="h-3 w-3" />
+                  Refresh
+                </button>
               </div>
             </div>
           </section>
@@ -809,6 +784,17 @@ export default function MyRequests() {
                           {request.location}
                         </div>
                       )}
+
+                      <div
+                        className={`mt-3 flex items-center gap-2 text-sm ${textMuted}`}
+                      >
+                        <Calendar size={14} />
+                        {formatDate(request.startdate)}
+                        {request.enddate && (
+                          <> - {formatDate(request.enddate)}</>
+                        )}
+                      </div>
+
                       <div
                         className={`mt-3 flex items-center gap-2 text-sm ${textMuted}`}
                       >
