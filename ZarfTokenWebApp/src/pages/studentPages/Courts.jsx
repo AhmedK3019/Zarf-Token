@@ -164,15 +164,11 @@ const Courts = () => {
         ...studentData,
       };
 
-      console.log("Sending booking payload:", payload);
-
       // Post to backend route (no need for /:id since controller uses req.body.courtId)
       const response = await api.post(
         `/courts/${selectedCourt._id}/reserve`,
         payload
       );
-
-      console.log("Booking success:", response.data);
 
       // Update slot locally
       const updatedSlots = selectedCourt.freeSlots.map((slot) =>
@@ -191,7 +187,7 @@ const Courts = () => {
       setSelectedSlot(null);
       setBookingMessage("");
       setShowSuccessToast(true);
-      
+
       // Auto-hide success toast after 3 seconds
       setTimeout(() => {
         setShowSuccessToast(false);
@@ -230,7 +226,9 @@ const Courts = () => {
                 <div className="flex flex-col items-stretch gap-4 md:flex-row md:items-center mb-4">
                   <div className="flex justify-end w-full">
                     <button
-                      onClick={() => navigate('/dashboard/user/my-reservations')}
+                      onClick={() =>
+                        navigate("/dashboard/user/my-reservations")
+                      }
                       className="inline-flex items-center justify-center gap-2 rounded-full px-6 py-3 text-sm font-semibold transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 bg-[#4C3BCF] text-white hover:bg-[#3730A3] focus-visible:ring-[#4C3BCF]/50 shadow-[0_4px_14px_0_rgba(76,59,207,0.3)] hover:shadow-[0_6px_20px_0_rgba(76,59,207,0.4)]"
                     >
                       <Calendar className="h-4 w-4" />
@@ -238,7 +236,7 @@ const Courts = () => {
                     </button>
                   </div>
                 </div>
-                
+
                 <div className="flex flex-col items-stretch gap-4 md:flex-row md:items-center">
                   {/* Court Type Dropdown */}
                   <div
@@ -577,7 +575,11 @@ const Courts = () => {
                     : "hover:bg-[#5A4BBA]"
                 }`}
               >
-                {bookingLoading ? "Booking..." : !user ? "Please log in" : "Book Slot"}
+                {bookingLoading
+                  ? "Booking..."
+                  : !user
+                  ? "Please log in"
+                  : "Book Slot"}
               </button>
             </div>
           </div>
@@ -588,25 +590,47 @@ const Courts = () => {
       {showSuccessToast && (
         <div className="fixed top-4 right-4 z-50 animate-slide-in">
           <div className="bg-green-500 text-white px-6 py-4 rounded-lg shadow-lg flex items-center gap-3 min-w-[300px]">
-            <svg className="w-6 h-6 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" />
+            <svg
+              className="w-6 h-6 text-white"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth="2"
+                d="M5 13l4 4L19 7"
+              />
             </svg>
             <div className="flex-1">
               <h4 className="font-semibold">Booking Successful!</h4>
-              <p className="text-sm opacity-90">Your court slot has been reserved.</p>
+              <p className="text-sm opacity-90">
+                Your court slot has been reserved.
+              </p>
             </div>
             <button
               onClick={() => setShowSuccessToast(false)}
               className="text-white hover:text-gray-200 transition-colors"
             >
-              <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
+              <svg
+                className="w-5 h-5"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth="2"
+                  d="M6 18L18 6M6 6l12 12"
+                />
               </svg>
             </button>
           </div>
         </div>
       )}
-      
+
       <style jsx>{`
         @keyframes slide-in {
           from {

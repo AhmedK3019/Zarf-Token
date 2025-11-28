@@ -339,7 +339,7 @@ const deleteComment = async (req, res, next) => {
         deletedComment = event.userComments.id(commentid);
         if (!deletedComment)
           return res.status(404).json({ message: "Comment not found" });
-        console.log("here");
+
         await Trip.findByIdAndUpdate(
           id,
           {
@@ -452,7 +452,7 @@ const removeRate = async (req, res, next) => {
 const archiveEvent = async (req, res, next) => {
   try {
     const { id, type } = req.params;
-    console.log(id, type);
+
     let model;
     switch (type) {
       case "trip":
@@ -537,7 +537,7 @@ const unArchiveEvent = async (req, res, next) => {
         return res.status(400).json({ message: "Invalid type" });
     }
     let event = await model.findById(id);
-    console.log(event);
+
     if (!event) return res.satuts(404).json({ message: "Event not found" });
     let result = await model.findByIdAndUpdate(
       id,

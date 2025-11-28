@@ -67,7 +67,6 @@ const createWorkshop = async (req, res, next) => {
     const userId = req.userId;
     if (!userId) return res.status(401).json({ message: "No token provided" });
     // normalize common misspellings from older clients
-    console.log(req.body);
     const normalizedBody = { ...req.body };
     // accept registerationDeadline or registerationdeadline (misspelled) and map to registrationDeadline
     if (

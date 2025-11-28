@@ -63,7 +63,7 @@ const NavbarUser = () => {
 
   // Format wallet value for display. Keep two decimal places (e.g. 0.00).
   const formatWallet = (w) => {
-    //console.log("Formatting wallet:", user);
+    //
     if (w === undefined || w === null) return "0.00";
     try {
       // Mongoose Decimal128 may come as an object whose toString yields the numeric string.

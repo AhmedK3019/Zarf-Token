@@ -6,7 +6,6 @@ import { all } from "axios";
 const EditBazaar = () => {
   const { id } = useParams();
   const navigate = useNavigate();
-  console.log(id);
   const [bazaarData, setBazaarData] = useState({
     bazaarname: "",
     startdate: "",

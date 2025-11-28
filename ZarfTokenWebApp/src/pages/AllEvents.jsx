@@ -619,12 +619,10 @@ const AllEvents = () => {
 
   const handleExcelDownload = async (event) => {
     try {
-      console.log("here");
       const response = await api.get(
         `/allEvents/registeredNamesExcel/${event._id}/${event.type}`,
         { responseType: "blob" } // VERY IMPORTANT
       );
-      console.log(response.data);
       // Create a download link
       const url = window.URL.createObjectURL(new Blob([response.data]));
       const link = document.createElement("a");
@@ -671,9 +669,7 @@ const AllEvents = () => {
       typeof event.bazarId === "string"
     ) {
       try {
-        console.log("Fetching bazaar data for:", event.bazarId);
         const bazaarRes = await api.get(`/bazaars/getBazaar/${event.bazarId}`);
-        console.log("Bazaar data received:", bazaarRes.data);
 
         const updatedEvent = {
           ...event,
@@ -802,12 +798,6 @@ const AllEvents = () => {
     setRatingSubmitting(true);
     try {
       const eventDetails = getEventDetails(selectedRatingEvent);
-      console.log("Submitting rating:", {
-        rating,
-        eventId: eventDetails.id,
-        eventType: eventDetails.type,
-      });
-
       await api.patch(
         `/allEvents/rateEvent/${eventDetails.id}/${eventDetails.type}`,
         { rating }

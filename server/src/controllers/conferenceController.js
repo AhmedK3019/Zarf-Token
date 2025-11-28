@@ -58,7 +58,6 @@ const updateConference = async (req, res, next) => {
     const { id } = req.params;
     const { error, value } = conferenceSchema.validate(req.body);
     if (error) {
-      console.log(error);
       return res.status(400).json({ message: error.details[0].message });
     }
     const conference = await Conference.findByIdAndUpdate(
@@ -72,7 +71,6 @@ const updateConference = async (req, res, next) => {
     }
     return res.status(200).json({ conference });
   } catch (error) {
-    console.log(error);
     next(error);
   }
 };

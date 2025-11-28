@@ -164,7 +164,7 @@ const loginUser = async (req, res, next) => {
 const blockUser = async (req, res, next) => {
   try {
     const { id, role } = req.params;
-    console.log(id, role);
+
     let body = { status: "Blocked" };
     let user;
     switch (role) {
@@ -184,7 +184,7 @@ const blockUser = async (req, res, next) => {
         user = await EventsOffice.findByIdAndUpdate(id, body, { new: true });
         break;
     }
-    console.log(user);
+
     res.status(200).json({ message: "User is Blocked", user });
   } catch (error) {
     next(error);

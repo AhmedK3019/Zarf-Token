@@ -287,10 +287,8 @@ export default function RegisteredEvents() {
         )
       : false;
 
-    console.log("📝 Setting hasAttended to:", userHasAttended);
     setHasAttended(userHasAttended);
 
-    console.log("🔧 Setting showCommentsModal to true");
     setShowCommentsModal(true);
 
     setCommentsLoading(true);
@@ -298,7 +296,7 @@ export default function RegisteredEvents() {
       const response = await api.get(
         `/allEvents/viewAllComments/${eventId}/${eventType}`
       );
-      console.log("📥 Comments response:", response.data);
+
       setComments(response.data.userComments || []);
     } catch (error) {
       console.error("Failed to fetch comments:", error);

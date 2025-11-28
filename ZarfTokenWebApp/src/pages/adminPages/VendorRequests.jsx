@@ -156,7 +156,10 @@ export default function VendorRequests() {
       }
 
       setMessage(`Request ${action}ed successfully`);
-      setRequests((prev) => prev.filter((r) => r._id !== id));
+
+      // Refresh the data after successful action
+      await fetchRequests();
+
       setTimeout(() => setMessage(null), 2000);
     } catch (err) {
       console.error(err);
@@ -642,7 +645,7 @@ export default function VendorRequests() {
                 disabled={selectedRoles.length === 0}
                 className={`px-6 py-2 rounded-full font-medium text-white shadow-sm transition-all text-sm ${
                   selectedRoles.length > 0
-                    ? "bg-[#6DD3CE] hover:bg-[#54C6EB]"
+                    ? "bg-[#736CED] hover:bg-[#4C3BCF]"
                     : "bg-gray-300 cursor-not-allowed"
                 }`}
               >

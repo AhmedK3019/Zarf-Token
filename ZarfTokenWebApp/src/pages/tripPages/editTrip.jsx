@@ -23,7 +23,7 @@ function EditTrip() {
       .get(`/trips/getTrip/${id}`)
       .then((res) => {
         const trip = res.data.trip;
-        console.log(trip);
+
         setTripData({
           ...trip,
           startdate: trip.startdate?.slice(0, 10) || "",
@@ -102,7 +102,7 @@ function EditTrip() {
     const errorMessages = validateForm();
     if (Object.keys(errorMessages).length > 0) {
       setError(errorMessages);
-      console.log(errorMessages);
+
       return;
     }
 

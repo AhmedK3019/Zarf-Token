@@ -219,7 +219,6 @@ const updateRequest = async (req, res, next) => {
 const acceptRequest = async (req, res, next) => {
   try {
     const { allowedusers } = req.body;
-    console.log("Allowed users:", allowedusers);
     const request = await VendorRequest.findById(req.params.id).populate(
       "bazarId"
     );

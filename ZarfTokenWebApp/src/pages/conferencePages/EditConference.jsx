@@ -166,14 +166,12 @@ const EditConference = () => {
         setSuccessMessage("");
         return;
       }
-      console.log(body);
       await api.put(`/conferences/updateConference/${id}`, body);
       setErrors({});
       setSuccessMessage("Conference updated successfully !!");
       window.location.href =
         "http://localhost:5173/dashboard/eventsOffice/all-events";
     } catch (error) {
-      console.log(error);
       setErrors({ general: error.message });
       setSuccessMessage("");
       return;
