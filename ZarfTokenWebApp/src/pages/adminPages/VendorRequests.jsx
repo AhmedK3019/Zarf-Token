@@ -46,6 +46,10 @@ export default function VendorRequests() {
   const [selectedRequest, setSelectedRequest] = useState(null);
   const [selectedRoles, setSelectedRoles] = useState([]);
 
+  // --- Details Modal State ---
+  const [showDetailsModal, setShowDetailsModal] = useState(false);
+  const [detailsRequest, setDetailsRequest] = useState(null);
+
   // --- Expandable Team Members State ---
   const [expandedTeams, setExpandedTeams] = useState(new Set());
 
@@ -95,6 +99,12 @@ export default function VendorRequests() {
         setShowAcceptModal(true);
       }
     }
+  };
+
+  // --- Open Details Modal ---
+  const openDetailsModal = (request) => {
+    setDetailsRequest(request);
+    setShowDetailsModal(true);
   };
 
   // --- Toggle Team Members Expansion ---
@@ -240,233 +250,312 @@ export default function VendorRequests() {
               No pending requests found.
             </div>
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
-              {requests.map((req) => (
-                <div
-                  key={req._id}
-                  className="bg-white rounded-2xl p-6 shadow-lg flex flex-col justify-between"
-                >
-                  <div>
-                    <h3 className="text-xl font-bold text-[#4C3BCF] mb-1">
-                      {req.vendorId?.companyname || "Vendor"}
-                    </h3>
-                    <p className="text-xs font-semibold text-[#736CED] mb-4">
-                      {req.vendorId?.email || "No Email"}
-                    </p>
-
-                    <div className="border-t border-gray-100 pt-4 space-y-3 text-sm">
-                      {/* Type Indicator */}
-                      <div className="flex items-start gap-2">
-                        <Info size={14} className="text-[#736CED] mt-0.5" />
-                        <span
-                          className={`px-2 py-0.5 rounded text-xs font-semibold ${
-                            req.isBazarBooth
-                              ? "bg-purple-100 text-purple-700"
-                              : "bg-blue-100 text-blue-700"
-                          }`}
-                        >
-                          {req.isBazarBooth ? "Bazaar Booth" : "Platform Booth"}
-                        </span>
-                      </div>
-
-                      {/* Details based on Type */}
-                      {req.isBazarBooth ? (
-                        <>
-                          <div className="flex items-start gap-2">
-                            <Calendar
-                              size={14}
-                              className="text-[#736CED] mt-0.5"
-                            />
-                            <span>
-                              <strong>Event:</strong> {req.bazarId?.bazaarname}
-                            </span>
-                          </div>
-                          <div className="flex items-start gap-2">
-                            <Calendar
-                              size={14}
-                              className="text-[#736CED] mt-0.5"
-                            />
-                            <span>
-                              <strong>Dates:</strong>{" "}
-                              {formatDate(req.bazarId?.startdate)}
-                            </span>
-                          </div>
-                        </>
-                      ) : (
-                        <>
-                          <div className="flex items-start gap-2">
-                            <MapPin
-                              size={14}
-                              className="text-[#736CED] mt-0.5"
-                            />
-                            <span>
-                              <strong>Location:</strong> {req.location}
-                            </span>
-                          </div>
-                          <div className="flex items-start gap-2">
-                            <Clock
-                              size={14}
-                              className="text-[#736CED] mt-0.5"
-                            />
-                            <span>
-                              <strong>Duration:</strong> {req.duration} weeks
-                            </span>
-                          </div>
-                        </>
-                      )}
-
-                      <div className="flex items-start gap-2">
-                        <Square size={14} className="text-[#736CED] mt-0.5" />
-                        <span>
-                          <strong>Size:</strong> {req.boothSize}
-                        </span>
-                      </div>
-
-                      {/* Team */}
-                      <div className="flex items-start gap-2">
-                        <Users size={14} className="text-[#736CED] mt-0.5" />
-                        <div className="w-full">
-                          <strong>Team Members:</strong> {req.people.length}
-                          <ul className="mt-2 space-y-2">
-                            {/* Always show first member */}
-                            {req.people.length > 0 && (
-                              <li className="flex items-center gap-2 p-2 rounded bg-gray-50">
-                                <div className="w-6 h-6 bg-gray-200 rounded-full flex items-center justify-center">
-                                  <User size={12} className="text-gray-500" />
-                                </div>
-                                <div className="flex-1 min-w-0 overflow-hidden">
-                                  <div className="text-xs font-medium truncate">
-                                    {req.people[0].name}
-                                  </div>
-                                </div>
-                                <div className="flex gap-1">
-                                  {req.people[0].DocumentId ? (
-                                    <>
-                                      <button
-                                        onClick={() =>
-                                          handleViewDocument(
-                                            req.people[0].DocumentId
-                                          )
-                                        }
-                                        className="text-gray-400 hover:text-green-600"
-                                      >
-                                        <Eye size={14} />
-                                      </button>
-                                      <button
-                                        onClick={() =>
-                                          handleDownloadDocument(
-                                            req.people[0].DocumentId,
-                                            req.people[0].name
-                                          )
-                                        }
-                                        className="text-gray-400 hover:text-blue-600"
-                                      >
-                                        <Download size={14} />
-                                      </button>
-                                    </>
-                                  ) : (
-                                    <AlertCircle
-                                      size={14}
-                                      className="text-red-300"
-                                    />
-                                  )}
-                                </div>
-                              </li>
-                            )}
-
-                            {/* Show remaining members if expanded */}
-                            {expandedTeams.has(req._id) &&
-                              req.people.slice(1).map((p, i) => (
-                                <li
-                                  key={i + 1}
-                                  className="flex items-center gap-2 p-2 rounded bg-gray-50"
-                                >
-                                  <div className="w-6 h-6 bg-gray-200 rounded-full flex items-center justify-center">
-                                    <User size={12} className="text-gray-500" />
-                                  </div>
-                                  <div className="flex-1 min-w-0 overflow-hidden">
-                                    <div className="text-xs font-medium truncate">
-                                      {p.name}
-                                    </div>
-                                  </div>
-                                  <div className="flex gap-1">
-                                    {p.DocumentId ? (
-                                      <>
-                                        <button
-                                          onClick={() =>
-                                            handleViewDocument(p.DocumentId)
-                                          }
-                                          className="text-gray-400 hover:text-green-600"
-                                        >
-                                          <Eye size={14} />
-                                        </button>
-                                        <button
-                                          onClick={() =>
-                                            handleDownloadDocument(
-                                              p.DocumentId,
-                                              p.name
-                                            )
-                                          }
-                                          className="text-gray-400 hover:text-blue-600"
-                                        >
-                                          <Download size={14} />
-                                        </button>
-                                      </>
-                                    ) : (
-                                      <AlertCircle
-                                        size={14}
-                                        className="text-red-300"
-                                      />
-                                    )}
-                                  </div>
-                                </li>
-                              ))}
-                          </ul>
-                          {/* Show more/less button if there are more than 1 member */}
-                          {req.people.length > 1 && (
-                            <button
-                              onClick={() => toggleTeamExpansion(req._id)}
-                              className="mt-2 text-xs text-[#736CED] hover:text-[#4C3BCF] font-medium flex items-center gap-1 transition-colors"
+            <div className="bg-white rounded-2xl shadow-lg overflow-hidden">
+              <div className="overflow-x-auto">
+                <table className="w-full">
+                  <thead className="bg-[#001889] text-white">
+                    <tr>
+                      <th className="px-6 py-4 text-left text-sm font-semibold">
+                        Company Name
+                      </th>
+                      <th className="px-6 py-4 text-left text-sm font-semibold">
+                        Location
+                      </th>
+                      <th className="px-6 py-4 text-left text-sm font-semibold">
+                        Dates & Duration
+                      </th>
+                      <th className="px-6 py-4 text-left text-sm font-semibold">
+                        Size
+                      </th>
+                      <th className="px-6 py-4 text-center text-sm font-semibold">
+                        Actions
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-gray-200">
+                    {requests.map((req) => (
+                      <tr
+                        key={req._id}
+                        className="hover:bg-gray-50 transition-colors"
+                      >
+                        <td className="px-6 py-4">
+                          <div>
+                            <div className="font-semibold text-[#4C3BCF]">
+                              {req.vendorId?.companyname || "Vendor"}
+                            </div>
+                            <div className="text-xs text-gray-500 mt-0.5">
+                              {req.vendorId?.email || "No Email"}
+                            </div>
+                            <span
+                              className={`inline-block mt-1 px-2 py-0.5 rounded text-xs font-semibold ${
+                                req.isBazarBooth
+                                  ? "bg-purple-100 text-purple-700"
+                                  : "bg-blue-100 text-blue-700"
+                              }`}
                             >
-                              {expandedTeams.has(req._id) ? (
-                                <>
-                                  <ChevronUp size={12} />
-                                  Show less
-                                </>
-                              ) : (
-                                <>
-                                  <ChevronDown size={12} />
-                                  Show {req.people.length - 1} more member
-                                  {req.people.length - 1 !== 1 ? "s" : ""}
-                                </>
-                              )}
-                            </button>
+                              {req.isBazarBooth
+                                ? "Bazaar Booth"
+                                : "Platform Booth"}
+                            </span>
+                          </div>
+                        </td>
+                        <td className="px-6 py-4 text-sm text-gray-700">
+                          {req.isBazarBooth ? (
+                            <div>
+                              <div className="font-medium">
+                                {req.bazarId?.bazaarname || "N/A"}
+                              </div>
+                              <div className="text-xs text-gray-500">
+                                Event Location
+                              </div>
+                            </div>
+                          ) : (
+                            req.location || "N/A"
                           )}
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="mt-6 border-t pt-4 flex gap-3">
-                    <button
-                      onClick={() => handleAction(req._id, "accept")}
-                      className="flex-1 rounded-lg px-4 py-2 text-sm font-semibold text-center transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 border border-green-200 bg-green-50 text-green-700 hover:bg-green-100 focus-visible:ring-green-200"
-                    >
-                      Accept
-                    </button>
-                    <button
-                      onClick={() => handleAction(req._id, "reject")}
-                      className="flex-1 rounded-lg px-4 py-2 text-sm font-semibold text-center transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 border border-red-200 bg-red-50 text-red-600 hover:bg-red-100 focus-visible:ring-red-200"
-                    >
-                      Reject
-                    </button>
-                  </div>
-                </div>
-              ))}
+                        </td>
+                        <td className="px-6 py-4 text-sm text-gray-700">
+                          {req.isBazarBooth ? (
+                            <div>
+                              <div>{formatDate(req.bazarId?.startdate)}</div>
+                              {req.bazarId?.enddate && (
+                                <div className="text-xs text-gray-500">
+                                  to {formatDate(req.bazarId.enddate)}
+                                </div>
+                              )}
+                            </div>
+                          ) : (
+                            <div>
+                              <div>{formatDate(req.startdate)}</div>
+                              <div className="text-xs text-gray-500">
+                                to {formatDate(req.enddate)}
+                              </div>
+                            </div>
+                          )}
+                        </td>
+                        <td className="px-6 py-4 text-sm text-gray-700">
+                          {req.boothSize}
+                        </td>
+                        <td className="px-6 py-4">
+                          <div className="flex items-center justify-center gap-2">
+                            <button
+                              onClick={() => openDetailsModal(req)}
+                              className="rounded-full border border-blue-200 bg-white/90 p-2 text-blue-600 shadow-sm transition hover:bg-blue-50 focus-visible:outline-none"
+                              title="View Details"
+                              aria-label="View Details"
+                            >
+                              <Eye size={18} />
+                            </button>
+                            <button
+                              onClick={() => handleAction(req._id, "accept")}
+                              className="rounded-full border border-green-200 bg-white/90 p-2 text-green-600 shadow-sm transition hover:bg-green-50 focus-visible:outline-none"
+                              title="Accept"
+                              aria-label="Accept"
+                            >
+                              <CheckSquare size={18} />
+                            </button>
+                            <button
+                              onClick={() => handleAction(req._id, "reject")}
+                              className="rounded-full border border-red-200 bg-white/90 p-2 text-red-600 shadow-sm transition hover:bg-red-50 focus-visible:outline-none"
+                              title="Reject"
+                              aria-label="Reject"
+                            >
+                              <X size={18} />
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
             </div>
           )}
         </div>
       </div>
+
+      {/* --- DETAILS MODAL --- */}
+      {showDetailsModal && detailsRequest && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 animate-in fade-in duration-200">
+          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-3xl max-h-[90vh] overflow-hidden flex flex-col">
+            {/* Header */}
+            <div className="px-6 py-4 bg-[#1F1B3B] text-white flex justify-between items-center">
+              <div>
+                <h3 className="text-lg font-bold">Request Details</h3>
+                <p className="text-xs text-gray-300">
+                  {detailsRequest.vendorId?.companyname}
+                </p>
+              </div>
+              <button
+                onClick={() => setShowDetailsModal(false)}
+                className="text-white/80 hover:text-white"
+              >
+                <X size={20} />
+              </button>
+            </div>
+
+            {/* Body */}
+            <div className="p-6 overflow-y-auto flex-1">
+              <div className="space-y-6">
+                {/* Company Info */}
+                <div className="border-b pb-4">
+                  <h4 className="text-sm font-semibold text-[#736CED] uppercase mb-3">
+                    Company Information
+                  </h4>
+                  <div className="grid grid-cols-2 gap-4 text-sm">
+                    <div>
+                      <span className="text-gray-500">Company Name:</span>
+                      <p className="font-medium">
+                        {detailsRequest.vendorId?.companyname}
+                      </p>
+                    </div>
+                    <div>
+                      <span className="text-gray-500">Email:</span>
+                      <p className="font-medium">
+                        {detailsRequest.vendorId?.email}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Booth Info */}
+                <div className="border-b pb-4">
+                  <h4 className="text-sm font-semibold text-[#736CED] uppercase mb-3">
+                    Booth Information
+                  </h4>
+                  <div className="grid grid-cols-2 gap-4 text-sm">
+                    <div>
+                      <span className="text-gray-500">Type:</span>
+                      <p className="font-medium">
+                        <span
+                          className={`inline-block px-2 py-0.5 rounded text-xs font-semibold ${
+                            detailsRequest.isBazarBooth
+                              ? "bg-purple-100 text-purple-700"
+                              : "bg-blue-100 text-blue-700"
+                          }`}
+                        >
+                          {detailsRequest.isBazarBooth
+                            ? "Bazaar Booth"
+                            : "Platform Booth"}
+                        </span>
+                      </p>
+                    </div>
+                    <div>
+                      <span className="text-gray-500">Size:</span>
+                      <p className="font-medium">{detailsRequest.boothSize}</p>
+                    </div>
+                    {detailsRequest.isBazarBooth ? (
+                      <>
+                        <div>
+                          <span className="text-gray-500">Event:</span>
+                          <p className="font-medium">
+                            {detailsRequest.bazarId?.bazaarname}
+                          </p>
+                        </div>
+                        <div>
+                          <span className="text-gray-500">Event Dates:</span>
+                          <p className="font-medium">
+                            {formatDate(detailsRequest.bazarId?.startdate)}
+                            {detailsRequest.bazarId?.enddate && (
+                              <>
+                                {" "}
+                                to {formatDate(detailsRequest.bazarId.enddate)}
+                              </>
+                            )}
+                          </p>
+                        </div>
+                      </>
+                    ) : (
+                      <>
+                        <div>
+                          <span className="text-gray-500">Location:</span>
+                          <p className="font-medium">
+                            {detailsRequest.location}
+                          </p>
+                        </div>
+                        <div>
+                          <span className="text-gray-500">Duration:</span>
+                          <p className="font-medium">
+                            {detailsRequest.duration} weeks
+                          </p>
+                        </div>
+                      </>
+                    )}
+                  </div>
+                </div>
+
+                {/* Team Members */}
+                <div>
+                  <h4 className="text-sm font-semibold text-[#736CED] uppercase mb-3">
+                    Team Members ({detailsRequest.people.length})
+                  </h4>
+                  <div className="space-y-3">
+                    {detailsRequest.people.map((person, idx) => (
+                      <div
+                        key={idx}
+                        className="flex items-center justify-between p-3 rounded-lg bg-gray-50 border border-gray-200"
+                      >
+                        <div className="flex items-center gap-3">
+                          <div className="w-10 h-10 bg-[#736CED]/10 rounded-full flex items-center justify-center">
+                            <User size={20} className="text-[#736CED]" />
+                          </div>
+                          <div>
+                            <p className="font-medium text-sm">{person.name}</p>
+                            <p className="text-xs text-gray-500">
+                              Team Member {idx + 1}
+                            </p>
+                          </div>
+                        </div>
+                        <div className="flex gap-2">
+                          {person.DocumentId ? (
+                            <>
+                              <button
+                                onClick={() =>
+                                  handleViewDocument(person.DocumentId)
+                                }
+                                className="rounded-full border border-green-200 bg-white p-2 text-green-600 shadow-sm transition hover:bg-green-50"
+                                title="View ID"
+                              >
+                                <Eye size={16} />
+                              </button>
+                              <button
+                                onClick={() =>
+                                  handleDownloadDocument(
+                                    person.DocumentId,
+                                    person.name
+                                  )
+                                }
+                                className="rounded-full border border-blue-200 bg-white p-2 text-blue-600 shadow-sm transition hover:bg-blue-50"
+                                title="Download ID"
+                              >
+                                <Download size={16} />
+                              </button>
+                            </>
+                          ) : (
+                            <div className="flex items-center gap-1 text-red-500 text-xs">
+                              <AlertCircle size={16} />
+                              <span>No ID</span>
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Footer */}
+            <div className="px-6 py-4 bg-gray-50 border-t border-gray-100 flex justify-end gap-3">
+              <button
+                onClick={() => setShowDetailsModal(false)}
+                className="px-4 py-2 text-gray-600 hover:text-gray-900 font-medium text-sm"
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* --- MODAL: Only shown for Platform Booths --- */}
       {showAcceptModal && selectedRequest && (
