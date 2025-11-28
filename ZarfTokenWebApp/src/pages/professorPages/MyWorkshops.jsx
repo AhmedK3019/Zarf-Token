@@ -22,7 +22,7 @@ const COLORS = {
   secondary: "#6DD3CE",
   accent: "#C14953",
   muted: "#f5f5f7",
-  info: "#54C6EB",
+  info: "#E09000",
 };
 
 const statusConfig = {
@@ -30,7 +30,7 @@ const statusConfig = {
     color: COLORS.info,
     icon: Clock,
     badge:
-      "bg-[#54C6EB] text-white border border-[#2f9ec8]/60 shadow-[0_2px_6px_rgba(84,198,235,0.35)]",
+      "bg-[#E09000] text-white border border-[#b87800]/60 shadow-[0_2px_6px_rgba(224,144,0,0.45)]",
   },
   Approved: {
     color: COLORS.secondary,
