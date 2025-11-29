@@ -435,7 +435,7 @@ const Courts = () => {
                           />
                           <span className="capitalize" style={{ color }}>{court.type || "Court"}</span>
                         </div>
-                        <h3 className="text-xl font-bold mb-3"> {court.name}</h3>
+                        <h3 className="text-xl font-bold mb-3 text-[#001889]"> {court.name}</h3>
                         <div className="mb-4">
                           <p className="flex items-center gap-2 text-sm text-[#001889]">
                             <span className="inline-block h-1.5 w-1.5 rounded-full bg-[#001889]" />
