@@ -3,6 +3,66 @@ import { useNavigate } from "react-router-dom";
 import { Calendar } from "lucide-react";
 import api from "../../services/api";
 import { useAuthUser } from "../../hooks/auth";
+import Football from "../../assets/FootBall.jpg";
+import Tennis from "../../assets/Tennis.jpg";
+
+// Color palette per court type (Tailwind utility classes)
+const COURT_COLORS = {
+  basketball: {
+    badgeBg: "bg-yellow-100",
+    badgeText: "text-yellow-800",
+    titleText: "text-yellow-900",
+    countText: "text-yellow-800",
+    accent: "bg-yellow-500",
+    buttonBg: "bg-yellow-600",
+    buttonHover: "hover:bg-yellow-700",
+  },
+  tennis: {
+    badgeBg: "bg-green-100",
+    badgeText: "text-green-800",
+    titleText: "text-green-900",
+    countText: "text-green-800",
+    accent: "bg-green-500",
+    buttonBg: "bg-green-600",
+    buttonHover: "hover:bg-green-700",
+  },
+  football: {
+    badgeBg: "bg-blue-100",
+    badgeText: "text-blue-800",
+    titleText: "text-blue-900",
+    countText: "text-blue-800",
+    accent: "bg-blue-600",
+    buttonBg: "bg-blue-700",
+    buttonHover: "hover:bg-blue-800",
+  },
+  volleyball: {
+    badgeBg: "bg-pink-100",
+    badgeText: "text-pink-800",
+    titleText: "text-pink-900",
+    countText: "text-pink-800",
+    accent: "bg-pink-500",
+    buttonBg: "bg-pink-600",
+    buttonHover: "hover:bg-pink-700",
+  },
+  badminton: {
+    badgeBg: "bg-indigo-100",
+    badgeText: "text-indigo-800",
+    titleText: "text-indigo-900",
+    countText: "text-indigo-800",
+    accent: "bg-indigo-600",
+    buttonBg: "bg-indigo-700",
+    buttonHover: "hover:bg-indigo-800",
+  },
+  default: {
+    badgeBg: "bg-gray-100",
+    badgeText: "text-[#5A4BBA]",
+    titleText: "text-[#001889]",
+    countText: "text-[#001889]",
+    accent: "bg-[#6DD3CE]",
+    buttonBg: "bg-[#001889]",
+    buttonHover: "hover:bg-[#00104f]",
+  },
+};
 
 const Courts = () => {
   const { user } = useAuthUser();
@@ -365,73 +425,54 @@ const Courts = () => {
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
                 {filteredCourts.map((court) => {
                   const availableSlots = getAvailableSlots(court);
+                  const courtImages = {
+                    football: Football,
+                    tennis: Tennis,
+                  };
+                  const courtTypeLower = court.type?.toLowerCase();
+                  const imageSrc = courtImages[courtTypeLower] ? `url(${courtImages[courtTypeLower]})` : "none";
                   return (
                     <div
                       key={court._id}
-                      className="bg-white rounded-2xl p-6 shadow-[0_10px_25px_rgba(165,148,249,0.2)] border border-white/50 hover:shadow-[0_15px_35px_rgba(165,148,249,0.3)] transition-all hover:-translate-y-1"
+                      className="relative overflow-hidden bg-white rounded-2xl p-6 shadow-[0_10px_25px_rgba(165,148,249,0.2)] border border-white/50 hover:shadow-[0_15px_35px_rgba(165,148,249,0.3)] transition-all hover:-translate-y-1"
                     >
-                      <div className="inline-flex items-center gap-2 rounded-full bg-[#EEE9FF] px-3 py-1 text-xs font-medium text-[#5A4BBA] mb-4">
-                        <span className="h-2 w-2 rounded-full bg-[#6DD3CE]" />
-                        <span className="capitalize">
-                          {court.type || "Court"}
-                        </span>
-                      </div>
-                      <h3 className="text-xl font-bold text-[#4C3BCF] mb-3">
-                        {court.name}
-                      </h3>
-                      <div className="mb-4">
-                        <p className="flex items-center gap-2 text-sm text-[#312A68]">
-                          <span className="inline-block h-1.5 w-1.5 rounded-full bg-[#6DD3CE]" />
-                          {availableSlots.length} available slot
-                          {availableSlots.length !== 1 ? "s" : ""}
-                        </p>
-                      </div>
-                      <div className="space-y-2">
-                        <h4 className="text-sm font-semibold text-[#312A68] mb-3">
-                          Upcoming Available Times:
-                        </h4>
-                        {availableSlots.length > 0 ? (
-                          <div className="max-h-48 overflow-y-auto space-y-2">
-                            {availableSlots.slice(0, 5).map((slot) => (
-                              <div
-                                key={slot._id}
-                                className="bg-[#F8F6FF] p-3 rounded-lg text-xs text-[#312A68] border border-[#E7E1FF] hover:bg-[#EEE9FF] transition-colors"
-                              >
-                                <span className="font-medium">
-                                  {formatDateTime(slot.dateTime)}
-                                </span>
+                      {/* --- Background Image Layer --- */}
+                      <div
+                        className="absolute inset-0 z-0 opacity-60 bg-cover bg-center bg-no-repeat pointer-events-none"
+                        style={{
+                          backgroundImage:
+                            imageSrc,
+                        }}
+                      />
+
+                      {/* --- Content Layer --- */}
+                      <div className="relative z-10">
+                        <div className="inline-flex items-center gap-2 rounded-full bg-[#EEE9FF] px-3 py-1 text-xs font-medium text-[#5A4BBA] mb-4">
+                          <span className="h-2 w-2 rounded-full bg-[#6DD3CE]" />
+                          <span className="capitalize">{court.type || "Court"}</span>
+                        </div>
+                        <h3 className="text-xl font-bold text-[#001889] mb-3">{court.name}</h3>
+                        <div className="mb-4">
+                          <p className="flex items-center gap-2 text-sm text-[#001889]">
+                            <span className="inline-block h-1.5 w-1.5 rounded-full bg-[#6DD3CE]" />
+                            {availableSlots.length} available slot
+                            {availableSlots.length !== 1 ? "s" : ""}
+                          </p>
+                        </div>
+                        
+                            {availableSlots.length > 0 && (
+                              <div className="mt-4 pt-4 border-t border-gray-100">
+                                <button
+                                  onClick={() => handleViewAllSlots(court)}
+                                  className="w-full text-xs bg-[#001889] text-white px-4 py-2 rounded-full hover:bg-[#000f45] transition-colors"
+                                >
+                                  View All Available Times ({availableSlots.length})
+                                </button>
                               </div>
-                            ))}
-                            {availableSlots.length > 5 && (
-                              <p className="text-xs text-[#312A68]/70 text-center pt-2">
-                                +{availableSlots.length - 5} more slots
-                                available
-                              </p>
                             )}
                           </div>
-                        ) : (
-                          <div className="text-center py-4">
-                            <div className="w-12 h-12 bg-muted/30 rounded-full flex items-center justify-center mx-auto mb-2">
-                              <span className="h-2 w-2 rounded-full bg-[#6DD3CE] inline-block" />
-                            </div>
-                            <p className="text-[#312A68]/70 text-xs">
-                              No available slots at the moment
-                            </p>
-                          </div>
-                        )}
-                      </div>
-                      {availableSlots.length > 0 && (
-                        <div className="mt-4 pt-4 border-t border-gray-100">
-                          <button
-                            onClick={() => handleViewAllSlots(court)}
-                            className="w-full text-xs bg-[#736CED] text-white px-4 py-2 rounded-full hover:bg-[#5A4BBA] transition-colors"
-                          >
-                            View All Available Times ({availableSlots.length})
-                          </button>
                         </div>
-                      )}
-                    </div>
-                  );
+                      );
                 })}
               </div>
             )}
