@@ -208,17 +208,6 @@ const Courts = () => {
       <div className="relative flex min-h-screen w-full flex-col items-center">
         <main className="relative z-10 flex w-full flex-1 flex-col items-center px-6 py-8">
           <div className="w-full">
-            {/* Header */}
-            <div className="w-full max-w-5xl mx-auto mb-8">
-              <div className="text-center mb-6">
-                <h1 className="text-3xl font-bold text-[#736CED] sm:text-4xl mb-2">
-                  Court Booking
-                </h1>
-                <p className="text-[#312A68] opacity-80">
-                  Reserve basketball, tennis, football and other courts
-                </p>
-              </div>
-            </div>
 
             {/* Filters */}
             <div className="w-full flex justify-center mb-12">

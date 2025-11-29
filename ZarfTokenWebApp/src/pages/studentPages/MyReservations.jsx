@@ -154,25 +154,8 @@ const MyReservations = () => {
       <div className="relative flex min-h-screen w-full flex-col items-center">
         <main className="relative z-10 flex w-full flex-1 flex-col items-center px-6 py-8">
           <div className="w-full max-w-6xl">
-            {/* Header */}
-            <div className="mb-8">
-              <button
-                onClick={() => navigate("/dashboard/user/courts")}
-                className="flex items-center gap-2 text-[#736CED] hover:text-[#5A4BBA] mb-4 transition-colors"
-              >
-                <ArrowLeft className="w-5 h-5" />
-                Back to Courts
-              </button>
-
-              <div className="text-center">
-                <h1 className="text-3xl font-bold text-[#736CED] sm:text-4xl mb-2">
-                  My Reservations
-                </h1>
-                <p className="text-[#312A68] opacity-80">
-                  View and manage your court reservations
-                </p>
-              </div>
-            </div>
+            
+            
 
             {reservations.length === 0 ? (
               <div className="text-center py-16 bg-white/50 rounded-3xl">
