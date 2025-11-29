@@ -443,13 +443,19 @@ export default function VendorRequests() {
                       </p>
                     </div>
                     <div>
+                      <span className="text-gray-500">Booth Name:</span>
+                      <p className="font-medium">
+                        {detailsRequest.boothname}
+                      </p>
+                    </div>
+                    <div>
                       <span className="text-gray-500">Size:</span>
                       <p className="font-medium">{detailsRequest.boothSize}</p>
                     </div>
                     {detailsRequest.isBazarBooth ? (
                       <>
                         <div>
-                          <span className="text-gray-500">Event:</span>
+                          <span className="text-gray-500">Location:</span>
                           <p className="font-medium">
                             {detailsRequest.bazarId?.bazaarname}
                           </p>
@@ -502,7 +508,7 @@ export default function VendorRequests() {
                             <User size={20} className="text-[#736CED]" />
                           </div>
                           <div>
-                            <p className="font-medium text-sm">{person.name}</p>
+                            <p className="font-medium text-sm">{person.name}    -     {person.email}</p>
                             <p className="text-xs text-gray-500">
                               Team Member {idx + 1}
                             </p>
