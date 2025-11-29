@@ -232,7 +232,7 @@ const EditSessionModal = ({ isOpen, onClose, onSessionUpdated, session }) => {
   useEffect(() => {
     if (isOpen && session) {
       setFormData({
-        date: session.date,
+        date: session.date ? new Date(session.date).toISOString().split("T")[0] : "",
         time: session.time,
         duration: session.duration,
       });
@@ -749,7 +749,9 @@ export default function GymSchedule() {
                 <div className="flex items-center gap-3">
                   <Calendar size={16} className="text-[#736CED]" />
                   <span>
-                    {new Date(selectedSession.date).toLocaleDateString()}
+                    {selectedSession.date
+                      ? new Date(selectedSession.date).toLocaleDateString("en-GB")
+                      : ""}
                   </span>
                 </div>
 
