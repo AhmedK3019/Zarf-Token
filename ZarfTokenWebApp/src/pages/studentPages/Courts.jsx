@@ -5,64 +5,38 @@ import api from "../../services/api";
 import { useAuthUser } from "../../hooks/auth";
 import Football from "../../assets/FootBall.jpg";
 import Tennis from "../../assets/Tennis.jpg";
+import Basketball from "../../assets/Basketball.jpg";
 
-// Color palette per court type (Tailwind utility classes)
-const COURT_COLORS = {
-  basketball: {
-    badgeBg: "bg-yellow-100",
-    badgeText: "text-yellow-800",
-    titleText: "text-yellow-900",
-    countText: "text-yellow-800",
-    accent: "bg-yellow-500",
-    buttonBg: "bg-yellow-600",
-    buttonHover: "hover:bg-yellow-700",
-  },
-  tennis: {
-    badgeBg: "bg-green-100",
-    badgeText: "text-green-800",
-    titleText: "text-green-900",
-    countText: "text-green-800",
-    accent: "bg-green-500",
-    buttonBg: "bg-green-600",
-    buttonHover: "hover:bg-green-700",
-  },
-  football: {
-    badgeBg: "bg-blue-100",
-    badgeText: "text-blue-800",
-    titleText: "text-blue-900",
-    countText: "text-blue-800",
-    accent: "bg-blue-600",
-    buttonBg: "bg-blue-700",
-    buttonHover: "hover:bg-blue-800",
-  },
-  volleyball: {
-    badgeBg: "bg-pink-100",
-    badgeText: "text-pink-800",
-    titleText: "text-pink-900",
-    countText: "text-pink-800",
-    accent: "bg-pink-500",
-    buttonBg: "bg-pink-600",
-    buttonHover: "hover:bg-pink-700",
-  },
-  badminton: {
-    badgeBg: "bg-indigo-100",
-    badgeText: "text-indigo-800",
-    titleText: "text-indigo-900",
-    countText: "text-indigo-800",
-    accent: "bg-indigo-600",
-    buttonBg: "bg-indigo-700",
-    buttonHover: "hover:bg-indigo-800",
-  },
-  default: {
-    badgeBg: "bg-gray-100",
-    badgeText: "text-[#5A4BBA]",
-    titleText: "text-[#001889]",
-    countText: "text-[#001889]",
-    accent: "bg-[#6DD3CE]",
-    buttonBg: "bg-[#001889]",
-    buttonHover: "hover:bg-[#00104f]",
-  },
+const getCourtTheme = (type) => {
+  const typeLower = type?.toLowerCase();
+
+  // 1. Define Base Colors
+  const colors = {
+    football: "#1F1B3B",   // Dark Blue/Black
+    basketball: "#F59E0B", // Orange
+    tennis: "#10B981",     // Emerald Green
+  };
+
+  const baseColor = colors[typeLower] || "#736CED"; // Default purple
+
+  // 2. Define Badge Style (Handles the gradient logic)
+  let badgeStyle = {
+    color: baseColor,
+    backgroundColor: `${baseColor}20`, // Standard transparency
+  };
+
+  if (typeLower === "football") {
+    badgeStyle = {
+      color: baseColor,
+      // The Black-to-White gradient you asked for
+      backgroundImage: "linear-gradient(to right, rgba(0, 0, 0, 0.3), rgba(255, 255, 255, 0.3))",
+      backgroundColor: "transparent", // Required for gradient to show
+    };
+  }
+
+  return { color: baseColor, badgeStyle };
 };
+
 
 const Courts = () => {
   const { user } = useAuthUser();
@@ -80,15 +54,15 @@ const Courts = () => {
   const [bookingMessage, setBookingMessage] = useState("");
   const [showSuccessToast, setShowSuccessToast] = useState(false);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const [selectedCourtTheme, setSelectedCourtTheme] = useState(null);
   const dropdownRef = useRef(null);
+
 
   const courtCategories = [
     { id: "all", name: "All Courts" },
     { id: "basketball", name: "Basketball" },
     { id: "tennis", name: "Tennis" },
     { id: "football", name: "Football" },
-    { id: "volleyball", name: "Volleyball" },
-    { id: "badminton", name: "Badminton" },
   ];
 
   const formatDateTime = (isoString) => {
@@ -182,7 +156,9 @@ const Courts = () => {
   };
 
   const handleViewAllSlots = (court) => {
+    const { color } = getCourtTheme(court.type);
     setSelectedCourt(court);
+    setSelectedCourtTheme(color);
     setSelectedSlot(null);
     setBookingMessage("");
     setShowSlotsModal(true);
@@ -193,6 +169,7 @@ const Courts = () => {
     setSelectedCourt(null);
     setSelectedSlot(null);
     setBookingMessage("");
+    setSelectedCourtTheme(null);
     setShowSuccessToast(false);
   };
 
@@ -304,9 +281,8 @@ const Courts = () => {
                         }
                       </span>
                       <svg
-                        className={`h-5 w-5 text-[#736CED] transition-transform duration-200 ${
-                          isDropdownOpen ? "rotate-180" : "rotate-0"
-                        }`}
+                        className={`h-5 w-5 text-[#736CED] transition-transform duration-200 ${isDropdownOpen ? "rotate-180" : "rotate-0"
+                          }`}
                         fill="none"
                         viewBox="0 0 24 24"
                         stroke="currentColor"
@@ -320,22 +296,20 @@ const Courts = () => {
                       </svg>
                     </button>
                     <div
-                      className={`absolute left-0 right-0 z-20 mt-2 origin-top rounded-2xl border border-[#e7e3ff] bg-white/95 shadow-[0_14px_30px_rgba(115,108,237,0.18)] transition-all duration-200 ease-out ${
-                        isDropdownOpen
+                      className={`absolute left-0 right-0 z-20 mt-2 origin-top rounded-2xl border border-[#e7e3ff] bg-white/95 shadow-[0_14px_30px_rgba(115,108,237,0.18)] transition-all duration-200 ease-out ${isDropdownOpen
                           ? "opacity-100 translate-y-0 scale-100"
                           : "pointer-events-none -translate-y-1 scale-95 opacity-0"
-                      }`}
+                        }`}
                     >
                       <ul className="py-2">
                         {courtCategories.map((cat) => (
                           <li key={cat.id}>
                             <button
                               onClick={() => handleCategoryClick(cat.id)}
-                              className={`flex w-full items-center justify-between px-5 py-3 text-sm font-semibold text-[#312A68] transition-colors ${
-                                selectedCategory === cat.id
+                              className={`flex w-full items-center justify-between px-5 py-3 text-sm font-semibold text-[#312A68] transition-colors ${selectedCategory === cat.id
                                   ? "bg-[#F3F1FF] text-[#4C3BCF]"
                                   : "hover:bg-[#F8F6FF]"
-                              }`}
+                                }`}
                             >
                               <span>{cat.name}</span>
                               {selectedCategory === cat.id && (
@@ -425,9 +399,11 @@ const Courts = () => {
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
                 {filteredCourts.map((court) => {
                   const availableSlots = getAvailableSlots(court);
+                  const { color, badgeStyle } = getCourtTheme(court.type);
                   const courtImages = {
                     football: Football,
                     tennis: Tennis,
+                    basketball: Basketball,
                   };
                   const courtTypeLower = court.type?.toLowerCase();
                   const imageSrc = courtImages[courtTypeLower] ? `url(${courtImages[courtTypeLower]})` : "none";
@@ -447,32 +423,40 @@ const Courts = () => {
 
                       {/* --- Content Layer --- */}
                       <div className="relative z-10">
-                        <div className="inline-flex items-center gap-2 rounded-full bg-[#EEE9FF] px-3 py-1 text-xs font-medium text-[#5A4BBA] mb-4">
-                          <span className="h-2 w-2 rounded-full bg-[#6DD3CE]" />
-                          <span className="capitalize">{court.type || "Court"}</span>
+                        <div
+                          className="inline-flex items-center gap-2 rounded-full px-3 py-1 text-xs font-bold mb-4 capitalize bg-[#EEE9FF]/80"
+                          style={{
+                            badgeStyle
+                          }}
+                        >
+                          <span
+                            className="h-2 w-2 rounded-full"
+                            style={{ backgroundColor: color }}
+                          />
+                          <span className="capitalize" style={{ color }}>{court.type || "Court"}</span>
                         </div>
-                        <h3 className="text-xl font-bold text-[#001889] mb-3">{court.name}</h3>
+                        <h3 className="text-xl font-bold mb-3"> {court.name}</h3>
                         <div className="mb-4">
                           <p className="flex items-center gap-2 text-sm text-[#001889]">
-                            <span className="inline-block h-1.5 w-1.5 rounded-full bg-[#6DD3CE]" />
+                            <span className="inline-block h-1.5 w-1.5 rounded-full bg-[#001889]" />
                             {availableSlots.length} available slot
                             {availableSlots.length !== 1 ? "s" : ""}
                           </p>
                         </div>
-                        
-                            {availableSlots.length > 0 && (
-                              <div className="mt-4 pt-4 border-t border-gray-100">
-                                <button
-                                  onClick={() => handleViewAllSlots(court)}
-                                  className="w-full text-xs bg-[#001889] text-white px-4 py-2 rounded-full hover:bg-[#000f45] transition-colors"
-                                >
-                                  View All Available Times ({availableSlots.length})
-                                </button>
-                              </div>
-                            )}
+
+                        {availableSlots.length > 0 && (
+                          <div className="mt-4 pt-4 border-t border-gray-100">
+                            <button
+                              onClick={() => handleViewAllSlots(court)}
+                              className="w-full text-xs bg-[#001889]/80 text-white px-4 py-2 rounded-full hover:bg-[#000f45]/80 transition-colors"
+                            >
+                              View All Available Times ({availableSlots.length})
+                            </button>
                           </div>
-                        </div>
-                      );
+                        )}
+                      </div>
+                    </div>
+                  );
                 })}
               </div>
             )}
@@ -493,12 +477,12 @@ const Courts = () => {
             <div className="p-6 border-b border-gray-200 flex-shrink-0">
               <div className="flex items-center justify-between">
                 <div>
-                  <h2 className="text-2xl font-bold text-[#4C3BCF]">
+                  <h2 className="text-2xl font-bold text-[#001889]">
                     {selectedCourt.name}
                   </h2>
                   <div className="inline-flex items-center gap-2 mt-2">
-                    <span className="h-2 w-2 rounded-full bg-[#6DD3CE]" />
-                    <span className="text-sm text-[#5A4BBA] capitalize font-medium">
+                    <span className="h-2 w-2 rounded-full" style={{ backgroundColor: selectedCourtTheme }} />
+                    <span className="text-sm text-[#001889] capitalize font-medium">
                       {selectedCourt.type || "Court"}
                     </span>
                   </div>
@@ -542,16 +526,14 @@ const Courts = () => {
                       <div
                         key={slot._id}
                         onClick={() => handleSlotSelect(slot)}
-                        className={`bg-[#F8F6FF] p-4 rounded-xl border transition-all cursor-pointer group ${
-                          isSelected
+                        className={`bg-[#F8F6FF] p-4 rounded-xl border transition-all cursor-pointer group ${isSelected
                             ? "border-[#736CED] bg-[#EEE9FF]"
                             : "border-[#E7E1FF]"
-                        } ${
-                          slot.isReserved ? "opacity-50 cursor-not-allowed" : ""
-                        }`}
+                          } ${slot.isReserved ? "opacity-50 cursor-not-allowed" : ""
+                          }`}
                       >
                         <div className="flex items-center gap-3">
-                          <div className="w-3 h-3 bg-[#6DD3CE] rounded-full flex-shrink-0"></div>
+                          <div className="w-3 h-3 rounded-full flex-shrink-0" style={{ backgroundColor: selectedCourtTheme }}></div>
                           <div>
                             <p className="font-medium text-[#312A68] group-hover:text-[#4C3BCF]">
                               {formatFullDateTime(slot.dateTime)}
@@ -578,11 +560,10 @@ const Courts = () => {
 
               {bookingMessage && (
                 <p
-                  className={`mt-4 text-center font-medium ${
-                    bookingMessage.includes("")
+                  className={`mt-4 text-center font-medium ${bookingMessage.includes("")
                       ? "text-red-500"
                       : "text-green-600"
-                  }`}
+                    }`}
                 >
                   {bookingMessage}
                 </p>
@@ -599,17 +580,16 @@ const Courts = () => {
               <button
                 onClick={handleBookSlot}
                 disabled={!selectedSlot || bookingLoading || !user}
-                className={`px-6 py-2 bg-[#736CED] text-white rounded-full transition-colors ${
-                  !selectedSlot || bookingLoading || !user
+                className={`px-6 py-2 bg-[#001889]/80 text-white rounded-full transition-colors ${!selectedSlot || bookingLoading || !user
                     ? "opacity-50 cursor-not-allowed"
-                    : "hover:bg-[#5A4BBA]"
-                }`}
+                    : "hover:bg-[#000f45]/80"
+                  }`}
               >
                 {bookingLoading
                   ? "Booking..."
                   : !user
-                  ? "Please log in"
-                  : "Book Slot"}
+                    ? "Please log in"
+                    : "Book Slot"}
               </button>
             </div>
           </div>
