@@ -361,6 +361,7 @@ export default function GymSchedule() {
   const [registering, setRegistering] = useState(false);
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
+  const [toast, setToast] = useState(null);
 
   const { user } = useAuthUser();
 
@@ -428,18 +429,14 @@ export default function GymSchedule() {
   };
 
   const handleDeleteSession = async (sessionId) => {
-    if (
-      window.confirm(
-        "Are you sure you want to delete this session? This action cannot be undone."
-      )
-    ) {
-      try {
-        await api.delete(`/gym-sessions/${sessionId}`);
-        handleSessionDeleted(sessionId);
-      } catch (err) {
-        console.error("Error deleting session:", err);
-        alert(err.response?.data?.error || "Failed to delete session.");
-      }
+    try {
+      await api.delete(`/gym-sessions/${sessionId}`);
+      handleSessionDeleted(sessionId);
+      setToast({ type: "success", message: "Session cancelled successfully" });
+    } catch (err) {
+      console.error("Error deleting session:", err);
+      const message = err.response?.data?.error || "Failed to delete session.";
+      setToast({ type: "error", message });
     }
   };
 
@@ -495,6 +492,12 @@ export default function GymSchedule() {
       setRegistering(false);
     }
   };
+
+  useEffect(() => {
+    if (!toast) return;
+    const timer = setTimeout(() => setToast(null), 3000);
+    return () => clearTimeout(timer);
+  }, [toast]);
 
   const navigateMonth = (direction) => {
     const newDate = new Date(currentDate);
@@ -838,6 +841,99 @@ export default function GymSchedule() {
           onSessionUpdated={handleSessionUpdated}
           session={selectedSession}
         />
+        {toast && (
+          <>
+            {toast.type === "success" ? (
+              <div className="fixed top-4 right-4 z-50 animate-slide-in">
+                <div className="bg-green-500 text-white px-6 py-4 rounded-lg shadow-lg flex items-center gap-3 min-w-[300px]">
+                  <svg
+                    className="w-6 h-6 text-white"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth="2"
+                      d="M5 13l4 4L19 7"
+                    />
+                  </svg>
+                  <div className="flex-1">
+                    <h4 className="font-semibold">Session Cancelled</h4>
+                    <p className="text-sm opacity-90">{toast.message}</p>
+                  </div>
+                  <button
+                    onClick={() => setToast(null)}
+                    className="text-white hover:text-gray-200 transition-colors"
+                  >
+                    <svg
+                      className="w-5 h-5"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth="2"
+                        d="M6 18L18 6M6 6l12 12"
+                      />
+                    </svg>
+                  </button>
+                </div>
+              </div>
+            ) : (
+              <div className="fixed top-4 right-4 z-50 animate-slide-in">
+                <div className="bg-rose-500 text-white px-6 py-4 rounded-lg shadow-lg flex items-center gap-3 min-w-[300px]">
+                  <svg
+                    className="w-6 h-6 text-white"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth="2"
+                      d="M6 18L18 6M6 6l12 12"
+                    />
+                  </svg>
+                  <div className="flex-1">
+                    <h4 className="font-semibold">Action Failed</h4>
+                    <p className="text-sm opacity-90">{toast.message}</p>
+                  </div>
+                  <button
+                    onClick={() => setToast(null)}
+                    className="text-white hover:text-gray-200 transition-colors"
+                  >
+                    <svg
+                      className="w-5 h-5"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth="2"
+                        d="M6 18L18 6M6 6l12 12"
+                      />
+                    </svg>
+                  </button>
+                </div>
+              </div>
+            )}
+
+            <style>{`
+              @keyframes slide-in {
+                from { transform: translateX(100%); opacity: 0; }
+                to { transform: translateX(0); opacity: 1; }
+              }
+              .animate-slide-in { animation: slide-in 0.28s ease-out forwards; }
+            `}</style>
+          </>
+        )}
       </div>
     </div>
   );
