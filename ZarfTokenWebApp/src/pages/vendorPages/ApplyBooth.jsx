@@ -59,6 +59,8 @@ export default function ApplyBooth() {
   const navigate = useNavigate();
   const { user } = useAuthUser();
 
+  const minDate = new Date().toISOString().split("T")[0];
+
   const handleFormChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
@@ -258,7 +260,7 @@ export default function ApplyBooth() {
                       <div>
                         <label
                           htmlFor="startdate"
-                          className="block text-sm font-medium text-[#4C3BCF] mb-2"
+                          className="block text-sm font-medium text-[#4C3BCF] mb-1"
                         >
                           Start date
                         </label>
@@ -268,8 +270,9 @@ export default function ApplyBooth() {
                           name="startdate"
                           value={formData.startdate}
                           onChange={handleFormChange}
+                          min={minDate}
                           required
-                          className="w-full rounded-lg border-2 border-gray-200 shadow-sm focus:border-[#736CED] focus:ring-[#736CED] text-[#312A68]"
+                          className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#736CED]"
                         />
                       </div>
 
