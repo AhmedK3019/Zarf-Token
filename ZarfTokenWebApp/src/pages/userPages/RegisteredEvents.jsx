@@ -546,8 +546,9 @@ export default function RegisteredEvents() {
               details.price && details.price > 0
                 ? details.price
                 : details.requiredFunding || 0;
-            const walletBalance = Number(user?.wallet ?? 0);
-            const canPayWallet = walletBalance >= amount && amount > 0;
+            const walletBalance = Number(user?.wallet) || 0;
+            const canPayWallet =
+              !isNaN(walletBalance) && walletBalance >= amount && amount > 0;
 
             const refreshRegistered = async () => {
               try {

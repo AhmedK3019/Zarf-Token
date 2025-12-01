@@ -50,33 +50,24 @@ export function UserProvider({ children }) {
     }
   }, []);
 
-  // hydrate from token on startup (best-effort, client-side decode)
+  // hydrate from token on startup
   useEffect(() => {
     const hydrate = async () => {
       const token = localStorage.getItem("token");
-      if (token) {
-        try {
-          const parts = token.split(".");
-          if (parts.length === 3) {
-            const payload = JSON.parse(atob(parts[1]));
-            const restored = {};
-            if (payload.role) restored.role = payload.role;
-            if (payload.name) restored.name = payload.name;
-            if (payload.id) restored._id = payload.id;
-            setUser((prev) => ({ ...(prev || {}), ...restored }));
-            hasUserEverRef.current = true;
-          }
-        } catch (err) {
-          // fallthrough to server-side /me check
-          console.error("Token parse error:", err);
-        }
+      if (!token) {
+        setUser(null);
+        return;
       }
 
       // Ask server for authoritative user info (server reads Authorization header)
       try {
         const res = await api.get("/auth/me");
-        if (res?.data?.user) setUser(res.data.user);
-        if (res?.data?.user) hasUserEverRef.current = true;
+        if (res?.data?.user) {
+          setUser(res.data.user);
+          hasUserEverRef.current = true;
+        } else {
+          setUser(null);
+        }
       } catch (err) {
         // user not logged in or token invalid/expired
         setUser(null);
