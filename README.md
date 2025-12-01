@@ -83,12 +83,11 @@ The project uses a carefully selected color palette to ensure visual consistency
 
 ## Project Demo Video
 
-<div align="center">
-  <a href="https://youtu.be/kZu-8kdH5Kc">
-    <img src="https://img.youtube.com/vi/kZu-8kdH5Kc/maxresdefault.jpg" alt="Zarf Token Demo" width="800"/>
-  </a>
-  <p><em>Click to watch the Zarf Token demonstration and features!</em></p>
-</div>
+
+
+https://github.com/user-attachments/assets/b87aad05-c310-4e90-86e1-0e9d0b5857c2
+
+
 
 ---
 
