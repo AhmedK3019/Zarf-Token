@@ -415,6 +415,94 @@ export const getAllBazarsBooths = async (req, res) => {
 };
 ```
 
+**Example: Registration to event modal**
+```javascript
+const RegistrationModal = ({
+  registerModalEvent,
+  regName,
+  setRegName,
+  regEmail,
+  setRegEmail,
+  regGucid,
+  setRegGucid,
+  regError,
+  regLoading,
+  onClose,
+  onSubmit,
+}) => {
+  if (!registerModalEvent) return null;
+
+  return (
+    <div className="fixed inset-0 bg-black/30 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+      <div className="bg-white rounded-2xl max-w-md w-full p-6">
+        <div className="flex justify-between items-center mb-4">
+          <h2 className="text-xl font-bold text-[#4C3BCF]">
+            Register for {getEventDetails(registerModalEvent).name}
+          </h2>
+          <button
+            onClick={onClose}
+            className="text-gray-500 hover:text-gray-700 text-2xl"
+          >
+            <X size={24} />
+          </button>
+        </div>
+        {regError && <p className="text-sm text-red-500 mb-2">{regError}</p>}
+        <div className="space-y-3">
+          <input
+            value={regName}
+            onChange={(e) => setRegName(e.target.value)}
+            placeholder="Full name"
+            className="w-full px-4 py-2 border rounded-md"
+          />
+          <input
+            value={regEmail}
+            onChange={(e) => setRegEmail(e.target.value)}
+            placeholder="Email"
+            className="w-full px-4 py-2 border rounded-md"
+          />
+          <input
+            value={regGucid}
+            onChange={(e) => setRegGucid(e.target.value)}
+            placeholder="GUC ID"
+            className="w-full px-4 py-2 border rounded-md"
+          />
+        </div>
+        <div className="mt-6 flex justify-end gap-3">
+          <button
+            onClick={onClose}
+            className="px-4 py-2 rounded-full border hover:bg-gray-100"
+          >
+            Cancel
+          </button>
+          <button
+            onClick={onSubmit}
+            disabled={regLoading}
+            className="px-4 py-2 rounded-full bg-[#4C3BCF] text-white hover:bg-[#002966] disabled:opacity-50"
+          >
+            {regLoading ? "Submitting..." : "Submit"}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+};
+```
+
+**Example: Voting function in Frontend**
+```javascript
+const vote = async (pollId, boothId) => {
+    try {
+      await api.post("/polls/vote", { pollId, boothId });
+      setSelection((prev) => ({ ...prev, [pollId]: boothId }));
+      await refresh();
+      setToast({ type: "success", message: "Vote recorded." });
+    } catch (e) {
+      setError(e?.response?.data?.error || e?.message || "Failed to vote");
+      setToast({ type: "error", message: "Could not submit vote." });
+    }
+  };
+```
+
 ## Installation
 
 **Prerequisites:**
@@ -605,6 +693,8 @@ We would like to sincerely thank:
 - ACL TAs for their guidance and support
 - All the free online resources
 - Open-source community for the amazing tools and frameworks that made this possible
+- This amazing React crash course made by @programmingwithmosh
+https://youtu.be/SqcY0GlETPk?si=fn9R_sJL4msuLkL0
 
 **Inspiration & Resources:**
 
