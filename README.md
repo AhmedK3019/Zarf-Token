@@ -146,9 +146,6 @@ The project uses a carefully selected color palette to ensure visual consistency
 - **lucide-react** - Icon library for React components
 - **Tailwind CSS** - Utility-first CSS framework for styling
 
-**Development Tools:**
-- Testing framework (TBD)
-
 # Zarf Token - Feature List
 
 ## Authentication & User Management
