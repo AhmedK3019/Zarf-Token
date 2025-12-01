@@ -1,6 +1,7 @@
-import { Routes, Route, useLocation } from "react-router-dom";
+import { Routes, Route, useLocation, useNavigate } from "react-router-dom";
 import NavbarUser from "./navbarUser";
 import { useAuthUser } from "../../hooks/auth";
+import { ArrowLeft } from "lucide-react";
 
 import AllEvents from "../AllEvents";
 import FavouriteEvents from "./FavouriteEvents";
@@ -17,6 +18,7 @@ import NotFound from "../NotFoundPage";
 const mainDashboardUser = () => {
   const { user } = useAuthUser();
   const location = useLocation();
+  const navigate = useNavigate();
   const isFavouriteEventsPage =
     location.pathname === "/dashboard/user/favourite-events";
   const isRegisteredEventsPage =
@@ -28,6 +30,8 @@ const mainDashboardUser = () => {
   const isVendorsPollPage =
     location.pathname === "/dashboard/user/vendors-poll";
   const isCourtsPage = location.pathname === "/dashboard/user/courts";
+  const isMyReservationsPage =
+    location.pathname === "/dashboard/user/my-reservations";
   const isCampusEventsPage = location.pathname === "/dashboard/user/all-events";
   const isCreateWorkshopPage =
     location.pathname === "/dashboard/user/create-workshop";
@@ -111,6 +115,31 @@ const mainDashboardUser = () => {
               Discover available court times for your sports activities. Filter
               by court type to find exactly what you're looking for.
             </p>
+          </div>
+        </div>
+      )}
+      {isMyReservationsPage && (
+        <div className="w-full bg-[#001845] text-white px-6 py-8">
+          <div className="max-w-7xl mx-auto">
+            <div className="flex items-center mb-4">
+              <button
+                onClick={() => navigate("/dashboard/user/courts")}
+                className="flex items-center gap-2 text-white/90 hover:text-white hover:underline focus:underline underline-offset-2 mr-8 transition-colors"
+              >
+                <ArrowLeft className="w-5 h-5" />
+                Back to Courts
+              </button>
+              <div className="flex-grow text-center">
+                <h1 className="text-4xl font-bold sm:text-5xl mb-2">
+                  My Reservations
+                </h1>
+                <p className="text-lg max-w-2xl mx-auto opacity-90">
+                  View and manage your court reservations.
+                </p>
+              </div>
+              {/* Spacer div to help center the title when the button is on the left */}
+              <div className="w-[110px] mr-8 hidden sm:block"></div> 
+            </div>
           </div>
         </div>
       )}

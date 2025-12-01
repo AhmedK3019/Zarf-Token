@@ -1,8 +1,42 @@
 import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Calendar } from "lucide-react";
+import { Calendar, ChevronLeft, ChevronRight, ArrowLeft, Clock } from "lucide-react";
 import api from "../../services/api";
 import { useAuthUser } from "../../hooks/auth";
+import Football from "../../assets/FootBall.jpg";
+import Tennis from "../../assets/Tennis.jpg";
+import Basketball from "../../assets/Basketball.jpg";
+
+const getCourtTheme = (type) => {
+  const typeLower = type?.toLowerCase();
+
+  // 1. Define Base Colors
+  const colors = {
+    football: "#1F1B3B",   // Dark Blue/Black
+    basketball: "#F59E0B", // Orange
+    tennis: "#10B981",     // Emerald Green
+  };
+
+  const baseColor = colors[typeLower] || "#736CED"; // Default purple
+
+  // 2. Define Badge Style (Handles the gradient logic)
+  let badgeStyle = {
+    color: baseColor,
+    backgroundColor: `${baseColor}20`, // Standard transparency
+  };
+
+  if (typeLower === "football") {
+    badgeStyle = {
+      color: baseColor,
+      // The Black-to-White gradient you asked for
+      backgroundImage: "linear-gradient(to right, rgba(0, 0, 0, 0.3), rgba(255, 255, 255, 0.3))",
+      backgroundColor: "transparent", // Required for gradient to show
+    };
+  }
+
+  return { color: baseColor, badgeStyle };
+};
+
 
 const Courts = () => {
   const { user } = useAuthUser();
@@ -20,15 +54,19 @@ const Courts = () => {
   const [bookingMessage, setBookingMessage] = useState("");
   const [showSuccessToast, setShowSuccessToast] = useState(false);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const [selectedCourtTheme, setSelectedCourtTheme] = useState(null);
   const dropdownRef = useRef(null);
+  const [currentDate, setCurrentDate] = useState(new Date());
+  const [selectedDate, setSelectedDate] = useState(null);
+
+  
+
 
   const courtCategories = [
     { id: "all", name: "All Courts" },
     { id: "basketball", name: "Basketball" },
     { id: "tennis", name: "Tennis" },
     { id: "football", name: "Football" },
-    { id: "volleyball", name: "Volleyball" },
-    { id: "badminton", name: "Badminton" },
   ];
 
   const formatDateTime = (isoString) => {
@@ -122,17 +160,65 @@ const Courts = () => {
   };
 
   const handleViewAllSlots = (court) => {
+    const { color } = getCourtTheme(court.type);
     setSelectedCourt(court);
+    setSelectedCourtTheme(color);
     setSelectedSlot(null);
     setBookingMessage("");
+    setCurrentDate(new Date());
+    setSelectedDate(null);
     setShowSlotsModal(true);
   };
+
+  const navigateMonth = (direction) => {
+    const newDate = new Date(currentDate);
+    newDate.setMonth(currentDate.getMonth() + direction);
+    setCurrentDate(newDate);
+  };
+
+  const getDaysInMonth = () => {
+    const year = currentDate.getFullYear();
+    const month = currentDate.getMonth();
+    const firstDay = new Date(year, month, 1);
+    const lastDay = new Date(year, month + 1, 0);
+    const daysInMonth = lastDay.getDate();
+    const startingDayOfWeek = firstDay.getDay();
+
+    const days = [];
+    for (let i = 0; i < startingDayOfWeek; i++) {
+      days.push(null);
+    }
+    for (let day = 1; day <= daysInMonth; day++) {
+      days.push(new Date(year, month, day));
+    }
+    return days;
+  };
+
+  // Helper to filter slots for a specific calendar day
+  const getSlotsForDate = (dateObj) => {
+    if (!selectedCourt || !dateObj) return [];
+    const dateStr = dateObj.toLocaleDateString("en-CA");
+    return selectedCourt.freeSlots.filter(slot => {
+      const slotDate = new Date(slot.dateTime).toLocaleDateString("en-CA");
+      return slotDate === dateStr && !slot.isReserved && new Date(slot.dateTime) > new Date();
+    });
+  };
+
+  // Helper to determine if the "Previous Month" arrow should be disabled
+  const isPreviousMonthDisabled = () => {
+    const today = new Date();
+    const currentRealMonthStart = new Date(today.getFullYear(), today.getMonth(), 1);
+    const currentViewStart = new Date(currentDate.getFullYear(), currentDate.getMonth(), 1);
+    return currentViewStart <= currentRealMonthStart;
+  };
+
 
   const closeSlotsModal = () => {
     setShowSlotsModal(false);
     setSelectedCourt(null);
     setSelectedSlot(null);
     setBookingMessage("");
+    setSelectedCourtTheme(null);
     setShowSuccessToast(false);
   };
 
@@ -208,17 +294,6 @@ const Courts = () => {
       <div className="relative flex min-h-screen w-full flex-col items-center">
         <main className="relative z-10 flex w-full flex-1 flex-col items-center px-6 py-8">
           <div className="w-full">
-            {/* Header */}
-            <div className="w-full max-w-5xl mx-auto mb-8">
-              <div className="text-center mb-6">
-                <h1 className="text-3xl font-bold text-[#736CED] sm:text-4xl mb-2">
-                  Court Booking
-                </h1>
-                <p className="text-[#312A68] opacity-80">
-                  Reserve basketball, tennis, football and other courts
-                </p>
-              </div>
-            </div>
 
             {/* Filters */}
             <div className="w-full flex justify-center mb-12">
@@ -255,9 +330,8 @@ const Courts = () => {
                         }
                       </span>
                       <svg
-                        className={`h-5 w-5 text-[#736CED] transition-transform duration-200 ${
-                          isDropdownOpen ? "rotate-180" : "rotate-0"
-                        }`}
+                        className={`h-5 w-5 text-[#736CED] transition-transform duration-200 ${isDropdownOpen ? "rotate-180" : "rotate-0"
+                          }`}
                         fill="none"
                         viewBox="0 0 24 24"
                         stroke="currentColor"
@@ -271,22 +345,20 @@ const Courts = () => {
                       </svg>
                     </button>
                     <div
-                      className={`absolute left-0 right-0 z-20 mt-2 origin-top rounded-2xl border border-[#e7e3ff] bg-white/95 shadow-[0_14px_30px_rgba(115,108,237,0.18)] transition-all duration-200 ease-out ${
-                        isDropdownOpen
+                      className={`absolute left-0 right-0 z-20 mt-2 origin-top rounded-2xl border border-[#e7e3ff] bg-white/95 shadow-[0_14px_30px_rgba(115,108,237,0.18)] transition-all duration-200 ease-out ${isDropdownOpen
                           ? "opacity-100 translate-y-0 scale-100"
                           : "pointer-events-none -translate-y-1 scale-95 opacity-0"
-                      }`}
+                        }`}
                     >
                       <ul className="py-2">
                         {courtCategories.map((cat) => (
                           <li key={cat.id}>
                             <button
                               onClick={() => handleCategoryClick(cat.id)}
-                              className={`flex w-full items-center justify-between px-5 py-3 text-sm font-semibold text-[#312A68] transition-colors ${
-                                selectedCategory === cat.id
+                              className={`flex w-full items-center justify-between px-5 py-3 text-sm font-semibold text-[#312A68] transition-colors ${selectedCategory === cat.id
                                   ? "bg-[#F3F1FF] text-[#4C3BCF]"
                                   : "hover:bg-[#F8F6FF]"
-                              }`}
+                                }`}
                             >
                               <span>{cat.name}</span>
                               {selectedCategory === cat.id && (
@@ -376,71 +448,69 @@ const Courts = () => {
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
                 {filteredCourts.map((court) => {
                   const availableSlots = getAvailableSlots(court);
+                  const { color, badgeStyle } = getCourtTheme(court.type);
+                  const courtImages = {
+                    football: Football,
+                    tennis: Tennis,
+                    basketball: Basketball,
+                  };
+                  const courtTypeLower = court.type?.toLowerCase();
+                  const imageSrc = courtImages[courtTypeLower] ? `url(${courtImages[courtTypeLower]})` : "none";
                   return (
                     <div
                       key={court._id}
-                      className="bg-white rounded-2xl p-6 shadow-[0_10px_25px_rgba(165,148,249,0.2)] border border-white/50 hover:shadow-[0_15px_35px_rgba(165,148,249,0.3)] transition-all hover:-translate-y-1"
+                      className="relative overflow-hidden bg-white rounded-2xl p-6 shadow-[0_10px_25px_rgba(165,148,249,0.2)] border border-white/50 hover:shadow-[0_15px_35px_rgba(165,148,249,0.3)] transition-all hover:-translate-y-1"
                     >
-                      <div className="inline-flex items-center gap-2 rounded-full bg-[#EEE9FF] px-3 py-1 text-xs font-medium text-[#5A4BBA] mb-4">
-                        <span className="h-2 w-2 rounded-full bg-[#6DD3CE]" />
-                        <span className="capitalize">
-                          {court.type || "Court"}
-                        </span>
-                      </div>
-                      <h3 className="text-xl font-bold text-[#4C3BCF] mb-3">
-                        {court.name}
-                      </h3>
-                      <div className="mb-4">
-                        <p className="flex items-center gap-2 text-sm text-[#312A68]">
-                          <span className="inline-block h-1.5 w-1.5 rounded-full bg-[#6DD3CE]" />
-                          {availableSlots.length} available slot
-                          {availableSlots.length !== 1 ? "s" : ""}
-                        </p>
-                      </div>
-                      <div className="space-y-2">
-                        <h4 className="text-sm font-semibold text-[#312A68] mb-3">
-                          Upcoming Available Times:
-                        </h4>
-                        {availableSlots.length > 0 ? (
-                          <div className="max-h-48 overflow-y-auto space-y-2">
-                            {availableSlots.slice(0, 5).map((slot) => (
-                              <div
-                                key={slot._id}
-                                className="bg-[#F8F6FF] p-3 rounded-lg text-xs text-[#312A68] border border-[#E7E1FF] hover:bg-[#EEE9FF] transition-colors"
-                              >
-                                <span className="font-medium">
-                                  {formatDateTime(slot.dateTime)}
-                                </span>
-                              </div>
-                            ))}
-                            {availableSlots.length > 5 && (
-                              <p className="text-xs text-[#312A68]/70 text-center pt-2">
-                                +{availableSlots.length - 5} more slots
-                                available
-                              </p>
-                            )}
-                          </div>
-                        ) : (
-                          <div className="text-center py-4">
-                            <div className="w-12 h-12 bg-muted/30 rounded-full flex items-center justify-center mx-auto mb-2">
-                              <span className="h-2 w-2 rounded-full bg-[#6DD3CE] inline-block" />
-                            </div>
-                            <p className="text-[#312A68]/70 text-xs">
-                              No available slots at the moment
-                            </p>
+                      {/* --- Background Image Layer --- */}
+                      <div
+                        className="absolute inset-0 z-0 opacity-60 bg-cover bg-center bg-no-repeat pointer-events-none"
+                        style={{
+                          backgroundImage:
+                            imageSrc,
+                        }}
+                      />
+
+                      <div
+                        className="absolute inset-0 z-0 bg-[#001889]/30 pointer-events-none"
+                      />
+
+                      {/* --- Content Layer --- */}
+                      <div className="relative z-10">
+                        <div
+                          className="inline-flex items-center gap-2 rounded-full px-3 py-1 text-xs font-bold mb-4 capitalize bg-[#EEE9FF]/80"
+                          style={{
+                            badgeStyle
+                          }}
+                        >
+                          <span
+                            className="h-2 w-2 rounded-full"
+                            style={{ backgroundColor: color }}
+                          />
+                          <span className="capitalize" style={{ color }}>{court.type || "Court"}</span>
+                        </div>
+                        <h3 className="text-xl font-bold mb-3 text-white shadow-sm" style={{ textShadow: '0 0 5px rgba(0,0,0,0.7), 0 0 1px rgba(0,0,0,0.5)' }}> {court.name}</h3>
+                        <div className="mb-4">
+                          <p
+                            className="flex items-center gap-2 text-base text-white font-semibold"
+                            style={{ textShadow: '0 0 4px rgba(0,0,0,0.8)' }}
+                          >
+                            <span className="inline-block h-2 w-2 rounded-full bg-white" />
+                            {availableSlots.length} available slot
+                            {availableSlots.length !== 1 ? "s" : ""}
+                          </p>
+                        </div>
+
+                        {availableSlots.length > 0 && (
+                          <div className="mt-4 pt-4 border-t border-gray-100">
+                            <button
+                              onClick={() => handleViewAllSlots(court)}
+                              className="w-full text-xs bg-[#001889]/80 text-white px-4 py-2 rounded-full hover:bg-[#000f45]/80 transition-colors"
+                            >
+                              View All Available Times ({availableSlots.length})
+                            </button>
                           </div>
                         )}
                       </div>
-                      {availableSlots.length > 0 && (
-                        <div className="mt-4 pt-4 border-t border-gray-100">
-                          <button
-                            onClick={() => handleViewAllSlots(court)}
-                            className="w-full text-xs bg-[#736CED] text-white px-4 py-2 rounded-full hover:bg-[#5A4BBA] transition-colors"
-                          >
-                            View All Available Times ({availableSlots.length})
-                          </button>
-                        </div>
-                      )}
                     </div>
                   );
                 })}
@@ -450,136 +520,186 @@ const Courts = () => {
         </main>
       </div>
 
-      {/* Modal */}
+      {/* Updated Calendar Modal */}
       {showSlotsModal && selectedCourt && (
         <div
           className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-muted bg-opacity-90 backdrop-blur-sm animate-fade-in"
           onClick={closeSlotsModal}
         >
           <div
-            className="bg-white rounded-2xl max-w-2xl w-full max-h-[90vh] flex flex-col"
+            className="bg-white rounded-2xl max-w-lg w-full max-h-[90vh] flex flex-col shadow-2xl overflow-hidden"
             onClick={(e) => e.stopPropagation()}
           >
-            <div className="p-6 border-b border-gray-200 flex-shrink-0">
-              <div className="flex items-center justify-between">
-                <div>
-                  <h2 className="text-2xl font-bold text-[#4C3BCF]">
-                    {selectedCourt.name}
-                  </h2>
-                  <div className="inline-flex items-center gap-2 mt-2">
-                    <span className="h-2 w-2 rounded-full bg-[#6DD3CE]" />
-                    <span className="text-sm text-[#5A4BBA] capitalize font-medium">
-                      {selectedCourt.type || "Court"}
-                    </span>
+            {/* Modal Header */}
+            <div className="relative p-6 bg-[#001889] text-white flex-shrink-0 overflow-hidden">
+              
+              {/* 1. Background Image Layer */}
+              <div 
+                className="absolute inset-0 bg-cover bg-center z-0 opacity-70"
+                style={{ 
+                  backgroundImage: (() => {
+                    const type = selectedCourt.type?.toLowerCase();
+                    if (type === 'football') return `url(${Football})`;
+                    if (type === 'tennis') return `url(${Tennis})`;
+                    if (type === 'basketball') return `url(${Basketball})`;
+                    return 'none';
+                  })()
+                }}
+              />
+              
+              {/* 2. Gradient Overlay (Ensures text readability) */}
+              <div className="absolute inset-0 z-0" />
+
+              {/* 3. Header Content (Relative z-10 to sit on top) */}
+              <div className="relative z-10 flex items-center justify-between mb-2">
+                <div className="flex items-center gap-3">
+                  {selectedDate && (
+                    <button 
+                      onClick={() => setSelectedDate(null)}
+                      className="p-1 hover:bg-white/20 rounded-full transition-colors"
+                    >
+                      <ArrowLeft size={20} />
+                    </button>
+                  )}
+                  <div>
+                    <h2 className="text-xl font-bold text-white shadow-sm">{selectedCourt.name}</h2>
+                    <div className="flex items-center gap-2">
+                      <span className="h-2 w-2 rounded-full" style={{backgroundColor: selectedCourtTheme, boxShadow: `0 0 8px ${selectedCourtTheme}`}}></span>
+                      <p className="text-xs text-white/90 capitalize font-medium">{selectedCourt.type} Court</p>
+                    </div>
                   </div>
                 </div>
-                <button
-                  onClick={closeSlotsModal}
-                  className="text-gray-400 hover:text-gray-600 transition-colors"
-                >
-                  <svg
-                    className="w-6 h-6"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M6 18L18 6M6 6l12 12"
-                    />
-                  </svg>
+                <button onClick={closeSlotsModal} className="text-white/70 hover:text-white transition-colors">
+                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
                 </button>
               </div>
             </div>
 
-            <div className="p-6 overflow-y-auto flex-1 min-h-0">
-              <div className="mb-4">
-                <h3 className="text-lg font-semibold text-[#312A68] mb-4">
-                  All Available Time Slots
-                </h3>
-                <p className="text-sm text-[#312A68]/70 mb-6">
-                  {getAvailableSlots(selectedCourt).length} available slots
-                </p>
-              </div>
+            {/* Modal Body */}
+            <div className="flex-1 overflow-y-auto p-6 min-h-[400px]">
+              
+              {!selectedDate ? (
+                /* --- VIEW 1: CALENDAR GRID --- */
+                <div className="space-y-4">
+                  {/* Month Navigation */}
+                  <div className="flex items-center justify-between mb-6">
+                    <button onClick={() => navigateMonth(-1)} disabled={isPreviousMonthDisabled()} className="p-2 hover:bg-gray-100 rounded-full  disabled:opacity-30 disabled:cursor-not-allowed"><ChevronLeft className="text-[#001889]" /></button>
+                    <h3 className="text-lg font-bold text-[#312A68]">
+                      {currentDate.toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}
+                    </h3>
+                    <button onClick={() => navigateMonth(1)} className="p-2 hover:bg-gray-100 rounded-full"><ChevronRight className="text-[#001889]" /></button>
+                  </div>
 
-              {getAvailableSlots(selectedCourt).length > 0 ? (
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                  {getAvailableSlots(selectedCourt).map((slot) => {
-                    const isSelected = selectedSlot?._id === slot._id;
-                    return (
-                      <div
-                        key={slot._id}
-                        onClick={() => handleSlotSelect(slot)}
-                        className={`bg-[#F8F6FF] p-4 rounded-xl border transition-all cursor-pointer group ${
-                          isSelected
-                            ? "border-[#736CED] bg-[#EEE9FF]"
-                            : "border-[#E7E1FF]"
-                        } ${
-                          slot.isReserved ? "opacity-50 cursor-not-allowed" : ""
-                        }`}
-                      >
-                        <div className="flex items-center gap-3">
-                          <div className="w-3 h-3 bg-[#6DD3CE] rounded-full flex-shrink-0"></div>
-                          <div>
-                            <p className="font-medium text-[#312A68] group-hover:text-[#4C3BCF]">
-                              {formatFullDateTime(slot.dateTime)}
-                            </p>
-                          </div>
-                        </div>
-                      </div>
-                    );
-                  })}
+                  {/* Days Header */}
+                  <div className="grid grid-cols-7 text-center mb-2">
+                    {['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa'].map(d => (
+                      <span key={d} className="text-xs font-bold text-gray-400 uppercase">{d}</span>
+                    ))}
+                  </div>
+
+                  {/* Calendar Grid */}
+                  <div className="grid grid-cols-7 gap-2">
+                    {getDaysInMonth().map((dateObj, idx) => {
+                      if (!dateObj) return <div key={idx} />; // Empty cell
+                      
+                      const daySlots = getSlotsForDate(dateObj);
+                      const hasSlots = daySlots.length > 0;
+                      const isPast = dateObj < new Date().setHours(0,0,0,0);
+                      const isToday = dateObj.toDateString() === new Date().toDateString();
+
+                      return (
+                        <button
+                          key={idx}
+                          disabled={!hasSlots}
+                          onClick={() => hasSlots && setSelectedDate(dateObj)}
+                          className={`
+                            h-12 w-full rounded-xl flex flex-col items-center justify-center relative transition-all border
+                            ${isToday ? "border-[#736CED] bg-purple-50" : "border-transparent"}
+                            ${hasSlots 
+                              ? "bg-white border-gray-100 shadow-sm hover:border-[#736CED] hover:shadow-md cursor-pointer text-[#312A68]" 
+                              : "text-gray-300 bg-gray-50 cursor-default"
+                            }
+                          `}
+                        >
+                          <span className={`text-sm ${hasSlots ? "font-bold" : ""}`}>{dateObj.getDate()}</span>
+                          {hasSlots && (
+                            <span className="w-1.5 h-1.5 rounded-full mt-1" style={{backgroundColor: selectedCourtTheme}}></span>
+                          )}
+                        </button>
+                      );
+                    })}
+                  </div>
+                  
+                  <p className="text-center text-xs text-gray-400 mt-4">
+                    Days with dots have available slots.
+                  </p>
                 </div>
               ) : (
-                <div className="text-center py-12">
-                  <div className="w-16 h-16 bg-muted/30 rounded-full flex items-center justify-center mx-auto mb-4">
-                    <span className="text-[#736CED] text-2xl"></span>
+                <div className="animate-fade-in">
+                  <h3 className="text-lg font-bold text-[#312A68] mb-4 flex items-center gap-2">
+                    <Calendar className="w-5 h-5 text-[#736CED]" />
+                    {selectedDate.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })}
+                  </h3>
+                  
+                  <div className="grid grid-cols-1 gap-3">
+                    {getSlotsForDate(selectedDate).sort((a,b) => new Date(a.dateTime) - new Date(b.dateTime)).map((slot) => {
+                      const isSelected = selectedSlot?._id === slot._id;
+                      return (
+                        <button
+                          key={slot._id}
+                          onClick={() => handleSlotSelect(slot)}
+                          className={`
+                            flex items-center justify-between p-4 rounded-xl border transition-all w-full text-left group
+                            ${isSelected 
+                              ? "border-[#736CED] bg-[#EEE9FF] ring-1 ring-[#736CED]" 
+                              : "border-gray-100 bg-white hover:border-[#736CED]/50 hover:bg-gray-50"
+                            }
+                          `}
+                        >
+                          <div className="flex items-center gap-3">
+                            <div className={`p-2 rounded-lg ${isSelected ? "bg-[#736CED] text-white" : "bg-gray-100 text-gray-500 group-hover:text-[#736CED]"}`}>
+                              <Clock size={18} />
+                            </div>
+                            <div>
+                              <p className={`font-bold ${isSelected ? "text-[#312A68]" : "text-gray-700"}`}>
+                                {new Date(slot.dateTime).toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' })}
+                              </p>
+                              <p className="text-xs text-gray-500">60 Minutes</p>
+                            </div>
+                          </div>
+                          
+                          {isSelected && (
+                            <div className="bg-[#736CED] text-white text-xs px-2 py-1 rounded">Selected</div>
+                          )}
+                        </button>
+                      );
+                    })}
                   </div>
-                  <p className="text-[#312A68] text-lg mb-2">
-                    No Available Slots
-                  </p>
-                  <p className="text-[#312A68]/70 text-sm">
-                    All slots are currently reserved or unavailable.
-                  </p>
                 </div>
               )}
 
+              {/* Booking Message Feedback */}
               {bookingMessage && (
-                <p
-                  className={`mt-4 text-center font-medium ${
-                    bookingMessage.includes("")
-                      ? "text-red-500"
-                      : "text-green-600"
-                  }`}
-                >
+                <div className={`mt-4 p-3 rounded-lg text-sm text-center font-medium ${bookingMessage.includes("failed") ? "bg-red-50 text-red-600" : "bg-green-50 text-green-600"}`}>
                   {bookingMessage}
-                </p>
+                </div>
               )}
             </div>
 
-            <div className="p-6 border-t border-gray-200 flex-shrink-0 flex justify-end gap-3">
+            {/* Modal Footer */}
+            <div className="p-4 border-t bg-gray-50 flex justify-end gap-3">
               <button
                 onClick={closeSlotsModal}
-                className="px-6 py-2 text-[#736CED] border border-[#736CED] rounded-full hover:bg-[#E7E1FF] transition-colors"
+                className="px-5 py-2 text-sm font-medium text-gray-600 hover:text-gray-800 transition-colors"
               >
-                Close
+                Cancel
               </button>
               <button
                 onClick={handleBookSlot}
                 disabled={!selectedSlot || bookingLoading || !user}
-                className={`px-6 py-2 bg-[#736CED] text-white rounded-full transition-colors ${
-                  !selectedSlot || bookingLoading || !user
-                    ? "opacity-50 cursor-not-allowed"
-                    : "hover:bg-[#5A4BBA]"
-                }`}
+                className="px-6 py-2 bg-[#001889] text-white rounded-lg text-sm font-medium hover:bg-[#00126b] disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-lg shadow-indigo-200"
               >
-                {bookingLoading
-                  ? "Booking..."
-                  : !user
-                  ? "Please log in"
-                  : "Book Slot"}
+                {bookingLoading ? "Confirming..." : "Confirm Booking"}
               </button>
             </div>
           </div>
