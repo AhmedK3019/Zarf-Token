@@ -33,30 +33,16 @@ Zarf Token solves these challenges by providing a unified platform that simplifi
 
 ## Build Status
 
-**Current Sprint:** Sprint 2 of 3
-
-**Project Progress:** In Active Development
-
-**Completed Features:** 31 system requirements implemented, 27 system requirements tested
-
-**Sprint Overview:**
-- Sprint 1
-- Sprint 2 (Current)
-- Sprint 3
-
-**Status:** We are now working very hard in sprint 2.
-
-## Known Issues
-
 **Code Quality & Architecture**
 - Edge cases are not consistently handled across the codebase
 - Legacy code from earlier versions remains in some pages (e.g., `AllEvents.jsx`)
 - `MyWorkshops.jsx` and `WorkshopRequests.jsx` inconsistently access backend response data—sometimes using raw values, sometimes through card component functions—resulting in fragmented, difficult-to-maintain code
-- All get requests populate objects that might be needed in the future which delays the response
-- Some pages are just useless and can be merged into other pages
-- Admin and events office pages are not agile enough. They look similiar to the users pages
-- Some pages are the same for admins and users which is a huge security risk
-- No specific naming convention used for naming models' fields
+- All get requests populate objects that might be needed in the future which delays the response.
+- Some pages are just useless and can be merged into other pages.
+- Some pages are the same for admins and users which is a huge security risk.
+- Some pages load a lot of instances at once. It should gradual for better response time.
+- May need to add a "go to top of the page" button for better QoL. 
+- No specific naming convention used for naming models' fields.
 
 **Data Synchronization & State Management**
 - Only a subset of pages implement auto-refresh (10-second intervals) to reflect backend changes
@@ -64,8 +50,6 @@ Zarf Token solves these challenges by providing a unified platform that simplifi
 
 **Data Model**
 - The current `Workshop` model conflates all workshop states (Pending, Approved, Rejected). A dedicated `WorkshopRequests` model should be implemented to separate request management from approved workshops
-
-**Notes:** Following Agile methodology, each sprint will deliver a fully functional version with all specified system requirements.
 
 ## Code Style
 
@@ -82,11 +66,10 @@ This project follows consistent coding standards to ensure readability and maint
 
 **Color Palette:**
 The project uses a carefully selected color palette to ensure visual consistency and brand identity.
-- **Header Background & Main Text:** #001a4d
+- **Header Background & Main Text:** #001845
 - **Text & Card Backgrounds:** #ffffff
-- **Refresh Button & Interactive Elements:** #7c3aed
-- **Main Heading Text & Primary Branding:** #0a1c3f
-- **Notification Badge & Rejected Count:** #dc2626
+- **Refresh Button & Interactive Elements:** #4C3BCF
+- **Main Heading Text & Primary Branding:** #ffffff
 
 **Typography:**
 - **Primary Font:** Playfair Display (Used for headings, titles, and emphasis elements)
