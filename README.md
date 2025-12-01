@@ -83,11 +83,7 @@ The project uses a carefully selected color palette to ensure visual consistency
 
 ## Project Demo Video
 
-
-
-https://github.com/user-attachments/assets/b87aad05-c310-4e90-86e1-0e9d0b5857c2
-
-
+https://github.com/user-attachments/assets/ad306a79-faec-4f55-ac7f-988e36597b1e
 
 ---
 
