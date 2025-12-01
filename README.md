@@ -2,7 +2,7 @@
 
 # Zarf Token
 
-### The GUC EMS
+### The best GUC EMS
 
 ![MongoDB](https://img.shields.io/badge/-MongoDB-black?style=flat-square&logo=mongodb)
 ![Express.js](https://img.shields.io/badge/-Express.js-black?style=flat-square&logo=express)
@@ -32,6 +32,11 @@ Zarf Token solves these challenges by providing a unified platform that simplifi
 - Implements approval workflows ensuring quality and transparency
 
 ## Build Status
+
+**Current Status**
+- ~~Sprint 1~~ (Done!)
+- ~~Sprint 2~~ (Done!)
+- Sprint 3 
 
 **Code Quality & Architecture**
 - Edge cases are not consistently handled across the codebase
@@ -66,14 +71,26 @@ This project follows consistent coding standards to ensure readability and maint
 
 **Color Palette:**
 The project uses a carefully selected color palette to ensure visual consistency and brand identity.
-- **Header Background & Main Text:** #001845
-- **Text & Card Backgrounds:** #ffffff
-- **Refresh Button & Interactive Elements:** #4C3BCF
-- **Main Heading Text & Primary Branding:** #ffffff
+
+- **Header Background & Main Text:** `#001845` 🟦
+- **Text & Card Backgrounds:** `#ffffff` ⬜
+- **Refresh Button & Interactive Elements:** `#4C3BCF` 🟪
+- **Main Heading Text & Primary Branding:** `#ffffff` ⬜
 
 **Typography:**
 - **Primary Font:** Playfair Display (Used for headings, titles, and emphasis elements)
 - **Secondary Fonts:** Inter (Used for body text, buttons, and UI components)
+
+## Project Demo Video
+
+<div align="center">
+  <a href="https://youtu.be/kZu-8kdH5Kc">
+    <img src="https://img.youtube.com/vi/kZu-8kdH5Kc/maxresdefault.jpg" alt="Zarf Token Demo" width="800"/>
+  </a>
+  <p><em>Click to watch the Zarf Token demonstration and features!</em></p>
+</div>
+
+---
 
 ## Screenshots (Postman Tests)
 
@@ -620,4 +637,4 @@ Distributed under the MIT License. See `LICENSE` for more information.
 
 **Contact:** For questions or support, please contact our scrum master Abdelhamid Sameh.
 
-**Last Updated:** November '25
+**Last Updated:** December '25
