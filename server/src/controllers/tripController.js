@@ -161,6 +161,28 @@ const cancelRegistration = async (req, res, next) => {
       { new: true }
     );
 
+    // notify other users that a spot is available
+    if (trip.toBeNotified.length > 0) {
+      try {
+        await User.updateMany(
+          { _id: { $in: trip.toBeNotified } },
+          {
+            $push: {
+              notifications: {
+                message: `A spot has opened up for the trip "${trip.tripname}".`,
+                isRead: false,
+              },
+            },
+          }
+        );
+      } catch (notifyError) {
+        console.error(
+          "Failed to notify users about trip availability:",
+          notifyError
+        );
+      }
+    }
+
     await User.findByIdAndUpdate(
       userId,
       { $inc: { wallet: trip.price } },
@@ -297,6 +319,28 @@ const payForTrip = async (req, res, next) => {
   }
 };
 
+const askToBeNotified = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+    const userId = req.userId;
+    if (!userId) return res.status(401).json({ message: "No token provided" });
+    const trip = await Trip.findById(id);
+    if (!trip) return res.status(404).json({ message: "Trip not found" });
+    if (trip.toBeNotified.includes(userId)) {
+      return res
+        .status(400)
+        .json({ message: "You are already registered to be notified" });
+    }
+    trip.toBeNotified.push(userId);
+    await trip.save();
+    return res
+      .status(200)
+      .json({ message: "You have been registered to be notified" });
+  } catch (error) {
+    next(error);
+  }
+};
+
 export default {
   createTrip,
   updateTrip,
@@ -306,4 +350,5 @@ export default {
   registerForTrip,
   cancelRegistration,
   payForTrip,
+  askToBeNotified,
 };

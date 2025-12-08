@@ -21,6 +21,7 @@ import {
   Edit,
   FileText,
   Archive,
+  Bell,
 } from "lucide-react";
 
 const EventCard = ({
@@ -53,6 +54,8 @@ const EventCard = ({
   const [ratings, setRatings] = useState([]);
   const [comments, setComments] = useState([]);
   const [ratingsLoading, setRatingsLoading] = useState(true);
+  const [notificationRequested, setNotificationRequested] = useState(false);
+  const [notificationLoading, setNotificationLoading] = useState(false);
 
   // Robust ID normalization helpers (handles ObjectId, populated user docs, strings)
   const toIdString = (val) => {
@@ -150,6 +153,22 @@ const EventCard = ({
     fetchRatingsAndComments();
   }, [event.id, event.type, refreshTrigger]); // Add refreshTrigger to dependency array
 
+  // Check if user has already requested notification
+  useEffect(() => {
+    if (
+      user &&
+      rawEvent &&
+      (event.type === "workshop" || event.type === "trip")
+    ) {
+      const toBeNotified = rawEvent.toBeNotified || [];
+      const userIdStr = toIdString(user._id);
+      const isAlreadyNotified = toBeNotified.some(
+        (id) => toIdString(id) === userIdStr
+      );
+      setNotificationRequested(isAlreadyNotified);
+    }
+  }, [user, rawEvent, event.type]);
+
   const onUpdate = (type) => {
     navigate(`/dashboard/eventsOffice/edit-event/${type}/${event.id}`);
   };
@@ -210,8 +229,37 @@ const EventCard = ({
     !isCreator &&
     (event.capacity ? (attendeesArr?.length ?? 0) < event.capacity : true);
 
+  // Check if event is full but still within registration deadline
+  const isEventFull =
+    userIsEligible &&
+    (event.type === "trip" || event.type === "workshop") &&
+    event.registrationDeadline &&
+    new Date() < new Date(event.registrationDeadline) &&
+    !isRegistered &&
+    !isCreator &&
+    event.capacity &&
+    (attendeesArr?.length ?? 0) >= event.capacity;
+
   const toggleDescription = () => {
     if (hasOverflow) setIsDescriptionExpanded((v) => !v);
+  };
+
+  const handleNotifyMe = async () => {
+    if (notificationRequested) return;
+
+    setNotificationLoading(true);
+    try {
+      await api.post(`/${event.type}s/askToBeNotified/${event.id}`);
+      setNotificationRequested(true);
+    } catch (error) {
+      console.error("Failed to request notification:", error);
+      alert(
+        error.response?.data?.message ||
+          "Failed to request notification. Please try again."
+      );
+    } finally {
+      setNotificationLoading(false);
+    }
   };
 
   const averageRating =
@@ -371,16 +419,46 @@ const EventCard = ({
     !isCreator &&
     (event.type === "trip" || event.type === "workshop")
   ) {
-    defaultRegistrationButtons.push(
-      <button
-        key="registration-closed"
-        type="button"
-        disabled
-        className={`${actionButtonBase} border border-dashed border-gray-300 bg-gray-100 text-[#555] focus-visible:ring-gray-200`}
-      >
-        Registration Closed
-      </button>
-    );
+    if (isEventFull) {
+      defaultRegistrationButtons.push(
+        <button
+          key="notify-me"
+          type="button"
+          onClick={handleNotifyMe}
+          disabled={notificationRequested || notificationLoading}
+          className={`${actionButtonBase} ${
+            notificationRequested
+              ? "border border-emerald-300 bg-emerald-50 text-emerald-700 cursor-not-allowed"
+              : "border border-amber-300 bg-amber-50 text-amber-700 hover:bg-amber-100 focus-visible:ring-amber-200"
+          }`}
+        >
+          {notificationLoading ? (
+            "Requesting..."
+          ) : notificationRequested ? (
+            <span className="flex items-center justify-center gap-2">
+              <Bell size={14} />
+              Notification Requested
+            </span>
+          ) : (
+            <span className="flex items-center justify-center gap-2">
+              <Bell size={14} />
+              Notify Me if Spot Opens
+            </span>
+          )}
+        </button>
+      );
+    } else {
+      defaultRegistrationButtons.push(
+        <button
+          key="registration-closed"
+          type="button"
+          disabled
+          className={`${actionButtonBase} border border-dashed border-gray-300 bg-gray-100 text-[#555] focus-visible:ring-gray-200`}
+        >
+          Registration Closed
+        </button>
+      );
+    }
   }
 
   const registrationControls =

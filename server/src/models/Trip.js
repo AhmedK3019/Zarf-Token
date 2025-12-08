@@ -64,6 +64,13 @@ const tripSchema = new mongoose.Schema({
       enum: ["Student", "Professor", "TA", "Staff", "Admin", "Event office"],
     },
   ],
+  toBeNotified: [
+    {
+      type: mongoose.Schema.ObjectId,
+      ref: "User",
+      default: [],
+    },
+  ],
 });
 tripSchema.pre("save", function (next) {
   // Ensure allowedusers is an array

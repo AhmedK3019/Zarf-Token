@@ -27,5 +27,6 @@ router.get("/getMyWorkshops", worshopsController.getMyWorkshops);
 router.patch("/requestEdits/:id", worshopsController.requestEdits);
 router.post("/acceptEdits/:id", worshopsController.acceptEdits);
 router.post("/rejectEdits/:id", worshopsController.rejectEdits);
+router.post("/askToBeNotified/:id", worshopsController.askToBeNotified);
 // router.patch("/setAllowedRoles/:id", worshopsController.setAllowedRoles);
 export default router;

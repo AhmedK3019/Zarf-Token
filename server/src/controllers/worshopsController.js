@@ -416,6 +416,28 @@ const cancelRegistration = async (req, res, next) => {
       { new: true }
     );
 
+    // notify other users that a spot is available
+    if (workshop.toBeNotified.length > 0) {
+      try {
+        await User.updateMany(
+          { _id: { $in: workshop.toBeNotified } },
+          {
+            $push: {
+              notifications: {
+                message: `A spot has opened up for the workshop "${workshop.workshopname}".`,
+                isRead: false,
+              },
+            },
+          }
+        );
+      } catch (notifyError) {
+        console.error(
+          "Failed to notify users about workshop availability:",
+          notifyError
+        );
+      }
+    }
+
     await User.findByIdAndUpdate(
       userId,
       { $inc: { wallet: updatedWorkshop.requiredFunding } },
@@ -556,6 +578,29 @@ const payForWorkshop = async (req, res, next) => {
   }
 };
 
+const askToBeNotified = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+    const userId = req.userId;
+    if (!userId) return res.status(401).json({ message: "No token provided" });
+    const workshop = await WorkShop.findById(id);
+    if (!workshop)
+      return res.status(404).json({ message: "Workshop not found" });
+    if (workshop.toBeNotified.includes(userId)) {
+      return res
+        .status(400)
+        .json({ message: "You are already registered to be notified" });
+    }
+    workshop.toBeNotified.push(userId);
+    await workshop.save();
+    return res
+      .status(200)
+      .json({ message: "You have been registered to be notified" });
+  } catch (error) {
+    next(error);
+  }
+};
+
 const unPackToken = (token) => {
   try {
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
@@ -605,5 +650,6 @@ export default {
   rejectEdits,
   payForWorkshop,
   // setAllowedRoles,
+  askToBeNotified,
   certificateEmail,
 };

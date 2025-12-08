@@ -87,6 +87,13 @@ const workshopSchema = new mongoose.Schema({
       enum: ["Student", "Professor", "TA", "Staff", "Admin", "Event office"],
     },
   ],
+  toBeNotified: [
+    {
+      type: mongoose.Schema.ObjectId,
+      ref: "User",
+      default: [],
+    },
+  ],
 });
 
 const Workshop = mongoose.model("Workshop", workshopSchema);

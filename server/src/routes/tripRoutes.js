@@ -10,4 +10,5 @@ router.put("/updateTrip/:id", tripController.updateTrip);
 router.delete("/deleteTrip/:id", tripController.deleteTrip);
 router.patch("/registerForaTrip/:id", tripController.registerForTrip);
 router.patch("/cancelRegistration/:id", tripController.cancelRegistration);
+router.post("/askToBeNotified/:id", tripController.askToBeNotified);
 export default router;
