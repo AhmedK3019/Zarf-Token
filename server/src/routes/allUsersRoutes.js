@@ -16,4 +16,6 @@ router.get("/:id", AllUsersController.getUserById);
 router.post("/login", AllUsersController.loginUser);
 router.patch("/blockUser/:id/:role", AllUsersController.blockUser);
 router.patch("/unBlockUser/:id/:role", AllUsersController.unBlockUser);
+router.post("/passwordEmail", AllUsersController.passwordEmail);
+router.patch("/resetPassword", AllUsersController.forgetPassword);
 export default router;

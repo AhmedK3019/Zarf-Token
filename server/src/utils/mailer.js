@@ -384,3 +384,51 @@ export const sendCertificate = async (email, name, workshop, subject) => {
 
   return await sendEmail(email, subject, htmlBody, true, [], []);
 };
+
+export const sendResetPasswordEmail = async (email) => {
+  let subject = "Reset your password";
+  let resetLink = `${process.env.FRONTEND_URL}/reset-password`;
+  const htmlBody = `
+    <!DOCTYPE html>
+    <html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Password Reset</title>
+    </head>
+    <body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333; margin: 0; padding: 20px;">
+
+        <div style="max-width: 600px; margin: 0 auto; border: 1px solid #ddd; padding: 20px; border-radius: 8px;">
+
+            <h2 style="color: #4CAF50;">🔐 Password Reset Request</h2>
+            <p>
+                You are receiving this email because we received a **password reset request** for your account.
+                Please click the link below to securely reset your password:
+            </p>
+
+            <p style="text-align: center; margin: 30px 0;">
+                <a href="${resetLink}" 
+                   style="background-color: #4CAF50; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px; font-weight: bold; font-size: 16px;">
+                    Reset Password
+                </a>
+            </p>
+
+            <p style="font-weight: bold; color: #D9534F;">
+                ⚠️ This link will expire in **5 minutes** .
+            </p>
+
+            <p>
+                If you did not request a password reset, please ignore this email. Your password will remain unchanged.
+            </p>
+
+            <p style="margin-top: 40px; font-size: 0.9em; color: #777;">
+                Thank you, <br>
+                GUC Events
+            </p>
+
+        </div>
+    </body>
+    </html>
+  `;
+  return await sendEmail(email, subject, htmlBody, true, [], []);
+};
