@@ -17,6 +17,7 @@ import NotFound from "../NotFoundPage";
 import EditEvent from "./EditEvents";
 import EventsSalesReport from "../adminPages/EventsSalesReport";
 import EventAttendeesReport from "../adminPages/EventAttendeesReport";
+import ManageCourts from "./ManageCourts";
 
 const MainDashboardEventsOffice = () => {
   const { logout } = useAuthUser();
@@ -54,6 +55,7 @@ const MainDashboardEventsOffice = () => {
             <Route path="vendor-requests" element={<VendorRequests />} />
             <Route path="vendor-poll" element={<VendorPoll />} />
             <Route path="gym-schedule" element={<GymSchedule />} />
+            <Route path="manage-courts" element={<ManageCourts />} />
             <Route path="edit-event/:type/:id" element={<EditEvent />} />
             <Route path="*" element={<NotFound />}></Route>
           </Routes>

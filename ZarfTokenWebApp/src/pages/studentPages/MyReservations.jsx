@@ -195,6 +195,9 @@ const MyReservations = () => {
                               </h3>
                               <p className="text-sm text-[#312A68]/70">
                                 {reservation.courtName}
+                                {reservation.isCourtDeleted && (
+                                  <span className="ml-2 text-xs text-red-500 font-medium">(No longer available)</span>
+                                )}
                               </p>
                             </div>
                             <div className="flex items-center gap-1 bg-green-100 text-green-700 px-2 py-1 rounded-full text-xs font-medium">
@@ -225,13 +228,18 @@ const MyReservations = () => {
                                 reservation.slotId
                               )
                             }
-                            disabled={cancellingSlot === reservation.slotId}
-                            className="w-full bg-red-50 text-red-700 border border-red-200 px-4 py-2 rounded-lg hover:bg-red-100 transition-colors font-medium text-sm flex items-center justify-center gap-2 disabled:opacity-50"
+                            disabled={cancellingSlot === reservation.slotId || reservation.isCourtDeleted}
+                            className="w-full bg-red-50 text-red-700 border border-red-200 px-4 py-2 rounded-lg hover:bg-red-100 transition-colors font-medium text-sm flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
                           >
                             {cancellingSlot === reservation.slotId ? (
                               <>
                                 <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-red-700"></div>
                                 Cancelling...
+                              </>
+                            ) : reservation.isCourtDeleted ? (
+                              <>
+                                <Trash2 className="w-4 h-4" />
+                                Court No Longer Available
                               </>
                             ) : (
                               <>
@@ -262,10 +270,13 @@ const MyReservations = () => {
                           <div className="flex justify-between items-start mb-4">
                             <div>
                               <h3 className="text-lg font-bold text-gray-600 capitalize">
-                                {reservation.courtType} Court
+                                {reservation.courtType === 'deleted' ? 'Court' : `${reservation.courtType} Court`}
                               </h3>
                               <p className="text-sm text-gray-500">
                                 {reservation.courtName}
+                                {reservation.isCourtDeleted && (
+                                  <span className="ml-2 text-xs text-gray-400">(Deleted)</span>
+                                )}
                               </p>
                             </div>
                             <div className="flex items-center gap-1 bg-gray-100 text-gray-600 px-2 py-1 rounded-full text-xs font-medium">

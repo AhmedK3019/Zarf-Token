@@ -162,7 +162,10 @@ const cancelRegistration = async (req, res, next) => {
     );
 
     // notify other users that a spot is available
-    if (trip.toBeNotified.length > 0) {
+    if (
+      trip.toBeNotified.length > 0 &&
+      updatedTrip.attendees.length === trip.capacity - 1
+    ) {
       try {
         await User.updateMany(
           { _id: { $in: trip.toBeNotified } },
