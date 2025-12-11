@@ -12,6 +12,7 @@ const UserContext = createContext(null);
 
 export function UserProvider({ children }) {
   const [user, setUser] = useState(null);
+  const [loading, setLoading] = useState(true);
   const [logoutReason, setLogoutReason] = useState(null);
   // prevent scheduling multiple redirects (avoids reload loops)
   const redirectScheduledRef = useRef(false);
@@ -25,6 +26,7 @@ export function UserProvider({ children }) {
       localStorage.setItem("token", res.data.token);
     }
     setUser(res.data.user);
+    setLoading(false);
     hasUserEverRef.current = true;
     return res.data;
   }, []);
@@ -56,6 +58,7 @@ export function UserProvider({ children }) {
       const token = localStorage.getItem("token");
       if (!token) {
         setUser(null);
+        setLoading(false);
         return;
       }
 
@@ -71,6 +74,8 @@ export function UserProvider({ children }) {
       } catch (err) {
         // user not logged in or token invalid/expired
         setUser(null);
+      } finally {
+        setLoading(false);
       }
     };
     hydrate();
@@ -219,7 +224,15 @@ export function UserProvider({ children }) {
 
   return (
     <UserContext.Provider
-      value={{ user, login, logout, refreshUser, logoutReason, dismissLogout }}
+      value={{
+        user,
+        loading,
+        login,
+        logout,
+        refreshUser,
+        logoutReason,
+        dismissLogout,
+      }}
     >
       {logoutReason ? (
         <div

@@ -23,7 +23,7 @@ import NotificationsDrawer from "../../components/NotificationsDrawer";
 
 const NavbarUser = () => {
   const navigate = useNavigate();
-  const { user, logout } = useAuthUser(); // { role, wallet, logout }
+  const { user, loading, logout } = useAuthUser();
   // Hooks must be called on every render — declare them before any early return.
   const location = useLocation();
   const [eventsDropdownOpen, setEventsDropdownOpen] = useState(false);
@@ -307,7 +307,7 @@ const NavbarUser = () => {
               <div className="flex items-center gap-2 text-white/90 text-sm">
                 <Wallet className="h-4 w-4" />
                 <span className="font-semibold">
-                  {formatWallet(user.wallet)} EGP
+                  {loading ? "..." : formatWallet(user?.wallet)} EGP
                 </span>
               </div>
               <NotificationsDrawer />

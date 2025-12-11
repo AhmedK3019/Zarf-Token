@@ -153,7 +153,9 @@ const loginUser = async (req, res, next) => {
     const token = createToken(user);
 
     const userObj =
-      typeof user.toObject === "function" ? user.toObject() : { ...user };
+      typeof user.toObject === "function"
+        ? user.toObject({ getters: true })
+        : { ...user };
     if (userObj.password) delete userObj.password;
     return res.json({ message: "Login successful", user: userObj, token });
   } catch (error) {
