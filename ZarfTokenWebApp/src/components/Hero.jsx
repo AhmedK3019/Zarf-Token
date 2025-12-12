@@ -218,6 +218,15 @@ const Hero = () => {
                     Sign up
                   </Link>
                 </p>
+                <p className="text-center text-sm text-primary">
+                  Forgot your password?{" "}
+                  <Link
+                    to="/forget-password"
+                    className="font-semibold text-secondary hover:text-primary"
+                  >
+                    Click here
+                  </Link>
+                </p>
               </form>
             </div>
           </div>

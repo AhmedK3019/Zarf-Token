@@ -48,6 +48,7 @@ const courtSchema = new mongoose.Schema(
       enum: ["basketball", "tennis", "football"],
       required: true,
     },
+    image: { type: String, required: false }, // Optional custom image path
     freeSlots: [
       {
         dateTime: { type: Date, required: true },

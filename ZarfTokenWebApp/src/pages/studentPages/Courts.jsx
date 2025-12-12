@@ -455,7 +455,12 @@ const Courts = () => {
                     basketball: Basketball,
                   };
                   const courtTypeLower = court.type?.toLowerCase();
-                  const imageSrc = courtImages[courtTypeLower] ? `url(${courtImages[courtTypeLower]})` : "none";
+                  // Use custom image if available, otherwise use default type-based image
+                  const imageSrc = court.image 
+                    ? `url(http://localhost:3000/uploads/${court.image})`
+                    : courtImages[courtTypeLower] 
+                    ? `url(${courtImages[courtTypeLower]})` 
+                    : "none";
                   return (
                     <div
                       key={court._id}

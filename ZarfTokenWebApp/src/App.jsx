@@ -9,6 +9,9 @@ import MainDashboardVendor from "./pages/vendorPages/mainDashboardVendor";
 import MainDashboardAdmin from "./pages/adminPages/mainDashboardAdmin";
 import ProtectedRoute from "./components/ProtectedRoute";
 import SignUp from "./pages/signUp";
+import ForgetPassword from "./pages/forgetPassword";
+import ResetPassword from "./pages/resetPassword";
+import InvalidLink from "./pages/linkIsInvalid";
 import NotFound from "./pages/notFound";
 import "./App.css";
 import { useAuthUser } from "./hooks/auth";
@@ -29,6 +32,8 @@ function App() {
         <Route path="/events" element={<EventsPage />} />
         <Route path="/events/:category" element={<EventsPage />} />
         <Route path="/signup" element={<SignUp />} />
+        <Route path="/forget-password" element={<ForgetPassword />} />
+        <Route path="/reset-password" element={<ResetPassword />} />
         <Route path="/payment-success" element={<PaymentSuccess />} />
         <Route path="/payment-cancelled" element={<PaymentCancelled />} />
         <Route
@@ -66,6 +71,7 @@ function App() {
           }
         />
         <Route path="/404" element={<NotFound />} />
+        <Route path="/invalid-link" element={<InvalidLink />} />
         <Route path="*" element={<NotFound />} />
       </Routes>
     </Router>

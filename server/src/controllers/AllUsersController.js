@@ -3,6 +3,8 @@ import Admin from "../models/Admin.js";
 import EventsOffice from "../models/EventsOffice.js";
 import Vendor from "../models/Vendor.js";
 import jwt from "jsonwebtoken";
+import { sendResetPasswordEmail } from "../utils/mailer.js";
+import bcrypt from "bcryptjs";
 const getAllUsers = async (_req, res, next) => {
   try {
     const users = await User.find();
@@ -219,6 +221,80 @@ const unBlockUser = async (req, res, next) => {
     next(error);
   }
 };
+const passwordEmail = async (req, res, next) => {
+  try {
+    const { email } = req.body;
+    let checkMail = await User.findOne({ email: email });
+    let role = "User";
+    if (!checkMail) {
+      checkMail = await Admin.findOne({ email: email });
+      role = "Admin";
+    }
+    if (!checkMail) {
+      checkMail = await Vendor.findOne({ email: email });
+      role = "Vendor";
+    }
+    if (!checkMail) {
+      checkMail = await EventsOffice.findOne({ email: email });
+      role = "EventsOffice";
+    }
+    if (!checkMail) {
+      console.log("HENA");
+      return res.status(404).json({ message: "Email is invalid" });
+    }
+    let id = checkMail._id;
+    let token = jwt.sign({ id, role }, process.env.JWT_SECRET, {
+      expiresIn: 300,
+    });
+    await sendResetPasswordEmail(checkMail.email);
+    return res.json({
+      message: "Reset link has been sent to your email",
+      resetToken: token,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+const forgetPassword = async (req, res, next) => {
+  try {
+    const { password } = req.body;
+    const authHeader = req.headers.authorization || null;
+    console.log(req.headers.authorization);
+    const [, resetToken] = authHeader.split(" "); // "Bearer <token>"
+    if (!resetToken) return res.status(401).json({ message: "Missing token" });
+
+    let decoded = jwt.verify(resetToken, process.env.JWT_SECRET);
+    let id = decoded.id;
+    let role = decoded.role;
+    if (!id || !role) {
+      return res.status(403).json({ message: "Invalid Token" });
+    }
+    let salt = await bcrypt.genSalt();
+    let hashedPassword = await bcrypt.hash(password, salt);
+    let model;
+    switch (role) {
+      case "Admin":
+        model = Admin;
+        break;
+      case "User":
+        model = User;
+        break;
+      case "Vendor":
+        model = Vendor;
+        break;
+      case "EventsOffice":
+        model = EventsOffice;
+        break;
+    }
+    await model.findByIdAndUpdate(id, { password: hashedPassword });
+    return res
+      .status(200)
+      .json({ message: "Yout password has been reseted successfully" });
+  } catch (error) {
+    next(error);
+  }
+};
 const createToken = (body) => {
   const payload = {
     id: String(body._id),
@@ -237,4 +313,6 @@ export default {
   loginUser,
   blockUser,
   unBlockUser,
+  passwordEmail,
+  forgetPassword,
 };
