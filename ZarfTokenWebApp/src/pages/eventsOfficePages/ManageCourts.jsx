@@ -12,6 +12,7 @@ const ManageCourts = () => {
   const [showCreateForm, setShowCreateForm] = useState(false);
   const [editingId, setEditingId] = useState(null);
   const [toast, setToast] = useState({ show: false, message: "", type: "" });
+  const [failedImages, setFailedImages] = useState(new Set());
 
   const [formData, setFormData] = useState({
     name: "",
@@ -49,6 +50,10 @@ const ManageCourts = () => {
     setTimeout(() => {
       setToast({ show: false, message: "", type: "" });
     }, 3000);
+  };
+
+  const handleImageError = (courtId) => {
+    setFailedImages((prev) => new Set([...prev, courtId]));
   };
 
   const handleCreateCourt = async (e) => {
@@ -333,8 +338,9 @@ const ManageCourts = () => {
                 basketball: Basketball,
               };
               const courtTypeLower = court.type?.toLowerCase();
-              // Use custom image if available, otherwise use default type-based image
-              const imageSrc = court.image 
+              // Use custom image if available and not failed, otherwise use default type-based image
+              const hasCustomImage = court.image && !failedImages.has(court._id);
+              const imageSrc = hasCustomImage
                 ? `url(http://localhost:3000/uploads/${court.image})`
                 : courtImages[courtTypeLower] 
                 ? `url(${courtImages[courtTypeLower]})` 
@@ -353,6 +359,15 @@ const ManageCourts = () => {
                     }}
                   />
                   <div className="absolute inset-0 z-0 bg-white/60 pointer-events-none" />
+                  {/* Hidden img to detect custom image load failures */}
+                  {court.image && !failedImages.has(court._id) && (
+                    <img
+                      src={`http://localhost:3000/uploads/${court.image}`}
+                      onError={() => handleImageError(court._id)}
+                      style={{ display: 'none' }}
+                      alt=""
+                    />
+                  )}
                   {/* Content Layer */}
                   <div className="relative z-10">
                   {isEditing ? (
