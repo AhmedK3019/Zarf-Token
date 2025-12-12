@@ -4,7 +4,17 @@ import Reservation from "../models/Reservation.js";
 // Create a new court
 export const createCourt = async (req, res) => {
   try {
-    const court = new Court(req.body);
+    const courtData = {
+      name: req.body.name,
+      type: req.body.type,
+    };
+    
+    // Add image path if file was uploaded
+    if (req.file) {
+      courtData.image = req.file.filename;
+    }
+    
+    const court = new Court(courtData);
     await court.save();
     res.status(201).json(court);
   } catch (err) {
@@ -27,11 +37,29 @@ export const getCourtById = async (req, res) => {
 
 // Update court info
 export const updateCourt = async (req, res) => {
-  const court = await Court.findByIdAndUpdate(req.params.id, req.body, {
-    new: true,
-  });
-  if (!court) return res.status(404).json({ error: "Court not found" });
-  res.json(court);
+  try {
+    const updateData = {
+      name: req.body.name,
+      type: req.body.type,
+    };
+    
+    // Handle image removal
+    if (req.body.removeImage === "true") {
+      updateData.image = null;
+    } 
+    // Add new image if uploaded
+    else if (req.file) {
+      updateData.image = req.file.filename;
+    }
+    
+    const court = await Court.findByIdAndUpdate(req.params.id, updateData, {
+      new: true,
+    });
+    if (!court) return res.status(404).json({ error: "Court not found" });
+    res.json(court);
+  } catch (err) {
+    res.status(400).json({ error: err.message });
+  }
 };
 
 // Delete court

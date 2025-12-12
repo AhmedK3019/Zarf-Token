@@ -224,7 +224,7 @@ const Hero = () => {
                     to="/forget-password"
                     className="font-semibold text-secondary hover:text-primary"
                   >
-                    click here
+                    Click here
                   </Link>
                 </p>
               </form>

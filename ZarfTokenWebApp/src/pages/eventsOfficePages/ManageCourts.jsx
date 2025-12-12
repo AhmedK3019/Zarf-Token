@@ -16,11 +16,14 @@ const ManageCourts = () => {
   const [formData, setFormData] = useState({
     name: "",
     type: "basketball",
+    image: null,
   });
 
   const [editFormData, setEditFormData] = useState({
     name: "",
     type: "",
+    image: null,
+    removeImage: false,
   });
 
   useEffect(() => {
@@ -51,9 +54,20 @@ const ManageCourts = () => {
   const handleCreateCourt = async (e) => {
     e.preventDefault();
     try {
-      const response = await api.post("/courts", formData);
+      const formDataToSend = new FormData();
+      formDataToSend.append("name", formData.name);
+      formDataToSend.append("type", formData.type);
+      if (formData.image) {
+        formDataToSend.append("image", formData.image);
+      }
+
+      const response = await api.post("/courts", formDataToSend, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      });
       setCourts([...courts, response.data]);
-      setFormData({ name: "", type: "basketball" });
+      setFormData({ name: "", type: "basketball", image: null });
       setShowCreateForm(false);
       showToast("Court created successfully!");
     } catch (err) {
@@ -81,20 +95,35 @@ const ManageCourts = () => {
     setEditFormData({
       name: court.name,
       type: court.type,
+      image: null,
+      removeImage: false,
     });
   };
 
   const handleCancelEdit = () => {
     setEditingId(null);
-    setEditFormData({ name: "", type: "" });
+    setEditFormData({ name: "", type: "", image: null, removeImage: false });
   };
 
   const handleUpdateCourt = async (courtId) => {
     try {
-      const response = await api.put(`/courts/${courtId}`, editFormData);
+      const formDataToSend = new FormData();
+      formDataToSend.append("name", editFormData.name);
+      formDataToSend.append("type", editFormData.type);
+      if (editFormData.removeImage) {
+        formDataToSend.append("removeImage", "true");
+      } else if (editFormData.image) {
+        formDataToSend.append("image", editFormData.image);
+      }
+
+      const response = await api.put(`/courts/${courtId}`, formDataToSend, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      });
       setCourts(courts.map((court) => (court._id === courtId ? response.data : court)));
       setEditingId(null);
-      setEditFormData({ name: "", type: "" });
+      setEditFormData({ name: "", type: "", image: null, removeImage: false });
       showToast("Court updated successfully!");
     } catch (err) {
       showToast(err.response?.data?.error || "Failed to update court", "error");
@@ -188,6 +217,61 @@ const ManageCourts = () => {
                 </select>
               </div>
 
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Court Image <span className="text-gray-500 text-xs">(Optional)</span>
+                </label>
+                <div className="relative">
+                  <input
+                    type="file"
+                    accept="image/jpeg,image/png,image/jpg,image/webp"
+                    onChange={(e) => setFormData({ ...formData, image: e.target.files[0] })}
+                    className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                    id="court-image-upload"
+                  />
+                  <label
+                    htmlFor="court-image-upload"
+                    className="flex items-center gap-3 px-4 py-3 bg-gradient-to-r from-[#EEE9FF] to-[#F8F6FF] border-2 border-dashed border-[#001845]/30 hover:border-[#001845]/50 rounded-lg cursor-pointer transition-all hover:shadow-md group"
+                  >
+                    <div className="flex items-center justify-center w-10 h-10 bg-[#001845]/10 rounded-full group-hover:bg-[#001845]/20 transition-colors">
+                      <svg
+                        className="w-5 h-5 text-[#001845]"
+                        fill="none"
+                        stroke="currentColor"
+                        viewBox="0 0 24 24"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"
+                        />
+                      </svg>
+                    </div>
+                    <div className="flex-1">
+                      <div className="text-sm font-medium text-[#001845]">
+                        {formData.image ? "Change Image" : "Upload Court Image"}
+                      </div>
+                      <div className="text-xs text-gray-500">
+                        JPG, PNG, WebP • Defaults to type-based image if not uploaded
+                      </div>
+                    </div>
+                    {formData.image && (
+                      <div className="flex items-center gap-1 text-green-600">
+                        <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                          <path
+                            fillRule="evenodd"
+                            d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+                            clipRule="evenodd"
+                          />
+                        </svg>
+                        <span className="text-xs font-medium">Selected</span>
+                      </div>
+                    )}
+                  </label>
+                </div>
+              </div>
+
               <div className="flex gap-3 pt-4">
                 <button
                   type="submit"
@@ -199,7 +283,7 @@ const ManageCourts = () => {
                   type="button"
                   onClick={() => {
                     setShowCreateForm(false);
-                    setFormData({ name: "", type: "basketball" });
+                    setFormData({ name: "", type: "basketball", image: null });
                   }}
                   className="px-6 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors"
                 >
@@ -249,7 +333,12 @@ const ManageCourts = () => {
                 basketball: Basketball,
               };
               const courtTypeLower = court.type?.toLowerCase();
-              const imageSrc = courtImages[courtTypeLower] ? `url(${courtImages[courtTypeLower]})` : "none";
+              // Use custom image if available, otherwise use default type-based image
+              const imageSrc = court.image 
+                ? `url(http://localhost:3000/uploads/${court.image})`
+                : courtImages[courtTypeLower] 
+                ? `url(${courtImages[courtTypeLower]})` 
+                : "none";
 
               return (
                 <div
@@ -288,20 +377,72 @@ const ManageCourts = () => {
                         <option value="tennis">Tennis</option>
                         <option value="football">Football</option>
                       </select>
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">
+                          Update Image
+                        </label>
+                        <div className="relative">
+                          <input
+                            type="file"
+                            accept="image/jpeg,image/png,image/jpg,image/webp"
+                            onChange={(e) => {
+                              setEditFormData({ ...editFormData, image: e.target.files[0], removeImage: false });
+                            }}
+                            disabled={editFormData.removeImage}
+                            className="absolute inset-0 w-full h-full opacity-0 cursor-pointer disabled:cursor-not-allowed"
+                            id={`edit-image-${court._id}`}
+                          />
+                          <label
+                            htmlFor={`edit-image-${court._id}`}
+                            className={`flex items-center gap-2 px-3 py-2 bg-gradient-to-r from-[#EEE9FF] to-[#F8F6FF] border-2 border-dashed border-[#001845]/30 rounded-lg cursor-pointer transition-all group ${
+                              editFormData.removeImage ? 'opacity-50 cursor-not-allowed' : 'hover:border-[#001845]/50 hover:shadow-sm'
+                            }`}
+                          >
+                            <div className="flex items-center justify-center w-7 h-7 bg-[#001845]/10 rounded-full group-hover:bg-[#001845]/20 transition-colors">
+                              <svg className="w-3.5 h-3.5 text-[#001845]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+                              </svg>
+                            </div>
+                            <div className="flex-1">
+                              <div className="text-xs font-medium text-[#001845]">
+                                {editFormData.image ? "Change Image" : "Upload New Image"}
+                              </div>
+                            </div>
+                            {editFormData.image && (
+                              <svg className="w-4 h-4 text-green-600" fill="currentColor" viewBox="0 0 20 20">
+                                <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                              </svg>
+                            )}
+                          </label>
+                        </div>
+                        {court.image && (
+                          <label className="flex items-center gap-2 mt-2 text-xs">
+                            <input
+                              type="checkbox"
+                              checked={editFormData.removeImage}
+                              onChange={(e) => {
+                                setEditFormData({ ...editFormData, removeImage: e.target.checked, image: null });
+                              }}
+                              className="rounded border-gray-300 text-red-600 focus:ring-red-500"
+                            />
+                            <span className="text-red-600 font-medium">Remove custom image</span>
+                          </label>
+                        )}
+                      </div>
                       <div className="flex gap-2">
                         <button
                           onClick={() => handleUpdateCourt(court._id)}
                           className="flex-1 inline-flex items-center justify-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
+                          title="Save changes"
                         >
                           <Save size={16} />
-                          Save
                         </button>
                         <button
                           onClick={handleCancelEdit}
                           className="flex-1 inline-flex items-center justify-center gap-2 px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors"
+                          title="Cancel"
                         >
                           <X size={16} />
-                          Cancel
                         </button>
                       </div>
                     </div>

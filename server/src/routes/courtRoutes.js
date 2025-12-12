@@ -9,13 +9,14 @@ import {
   getUserReservations,
   cancelReservation,
 } from "../controllers/courtController.js";
+import upload from "../middleware/upload.js";
 
 const router = express.Router();
 
-router.post("/", createCourt);
+router.post("/", upload.single("image"), createCourt);
 router.get("/", getCourts);
 router.get("/:id", getCourtById);
-router.put("/:id", updateCourt);
+router.put("/:id", upload.single("image"), updateCourt);
 router.delete("/:id", deleteCourt);
 
 // Reserve a court (expects { reservationId } in body)
