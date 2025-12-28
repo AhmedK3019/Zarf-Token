@@ -40,13 +40,20 @@ export const deleteCourt = async (req, res) => {
     const court = await Court.findById(req.params.id);
     if (!court) return res.status(404).json({ error: "Court not found" });
 
-    // delete all reservations linked to this court
-    await Reservation.deleteMany({ courtId: court._id });
+    // Only delete future reservations (keep past reservations for historical records)
+    const now = new Date();
+    const deleteResult = await Reservation.deleteMany({ 
+      courtId: court._id,
+      dateTime: { $gte: now }
+    });
 
     // delete the court itself
     await court.deleteOne();
 
-    res.json({ message: "Court and its reservations deleted successfully" });
+    res.json({ 
+      message: "Court deleted successfully", 
+      futureReservationsCancelled: deleteResult.deletedCount 
+    });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
@@ -95,16 +102,34 @@ export const getUserReservations = async (req, res) => {
   try {
     const { userId } = req.params;
     const reservations = await Reservation.find({ studentId: userId }).populate('courtId');
-    const formattedReservations = reservations.map(reservation => ({
-      _id: reservation._id,
-      slotId: reservation._id,
-      courtId: reservation.courtId._id,
-      courtName: reservation.courtId.name,
-      courtType: reservation.courtId.type,
-      dateTime: reservation.dateTime,
-      studentName: reservation.studentName,
-      studentGucId: reservation.studentGucId,
-    }));
+    const formattedReservations = reservations.map(reservation => {
+      // Handle case where court was deleted (courtId is null after populate fails)
+      if (!reservation.courtId) {
+        return {
+          _id: reservation._id,
+          slotId: reservation._id,
+          courtId: null,
+          courtName: "Court No Longer Available",
+          courtType: "deleted",
+          dateTime: reservation.dateTime,
+          studentName: reservation.studentName,
+          studentGucId: reservation.studentGucId,
+          isCourtDeleted: true,
+        };
+      }
+      
+      return {
+        _id: reservation._id,
+        slotId: reservation._id,
+        courtId: reservation.courtId._id,
+        courtName: reservation.courtId.name,
+        courtType: reservation.courtId.type,
+        dateTime: reservation.dateTime,
+        studentName: reservation.studentName,
+        studentGucId: reservation.studentGucId,
+        isCourtDeleted: false,
+      };
+    });
     
     res.json(formattedReservations);
   } catch (err) {

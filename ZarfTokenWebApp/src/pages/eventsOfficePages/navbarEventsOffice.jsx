@@ -13,7 +13,8 @@ import {
   QrCode,
   Clock,
   ChevronLeft,
-  ChevronRight
+  ChevronRight,
+  Trophy
 } from "lucide-react";
 
 const NavbarEventsOffice = () => {
@@ -138,6 +139,11 @@ const NavbarEventsOffice = () => {
         <NavLink to="/dashboard/eventsOffice/gym-schedule" className={linkClass} title="Gym Schedule">
           <Clock size={20} className="shrink-0" />
           {!isCollapsed && <span>Gym Schedule</span>}
+        </NavLink>
+
+        <NavLink to="/dashboard/eventsOffice/manage-courts" className={linkClass} title="Manage Courts">
+          <Trophy size={20} className="shrink-0" />
+          {!isCollapsed && <span>Manage Courts</span>}
         </NavLink>
 
       </div>
