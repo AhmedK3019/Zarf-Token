@@ -36,7 +36,7 @@ Zarf Token solves these challenges by providing a unified platform that simplifi
 **Current Status**
 - ~~Sprint 1~~ (Done!)
 - ~~Sprint 2~~ (Done!)
-- Sprint 3 
+- ~~Sprint 3~~ (Done!) 
 
 **Code Quality & Architecture**
 - Edge cases are not consistently handled across the codebase
