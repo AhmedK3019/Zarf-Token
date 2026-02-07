@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { Calendar, ChevronLeft, ChevronRight, ArrowLeft, Clock } from "lucide-react";
 import api from "../../services/api";
 import { useAuthUser } from "../../hooks/auth";
-import Football from "../../assets/FootBall.jpg";
+import Football from "../../assets/Football.jpg";
 import Tennis from "../../assets/Tennis.jpg";
 import Basketball from "../../assets/Basketball.jpg";
 
