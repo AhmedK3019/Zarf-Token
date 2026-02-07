@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { Plus, Trash2, Edit2, Save, X } from "lucide-react";
 import api from "../../services/api";
-import Football from "../../assets/FootBall.jpg";
+import Football from "../../assets/Football.jpg";
 import Tennis from "../../assets/Tennis.jpg";
 import Basketball from "../../assets/Basketball.jpg";
 

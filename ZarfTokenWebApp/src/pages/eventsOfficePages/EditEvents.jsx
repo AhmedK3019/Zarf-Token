@@ -1,6 +1,6 @@
 import React from "react";
 import { useParams } from "react-router-dom";
-import EditTrip from "../tripPages/EditTrip";
+import EditTrip from "../tripPages/editTrip";
 import EditBazaar from "../bazaarPages/EditBazaar";
 import EditConference from "../conferencePages/EditConference";
 
