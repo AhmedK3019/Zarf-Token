@@ -1,7 +1,7 @@
 import React, { useState } from "react";
-import CreateBazaar from "../bazaarPages/CreateBazaar";
+import CreateBazaar from "../bazaarPages/createBazaar";
 import CreateConference from "../conferencePages/CreateConference";
-import CreateTrip from "../tripPages/CreateTrip";
+import CreateTrip from "../tripPages/createTrip";
 
 export default function CreateEvent() {
   const [currentForm, setCurrentForm] = useState("");
