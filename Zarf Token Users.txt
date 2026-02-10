@@ -1,0 +1,23 @@
+Role : Admin
+Email : admin@guc.edu.eg
+Pass : admin123
+
+Role : Events Officer
+Email : Maro@guc.edu.eg
+Pass : maroamer
+
+Role : Student
+Email : Abdelhamid.amer@student.guc.edu.eg
+Pass : Abdelhamid
+
+Role : Staff
+Email : staff.test@guc.edu.eg
+Pass : stafftest
+
+Role : Professor
+Email : prof.test@guc.edu.eg
+Pass : proftest
+
+Role : Vendor
+Email : test@gmail.com
+Pass : test123
